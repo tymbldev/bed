@@ -5,6 +5,13 @@ import com.tymbl.jobs.dto.JobPostRequest;
 import com.tymbl.jobs.dto.JobResponse;
 import com.tymbl.jobs.service.JobService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -21,21 +28,78 @@ import java.util.List;
 @RequestMapping("/api/v1/jobs")
 @RequiredArgsConstructor
 @Tag(name = "Jobs", description = "Job posting and management APIs")
+@SecurityRequirement(name = "bearerAuth")
 public class JobController {
 
     private final JobService jobService;
 
     @PostMapping
-    @Operation(summary = "Create a new job posting")
+    @Operation(
+        summary = "Create a new job posting",
+        description = "Creates a new job posting with the given details. The job posting will be associated with the authenticated user."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Job posting created successfully",
+            content = @Content(
+                schema = @Schema(implementation = JobResponse.class)
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Invalid input"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "500", description = "Server error")
+    })
     public ResponseEntity<JobResponse> createJob(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "Job posting details",
+                required = true,
+                content = @Content(
+                    examples = @ExampleObject(
+                        name = "JobPostRequest",
+                        summary = "Standard job posting request",
+                        value = "{\n" +
+                              "  \"title\": \"Senior Java Developer\",\n" +
+                              "  \"description\": \"We are looking for an experienced Java Developer...\",\n" +
+                              "  \"company\": \"Example Corp\",\n" +
+                              "  \"department\": \"Engineering\",\n" +
+                              "  \"location\": \"San Francisco, CA\",\n" +
+                              "  \"jobType\": \"FULL_TIME\",\n" +
+                              "  \"experienceLevel\": \"SENIOR\",\n" +
+                              "  \"minExperience\": 5,\n" +
+                              "  \"maxExperience\": 10,\n" +
+                              "  \"minSalary\": \"120000\",\n" +
+                              "  \"maxSalary\": \"160000\",\n" +
+                              "  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n" +
+                              "  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n" +
+                              "  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\"],\n" +
+                              "  \"workplaceType\": \"HYBRID\",\n" +
+                              "  \"remoteAllowed\": true,\n" +
+                              "  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n" +
+                              "  \"numberOfOpenings\": 2\n" +
+                              "}"
+                    )
+                )
+            )
             @Valid @RequestBody JobPostRequest request,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(jobService.createJob(request, currentUser));
     }
 
     @PutMapping("/{jobId}")
-    @Operation(summary = "Update an existing job posting")
+    @Operation(
+        summary = "Update an existing job posting",
+        description = "Updates an existing job posting with the given details. Only the user who posted the job can update it."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Job posting updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Not the job owner"),
+        @ApiResponse(responseCode = "404", description = "Job posting not found")
+    })
     public ResponseEntity<JobResponse> updateJob(
+            @Parameter(description = "Job ID", required = true) 
             @PathVariable Long jobId,
             @Valid @RequestBody JobPostRequest request,
             @AuthenticationPrincipal User currentUser) {
@@ -43,11 +107,22 @@ public class JobController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all active job postings with pagination")
+    @Operation(
+        summary = "Get all active job postings with pagination",
+        description = "Returns a paginated list of all active job postings, sorted by the specified field and direction."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<Page<JobResponse>> getAllJobs(
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field", example = "postedDate")
             @RequestParam(defaultValue = "postedDate") String sortBy,
+            @Parameter(description = "Sort direction", example = "DESC", schema = @Schema(allowableValues = {"ASC", "DESC"}))
             @RequestParam(defaultValue = "DESC") String sortDirection) {
         PageRequest pageRequest = PageRequest.of(
                 page, size,
@@ -57,24 +132,53 @@ public class JobController {
     }
 
     @GetMapping("/{jobId}")
-    @Operation(summary = "Get job posting details by ID")
-    public ResponseEntity<JobResponse> getJobById(@PathVariable Long jobId) {
+    @Operation(
+        summary = "Get job posting details by ID",
+        description = "Returns the details of a job posting with the specified ID."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved job posting successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Job posting not found")
+    })
+    public ResponseEntity<JobResponse> getJobById(
+            @Parameter(description = "Job ID", required = true)
+            @PathVariable Long jobId) {
         return ResponseEntity.ok(jobService.getJobById(jobId));
     }
 
     @GetMapping("/my-posts")
-    @Operation(summary = "Get all job postings by the current user")
+    @Operation(
+        summary = "Get all job postings by the current user",
+        description = "Returns a paginated list of all job postings created by the authenticated user."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<Page<JobResponse>> getMyJobs(
             @AuthenticationPrincipal User currentUser,
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
                 jobService.getJobsByUser(currentUser, PageRequest.of(page, size)));
     }
 
     @DeleteMapping("/{jobId}")
-    @Operation(summary = "Delete (deactivate) a job posting")
+    @Operation(
+        summary = "Delete (deactivate) a job posting",
+        description = "Deactivates a job posting with the specified ID. Only the user who posted the job can delete it."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Job posting deleted successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Not the job owner"),
+        @ApiResponse(responseCode = "404", description = "Job posting not found")
+    })
     public ResponseEntity<Void> deleteJob(
+            @Parameter(description = "Job ID", required = true)
             @PathVariable Long jobId,
             @AuthenticationPrincipal User currentUser) {
         jobService.deleteJob(jobId, currentUser);
@@ -82,20 +186,40 @@ public class JobController {
     }
 
     @GetMapping("/search")
-    @Operation(summary = "Search job postings by keyword")
+    @Operation(
+        summary = "Search job postings by keyword",
+        description = "Returns a paginated list of job postings matching the specified keyword in the title, description, or company name."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Search completed successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<Page<JobResponse>> searchJobs(
+            @Parameter(description = "Search keyword", required = true, example = "Java")
             @RequestParam String keyword,
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
                 jobService.searchJobs(keyword, PageRequest.of(page, size)));
     }
 
     @GetMapping("/search/skills")
-    @Operation(summary = "Search job postings by required skills")
+    @Operation(
+        summary = "Search job postings by required skills",
+        description = "Returns a paginated list of job postings requiring the specified skills."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Search completed successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
     public ResponseEntity<Page<JobResponse>> searchBySkills(
+            @Parameter(description = "Required skills", required = true, example = "[\"Java\", \"Spring\"]")
             @RequestParam List<String> skills,
+            @Parameter(description = "Page number (0-based)", example = "0")
             @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
                 jobService.searchBySkills(skills, PageRequest.of(page, size)));

@@ -1,0 +1,145 @@
+{
+    "info": {
+        "name": "Job Referral API",
+        "description": "API collection for the Job Referral Application",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/register",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "register"]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\",\n    \"firstName\": \"John\",\n    \"lastName\": \"Doe\",\n    \"role\": \"USER\",\n    \"phoneNumber\": \"1234567890\",\n    \"company\": \"Example Corp\",\n    \"position\": \"Software Engineer\",\n    \"department\": \"Engineering\",\n    \"location\": \"New York\",\n    \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n    \"portfolioUrl\": \"https://portfolio.com/johndoe\",\n    \"resumeUrl\": \"https://resume.com/johndoe\",\n    \"yearsOfExperience\": 5,\n    \"currentSalary\": \"100000\",\n    \"expectedSalary\": \"120000\",\n    \"noticePeriod\": \"2 weeks\",\n    \"skills\": [\"Java\", \"Spring Boot\", \"MySQL\"],\n    \"education\": [\n        {\n            \"institution\": \"University of Example\",\n            \"degree\": \"Bachelor of Science\",\n            \"fieldOfStudy\": \"Computer Science\",\n            \"startDate\": \"2015\",\n            \"endDate\": \"2019\",\n            \"grade\": \"3.8\"\n        }\n    ]\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Login",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/login",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "login"]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"user@example.com\",\n    \"password\": \"password123\"\n}"
+                        }
+                    }
+                },
+                {
+                    "name": "Verify Email",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/verify-email?token={{verification_token}}",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "verify-email"],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "{{verification_token}}"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Forgot Password",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/forgot-password?email=user@example.com",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "forgot-password"],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "user@example.com"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Reset Password",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/reset-password?token={{reset_token}}&newPassword=newpassword123",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "reset-password"],
+                            "query": [
+                                {
+                                    "key": "token",
+                                    "value": "{{reset_token}}"
+                                },
+                                {
+                                    "key": "newPassword",
+                                    "value": "newpassword123"
+                                }
+                            ]
+                        }
+                    }
+                },
+                {
+                    "name": "Resend Verification Email",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{base_url}}/api/v1/auth/resend-verification?email=user@example.com",
+                            "host": ["{{base_url}}"],
+                            "path": ["api", "v1", "auth", "resend-verification"],
+                            "query": [
+                                {
+                                    "key": "email",
+                                    "value": "user@example.com"
+                                }
+                            ]
+                        }
+                    }
+                }
+            ]
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://localhost:8080",
+            "type": "string"
+        },
+        {
+            "key": "verification_token",
+            "value": "your-verification-token",
+            "type": "string"
+        },
+        {
+            "key": "reset_token",
+            "value": "your-reset-token",
+            "type": "string"
+        }
+    ]
+} 
