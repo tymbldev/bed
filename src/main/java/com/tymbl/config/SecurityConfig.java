@@ -32,17 +32,18 @@ public class SecurityConfig {
         http
             .csrf().disable()
             .authorizeRequests()
-                .antMatchers("/api/v1/auth/**", "/api/v1/registration/**", "/api/v1/oauth2/**").permitAll()
-                .antMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
+                // Public endpoints
+                .antMatchers("/api/v1/auth/**").permitAll()
+                .antMatchers("/api/v1/registration/**").permitAll()
+                .antMatchers("/api/v1/oauth2/**").permitAll()
+                .antMatchers("/v3/api-docs/**").permitAll()
+                .antMatchers("/swagger-ui/**").permitAll()
+                .antMatchers("/swagger-ui.html").permitAll()
+                .antMatchers("/api-docs/**").permitAll()
+                // Protected endpoints
+                .antMatchers("/api/v1/jobs/**").authenticated()
+                .antMatchers("/api/v1/users/**").authenticated()
                 .anyRequest().authenticated()
-            .and()
-            .oauth2Login()
-                .userInfoEndpoint()
-                    .userService(customOAuth2UserService)
-                .and()
-                .successHandler((request, response, authentication) -> {
-                    response.sendRedirect("/api/v1/auth/oauth2/success");
-                })
             .and()
             .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

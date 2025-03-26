@@ -47,13 +47,13 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public Page<JobResponse> getAllActiveJobs(Pageable pageable) {
-        return jobRepository.findByIsActiveTrue(pageable)
+        return jobRepository.findByActiveTrue(pageable)
                 .map(this::mapJobToResponse);
     }
 
     @Transactional(readOnly = true)
     public Page<JobResponse> getJobsByUser(User user, Pageable pageable) {
-        return jobRepository.findByPostedByAndIsActiveTrue(user, pageable)
+        return jobRepository.findByPostedByAndActiveTrue(user, pageable)
                 .map(this::mapJobToResponse);
     }
 

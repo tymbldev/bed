@@ -9,8 +9,12 @@ import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.Set;
+import lombok.Getter;
+import lombok.Setter;
 
 @Data
+@Getter
+@Setter
 public class JobPostRequest {
     
     @NotBlank(message = "Title is required")
