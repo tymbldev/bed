@@ -15,8 +15,22 @@ public class JobResponse {
     private String title;
     private String description;
     private String company;
-    private String department;
-    private String location;
+    
+    // Department details
+    private Long departmentId;
+    private String departmentName;
+    
+    // City details
+    private Long cityId;
+    private String cityName;
+    
+    // Country details
+    private Long countryId;
+    private String countryName;
+    
+    private String zipCode;
+    private boolean isRemote;
+    
     private JobType jobType;
     private ExperienceLevel experienceLevel;
     private Integer minExperience;
@@ -37,4 +51,30 @@ public class JobResponse {
     private LocalDateTime postedDate;
     private LocalDateTime lastModifiedDate;
     private boolean isActive;
+    
+    // Convenience methods
+    public String getLocationDisplay() {
+        if (isRemote) {
+            return "Remote" + (countryName != null ? " - " + countryName : "");
+        }
+        
+        StringBuilder location = new StringBuilder();
+        
+        if (cityName != null) {
+            location.append(cityName);
+        }
+        
+        if (countryName != null) {
+            if (location.length() > 0) {
+                location.append(", ");
+            }
+            location.append(countryName);
+        }
+        
+        if (zipCode != null && !zipCode.isEmpty()) {
+            location.append(" ").append(zipCode);
+        }
+        
+        return location.length() > 0 ? location.toString() : null;
+    }
 } 

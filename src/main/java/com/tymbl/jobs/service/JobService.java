@@ -1,14 +1,19 @@
 package com.tymbl.jobs.service;
 
+import com.tymbl.common.entity.City;
+import com.tymbl.common.entity.Country;
+import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Job;
 import com.tymbl.common.entity.User;
+import com.tymbl.common.repository.CityRepository;
+import com.tymbl.common.repository.CountryRepository;
+import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.jobs.dto.JobPostRequest;
 import com.tymbl.jobs.dto.JobResponse;
 import com.tymbl.jobs.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +25,9 @@ import java.util.stream.Collectors;
 public class JobService {
 
     private final JobRepository jobRepository;
+    private final DepartmentRepository departmentRepository;
+    private final CityRepository cityRepository;
+    private final CountryRepository countryRepository;
 
     @Transactional
     public JobResponse createJob(JobPostRequest request, User postedBy) {
@@ -93,8 +101,36 @@ public class JobService {
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
         job.setCompany(request.getCompany());
-        job.setDepartment(request.getDepartment());
-        job.setLocation(request.getLocation());
+        job.setZipCode(request.getZipCode());
+        job.setRemote(request.isRemote());
+        
+        // Set department if ID provided
+        if (request.getDepartmentId() != null) {
+            Department department = departmentRepository.findById(request.getDepartmentId())
+                .orElseThrow(() -> new RuntimeException("Department not found"));
+            job.setDepartment(department);
+        } else {
+            job.setDepartment(null);
+        }
+        
+        // Set city if ID provided
+        if (request.getCityId() != null) {
+            City city = cityRepository.findById(request.getCityId())
+                .orElseThrow(() -> new RuntimeException("City not found"));
+            job.setCity(city);
+        } else {
+            job.setCity(null);
+        }
+        
+        // Set country if ID provided
+        if (request.getCountryId() != null) {
+            Country country = countryRepository.findById(request.getCountryId())
+                .orElseThrow(() -> new RuntimeException("Country not found"));
+            job.setCountry(country);
+        } else {
+            job.setCountry(null);
+        }
+        
         job.setJobType(request.getJobType());
         job.setExperienceLevel(request.getExperienceLevel());
         job.setMinExperience(request.getMinExperience());
@@ -114,13 +150,13 @@ public class JobService {
     }
 
     private JobResponse mapJobToResponse(Job job) {
-        return JobResponse.builder()
+        JobResponse.JobResponseBuilder builder = JobResponse.builder()
                 .id(job.getId())
                 .title(job.getTitle())
                 .description(job.getDescription())
                 .company(job.getCompany())
-                .department(job.getDepartment())
-                .location(job.getLocation())
+                .zipCode(job.getZipCode())
+                .isRemote(job.isRemote())
                 .jobType(job.getJobType())
                 .experienceLevel(job.getExperienceLevel())
                 .minExperience(job.getMinExperience())
@@ -140,7 +176,26 @@ public class JobService {
                 .postedByUserName(job.getPostedBy().getFirstName() + " " + job.getPostedBy().getLastName())
                 .postedDate(job.getPostedDate())
                 .lastModifiedDate(job.getLastModifiedDate())
-                .isActive(job.isActive())
-                .build();
+                .isActive(job.isActive());
+        
+        // Add department details if available
+        if (job.getDepartment() != null) {
+            builder.departmentId(job.getDepartment().getId())
+                   .departmentName(job.getDepartment().getName());
+        }
+        
+        // Add city details if available
+        if (job.getCity() != null) {
+            builder.cityId(job.getCity().getId())
+                   .cityName(job.getCity().getName());
+        }
+        
+        // Add country details if available
+        if (job.getCountry() != null) {
+            builder.countryId(job.getCountry().getId())
+                   .countryName(job.getCountry().getName());
+        }
+        
+        return builder.build();
     }
-} 
+}

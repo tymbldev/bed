@@ -33,11 +33,20 @@ public class Job {
     @Column(nullable = false)
     private String company;
     
-    private String department;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id")
+    private Department department;
     
-    @NotBlank
-    @Column(nullable = false)
-    private String location;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "city_id")
+    private City city;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "country_id")
+    private Country country;
+    
+    private String zipCode;
+    private boolean isRemote;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -119,5 +128,36 @@ public class Job {
         MANAGER,
         DIRECTOR,
         EXECUTIVE
+    }
+    
+    @Transient
+    public String getDepartmentDisplay() {
+        return department != null ? department.getName() : null;
+    }
+    
+    @Transient
+    public String getLocationDisplay() {
+        if (isRemote) {
+            return "Remote" + (country != null ? " - " + country.getName() : "");
+        }
+        
+        StringBuilder location = new StringBuilder();
+        
+        if (city != null) {
+            location.append(city.getName());
+        }
+        
+        if (country != null) {
+            if (location.length() > 0) {
+                location.append(", ");
+            }
+            location.append(country.getName());
+        }
+        
+        if (zipCode != null && !zipCode.isEmpty()) {
+            location.append(" ").append(zipCode);
+        }
+        
+        return location.length() > 0 ? location.toString() : null;
     }
 } 

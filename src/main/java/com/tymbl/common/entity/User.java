@@ -47,9 +47,28 @@ public class User implements UserDetails {
     
     // Professional Details
     private String company;
-    private String position;
-    private String department;
-    private String location;
+    
+    // Replace string position with Designation entity reference
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "designation_id")
+    private Designation designation;
+    
+    // Replace string department with Department entity reference
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id")
+    private Department department;
+    
+    // Replace location with City and Country references
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "city_id")
+    private City city;
+    
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "country_id")
+    private Country country;
+    
+    private String zipCode;
+    
     private String linkedInProfile;
     private String portfolioUrl;
     private String resumeUrl;
@@ -118,5 +137,38 @@ public class User implements UserDetails {
     @Override
     public boolean isCredentialsNonExpired() {
         return true;
+    }
+    
+    // Convenience methods for UI display
+    @Transient
+    public String getPositionDisplay() {
+        return designation != null ? designation.getTitle() : null;
+    }
+    
+    @Transient
+    public String getDepartmentDisplay() {
+        return department != null ? department.getName() : null;
+    }
+    
+    @Transient
+    public String getLocationDisplay() {
+        StringBuilder location = new StringBuilder();
+        
+        if (city != null) {
+            location.append(city.getName());
+        }
+        
+        if (country != null) {
+            if (location.length() > 0) {
+                location.append(", ");
+            }
+            location.append(country.getName());
+        }
+        
+        if (zipCode != null && !zipCode.isEmpty()) {
+            location.append(" ").append(zipCode);
+        }
+        
+        return location.length() > 0 ? location.toString() : null;
     }
 } 

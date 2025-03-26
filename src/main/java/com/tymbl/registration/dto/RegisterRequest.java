@@ -32,9 +32,14 @@ public class RegisterRequest {
     
     // Professional Details
     private String company;
-    private String position;
-    private String department;
-    private String location;
+    
+    // Replace strings with entity IDs
+    private Long designationId;
+    private Long departmentId;
+    private Long cityId;
+    private Long countryId;
+    private String zipCode;
+    
     private String linkedInProfile;
     private String portfolioUrl;
     private String resumeUrl;

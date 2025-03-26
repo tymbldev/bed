@@ -35,6 +35,7 @@ public class SecurityConfig {
                 // Public endpoints
                 .antMatchers("/api/v1/auth/**").permitAll()
                 .antMatchers("/api/v1/registration/**").permitAll()
+                .antMatchers("/api/v1/locations/**").permitAll()
                 .antMatchers("/api/v1/oauth2/**").permitAll()
                 .antMatchers("/v3/api-docs/**").permitAll()
                 .antMatchers("/swagger-ui/**").permitAll()

@@ -26,10 +26,11 @@ public class JobPostRequest {
     @NotBlank(message = "Company is required")
     private String company;
     
-    private String department;
-    
-    @NotBlank(message = "Location is required")
-    private String location;
+    private Long departmentId;
+    private Long cityId;
+    private Long countryId;
+    private String zipCode;
+    private boolean isRemote;
     
     @NotNull(message = "Job type is required")
     private JobType jobType;

@@ -6,18 +6,13 @@ import io.swagger.v3.oas.models.examples.Example;
 import io.swagger.v3.oas.models.info.Contact;
 import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.info.License;
-import io.swagger.v3.oas.models.media.Content;
-import io.swagger.v3.oas.models.media.MediaType;
-import io.swagger.v3.oas.models.parameters.RequestBody;
-import io.swagger.v3.oas.models.responses.ApiResponse;
 import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import io.swagger.v3.oas.models.servers.Server;
-
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -114,7 +109,7 @@ public class OpenApiConfig {
         .info(info)
         .servers(Arrays.asList(devServer))
         .components(new Components()
-            .securitySchemes(Map.of("bearerAuth", securityScheme))
+            .securitySchemes(Collections.singletonMap("bearerAuth", securityScheme))
             .examples(examples))
         .addSecurityItem(securityRequirement)
         .addTagsItem(new io.swagger.v3.oas.models.tags.Tag()
@@ -125,7 +120,10 @@ public class OpenApiConfig {
             .description("User registration endpoints"))
         .addTagsItem(new io.swagger.v3.oas.models.tags.Tag()
             .name("Jobs")
-            .description("Job posting and management operations"));
+            .description("Job posting and management operations"))
+        .addTagsItem(new io.swagger.v3.oas.models.tags.Tag()
+            .name("Dropdowns")
+            .description("Operations for dropdown data: departments, locations, and designations"));
   }
 
   private String getCurlForRegister() {
