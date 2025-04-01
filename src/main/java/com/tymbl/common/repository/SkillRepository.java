@@ -15,4 +15,9 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     List<Skill> findByEnabledTrueOrderByUsageCountDescNameAsc();
     
     boolean existsByNameIgnoreCase(String name);
+    
+    // Methods from interview.repository.SkillRepository
+    List<Skill> findByCategory(String category);
+    
+    List<Skill> findByNameContainingIgnoreCase(String name);
 } 

@@ -1,5 +1,7 @@
 package com.tymbl.interview.service;
 
+import com.tymbl.common.entity.Skill;
+import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.interview.entity.*;
 import com.tymbl.interview.repository.*;
 import lombok.RequiredArgsConstructor;

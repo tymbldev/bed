@@ -3,6 +3,7 @@ package com.tymbl.common.entity;
 import javax.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
@@ -17,9 +18,31 @@ public class Skill {
     @Column(nullable = false, unique = true)
     private String name;
     
+    @Column(columnDefinition = "TEXT")
+    private String description;
+    
+    private String category;
+    
     @Column(nullable = false)
     private boolean enabled = true;
     
     @Column(name = "usage_count")
     private Long usageCount = 0L;
+    
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 } 

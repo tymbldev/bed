@@ -92,7 +92,24 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public Page<JobResponse> searchBySkills(List<String> skills, Pageable pageable) {
-        return jobRepository.findBySkills(skills.stream().map(String::toLowerCase).collect(Collectors.toList()), pageable)
+        if (skills == null || skills.isEmpty()) {
+            return getAllActiveJobs(pageable);
+        }
+        
+        // For single skill searches, use the simpler method
+        if (skills.size() == 1) {
+            return jobRepository.findBySkill(skills.get(0), pageable)
+                .map(this::mapToResponse);
+        }
+        
+        // For multiple skills, create a combined string for LIKE search
+        List<String> lowerCaseSkills = skills.stream()
+            .map(String::toLowerCase)
+            .collect(Collectors.toList());
+        
+        String combinedSkills = String.join(" ", lowerCaseSkills);
+        
+        return jobRepository.findBySkills(lowerCaseSkills, combinedSkills, pageable)
             .map(this::mapToResponse);
     }
 

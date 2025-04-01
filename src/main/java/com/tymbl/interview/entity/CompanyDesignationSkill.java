@@ -1,6 +1,7 @@
 package com.tymbl.interview.entity;
 
 import com.tymbl.common.entity.Designation;
+import com.tymbl.common.entity.Skill;
 import com.tymbl.jobs.entity.Company;
 import java.time.LocalDateTime;
 import javax.persistence.Column;

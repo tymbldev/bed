@@ -22,8 +22,13 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     @Query("SELECT j FROM Job j WHERE j.title LIKE %:keyword% OR j.description LIKE %:keyword% OR j.companyName LIKE %:keyword% AND j.active = true")
     Page<Job> searchJobs(@Param("keyword") String keyword, Pageable pageable);
     
-    @Query("SELECT j FROM Job j WHERE EXISTS (SELECT 1 FROM j.requiredSkills s WHERE LOWER(s) IN :skills) AND j.active = true")
-    Page<Job> findBySkills(@Param("skills") List<String> skills, Pageable pageable);
+    @Query("SELECT j FROM Job j WHERE j.active = true AND (" +
+           "j.title IN :skills OR " +
+           "j.description LIKE %:combinedSkills%)")
+    Page<Job> findBySkills(@Param("skills") List<String> skills, @Param("combinedSkills") String combinedSkills, Pageable pageable);
+    
+    @Query("SELECT j FROM Job j WHERE j.description LIKE %:skill% AND j.active = true")
+    Page<Job> findBySkill(@Param("skill") String skill, Pageable pageable);
     
     List<Job> findByCompany(Company company);
     
