@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -30,7 +31,26 @@ public class LocationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of countries retrieved successfully",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = CountryDTO.class))))
+                            array = @ArraySchema(schema = @Schema(implementation = CountryDTO.class)),
+                            examples = @ExampleObject(
+                                value = "[\n" +
+                                      "  {\n" +
+                                      "    \"id\": 1,\n" +
+                                      "    \"name\": \"India\",\n" +
+                                      "    \"code\": \"IN\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 2,\n" +
+                                      "    \"name\": \"United States\",\n" +
+                                      "    \"code\": \"US\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 3,\n" +
+                                      "    \"name\": \"United Kingdom\",\n" +
+                                      "    \"code\": \"GB\"\n" +
+                                      "  }\n" +
+                                      "]"
+                            )))
     })
     public ResponseEntity<List<CountryDTO>> getAllCountries() {
         return ResponseEntity.ok(locationService.getAllCountries());
@@ -41,7 +61,32 @@ public class LocationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of cities retrieved successfully",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = CityDTO.class)))),
+                            array = @ArraySchema(schema = @Schema(implementation = CityDTO.class)),
+                            examples = @ExampleObject(
+                                value = "[\n" +
+                                      "  {\n" +
+                                      "    \"id\": 1,\n" +
+                                      "    \"name\": \"Mumbai\",\n" +
+                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"countryId\": 1,\n" +
+                                      "    \"countryName\": \"India\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 2,\n" +
+                                      "    \"name\": \"Delhi\",\n" +
+                                      "    \"state\": \"Delhi\",\n" +
+                                      "    \"countryId\": 1,\n" +
+                                      "    \"countryName\": \"India\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 3,\n" +
+                                      "    \"name\": \"Bangalore\",\n" +
+                                      "    \"state\": \"Karnataka\",\n" +
+                                      "    \"countryId\": 1,\n" +
+                                      "    \"countryName\": \"India\"\n" +
+                                      "  }\n" +
+                                      "]"
+                            ))),
             @ApiResponse(responseCode = "404", description = "Country not found")
     })
     public ResponseEntity<List<CityDTO>> getCitiesByCountry(
@@ -55,7 +100,32 @@ public class LocationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of cities retrieved successfully",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = CityDTO.class))))
+                            array = @ArraySchema(schema = @Schema(implementation = CityDTO.class)),
+                            examples = @ExampleObject(
+                                value = "[\n" +
+                                      "  {\n" +
+                                      "    \"id\": 1,\n" +
+                                      "    \"name\": \"Mumbai\",\n" +
+                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"countryId\": 1,\n" +
+                                      "    \"countryName\": \"India\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 4,\n" +
+                                      "    \"name\": \"New York\",\n" +
+                                      "    \"state\": \"New York\",\n" +
+                                      "    \"countryId\": 2,\n" +
+                                      "    \"countryName\": \"United States\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 7,\n" +
+                                      "    \"name\": \"London\",\n" +
+                                      "    \"state\": \"England\",\n" +
+                                      "    \"countryId\": 3,\n" +
+                                      "    \"countryName\": \"United Kingdom\"\n" +
+                                      "  }\n" +
+                                      "]"
+                            )))
     })
     public ResponseEntity<List<CityDTO>> getAllCities() {
         return ResponseEntity.ok(locationService.getAllCities());
@@ -66,7 +136,16 @@ public class LocationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "City retrieved successfully",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = CityDTO.class))),
+                            schema = @Schema(implementation = CityDTO.class),
+                            examples = @ExampleObject(
+                                value = "{\n" +
+                                      "  \"id\": 3,\n" +
+                                      "  \"name\": \"Bangalore\",\n" +
+                                      "  \"state\": \"Karnataka\",\n" +
+                                      "  \"countryId\": 1,\n" +
+                                      "  \"countryName\": \"India\"\n" +
+                                      "}"
+                            ))),
             @ApiResponse(responseCode = "404", description = "City not found")
     })
     public ResponseEntity<CityDTO> getCityById(
@@ -80,7 +159,25 @@ public class LocationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Cities matching search criteria",
                     content = @Content(mediaType = "application/json",
-                            array = @ArraySchema(schema = @Schema(implementation = CityDTO.class))))
+                            array = @ArraySchema(schema = @Schema(implementation = CityDTO.class)),
+                            examples = @ExampleObject(
+                                value = "[\n" +
+                                      "  {\n" +
+                                      "    \"id\": 1,\n" +
+                                      "    \"name\": \"Mumbai\",\n" +
+                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"countryId\": 1,\n" +
+                                      "    \"countryName\": \"India\"\n" +
+                                      "  },\n" +
+                                      "  {\n" +
+                                      "    \"id\": 21,\n" +
+                                      "    \"name\": \"Mumbai Suburban\",\n" +
+                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"countryId\": 1,\n" +
+                                      "    \"countryName\": \"India\"\n" +
+                                      "  }\n" +
+                                      "]"
+                            )))
     })
     public ResponseEntity<List<CityDTO>> searchCities(
             @Parameter(description = "Search term for city name", required = true)

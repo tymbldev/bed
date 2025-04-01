@@ -1,0 +1,1277 @@
+{
+  "info": {
+    "_postman_id": "d789f4a2-3a3d-4c7c-b4b1-ae5a66efd2be",
+    "name": "JobReferral",
+    "description": "API collection for the Job Referral application",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Authenticate a user and get JWT token"
+          },
+          "response": []
+        },
+        {
+          "name": "LinkedIn Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"your_linkedin_access_token\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login/linkedin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login",
+                "linkedin"
+              ]
+            },
+            "description": "Authenticate using LinkedIn access token"
+          },
+          "response": []
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/verify-email?token=verification_token",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-email"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "verification_token"
+                }
+              ]
+            },
+            "description": "Verify user's email address"
+          },
+          "response": []
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/forgot-password?email=user@example.com",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com"
+                }
+              ]
+            },
+            "description": "Initiate password reset process"
+          },
+          "response": []
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/reset-password?token=reset_token&newPassword=NewPassword123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "reset_token"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "NewPassword123"
+                }
+              ]
+            },
+            "description": "Reset password using token"
+          },
+          "response": []
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/resend-verification?email=user@example.com",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "resend-verification"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com"
+                }
+              ]
+            },
+            "description": "Resend email verification token"
+          },
+          "response": []
+        }
+      ],
+      "description": "Authentication and user management endpoints"
+    },
+    {
+      "name": "Registration",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"newuser@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/registration",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration"
+              ]
+            },
+            "description": "Register a new user"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"yearsOfExperience\": 5,\n  \"skills\": [\"Java\", \"Spring Boot\", \"Microservices\"]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/registration/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration",
+                "profile"
+              ]
+            },
+            "description": "Update user profile"
+          },
+          "response": []
+        },
+        {
+          "name": "LinkedIn Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"your_linkedin_access_token\",\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/registration/linkedin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration",
+                "linkedin"
+              ]
+            },
+            "description": "Register using LinkedIn profile"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Profile Completion",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/registration/profile/completion",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration",
+                "profile",
+                "completion"
+              ]
+            },
+            "description": "Get profile completion status"
+          },
+          "response": []
+        }
+      ],
+      "description": "User registration and profile management"
+    },
+    {
+      "name": "Jobs",
+      "item": [
+        {
+          "name": "Create Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"We are looking for an experienced Java Developer...\",\n  \"company\": \"Example Corp\",\n  \"department\": \"Engineering\",\n  \"location\": \"San Francisco, CA\",\n  \"jobType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"minExperience\": 5,\n  \"maxExperience\": 10,\n  \"minSalary\": \"120000\",\n  \"maxSalary\": \"160000\",\n  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\"],\n  \"workplaceType\": \"HYBRID\",\n  \"remoteAllowed\": true,\n  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n  \"numberOfOpenings\": 2\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs"
+              ]
+            },
+            "description": "Create a new job posting"
+          },
+          "response": []
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"Updated description for an experienced Java Developer...\",\n  \"company\": \"Example Corp\",\n  \"department\": \"Engineering\",\n  \"location\": \"San Francisco, CA\",\n  \"jobType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"minExperience\": 5,\n  \"maxExperience\": 10,\n  \"minSalary\": \"130000\",\n  \"maxSalary\": \"170000\",\n  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\", \"AWS\"],\n  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\", \"Lead system design\"],\n  \"workplaceType\": \"HYBRID\",\n  \"remoteAllowed\": true,\n  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n  \"numberOfOpenings\": 3\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "1"
+              ]
+            },
+            "description": "Update an existing job posting"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Jobs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs?page=0&size=10&sortBy=postedDate&sortDirection=DESC",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "postedDate"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "DESC"
+                }
+              ]
+            },
+            "description": "Get all active job postings with pagination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job By ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "1"
+              ]
+            },
+            "description": "Get job posting details by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Jobs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/my-posts?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "my-posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all job postings by the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "1"
+              ]
+            },
+            "description": "Delete (deactivate) a job posting"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Jobs",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/search?keyword=Java&page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Java"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search job postings by keyword"
+          },
+          "response": []
+        },
+        {
+          "name": "Search By Skills",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/search/skills?skills=Java&skills=Spring&page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "search",
+                "skills"
+              ],
+              "query": [
+                {
+                  "key": "skills",
+                  "value": "Java"
+                },
+                {
+                  "key": "skills",
+                  "value": "Spring"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search job postings by required skills"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Jobs By Company",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/company/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "company",
+                "1"
+              ]
+            },
+            "description": "Get jobs by company ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Jobs By Company And Title",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/company/1/search?title=Java",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "company",
+                "1",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "Java"
+                }
+              ]
+            },
+            "description": "Get jobs by company ID and title"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Jobs By Company Name",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/company/search?companyName=Example",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "company",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Example"
+                }
+              ]
+            },
+            "description": "Get jobs by company name"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Jobs By Company Name And Title",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobs/company/search/title?companyName=Example&title=Java",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobs",
+                "company",
+                "search",
+                "title"
+              ],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Example"
+                },
+                {
+                  "key": "title",
+                  "value": "Java"
+                }
+              ]
+            },
+            "description": "Get jobs by company name and title"
+          },
+          "response": []
+        }
+      ],
+      "description": "Job posting and management endpoints"
+    },
+    {
+      "name": "Job Applications",
+      "item": [
+        {
+          "name": "Apply For Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": 1,\n  \"coverLetter\": \"I am excited to apply for this position...\",\n  \"resumeUrl\": \"https://example.com/resumes/johndoe.pdf\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/job-applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications"
+              ]
+            },
+            "description": "Apply for a job"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Applications For Job",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/job-applications/job/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "job",
+                "1"
+              ]
+            },
+            "description": "Get all applications for a job"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/job-applications/my-applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "my-applications"
+              ]
+            },
+            "description": "Get current user's job applications"
+          },
+          "response": []
+        }
+      ],
+      "description": "Job application management endpoints"
+    },
+    {
+      "name": "Dropdowns",
+      "item": [
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "departments"
+              ]
+            },
+            "description": "Get all departments for dropdown selection"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Sales\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "departments"
+              ]
+            },
+            "description": "Create a new department"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Locations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "locations"
+              ]
+            },
+            "description": "Get all locations for dropdown selection"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"city\": \"Chennai\",\n  \"state\": \"Tamil Nadu\",\n  \"country\": \"India\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "locations"
+              ]
+            },
+            "description": "Create a new location"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Designations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations"
+              ]
+            },
+            "description": "Get all designations for dropdown selection"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Designation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"DevOps Engineer\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations"
+              ]
+            },
+            "description": "Create a new designation"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Designations Map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations-map",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations-map"
+              ]
+            },
+            "description": "Get all designations as a map of value/label pairs"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Degrees",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/degrees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "degrees"
+              ]
+            },
+            "description": "Get all degree types for dropdown selection"
+          },
+          "response": []
+        }
+      ],
+      "description": "Dropdown data endpoints"
+    },
+    {
+      "name": "Skills",
+      "item": [
+        {
+          "name": "Get All Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "skills"
+              ]
+            },
+            "description": "Get all available skills sorted by usage count and name"
+          },
+          "response": []
+        }
+      ],
+      "description": "Skills API endpoints"
+    },
+    {
+      "name": "Locations",
+      "item": [
+        {
+          "name": "Get All Countries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/countries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "countries"
+              ]
+            },
+            "description": "Get all available countries"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Cities By Country",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/countries/1/cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "countries",
+                "1",
+                "cities"
+              ]
+            },
+            "description": "Get cities for a specific country"
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Cities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "cities"
+              ]
+            },
+            "description": "Get all available cities"
+          },
+          "response": []
+        },
+        {
+          "name": "Get City By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/cities/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "cities",
+                "1"
+              ]
+            },
+            "description": "Get city details by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Cities",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/cities/search?query=Mumbai",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "cities",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Mumbai"
+                }
+              ]
+            },
+            "description": "Search cities by name"
+          },
+          "response": []
+        }
+      ],
+      "description": "Location API endpoints"
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    }
+  ]
+} 
