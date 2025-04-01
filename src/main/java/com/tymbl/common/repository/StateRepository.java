@@ -1,7 +1,6 @@
 package com.tymbl.common.repository;
 
 import com.tymbl.common.entity.Country;
-import com.tymbl.common.entity.State;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

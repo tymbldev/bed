@@ -3,6 +3,7 @@ package com.tymbl.common.controller;
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
 import com.tymbl.common.entity.Location;
+import com.tymbl.common.enums.Degree;
 import com.tymbl.common.service.DropdownService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -15,7 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/v1/dropdowns")
@@ -95,5 +99,27 @@ public class DropdownController {
     })
     public ResponseEntity<Designation> createDesignation(@Valid @RequestBody Designation designation) {
         return ResponseEntity.ok(dropdownService.createDesignation(designation));
+    }
+
+    @GetMapping("/designations")
+    public ResponseEntity<List<Map<String, String>>> getDesignations() {
+        List<Map<String, String>> designations = Arrays.stream(Designation.values())
+            .map(designation -> Map.of(
+                "value", designation.name(),
+                "label", designation.getDisplayName()
+            ))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(designations);
+    }
+
+    @GetMapping("/degrees")
+    public ResponseEntity<List<Map<String, String>>> getDegrees() {
+        List<Map<String, String>> degrees = Arrays.stream(Degree.values())
+            .map(degree -> Map.of(
+                "value", degree.name(),
+                "label", degree.getDisplayName()
+            ))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(degrees);
     }
 } 

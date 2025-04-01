@@ -17,13 +17,14 @@ public class Location {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
-    @ManyToOne(fetch = FetchType.EAGER)
+    @NotNull(message = "City is required")
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "city_id")
     private City city;
     
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "country_id", nullable = false)
-    @NotNull
+    @NotNull(message = "Country is required")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "country_id")
     private Country country;
     
     private String zipCode;
@@ -97,5 +98,20 @@ public class Location {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public String getLocationDisplay() {
+        if (city == null || country == null) {
+            return null;
+        }
+        StringBuilder display = new StringBuilder();
+        display.append(city.getName());
+        display.append(", ");
+        display.append(country.getName());
+        if (zipCode != null && !zipCode.trim().isEmpty()) {
+            display.append(" ");
+            display.append(zipCode);
+        }
+        return display.toString();
     }
 } 

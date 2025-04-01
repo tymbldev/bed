@@ -1,0 +1,4 @@
+linkedin:
+  client-id: ${LINKEDIN_CLIENT_ID}
+  client-secret: ${LINKEDIN_CLIENT_SECRET}
+  redirect-uri: ${LINKEDIN_REDIRECT_URI} 

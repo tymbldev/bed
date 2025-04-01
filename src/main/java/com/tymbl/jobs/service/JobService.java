@@ -1,15 +1,11 @@
 package com.tymbl.jobs.service;
 
-import com.tymbl.common.entity.City;
-import com.tymbl.common.entity.Country;
-import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Job;
 import com.tymbl.common.entity.User;
-import com.tymbl.common.repository.CityRepository;
-import com.tymbl.common.repository.CountryRepository;
-import com.tymbl.common.repository.DepartmentRepository;
-import com.tymbl.jobs.dto.JobPostRequest;
+import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
+import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -25,57 +21,60 @@ import java.util.stream.Collectors;
 public class JobService {
 
     private final JobRepository jobRepository;
-    private final DepartmentRepository departmentRepository;
-    private final CityRepository cityRepository;
-    private final CountryRepository countryRepository;
+    private final CompanyRepository companyRepository;
 
     @Transactional
-    public JobResponse createJob(JobPostRequest request, User postedBy) {
-        Job job = new Job();
-        mapRequestToJob(request, job);
-        job.setPostedBy(postedBy);
-        
-        job = jobRepository.save(job);
-        return mapJobToResponse(job);
-    }
-
-    @Transactional
-    public JobResponse updateJob(Long jobId, JobPostRequest request, User currentUser) {
-        Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
-
-        if (!job.getPostedBy().getId().equals(currentUser.getId())) {
-            throw new RuntimeException("You are not authorized to update this job");
+    public JobResponse createJob(JobRequest request, User postedBy) {
+        Company company;
+        if (request.getCompanyId() == 1000) {
+            // New company
+            company = new Company();
+            company.setName(request.getCompanyName());
+            company = companyRepository.save(company);
+        } else {
+            // Existing company
+            company = companyRepository.findById(request.getCompanyId())
+                .orElseThrow(() -> new RuntimeException("Company not found"));
         }
 
-        mapRequestToJob(request, job);
+        Job job = new Job();
+        job.setTitle(request.getTitle());
+        job.setDescription(request.getDescription());
+        job.setLocation(request.getLocation());
+        job.setEmploymentType(request.getEmploymentType());
+        job.setExperienceLevel(request.getExperienceLevel());
+        job.setSalary(request.getSalary());
+        job.setCurrency(request.getCurrency());
+        job.setCompany(company);
+        job.setPostedBy(postedBy);
+
         job = jobRepository.save(job);
-        return mapJobToResponse(job);
+        return mapToResponse(job);
     }
 
     @Transactional(readOnly = true)
     public Page<JobResponse> getAllActiveJobs(Pageable pageable) {
         return jobRepository.findByActiveTrue(pageable)
-                .map(this::mapJobToResponse);
+            .map(this::mapToResponse);
     }
 
     @Transactional(readOnly = true)
     public Page<JobResponse> getJobsByUser(User user, Pageable pageable) {
         return jobRepository.findByPostedByAndActiveTrue(user, pageable)
-                .map(this::mapJobToResponse);
+            .map(this::mapToResponse);
     }
 
     @Transactional(readOnly = true)
     public JobResponse getJobById(Long jobId) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
-        return mapJobToResponse(job);
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        return mapToResponse(job);
     }
 
     @Transactional
     public void deleteJob(Long jobId, User currentUser) {
         Job job = jobRepository.findById(jobId)
-                .orElseThrow(() -> new RuntimeException("Job not found"));
+            .orElseThrow(() -> new RuntimeException("Job not found"));
 
         if (!job.getPostedBy().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to delete this job");
@@ -88,114 +87,88 @@ public class JobService {
     @Transactional(readOnly = true)
     public Page<JobResponse> searchJobs(String keyword, Pageable pageable) {
         return jobRepository.searchJobs(keyword, pageable)
-                .map(this::mapJobToResponse);
+            .map(this::mapToResponse);
     }
 
     @Transactional(readOnly = true)
     public Page<JobResponse> searchBySkills(List<String> skills, Pageable pageable) {
         return jobRepository.findBySkills(skills.stream().map(String::toLowerCase).collect(Collectors.toList()), pageable)
-                .map(this::mapJobToResponse);
+            .map(this::mapToResponse);
     }
 
-    private void mapRequestToJob(JobPostRequest request, Job job) {
+    public List<JobResponse> getJobsByCompany(Long companyId) {
+        Company company = companyRepository.findById(companyId)
+            .orElseThrow(() -> new RuntimeException("Company not found"));
+
+        return jobRepository.findByCompany(company).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    public List<JobResponse> getJobsByCompanyAndTitle(Long companyId, String title) {
+        return jobRepository.findActiveJobsByCompanyAndTitle(companyId, title).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    public List<JobResponse> getJobsByCompanyName(String companyName) {
+        return jobRepository.findByCompanyNameContainingIgnoreCase(companyName).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    public List<JobResponse> getJobsByCompanyNameAndTitle(String companyName, String title) {
+        return jobRepository.findActiveJobsByCompanyNameAndTitle(companyName, title).stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public JobResponse updateJob(Long jobId, JobRequest request, User currentUser) {
+        Job job = jobRepository.findById(jobId)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Check if user is authorized to update the job
+        if (!job.getPostedBy().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You are not authorized to update this job");
+        }
+
+        // Update company if needed
+        if (request.getCompanyId() != null && !request.getCompanyId().equals(job.getCompany().getId())) {
+            Company company = companyRepository.findById(request.getCompanyId())
+                .orElseThrow(() -> new RuntimeException("Company not found"));
+            job.setCompany(company);
+        }
+
+        // Update job details
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
-        job.setCompany(request.getCompany());
-        job.setZipCode(request.getZipCode());
-        job.setRemote(request.isRemote());
-        
-        // Set department if ID provided
-        if (request.getDepartmentId() != null) {
-            Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new RuntimeException("Department not found"));
-            job.setDepartment(department);
-        } else {
-            job.setDepartment(null);
-        }
-        
-        // Set city if ID provided
-        if (request.getCityId() != null) {
-            City city = cityRepository.findById(request.getCityId())
-                .orElseThrow(() -> new RuntimeException("City not found"));
-            job.setCity(city);
-        } else {
-            job.setCity(null);
-        }
-        
-        // Set country if ID provided
-        if (request.getCountryId() != null) {
-            Country country = countryRepository.findById(request.getCountryId())
-                .orElseThrow(() -> new RuntimeException("Country not found"));
-            job.setCountry(country);
-        } else {
-            job.setCountry(null);
-        }
-        
-        job.setJobType(request.getJobType());
+        job.setLocation(request.getLocation());
+        job.setEmploymentType(request.getEmploymentType());
         job.setExperienceLevel(request.getExperienceLevel());
-        job.setMinExperience(request.getMinExperience());
-        job.setMaxExperience(request.getMaxExperience());
-        job.setMinSalary(request.getMinSalary());
-        job.setMaxSalary(request.getMaxSalary());
-        job.setRequiredSkills(request.getRequiredSkills());
-        job.setQualifications(request.getQualifications());
-        job.setResponsibilities(request.getResponsibilities());
-        job.setEducationRequirement(request.getEducationRequirement());
-        job.setWorkplaceType(request.getWorkplaceType());
-        job.setRemoteAllowed(request.isRemoteAllowed());
-        job.setApplicationDeadline(request.getApplicationDeadline());
-        job.setNumberOfOpenings(request.getNumberOfOpenings());
-        job.setNoticePeriod(request.getNoticePeriod());
-        job.setReferralBonus(request.getReferralBonus());
+        job.setSalary(request.getSalary());
+        job.setCurrency(request.getCurrency());
+
+        job = jobRepository.save(job);
+        return mapToResponse(job);
     }
 
-    private JobResponse mapJobToResponse(Job job) {
-        JobResponse.JobResponseBuilder builder = JobResponse.builder()
-                .id(job.getId())
-                .title(job.getTitle())
-                .description(job.getDescription())
-                .company(job.getCompany())
-                .zipCode(job.getZipCode())
-                .isRemote(job.isRemote())
-                .jobType(job.getJobType())
-                .experienceLevel(job.getExperienceLevel())
-                .minExperience(job.getMinExperience())
-                .maxExperience(job.getMaxExperience())
-                .minSalary(job.getMinSalary())
-                .maxSalary(job.getMaxSalary())
-                .requiredSkills(job.getRequiredSkills())
-                .qualifications(job.getQualifications())
-                .responsibilities(job.getResponsibilities())
-                .educationRequirement(job.getEducationRequirement())
-                .workplaceType(job.getWorkplaceType())
-                .isRemoteAllowed(job.isRemoteAllowed())
-                .applicationDeadline(job.getApplicationDeadline())
-                .numberOfOpenings(job.getNumberOfOpenings())
-                .noticePeriod(job.getNoticePeriod())
-                .referralBonus(job.getReferralBonus())
-                .postedByUserName(job.getPostedBy().getFirstName() + " " + job.getPostedBy().getLastName())
-                .postedDate(job.getPostedDate())
-                .lastModifiedDate(job.getLastModifiedDate())
-                .isActive(job.isActive());
-        
-        // Add department details if available
-        if (job.getDepartment() != null) {
-            builder.departmentId(job.getDepartment().getId())
-                   .departmentName(job.getDepartment().getName());
-        }
-        
-        // Add city details if available
-        if (job.getCity() != null) {
-            builder.cityId(job.getCity().getId())
-                   .cityName(job.getCity().getName());
-        }
-        
-        // Add country details if available
-        if (job.getCountry() != null) {
-            builder.countryId(job.getCountry().getId())
-                   .countryName(job.getCountry().getName());
-        }
-        
-        return builder.build();
+    private JobResponse mapToResponse(Job job) {
+        JobResponse response = new JobResponse();
+        response.setId(job.getId());
+        response.setTitle(job.getTitle());
+        response.setDescription(job.getDescription());
+        response.setLocation(job.getLocation());
+        response.setEmploymentType(job.getEmploymentType());
+        response.setExperienceLevel(job.getExperienceLevel());
+        response.setSalary(job.getSalary());
+        response.setCurrency(job.getCurrency());
+        response.setCompanyId(job.getCompany().getId());
+        response.setCompanyName(job.getCompanyName());
+        response.setPostedBy(job.getPostedBy().getId());
+        response.setActive(job.isActive());
+        response.setCreatedAt(job.getCreatedAt());
+        response.setUpdatedAt(job.getUpdatedAt());
+        return response;
     }
 }

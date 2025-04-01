@@ -21,18 +21,14 @@ public class Designation {
     @Column(nullable = false, unique = true)
     private String title;
     
-    private String description;
-    
+    @Column(nullable = false)
     private Integer level;
+    
+    @Column(nullable = false)
+    private boolean enabled = true;
     
     public Designation(String title) {
         this.title = title;
-    }
-    
-    public Designation(String title, String description, Integer level) {
-        this.title = title;
-        this.description = description;
-        this.level = level;
     }
     
     @Override

@@ -1,7 +1,7 @@
 package com.tymbl.jobs.controller;
 
 import com.tymbl.common.entity.User;
-import com.tymbl.jobs.dto.JobPostRequest;
+import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
 import com.tymbl.jobs.service.JobService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -56,7 +56,7 @@ public class JobController {
                 required = true,
                 content = @Content(
                     examples = @ExampleObject(
-                        name = "JobPostRequest",
+                        name = "JobRequest",
                         summary = "Standard job posting request",
                         value = "{\n" +
                               "  \"title\": \"Senior Java Developer\",\n" +
@@ -81,7 +81,7 @@ public class JobController {
                     )
                 )
             )
-            @Valid @RequestBody JobPostRequest request,
+            @Valid @RequestBody JobRequest request,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(jobService.createJob(request, currentUser));
     }
@@ -101,7 +101,7 @@ public class JobController {
     public ResponseEntity<JobResponse> updateJob(
             @Parameter(description = "Job ID", required = true) 
             @PathVariable Long jobId,
-            @Valid @RequestBody JobPostRequest request,
+            @Valid @RequestBody JobRequest request,
             @AuthenticationPrincipal User currentUser) {
         return ResponseEntity.ok(jobService.updateJob(jobId, request, currentUser));
     }
@@ -223,5 +223,30 @@ public class JobController {
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
                 jobService.searchBySkills(skills, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/company/{companyId}")
+    public ResponseEntity<List<JobResponse>> getJobsByCompany(@PathVariable Long companyId) {
+        return ResponseEntity.ok(jobService.getJobsByCompany(companyId));
+    }
+
+    @GetMapping("/company/{companyId}/search")
+    public ResponseEntity<List<JobResponse>> getJobsByCompanyAndTitle(
+            @PathVariable Long companyId,
+            @RequestParam String title) {
+        return ResponseEntity.ok(jobService.getJobsByCompanyAndTitle(companyId, title));
+    }
+
+    @GetMapping("/company/search")
+    public ResponseEntity<List<JobResponse>> getJobsByCompanyName(
+            @RequestParam String companyName) {
+        return ResponseEntity.ok(jobService.getJobsByCompanyName(companyName));
+    }
+
+    @GetMapping("/company/search/title")
+    public ResponseEntity<List<JobResponse>> getJobsByCompanyNameAndTitle(
+            @RequestParam String companyName,
+            @RequestParam String title) {
+        return ResponseEntity.ok(jobService.getJobsByCompanyNameAndTitle(companyName, title));
     }
 } 

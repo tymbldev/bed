@@ -1,8 +1,14 @@
 package com.tymbl.common.entity;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder.In;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Pattern;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -11,6 +17,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -27,7 +34,9 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
     
-    @NotBlank
+    @NotBlank(message = "Password is required")
+    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{5,}$",
+            message = "Password must be at least 5 characters long and contain at least one digit, one uppercase letter, one lowercase letter, and one special character")
     @Column(nullable = false)
     private String password;
     
@@ -74,15 +83,21 @@ public class User implements UserDetails {
     private String resumeUrl;
     
     // Experience
+    @Min(value = 0, message = "Years of experience cannot be negative")
     private Integer yearsOfExperience;
-    private String currentSalary;
-    private String expectedSalary;
-    private String noticePeriod;
+    
+    @Min(value = 0, message = "Months of experience cannot be negative")
+    @Max(value = 11, message = "Months of experience cannot be more than 11")
+    private Integer monthsOfExperience;
+    
+    private Integer currentSalary;
+    private Integer expectedSalary;
+    private Integer noticePeriod;
     
     @ElementCollection
     @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "skill")
-    private Collection<String> skills;
+    private List<String> skills;
     
     @ElementCollection
     @CollectionTable(name = "user_education", joinColumns = @JoinColumn(name = "user_id"))
@@ -102,16 +117,27 @@ public class User implements UserDetails {
     
     private String profilePicture;
     
-    @Embeddable
     @Data
     @NoArgsConstructor
+    @Embeddable
     public static class Education {
-        private String institution;
-        private String degree;
-        private String fieldOfStudy;
-        private String startDate;
-        private String endDate;
-        private String grade;
+        private Long institutionId;
+        private Long degreeId;
+        private String specialization;
+        private Integer startYear;
+        private Integer endYear;
+        
+        @Enumerated(EnumType.STRING)
+        private GradeType gradeType;
+        
+        @DecimalMin(value = "0.0", message = "Grade value must be greater than or equal to 0")
+        @DecimalMax(value = "100.0", message = "Grade value must be less than or equal to 100")
+        private Float gradeValue;
+    }
+    
+    public enum GradeType {
+        PERCENTAGE,
+        CGPA
     }
     
     @Override
