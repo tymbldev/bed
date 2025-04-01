@@ -1,13 +1,16 @@
 package com.tymbl.common.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.User;
 import com.tymbl.common.repository.UserRepository;
+import com.tymbl.registration.dto.LinkedInProfile;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -16,10 +19,8 @@ import java.util.Map;
 @Service
 @RequiredArgsConstructor
 public class LinkedInService {
-
-    private final RestTemplate restTemplate;
     private final UserRepository userRepository;
-    private final JwtService jwtService;
+    private final RestTemplate restTemplate;
 
     @Value("${linkedin.client-id}")
     private String clientId;
@@ -30,53 +31,114 @@ public class LinkedInService {
     @Value("${linkedin.redirect-uri}")
     private String redirectUri;
 
-    public String validateAndLogin(String accessToken) {
+    /**
+     * Validates a LinkedIn access token and retrieves the user.
+     * Throws an exception if user is not found.
+     */
+    public User validateAndLogin(String accessToken) {
         // Validate the access token with LinkedIn
-        Map<String, Object> userInfo = validateAccessToken(accessToken);
-        
-        // Extract LinkedIn user information
-        String email = (String) userInfo.get("email");
-        String firstName = (String) userInfo.get("given_name");
-        String lastName = (String) userInfo.get("family_name");
-        String linkedInProfile = (String) userInfo.get("picture");
-
-        // Find or create user
-        User user = userRepository.findByEmail(email)
-            .orElseGet(() -> createNewUser(email, firstName, lastName, linkedInProfile));
-
-        // Generate JWT token
-        return jwtService.generateToken(user);
-    }
-
-    private Map<String, Object> validateAccessToken(String accessToken) {
+        // First, get basic profile information
+        String userInfoUrl = "https://api.linkedin.com/v2/me";
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(accessToken);
-
+        
         HttpEntity<String> entity = new HttpEntity<>(headers);
-
         ResponseEntity<Map> response = restTemplate.exchange(
-            "https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams))",
+            userInfoUrl,
             HttpMethod.GET,
             entity,
             Map.class
         );
 
-        if (!response.getStatusCode().is2xxSuccessful()) {
-            throw new RuntimeException("Invalid LinkedIn access token");
+        if (response.getBody() == null) {
+            throw new RuntimeException("Failed to get user info from LinkedIn");
         }
 
-        return response.getBody();
-    }
+        // Get email address from a separate endpoint
+        String emailUrl = "https://api.linkedin.com/v2/emailAddress?q=members&projection=(elements*(handle~))";
+        ResponseEntity<Map> emailResponse = restTemplate.exchange(
+            emailUrl,
+            HttpMethod.GET,
+            entity,
+            Map.class
+        );
 
-    private User createNewUser(String email, String firstName, String lastName, String linkedInProfile) {
-        User user = new User();
-        user.setEmail(email);
-        user.setFirstName(firstName);
-        user.setLastName(lastName);
-        user.setLinkedInProfile(linkedInProfile);
-        user.setEnabled(true);
-        user.setRole(User.Role.USER);
+        if (emailResponse.getBody() == null) {
+            throw new RuntimeException("Failed to get email from LinkedIn");
+        }
+
+        // Extract user information
+        Map<String, Object> userInfo = response.getBody();
+        Map<String, Object> emailData = emailResponse.getBody();
         
-        return userRepository.save(user);
+        // Extract appropriate fields based on LinkedIn API response structure
+        Map<String, Object> localizedFirstName = (Map<String, Object>) userInfo.get("localizedFirstName");
+        Map<String, Object> localizedLastName = (Map<String, Object>) userInfo.get("localizedLastName");
+        
+        String firstName = userInfo.containsKey("localizedFirstName") ? 
+            (String) userInfo.get("localizedFirstName") : 
+            "LinkedIn User";
+            
+        String lastName = userInfo.containsKey("localizedLastName") ? 
+            (String) userInfo.get("localizedLastName") : 
+            "";
+        
+        // Extract email from response
+        String email = extractEmailFromLinkedInResponse(emailData);
+        
+        if (email == null || email.isEmpty()) {
+            throw new RuntimeException("Could not retrieve email from LinkedIn");
+        }
+
+        // Find user and throw error if not found
+        return userRepository.findByEmail(email)
+            .orElseThrow(() -> new UsernameNotFoundException("User not found. Please register first."));
+    }
+    
+    /**
+     * Retrieves LinkedIn profile data for registration purposes.
+     * This is used when creating a new user via LinkedIn.
+     */
+    public LinkedInProfile getProfileData(String accessToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        
+        ResponseEntity<String> response = restTemplate.exchange(
+            "https://api.linkedin.com/v2/me?projection=(id,localizedFirstName,localizedLastName,profilePicture(displayImage~:playableStreams),email-address)",
+            HttpMethod.GET,
+            entity,
+            String.class
+        );
+
+        try {
+            ObjectMapper objectMapper = new ObjectMapper();
+            return objectMapper.readValue(response.getBody(), LinkedInProfile.class);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse LinkedIn profile data", e);
+        }
+    }
+    
+    private String extractEmailFromLinkedInResponse(Map<String, Object> emailData) {
+        try {
+            if (emailData.containsKey("elements") && emailData.get("elements") instanceof Iterable) {
+                Iterable<?> elements = (Iterable<?>) emailData.get("elements");
+                for (Object element : elements) {
+                    if (element instanceof Map) {
+                        Map<?, ?> elementMap = (Map<?, ?>) element;
+                        if (elementMap.containsKey("handle~")) {
+                            Map<?, ?> handleMap = (Map<?, ?>) elementMap.get("handle~");
+                            if (handleMap.containsKey("emailAddress")) {
+                                return (String) handleMap.get("emailAddress");
+                            }
+                        }
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // Log error and continue to throw the general exception
+        }
+        return null;
     }
 } 

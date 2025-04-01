@@ -1,5 +1,6 @@
 package com.tymbl.common.service;
 
+import java.util.UUID;
 import javax.mail.MessagingException;
 import javax.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -9,9 +10,6 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
-
-import java.util.HashMap;
-import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -29,6 +27,7 @@ public class EmailService {
     public void sendVerificationEmail(String to, String verificationToken) throws MessagingException {
         Context context = new Context();
         context.setVariable("verificationToken", verificationToken);
+        context.setVariable("verificationUrl", frontendUrl + "/verify-email?token=" + verificationToken);
         
         String emailContent = templateEngine.process("verification-email", context);
         sendEmail(to, "Email Verification", emailContent);
@@ -37,6 +36,7 @@ public class EmailService {
     public void sendPasswordResetEmail(String to, String resetToken) throws MessagingException {
         Context context = new Context();
         context.setVariable("resetToken", resetToken);
+        context.setVariable("resetUrl", frontendUrl + "/reset-password?token=" + resetToken);
         
         String emailContent = templateEngine.process("password-reset-email", context);
         sendEmail(to, "Password Reset Request", emailContent);
@@ -52,5 +52,13 @@ public class EmailService {
         helper.setText(content, true);
         
         mailSender.send(message);
+    }
+    
+    public String generateVerificationToken() {
+        return UUID.randomUUID().toString();
+    }
+    
+    public String generatePasswordResetToken() {
+        return UUID.randomUUID().toString();
     }
 } 

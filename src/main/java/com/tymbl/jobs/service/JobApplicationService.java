@@ -5,6 +5,7 @@ import com.tymbl.common.entity.User;
 import com.tymbl.jobs.dto.JobApplicationRequest;
 import com.tymbl.jobs.dto.JobApplicationResponse;
 import com.tymbl.jobs.dto.JobApplicationResponseExtendedDetails;
+import com.tymbl.jobs.entity.ApplicationStatus;
 import com.tymbl.jobs.entity.JobApplication;
 import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
@@ -12,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -68,9 +70,9 @@ public class JobApplicationService {
         response.setJobId(application.getJob().getId());
         response.setJobTitle(application.getJob().getTitle());
         response.setApplicantId(application.getApplicant().getId());
-        response.setApplicantName(application.getApplicant().getFullName());
-        response.setStatus(application.getStatus());
-        response.setCreatedAt(application.getCreatedAt());
+        response.setApplicantName(application.getApplicant().getFirstName() + " " + application.getApplicant().getLastName());
+        response.setStatus(convertStatus(application.getStatus()));
+        response.setCreatedAt(application.getAppliedAt());
         return response;
     }
 
@@ -86,19 +88,41 @@ public class JobApplicationService {
         response.setJobSalary(application.getJob().getSalary());
         response.setJobCurrency(application.getJob().getCurrency());
         response.setApplicantId(application.getApplicant().getId());
-        response.setApplicantName(application.getApplicant().getFullName());
+        response.setApplicantName(application.getApplicant().getFirstName() + " " + application.getApplicant().getLastName());
         response.setApplicantEmail(application.getApplicant().getEmail());
         response.setCoverLetter(application.getCoverLetter());
         response.setResumeUrl(application.getResumeUrl());
-        response.setStatus(application.getStatus());
-        response.setSkills(application.getSkills());
-        response.setExperience(application.getExperience());
-        response.setEducation(application.getEducation());
-        response.setPortfolioUrl(application.getPortfolioUrl());
-        response.setLinkedInUrl(application.getLinkedInUrl());
-        response.setGithubUrl(application.getGithubUrl());
-        response.setCreatedAt(application.getCreatedAt());
+        response.setStatus(convertStatus(application.getStatus()));
+        
+        // These fields may not exist in the entity, setting them to null or default values
+        response.setSkills(new ArrayList<>());
+        response.setExperience(null);
+        response.setEducation(null);
+        response.setPortfolioUrl(application.getApplicant().getPortfolioUrl());
+        response.setLinkedInUrl(application.getApplicant().getLinkedInProfile());
+        response.setGithubUrl(null);
+        response.setCreatedAt(application.getAppliedAt());
         response.setUpdatedAt(application.getUpdatedAt());
         return response;
+    }
+    
+    /**
+     * Convert from JobApplication.ApplicationStatus to ApplicationStatus
+     */
+    private ApplicationStatus convertStatus(JobApplication.ApplicationStatus status) {
+        switch (status) {
+            case PENDING:
+                return ApplicationStatus.PENDING;
+            case REVIEWING:
+                return ApplicationStatus.REVIEWING;
+            case SHORTLISTED:
+                return ApplicationStatus.SHORTLISTED;
+            case REJECTED:
+                return ApplicationStatus.REJECTED;
+            case HIRED:
+                return ApplicationStatus.ACCEPTED;
+            default:
+                return ApplicationStatus.PENDING;
+        }
     }
 } 

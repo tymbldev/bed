@@ -13,6 +13,7 @@ import com.tymbl.common.repository.CountryRepository;
 import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.UserRepository;
+import com.tymbl.common.service.LinkedInService;
 import com.tymbl.registration.dto.LinkedInProfile;
 import com.tymbl.registration.dto.LinkedInRegisterRequest;
 import com.tymbl.registration.dto.ProfileUpdateRequest;

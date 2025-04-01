@@ -45,7 +45,7 @@ public class InterviewPreparationService {
     public Map<String, List<CompanyDesignationSkill>> getSkillsByCompany(Long companyId) {
         List<CompanyDesignationSkill> skills = companyDesignationSkillRepository.findByCompanyId(companyId);
         return skills.stream()
-                .collect(Collectors.groupingBy(skill -> skill.getDesignation().getName()));
+                .collect(Collectors.groupingBy(skill -> skill.getDesignation().getTitle()));
     }
 
     // Interview Topics Management

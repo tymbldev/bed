@@ -2,7 +2,8 @@ package com.tymbl.auth.controller;
 
 import com.tymbl.auth.dto.AuthResponse;
 import com.tymbl.auth.dto.LoginRequest;
-import com.tymbl.auth.service.AuthenticationService;
+import com.tymbl.auth.service.impl.AuthenticationService;
+import com.tymbl.common.dto.LinkedInLoginRequest;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -132,5 +133,27 @@ public class AuthenticationController {
         throws Exception {
         authenticationService.resendVerificationEmail(email);
         return ResponseEntity.ok("Verification email sent successfully");
+    }
+
+    @PostMapping("/login/linkedin")
+    @Operation(
+        summary = "Authenticate user with LinkedIn",
+        description = "Authenticates a user using their LinkedIn account and returns a JWT token that can be used for protected API endpoints."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Successfully authenticated with LinkedIn",
+            content = @Content(
+                schema = @Schema(implementation = AuthResponse.class),
+                examples = @ExampleObject(
+                    value = "{\"token\":\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\"email\":\"user@example.com\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"role\":\"USER\",\"emailVerified\":true}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Invalid LinkedIn access token")
+    })
+    public ResponseEntity<AuthResponse> loginWithLinkedIn(@Valid @RequestBody LinkedInLoginRequest request) {
+        return ResponseEntity.ok(authenticationService.loginWithLinkedIn(request.getAccessToken()));
     }
 } 

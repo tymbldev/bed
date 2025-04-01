@@ -11,15 +11,20 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/dropdowns")
@@ -101,24 +106,30 @@ public class DropdownController {
         return ResponseEntity.ok(dropdownService.createDesignation(designation));
     }
 
-    @GetMapping("/designations")
-    public ResponseEntity<List<Map<String, String>>> getDesignations() {
-        List<Map<String, String>> designations = Arrays.stream(Designation.values())
-            .map(designation -> Map.of(
-                "value", designation.name(),
-                "label", designation.getDisplayName()
-            ))
+    @GetMapping("/designations-map")
+    @Operation(summary = "Get all designations as a map", description = "Returns designations as a map of value/label pairs")
+    public ResponseEntity<List<Map<String, String>>> getDesignationsAsMap() {
+        List<Map<String, String>> designationMaps = dropdownService.getAllDesignations().stream()
+            .map(designation -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("value", designation.getId().toString());
+                map.put("label", designation.getTitle());
+                return map;
+            })
             .collect(Collectors.toList());
-        return ResponseEntity.ok(designations);
+        return ResponseEntity.ok(designationMaps);
     }
 
     @GetMapping("/degrees")
+    @Operation(summary = "Get all degrees", description = "Returns all degree types for dropdown selection")
     public ResponseEntity<List<Map<String, String>>> getDegrees() {
         List<Map<String, String>> degrees = Arrays.stream(Degree.values())
-            .map(degree -> Map.of(
-                "value", degree.name(),
-                "label", degree.getDisplayName()
-            ))
+            .map(degree -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("value", degree.name());
+                map.put("label", degree.getDisplayName());
+                return map;
+            })
             .collect(Collectors.toList());
         return ResponseEntity.ok(degrees);
     }

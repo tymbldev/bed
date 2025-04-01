@@ -6,7 +6,9 @@ import com.tymbl.auth.service.JwtService;
 import com.tymbl.common.entity.User;
 import com.tymbl.common.repository.UserRepository;
 import com.tymbl.common.service.EmailService;
+import com.tymbl.common.service.LinkedInService;
 import java.util.UUID;
+import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -23,6 +25,7 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final UserRepository userRepository;
     private final EmailService emailService;
+    private final LinkedInService linkedInService;
 
     
     public AuthResponse login(LoginRequest request) {
@@ -60,7 +63,7 @@ public class AuthenticationService {
 
     
     @Transactional
-    public void initiatePasswordReset(String email) throws Exception{
+    public void initiatePasswordReset(String email) throws javax.mail.MessagingException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -90,7 +93,7 @@ public class AuthenticationService {
 
     
     @Transactional
-    public void resendVerificationEmail(String email) throws Exception{
+    public void resendVerificationEmail(String email) throws MessagingException {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
@@ -104,4 +107,23 @@ public class AuthenticationService {
 
         emailService.sendVerificationEmail(user.getEmail(), verificationToken);
     }
+
+    public AuthResponse loginWithLinkedIn(String accessToken) {
+        User user = linkedInService.validateAndLogin(accessToken);
+        
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+            user.getEmail(), null, user.getAuthorities());
+        
+        String token = jwtService.generateToken(user);
+
+        return AuthResponse.builder()
+            .token(token)
+            .email(user.getEmail())
+            .firstName(user.getFirstName())
+            .lastName(user.getLastName())
+            .role(user.getRole().name())
+            .emailVerified(user.isEmailVerified())
+            .build();
+    }
+
 } 
