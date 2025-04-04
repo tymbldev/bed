@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -34,6 +36,9 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "Registration", description = "User registration and profile management endpoints")
 public class RegistrationController {
 
+    private static final Logger logger = LoggerFactory.getLogger("com.tymbl.access");
+    private static final Logger applicationLogger = LoggerFactory.getLogger("com.tymbl");
+    
     private final RegistrationService registrationService;
 
     @PostMapping
@@ -71,7 +76,15 @@ public class RegistrationController {
                 )
             )
             @Valid @RequestBody RegisterRequest request) throws Exception {
-        return ResponseEntity.ok(registrationService.registerUserWithToken(request));
+        logger.info("Received registration request for email: {}", request.getEmail());
+        try {
+            AuthResponse response = registrationService.registerUserWithToken(request);
+            logger.info("Successfully registered user with email: {}", request.getEmail());
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to register user with email: {}. Error: {}", request.getEmail(), e.getMessage());
+            throw e;
+        }
     }
     
     @PutMapping("/profile")
@@ -119,7 +132,15 @@ public class RegistrationController {
             )
             @RequestBody ProfileUpdateRequest request,
             @AuthenticationPrincipal User currentUser) throws Exception {
-        return ResponseEntity.ok(registrationService.updateUserProfile(currentUser.getId(), request));
+        applicationLogger.info("Updating profile for user: {}", currentUser.getEmail());
+        try {
+            User updatedUser = registrationService.updateUserProfile(currentUser.getId(), request);
+            applicationLogger.info("Successfully updated profile for user: {}", currentUser.getEmail());
+            return ResponseEntity.ok(updatedUser);
+        } catch (Exception e) {
+            applicationLogger.error("Failed to update profile for user: {}. Error: {}", currentUser.getEmail(), e.getMessage());
+            throw e;
+        }
     }
 
     @PostMapping("/linkedin")
@@ -158,7 +179,15 @@ public class RegistrationController {
                 )
             )
             @Valid @RequestBody LinkedInRegisterRequest request) throws Exception {
-        return ResponseEntity.ok(registrationService.registerWithLinkedIn(request));
+        logger.info("Received LinkedIn registration request");
+        try {
+            AuthResponse response = registrationService.registerWithLinkedIn(request);
+            logger.info("Successfully registered user with LinkedIn");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            logger.error("Failed to register user with LinkedIn. Error: {}", e.getMessage());
+            throw e;
+        }
     }
 
   @GetMapping("/profile/completion")
@@ -172,7 +201,10 @@ public class RegistrationController {
   })
   public ResponseEntity<ProfileCompletionResponse> getProfileCompletionStatus(
       @AuthenticationPrincipal User currentUser) {
-    return ResponseEntity.ok(calculateProfileCompletion(currentUser));
+    applicationLogger.debug("Calculating profile completion for user: {}", currentUser.getEmail());
+    ProfileCompletionResponse response = calculateProfileCompletion(currentUser);
+    applicationLogger.debug("Profile completion for user {}: {}%", currentUser.getEmail(), response.getCompletionPercentage());
+    return ResponseEntity.ok(response);
   }
   private ProfileCompletionResponse calculateProfileCompletion(User user) {
     ProfileCompletionResponse response = new ProfileCompletionResponse();
