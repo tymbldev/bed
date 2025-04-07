@@ -1,5 +1,13 @@
 -- Clear existing data
-TRUNCATE TABLE skills RESTART IDENTITY CASCADE;
+
+-- Disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
+
+TRUNCATE TABLE skills;
+ALTER TABLE skills AUTO_INCREMENT = 1;
+
+-- Enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert initial skills
 INSERT INTO skills (name, enabled, usage_count) VALUES

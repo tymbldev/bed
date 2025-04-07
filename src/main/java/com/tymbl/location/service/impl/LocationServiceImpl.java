@@ -1,12 +1,12 @@
 package com.tymbl.location.service.impl;
 
+import com.tymbl.common.dto.CityDTO;
+import com.tymbl.common.dto.CountryDTO;
 import com.tymbl.common.entity.City;
-import com.tymbl.common.entity.Country;
+import com.tymbl.common.mapper.CityMapper;
 import com.tymbl.common.repository.CityRepository;
 import com.tymbl.common.repository.CountryRepository;
 import com.tymbl.exception.ResourceNotFoundException;
-import com.tymbl.location.dto.CityDTO;
-import com.tymbl.location.dto.CountryDTO;
 import com.tymbl.location.service.LocationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,6 +20,7 @@ public class LocationServiceImpl implements LocationService {
 
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
+    private final CityMapper cityMapper;
 
     @Override
     public List<CountryDTO> getAllCountries() {
@@ -35,42 +36,33 @@ public class LocationServiceImpl implements LocationService {
 
     @Override
     public List<CityDTO> getCitiesByCountry(Long countryId) {
-        Country country = countryRepository.findById(countryId)
-            .orElseThrow(() -> new ResourceNotFoundException("Country not found with id: " + countryId));
+        if (!countryRepository.existsById(countryId)) {
+            throw new ResourceNotFoundException("Country not found with id: " + countryId);
+        }
         
-        return cityRepository.findByCountryOrderByNameAsc(country).stream()
-                .map(this::mapCityToDTO)
+        return cityRepository.findByCountryIdOrderByNameAsc(countryId).stream()
+                .map(cityMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public List<CityDTO> getAllCities() {
         return cityRepository.findAll().stream()
-                .map(this::mapCityToDTO)
+                .map(cityMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public CityDTO getCityById(Long cityId) {
         return cityRepository.findById(cityId)
-                .map(this::mapCityToDTO)
+                .map(cityMapper::toDTO)
                 .orElseThrow(() -> new ResourceNotFoundException("City not found with id: " + cityId));
     }
 
     @Override
     public List<CityDTO> searchCities(String query) {
         return cityRepository.findByNameContainingIgnoreCaseOrderByNameAsc(query).stream()
-                .map(this::mapCityToDTO)
+                .map(cityMapper::toDTO)
                 .collect(Collectors.toList());
-    }
-
-    private CityDTO mapCityToDTO(City city) {
-        return CityDTO.builder()
-                .id(city.getId())
-                .name(city.getName())
-                .zipCode(city.getZipCode())
-                .countryId(city.getCountry().getId())
-                .countryName(city.getCountry().getName())
-                .build();
     }
 } 

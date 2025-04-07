@@ -12,6 +12,8 @@ import org.springframework.boot.availability.LivenessState;
 import org.springframework.boot.availability.ReadinessState;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -94,6 +96,27 @@ public class HealthController {
         Map<String, Object> response = new HashMap<>();
         response.put("status", ReadinessState.ACCEPTING_TRAFFIC);
         response.put("timestamp", LocalDateTime.now());
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/test-post")
+    @Operation(summary = "Test POST endpoint", description = "Test endpoint to verify POST requests are working")
+    public ResponseEntity<Map<String, Object>> testPost(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "SUCCESS");
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("request", request);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/test-register")
+    @Operation(summary = "Test registration endpoint", description = "Test endpoint to verify registration-like POST requests")
+    public ResponseEntity<Map<String, Object>> testRegister(@RequestBody Map<String, Object> request) {
+        Map<String, Object> response = new HashMap<>();
+        response.put("status", "REGISTERED");
+        response.put("timestamp", LocalDateTime.now().toString());
+        response.put("email", request.get("email"));
+        response.put("token", "test-jwt-token-123456789");
         return ResponseEntity.ok(response);
     }
 } 

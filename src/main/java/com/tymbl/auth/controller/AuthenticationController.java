@@ -153,7 +153,21 @@ public class AuthenticationController {
         ),
         @ApiResponse(responseCode = "400", description = "Invalid LinkedIn access token")
     })
-    public ResponseEntity<AuthResponse> loginWithLinkedIn(@Valid @RequestBody LinkedInLoginRequest request) {
+    public ResponseEntity<AuthResponse> loginWithLinkedIn(
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                description = "LinkedIn login credentials",
+                required = true,
+                content = @Content(
+                    examples = @ExampleObject(
+                        name = "LinkedInLoginRequest",
+                        summary = "LinkedIn login request",
+                        value = "{\n" +
+                              "  \"accessToken\": \"AQV...\"\n" +
+                              "}"
+                    )
+                )
+            )
+            @Valid @RequestBody LinkedInLoginRequest request) {
         return ResponseEntity.ok(authenticationService.loginWithLinkedIn(request.getAccessToken()));
     }
 } 

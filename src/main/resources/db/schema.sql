@@ -15,10 +15,7 @@ CREATE TABLE IF NOT EXISTS company_designation_skills (
     skill_id BIGINT NOT NULL,
     importance_level VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(id),
-    FOREIGN KEY (designation_id) REFERENCES designations(id),
-    FOREIGN KEY (skill_id) REFERENCES skills(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS interview_topics (
@@ -29,8 +26,7 @@ CREATE TABLE IF NOT EXISTS interview_topics (
     content TEXT,
     difficulty_level VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_designation_skill_id) REFERENCES company_designation_skills(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS interview_questions (
@@ -40,8 +36,7 @@ CREATE TABLE IF NOT EXISTS interview_questions (
     answer TEXT,
     difficulty_level VARCHAR(20),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (topic_id) REFERENCES interview_topics(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS company_interview_guides (
@@ -51,6 +46,90 @@ CREATE TABLE IF NOT EXISTS company_interview_guides (
     content TEXT,
     section VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(id)
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS countries (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    code VARCHAR(2) NOT NULL,
+    phone_code VARCHAR(10),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS cities (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    country_id BIGINT NOT NULL,
+    zip_code VARCHAR(20),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS locations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    city VARCHAR(100),
+    state VARCHAR(100),
+    country VARCHAR(100),
+    zip_code VARCHAR(20),
+    display_name VARCHAR(255) NOT NULL,
+    city_id BIGINT,
+    country_id BIGINT,
+    is_remote BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS designations (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    title VARCHAR(100) NOT NULL,
+    level INT,
+    enabled BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    email VARCHAR(255) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    first_name VARCHAR(100),
+    last_name VARCHAR(100),
+    designation_id BIGINT,
+    department_id BIGINT,
+    city_id BIGINT,
+    country_id BIGINT,
+    phone_number VARCHAR(20),
+    company VARCHAR(100),
+    linkedin_profile VARCHAR(255),
+    github_profile VARCHAR(255),
+    portfolio_website VARCHAR(255),
+    profile_picture VARCHAR(255),
+    resume VARCHAR(255),
+    profile_completion_percentage INT DEFAULT 0,
+    role VARCHAR(20) NOT NULL,
+    enabled BOOLEAN DEFAULT TRUE,
+    email_verified BOOLEAN DEFAULT FALSE,
+    email_verification_token VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS user_skills (
+    user_id BIGINT NOT NULL,
+    skill_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, skill_id)
+);
+
+CREATE TABLE IF NOT EXISTS user_education (
+    user_id BIGINT NOT NULL,
+    institution VARCHAR(255) NOT NULL,
+    degree VARCHAR(100) NOT NULL,
+    field_of_study VARCHAR(100),
+    start_date DATE,
+    end_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, institution, degree)
 ); 

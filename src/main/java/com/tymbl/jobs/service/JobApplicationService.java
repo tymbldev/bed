@@ -98,7 +98,6 @@ public class JobApplicationService {
         response.setSkills(new ArrayList<>());
         response.setExperience(null);
         response.setEducation(null);
-        response.setPortfolioUrl(application.getApplicant().getPortfolioUrl());
         response.setLinkedInUrl(application.getApplicant().getLinkedInProfile());
         response.setGithubUrl(null);
         response.setCreatedAt(application.getAppliedAt());

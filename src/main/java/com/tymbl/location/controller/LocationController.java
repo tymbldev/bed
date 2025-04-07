@@ -1,7 +1,7 @@
 package com.tymbl.location.controller;
 
-import com.tymbl.location.dto.CityDTO;
-import com.tymbl.location.dto.CountryDTO;
+import com.tymbl.common.dto.CityDTO;
+import com.tymbl.common.dto.CountryDTO;
 import com.tymbl.location.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -12,11 +12,14 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/locations")
@@ -37,17 +40,20 @@ public class LocationController {
                                       "  {\n" +
                                       "    \"id\": 1,\n" +
                                       "    \"name\": \"India\",\n" +
-                                      "    \"code\": \"IN\"\n" +
+                                      "    \"code\": \"IN\",\n" +
+                                      "    \"phoneCode\": \"91\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 2,\n" +
                                       "    \"name\": \"United States\",\n" +
-                                      "    \"code\": \"US\"\n" +
+                                      "    \"code\": \"US\",\n" +
+                                      "    \"phoneCode\": \"1\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 3,\n" +
                                       "    \"name\": \"United Kingdom\",\n" +
-                                      "    \"code\": \"GB\"\n" +
+                                      "    \"code\": \"GB\",\n" +
+                                      "    \"phoneCode\": \"44\"\n" +
                                       "  }\n" +
                                       "]"
                             )))
@@ -67,21 +73,21 @@ public class LocationController {
                                       "  {\n" +
                                       "    \"id\": 1,\n" +
                                       "    \"name\": \"Mumbai\",\n" +
-                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"zipCode\": \"400001\",\n" +
                                       "    \"countryId\": 1,\n" +
                                       "    \"countryName\": \"India\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 2,\n" +
                                       "    \"name\": \"Delhi\",\n" +
-                                      "    \"state\": \"Delhi\",\n" +
+                                      "    \"zipCode\": \"110001\",\n" +
                                       "    \"countryId\": 1,\n" +
                                       "    \"countryName\": \"India\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 3,\n" +
                                       "    \"name\": \"Bangalore\",\n" +
-                                      "    \"state\": \"Karnataka\",\n" +
+                                      "    \"zipCode\": \"560001\",\n" +
                                       "    \"countryId\": 1,\n" +
                                       "    \"countryName\": \"India\"\n" +
                                       "  }\n" +
@@ -106,21 +112,21 @@ public class LocationController {
                                       "  {\n" +
                                       "    \"id\": 1,\n" +
                                       "    \"name\": \"Mumbai\",\n" +
-                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"zipCode\": \"400001\",\n" +
                                       "    \"countryId\": 1,\n" +
                                       "    \"countryName\": \"India\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 4,\n" +
                                       "    \"name\": \"New York\",\n" +
-                                      "    \"state\": \"New York\",\n" +
+                                      "    \"zipCode\": \"10001\",\n" +
                                       "    \"countryId\": 2,\n" +
                                       "    \"countryName\": \"United States\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 7,\n" +
                                       "    \"name\": \"London\",\n" +
-                                      "    \"state\": \"England\",\n" +
+                                      "    \"zipCode\": \"EC1A 1BB\",\n" +
                                       "    \"countryId\": 3,\n" +
                                       "    \"countryName\": \"United Kingdom\"\n" +
                                       "  }\n" +
@@ -141,7 +147,7 @@ public class LocationController {
                                 value = "{\n" +
                                       "  \"id\": 3,\n" +
                                       "  \"name\": \"Bangalore\",\n" +
-                                      "  \"state\": \"Karnataka\",\n" +
+                                      "  \"zipCode\": \"560001\",\n" +
                                       "  \"countryId\": 1,\n" +
                                       "  \"countryName\": \"India\"\n" +
                                       "}"
@@ -165,14 +171,14 @@ public class LocationController {
                                       "  {\n" +
                                       "    \"id\": 1,\n" +
                                       "    \"name\": \"Mumbai\",\n" +
-                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"zipCode\": \"400001\",\n" +
                                       "    \"countryId\": 1,\n" +
                                       "    \"countryName\": \"India\"\n" +
                                       "  },\n" +
                                       "  {\n" +
                                       "    \"id\": 21,\n" +
                                       "    \"name\": \"Mumbai Suburban\",\n" +
-                                      "    \"state\": \"Maharashtra\",\n" +
+                                      "    \"zipCode\": \"400051\",\n" +
                                       "    \"countryId\": 1,\n" +
                                       "    \"countryName\": \"India\"\n" +
                                       "  }\n" +

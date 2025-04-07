@@ -18,13 +18,13 @@ public class Designation {
     private Long id;
     
     @NotBlank
-    @Column(nullable = false, unique = true)
+    @Column(nullable = true, unique = true)
     private String title;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private Integer level;
     
-    @Column(nullable = false)
+    @Column(nullable = true)
     private boolean enabled = true;
     
     public Designation(String title) {

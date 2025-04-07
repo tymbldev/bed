@@ -1,8 +1,15 @@
 -- Insert cities for India
 -- Note: country_id = 81 for India (based on countries.sql)
 
+-- Disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Clear existing data
-TRUNCATE TABLE cities RESTART IDENTITY CASCADE;
+TRUNCATE TABLE cities;
+ALTER TABLE cities AUTO_INCREMENT = 1;
+
+-- Enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert cities with country_id reference
 INSERT INTO cities (name, country_id, zip_code) VALUES

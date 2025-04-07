@@ -14,10 +14,15 @@ import lombok.NoArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.HashSet;
 
 @Data
 @NoArgsConstructor
@@ -35,113 +40,136 @@ public class User implements UserDetails {
     private String email;
     
     @NotBlank(message = "Password is required")
-    @Pattern(regexp = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{5,}$",
-            message = "Password must be at least 5 characters long and contain at least one digit, one uppercase letter, one lowercase letter, and one special character")
     @Column(nullable = false)
     private String password;
     
-    @NotBlank
-    @Column(nullable = false)
+    @Column(name = "first_name")
     private String firstName;
     
-    @NotBlank
-    @Column(nullable = false)
+    @Column(name = "last_name")
     private String lastName;
     
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Role role;
     
+    @Column(name = "designation_id")
+    private Long designationId;
+    
+    @Column(name = "department_id")
+    private Long departmentId;
+    
+    @Column(name = "city_id")
+    private Long cityId;
+    
+    @Column(name = "country_id")
+    private Long countryId;
+    
+    @Column(name = "phone_number")
     private String phoneNumber;
     
     // Professional Details
+    @Column(name = "company")
     private String company;
     
-    // Replace string position with Designation entity reference
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "designation_id")
-    private Designation designation;
-    
-    // Replace string department with Department entity reference
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "department_id")
-    private Department department;
-    
-    // Replace location with City and Country references
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "city_id")
-    private City city;
-    
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "country_id")
-    private Country country;
-    
-    private String zipCode;
-    
+    @Column(name = "linkedin_profile")
     private String linkedInProfile;
-    private String portfolioUrl;
-    private String resumeUrl;
+    
+    @Column(name = "github_profile")
+    private String githubProfile;
+    
+    @Column(name = "portfolio_website")
+    private String portfolioWebsite;
     
     // Experience
-    @Min(value = 0, message = "Years of experience cannot be negative")
+    @Column(name = "years_of_experience")
     private Integer yearsOfExperience;
     
-    @Min(value = 0, message = "Months of experience cannot be negative")
-    @Max(value = 11, message = "Months of experience cannot be more than 11")
-    private Integer monthsOfExperience;
-    
+    @Column(name = "current_salary")
     private Integer currentSalary;
+    
+    @Column(name = "expected_salary")
     private Integer expectedSalary;
+    
+    @Column(name = "notice_period")
     private Integer noticePeriod;
+    
+    @Column(name = "zip_code")
+    private String zipCode;
+    
+    // OAuth2 related fields
+    @Column(name = "provider")
+    private String provider; // "local" or "linkedin"
+    
+    @Column(name = "provider_id")
+    private String providerId;
+    
+    @Column(name = "email_verified")
+    private boolean emailVerified;
+    
+    @Column(name = "email_verification_token")
+    private String emailVerificationToken;
+    
+    @Column(name = "enabled")
+    private boolean enabled = true;
+    
+    @Column(name = "password_reset_token")
+    private String passwordResetToken;
+    
+    @Column(name = "password_reset_token_expiry")
+    private Long passwordResetTokenExpiry;
+    
+    @Column(name = "profile_picture")
+    private String profilePicture;
+    
+    @Column(name = "profile_completion_percentage")
+    private int profileCompletionPercentage;
+    
+    @Column(name = "resume")
+    private String resume;
     
     @ElementCollection
     @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
-    @Column(name = "skill")
-    private List<String> skills;
+    @Column(name = "skill_id")
+    private Set<Long> skillIds = new HashSet<>();
     
     @ElementCollection
     @CollectionTable(name = "user_education", joinColumns = @JoinColumn(name = "user_id"))
-    private Collection<Education> education;
+    private Set<Education> education = new HashSet<>();
     
-    // OAuth2 related fields
-    private String provider; // "local" or "linkedin"
-    private String providerId;
+    @CreationTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    private LocalDateTime createdAt;
     
-    @Column(nullable = false)
-    private boolean enabled = true;
-    
-    private boolean emailVerified = false;
-    private String emailVerificationToken;
-    private String passwordResetToken;
-    private Long passwordResetTokenExpiry;
-    
-    private String profilePicture;
+    @UpdateTimestamp
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
     
     @Data
     @NoArgsConstructor
     @Embeddable
     public static class Education {
-        private Long institutionId;
-        private Long degreeId;
-        private String specialization;
-        private Integer startYear;
-        private Integer endYear;
+        @Column(name = "institution", nullable = false)
+        private String institution;
         
-        @Enumerated(EnumType.STRING)
-        private GradeType gradeType;
+        @Column(name = "degree", nullable = false)
+        private String degree;
         
-        @DecimalMin(value = "0.0", message = "Grade value must be greater than or equal to 0")
-        @DecimalMax(value = "100.0", message = "Grade value must be less than or equal to 100")
-        private Float gradeValue;
-    }
-    
-    public enum GradeType {
-        PERCENTAGE,
-        CGPA
+        @Column(name = "field_of_study")
+        private String fieldOfStudy;
+        
+        @Column(name = "start_date")
+        private LocalDateTime startDate;
+        
+        @Column(name = "end_date")
+        private LocalDateTime endDate;
     }
     
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
+        if (role == null) {
+            return Collections.emptyList();
+        }
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
     }
     
@@ -168,27 +196,27 @@ public class User implements UserDetails {
     // Convenience methods for UI display
     @Transient
     public String getPositionDisplay() {
-        return designation != null ? designation.getTitle() : null;
+        return designationId != null ? designationId.toString() : null;
     }
     
     @Transient
     public String getDepartmentDisplay() {
-        return department != null ? department.getName() : null;
+        return departmentId != null ? departmentId.toString() : null;
     }
     
     @Transient
     public String getLocationDisplay() {
         StringBuilder location = new StringBuilder();
         
-        if (city != null) {
-            location.append(city.getName());
+        if (cityId != null) {
+            location.append(cityId.toString());
         }
         
-        if (country != null) {
+        if (countryId != null) {
             if (location.length() > 0) {
                 location.append(", ");
             }
-            location.append(country.getName());
+            location.append(countryId.toString());
         }
         
         if (zipCode != null && !zipCode.isEmpty()) {

@@ -2,16 +2,8 @@ package com.tymbl.registration.service;
 
 import com.tymbl.auth.dto.AuthResponse;
 import com.tymbl.auth.service.JwtService;
-import com.tymbl.common.entity.City;
-import com.tymbl.common.entity.Country;
-import com.tymbl.common.entity.Department;
-import com.tymbl.common.entity.Designation;
 import com.tymbl.common.entity.Role;
 import com.tymbl.common.entity.User;
-import com.tymbl.common.repository.CityRepository;
-import com.tymbl.common.repository.CountryRepository;
-import com.tymbl.common.repository.DepartmentRepository;
-import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.UserRepository;
 import com.tymbl.common.service.LinkedInService;
 import com.tymbl.registration.dto.LinkedInProfile;
@@ -31,10 +23,6 @@ public class RegistrationService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
-  private final DepartmentRepository departmentRepository;
-  private final DesignationRepository designationRepository;
-  private final CityRepository cityRepository;
-  private final CountryRepository countryRepository;
   private final LinkedInService linkedInService;
   private final JwtService jwtService;
 
@@ -46,7 +34,7 @@ public class RegistrationService {
 
     User user = new User();
     user.setEmail(request.getEmail());
-    user.setPassword(passwordEncoder.encode(request.getPassword()));
+    user.setPassword(request.getPassword());
     user.setRole(Role.USER);
 
     // Set optional fields if provided
@@ -124,14 +112,15 @@ public class RegistrationService {
     Long countryId = null;
     String zipCode = null;
     String linkedInProfile = null;
-    String portfolioUrl = null;
-    String resumeUrl = null;
+    String githubProfile = null;
+    String portfolioWebsite = null;
+    String resume = null;
     Integer yearsOfExperience = null;
     Integer currentSalary = null;
     Integer expectedSalary = null;
     Integer noticePeriod = null;
-    java.util.List<String> skills = null;
-    java.util.Collection<User.Education> education = null;
+    java.util.Set<Long> skillIds = null;
+    java.util.Set<User.Education> education = null;
 
     // Extract fields based on request type
     if (requestObj instanceof RegisterRequest) {
@@ -144,13 +133,14 @@ public class RegistrationService {
       countryId = request.getCountryId();
       zipCode = request.getZipCode();
       linkedInProfile = request.getLinkedInProfile();
-      portfolioUrl = request.getPortfolioUrl();
-      resumeUrl = request.getResumeUrl();
+      githubProfile = request.getGithubProfile();
+      portfolioWebsite = request.getPortfolioWebsite();
+      resume = request.getResume();
       yearsOfExperience = request.getYearsOfExperience();
       currentSalary = request.getCurrentSalary();
       expectedSalary = request.getExpectedSalary();
       noticePeriod = request.getNoticePeriod();
-      skills = request.getSkills();
+      skillIds = request.getSkillIds();
       education = request.getEducation();
     } else if (requestObj instanceof ProfileUpdateRequest) {
       ProfileUpdateRequest request = (ProfileUpdateRequest) requestObj;
@@ -162,13 +152,14 @@ public class RegistrationService {
       countryId = request.getCountryId();
       zipCode = request.getZipCode();
       linkedInProfile = request.getLinkedInProfile();
-      portfolioUrl = request.getPortfolioUrl();
-      resumeUrl = request.getResumeUrl();
+      githubProfile = request.getGithubProfile();
+      portfolioWebsite = request.getPortfolioWebsite();
+      resume = request.getResume();
       yearsOfExperience = request.getYearsOfExperience();
       currentSalary = request.getCurrentSalary();
       expectedSalary = request.getExpectedSalary();
       noticePeriod = request.getNoticePeriod();
-      skills = request.getSkills();
+      skillIds = request.getSkillIds();
       education = request.getEducation();
     }
 
@@ -185,37 +176,26 @@ public class RegistrationService {
       user.setZipCode(zipCode);
     }
 
-    // Set department if ID provided
+    // Set IDs directly
     if (departmentId != null) {
-      Department department = departmentRepository.findById(departmentId)
-          .orElseThrow(() -> new RuntimeException("Department not found"));
-      user.setDepartment(department);
+      user.setDepartmentId(departmentId);
     }
 
-    // Set designation (position) if ID provided
     if (designationId != null) {
-      Designation designation = designationRepository.findById(designationId)
-          .orElseThrow(() -> new RuntimeException("Designation not found"));
-      user.setDesignation(designation);
+      user.setDesignationId(designationId);
     }
 
-    // Set city if ID provided
     if (cityId != null) {
-      City city = cityRepository.findById(cityId)
-          .orElseThrow(() -> new RuntimeException("City not found"));
-      user.setCity(city);
+      user.setCityId(cityId);
     }
 
-    // Set country if ID provided
     if (countryId != null) {
-      Country country = countryRepository.findById(countryId)
-          .orElseThrow(() -> new RuntimeException("Country not found"));
-      user.setCountry(country);
+      user.setCountryId(countryId);
     }
 
     // Set additional fields if available
-    if (skills != null) {
-      user.setSkills(skills);
+    if (skillIds != null) {
+      user.setSkillIds(skillIds);
     }
 
     if (education != null) {
@@ -242,12 +222,16 @@ public class RegistrationService {
       user.setLinkedInProfile(linkedInProfile);
     }
 
-    if (portfolioUrl != null) {
-      user.setPortfolioUrl(portfolioUrl);
+    if (githubProfile != null) {
+      user.setGithubProfile(githubProfile);
     }
 
-    if (resumeUrl != null) {
-      user.setResumeUrl(resumeUrl);
+    if (portfolioWebsite != null) {
+      user.setPortfolioWebsite(portfolioWebsite);
+    }
+
+    if (resume != null) {
+      user.setResume(resume);
     }
   }
 
@@ -264,16 +248,15 @@ public class RegistrationService {
     // Create new user
     User user = new User();
     user.setEmail(profile.getEmail());
-    // Generate a random password since it's required but won't be used
-    user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-
-    // Set LinkedIn data
+    user.setPassword(UUID.randomUUID().toString()); // Generate random password
+    user.setRole(Role.USER);
     user.setFirstName(profile.getFirstName());
     user.setLastName(profile.getLastName());
     user.setLinkedInProfile(request.getLinkedInProfileUrl());
-
-    // Set default role
-    user.setRole(Role.USER);
+    user.setProvider("linkedin");
+    user.setProviderId(profile.getId());
+    user.setEmailVerified(false);
+    user.setEmailVerificationToken(null);
 
     // Save user
     user = userRepository.save(user);

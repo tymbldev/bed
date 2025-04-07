@@ -57,26 +57,17 @@ public class JobController {
                 content = @Content(
                     examples = @ExampleObject(
                         name = "JobRequest",
-                        summary = "Standard job posting request",
+                        summary = "Complete job posting request",
                         value = "{\n" +
                               "  \"title\": \"Senior Java Developer\",\n" +
                               "  \"description\": \"We are looking for an experienced Java Developer...\",\n" +
-                              "  \"company\": \"Example Corp\",\n" +
-                              "  \"department\": \"Engineering\",\n" +
                               "  \"location\": \"San Francisco, CA\",\n" +
-                              "  \"jobType\": \"FULL_TIME\",\n" +
+                              "  \"employmentType\": \"FULL_TIME\",\n" +
                               "  \"experienceLevel\": \"SENIOR\",\n" +
-                              "  \"minExperience\": 5,\n" +
-                              "  \"maxExperience\": 10,\n" +
-                              "  \"minSalary\": \"120000\",\n" +
-                              "  \"maxSalary\": \"160000\",\n" +
-                              "  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n" +
-                              "  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n" +
-                              "  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\"],\n" +
-                              "  \"workplaceType\": \"HYBRID\",\n" +
-                              "  \"remoteAllowed\": true,\n" +
-                              "  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n" +
-                              "  \"numberOfOpenings\": 2\n" +
+                              "  \"salary\": 120000.0,\n" +
+                              "  \"currency\": \"USD\",\n" +
+                              "  \"companyId\": 1,\n" +
+                              "  \"companyName\": \"Example Corp\"\n" +
                               "}"
                     )
                 )

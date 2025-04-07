@@ -1,7 +1,7 @@
 package com.tymbl.location.service;
 
-import com.tymbl.location.dto.CityDTO;
-import com.tymbl.location.dto.CountryDTO;
+import com.tymbl.common.dto.CityDTO;
+import com.tymbl.common.dto.CountryDTO;
 
 import java.util.List;
 

@@ -9,8 +9,7 @@ import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
-import java.util.Collection;
-import java.util.List;
+import java.util.Set;
 
 @Data
 public class ProfileUpdateRequest {
@@ -25,8 +24,9 @@ public class ProfileUpdateRequest {
     private Long countryId;
     private String zipCode;
     private String linkedInProfile;
-    private String portfolioUrl;
-    private String resumeUrl;
+    private String githubProfile;
+    private String portfolioWebsite;
+    private String resume;
     
     @Min(value = 0, message = "Years of experience cannot be negative")
     private Integer yearsOfExperience;
@@ -38,6 +38,6 @@ public class ProfileUpdateRequest {
     private Integer currentSalary;
     private Integer expectedSalary;
     private Integer noticePeriod;
-    private List<String> skills;
-    private Collection<User.Education> education;
+    private Set<Long> skillIds;
+    private Set<User.Education> education;
 } 

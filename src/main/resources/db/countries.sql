@@ -1,7 +1,14 @@
 -- SQL script to populate the countries table with a comprehensive list
 
+-- Disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Clear existing data
-TRUNCATE TABLE countries RESTART IDENTITY CASCADE;
+TRUNCATE TABLE countries;
+ALTER TABLE countries AUTO_INCREMENT = 1;
+
+-- Enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert statements for countries (name, code, phone_code)
 INSERT INTO countries (name, code, phone_code) VALUES ('Afghanistan', 'AF', '+93');

@@ -1,4 +1,4 @@
-package com.tymbl.location.dto;
+package com.tymbl.common.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

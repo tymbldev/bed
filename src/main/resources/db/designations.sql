@@ -1,7 +1,14 @@
 -- SQL script to populate the designations table with a comprehensive list of job titles
 
+-- Disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Clear existing data
-TRUNCATE TABLE designations RESTART IDENTITY CASCADE;
+TRUNCATE TABLE designations;
+ALTER TABLE designations AUTO_INCREMENT = 1;
+
+-- Enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert initial designations with explicit hierarchy
 INSERT INTO designations (title, level, enabled) VALUES

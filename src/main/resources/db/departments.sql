@@ -1,7 +1,8 @@
 -- SQL script to populate the departments table with comprehensive list
 
--- Clear existing data
-TRUNCATE TABLE departments RESTART IDENTITY CASCADE;
+TRUNCATE TABLE departments;
+ALTER TABLE departments AUTO_INCREMENT = 1;
+
 
 -- Insert statements for departments
 INSERT INTO departments (name, description) VALUES ('Engineering', 'Software development and engineering teams');

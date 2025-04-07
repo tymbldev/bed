@@ -2,7 +2,11 @@
 -- These INSERT statements will add cities with references to the countries table
 
 -- Clear existing data
-TRUNCATE TABLE cities RESTART IDENTITY CASCADE;
+
+
+TRUNCATE TABLE cities;
+ALTER TABLE cities AUTO_INCREMENT = 1;
+
 
 -- We'll create city entries for major countries
 -- Note: country_id values should be based on the sequence from countries.sql

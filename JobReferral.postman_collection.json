@@ -37,7 +37,60 @@
             },
             "description": "Authenticate a user and get JWT token"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
+            },
+            {
+              "name": "Invalid Credentials",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"WrongPassword\"\n}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Invalid credentials\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            }
+          ]
         },
         {
           "name": "LinkedIn Login",
@@ -68,7 +121,60 @@
             },
             "description": "Authenticate using LinkedIn access token"
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"accessToken\": \"your_linkedin_access_token\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true,\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}"
+            },
+            {
+              "name": "Invalid Token",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"accessToken\": \"invalid_token\"\n}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Invalid LinkedIn access token\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            }
+          ]
         },
         {
           "name": "Verify Email",
@@ -239,7 +345,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"yearsOfExperience\": 5,\n  \"skills\": [\"Java\", \"Spring Boot\", \"Microservices\"]\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Tech Corp\",\n  \"departmentId\": 1,\n  \"designationId\": 2,\n  \"cityId\": 10,\n  \"countryId\": 101,\n  \"zipCode\": \"123456\",\n  \"linkedInProfile\": \"fdfgds\",\n  \"githubProfile\": \"fds\",\n  \"portfolioWebsite\": \"fwdefw\",\n  \"resume\": \"fsds\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor's\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/registration/profile",

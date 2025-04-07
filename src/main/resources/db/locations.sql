@@ -1,7 +1,14 @@
 -- SQL script to populate the locations table with a comprehensive list of locations
 
+-- Disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Clear existing data
-TRUNCATE TABLE locations RESTART IDENTITY CASCADE;
+TRUNCATE TABLE locations;
+ALTER TABLE locations AUTO_INCREMENT = 1;
+
+-- Enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- United States
 INSERT INTO locations (city, state, country, zip_code, display_name) VALUES ('New York', 'NY', 'USA', '10001', 'New York, NY 10001, USA');
