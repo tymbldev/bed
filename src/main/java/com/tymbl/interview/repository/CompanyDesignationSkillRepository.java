@@ -12,4 +12,5 @@ public interface CompanyDesignationSkillRepository extends JpaRepository<Company
     List<CompanyDesignationSkill> findByCompanyId(Long companyId);
     List<CompanyDesignationSkill> findByDesignationId(Long designationId);
     List<CompanyDesignationSkill> findBySkillId(Long skillId);
+    List<CompanyDesignationSkill> findByCompanyIdAndDesignationIdAndSkillId(Long companyId, Long designationId, Long skillId);
 } 

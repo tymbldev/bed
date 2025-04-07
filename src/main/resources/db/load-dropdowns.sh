@@ -90,4 +90,54 @@ else
     exit 1
 fi
 
+# Load companies data for interviews
+echo "Loading companies data..."
+$MYSQL_CMD < ./companies.sql
+if [ $? -eq 0 ]; then
+    echo "Companies loaded successfully."
+else
+    echo "Error loading companies."
+    exit 1
+fi
+
+# Load company-designation-skills data
+echo "Loading company-designation-skills data..."
+$MYSQL_CMD < ./company_designation_skills.sql
+if [ $? -eq 0 ]; then
+    echo "Company designation skills loaded successfully."
+else
+    echo "Error loading company designation skills."
+    exit 1
+fi
+
+# Load interview topics
+echo "Loading interview topics..."
+$MYSQL_CMD < ./interview_topics.sql
+if [ $? -eq 0 ]; then
+    echo "Interview topics loaded successfully."
+else
+    echo "Error loading interview topics."
+    exit 1
+fi
+
+# Load interview questions
+echo "Loading interview questions..."
+$MYSQL_CMD < ./interview_questions.sql
+if [ $? -eq 0 ]; then
+    echo "Interview questions loaded successfully."
+else
+    echo "Error loading interview questions."
+    exit 1
+fi
+
+# Load company interview guides
+echo "Loading company interview guides..."
+$MYSQL_CMD < ./company_interview_guides.sql
+if [ $? -eq 0 ]; then
+    echo "Company interview guides loaded successfully."
+else
+    echo "Error loading company interview guides."
+    exit 1
+fi
+
 echo "All dropdown data loaded successfully!"

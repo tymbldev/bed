@@ -502,17 +502,114 @@
 					}
 				}
 			]
+		},
+		{
+			"name": "Interview Preparation",
+			"item": [
+				{
+					"name": "Get All Companies",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/companies",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "companies"]
+						},
+						"description": "Get all companies with interview preparation content"
+					}
+				},
+				{
+					"name": "Get Company with Designations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/companies/{{companyId}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "companies", "{{companyId}}"]
+						},
+						"description": "Get a specific company with all available designations"
+					}
+				},
+				{
+					"name": "Get Company Designations",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/companies/{{companyId}}/designations",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "companies", "{{companyId}}", "designations"]
+						},
+						"description": "Get all designations for a specific company"
+					}
+				},
+				{
+					"name": "Get Company-Designation Skills",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/companies/{{companyId}}/designations/{{designationId}}/skills",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "companies", "{{companyId}}", "designations", "{{designationId}}", "skills"]
+						},
+						"description": "Get all skills for a specific company-designation combination"
+					}
+				},
+				{
+					"name": "Get Topics by Company-Designation-Skill",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/companies/{{companyId}}/designations/{{designationId}}/skills/{{skillId}}/topics",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "companies", "{{companyId}}", "designations", "{{designationId}}", "skills", "{{skillId}}", "topics"]
+						},
+						"description": "Get all topics for a specific company-designation-skill combination"
+					}
+				},
+				{
+					"name": "Get Topic with Questions",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/topics/{{topicId}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "topics", "{{topicId}}"]
+						},
+						"description": "Get a specific topic with all its questions"
+					}
+				},
+				{
+					"name": "Get Interview Question",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/interview/questions/{{questionId}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "interview", "questions", "{{questionId}}"]
+						},
+						"description": "Get a specific interview question with its answer"
+					}
+				}
+			],
+			"description": "Endpoints for accessing interview preparation content for various companies, designations, and skills."
 		}
 	],
 	"variable": [
 		{
 			"key": "base_url",
-			"value": "http://localhost:8080/tymbl-service",
+			"value": "http://localhost:8080",
 			"type": "string"
 		},
 		{
 			"key": "jwt_token",
-			"value": "your_jwt_token_here",
+			"value": "",
 			"type": "string"
 		},
 		{
@@ -526,13 +623,38 @@
 			"type": "string"
 		},
 		{
-			"key": "searchQuery",
-			"value": "Mumbai",
+			"key": "companyId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "designationId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "skillId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "topicId",
+			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "questionId",
+			"value": "1",
 			"type": "string"
 		},
 		{
 			"key": "jobId",
 			"value": "1",
+			"type": "string"
+		},
+		{
+			"key": "searchQuery",
+			"value": "software engineer",
 			"type": "string"
 		}
 	]
