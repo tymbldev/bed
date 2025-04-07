@@ -10,7 +10,7 @@ ALTER TABLE skills AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert initial skills
-INSERT INTO skills (name, enabled, usage_count) VALUES
+INSERT IGNORE INTO skills (name, enabled, usage_count) VALUES
 ('Java', true, 100),
 ('Spring Boot', true, 95),
 ('Python', true, 90),

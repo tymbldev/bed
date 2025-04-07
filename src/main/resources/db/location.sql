@@ -1,5 +1,5 @@
 -- Insert locations for cities
-INSERT INTO locations (id, city_id, latitude, longitude, area_code, created_at, updated_at) VALUES
+INSERT IGNORE INTO locations (id, city_id, latitude, longitude, area_code, created_at, updated_at) VALUES
 -- Andhra Pradesh
 (1, 1, 17.6868, 83.2185, '0891', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),
 (2, 2, 16.5062, 80.6480, '0866', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP),

@@ -4,7 +4,7 @@
 
 DB_HOST="localhost"
 DB_PORT="3306"
-DB_NAME="job_referral_db"
+DB_NAME="jr"
 DB_USER="root"
 DB_PASS="Tymbl@123"
 

@@ -12,7 +12,7 @@ ALTER TABLE cities AUTO_INCREMENT = 1;
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Insert cities with country_id reference
-INSERT INTO cities (name, country_id, zip_code) VALUES
+INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES
 -- Andhra Pradesh cities
 ('Visakhapatnam', 81, '530001'),
 ('Vijayawada', 81, '520001'),
