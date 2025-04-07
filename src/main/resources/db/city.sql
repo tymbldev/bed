@@ -1,5 +1,6 @@
 -- Insert cities for India
 -- Note: country_id = 81 for India (based on countries.sql)
+-- This file contains ONLY Indian cities, all mapped to country_id = 81 (India)
 
 -- Disable foreign key checks
 SET FOREIGN_KEY_CHECKS = 0;

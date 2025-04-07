@@ -145,5 +145,6 @@ INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Bloemfontein', 1
 -- Singapore (country_id = 165)
 INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Singapore', 165, '018956');
 
--- Remote (country_id = 196)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Remote', 196, ''); 
+-- Remote (country_id = 206)
+-- Note: In countries.sql, the last entry is 'Remote' with country_id=206
+INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Remote', 206, ''); 
