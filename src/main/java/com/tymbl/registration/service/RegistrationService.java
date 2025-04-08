@@ -6,6 +6,7 @@ import com.tymbl.common.entity.Role;
 import com.tymbl.common.entity.User;
 import com.tymbl.common.repository.UserRepository;
 import com.tymbl.common.service.LinkedInService;
+import com.tymbl.exception.EmailAlreadyExistsException;
 import com.tymbl.registration.dto.LinkedInProfile;
 import com.tymbl.registration.dto.LinkedInRegisterRequest;
 import com.tymbl.registration.dto.ProfileUpdateRequest;
@@ -29,7 +30,7 @@ public class RegistrationService {
   @Transactional
   public User registerUser(RegisterRequest request) {
     if (userRepository.existsByEmail(request.getEmail())) {
-      throw new RuntimeException("Email already registered");
+      throw new EmailAlreadyExistsException(request.getEmail());
     }
 
     User user = new User();
@@ -54,7 +55,7 @@ public class RegistrationService {
   public AuthResponse registerUserWithToken(RegisterRequest request) {
     // Check if user already exists
     if (userRepository.existsByEmail(request.getEmail())) {
-      throw new RuntimeException("Email already registered");
+      throw new EmailAlreadyExistsException(request.getEmail());
     }
 
     // Register the user
@@ -242,7 +243,7 @@ public class RegistrationService {
 
     // Check if user already exists
     if (userRepository.existsByEmail(profile.getEmail())) {
-      throw new RuntimeException("Email already registered");
+      throw new EmailAlreadyExistsException(profile.getEmail());
     }
 
     // Create new user

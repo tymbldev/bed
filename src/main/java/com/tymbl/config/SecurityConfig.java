@@ -5,6 +5,7 @@ import com.tymbl.auth.service.CustomOAuth2UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -33,8 +34,9 @@ public class SecurityConfig {
         .csrf().disable()
         .cors().and()
         .authorizeRequests()
+        // Allow pre-flight OPTIONS requests
+        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
         // Public endpoints
-
         .antMatchers("/api/v1/auth/**", "/tymbl-service/api/v1/auth/**").permitAll()
         .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
         .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
