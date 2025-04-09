@@ -29,15 +29,11 @@ public class Skill {
     @Column(name = "usage_count")
     private Long usageCount = 0L;
     
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 

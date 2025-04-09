@@ -13,6 +13,7 @@ import javax.persistence.PrePersist;
 import javax.persistence.PreUpdate;
 import javax.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.UpdateTimestamp;
 
 @Data
 @Entity
@@ -34,15 +35,12 @@ public class CompanyInterviewGuide {
 
     private String section;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
-    @Column(name = "updated_at")
+    @UpdateTimestamp
+    @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
 
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
+    public void onCreate() {
         updatedAt = LocalDateTime.now();
     }
 

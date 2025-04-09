@@ -137,10 +137,6 @@ public class User implements UserDetails {
     @CollectionTable(name = "user_education", joinColumns = @JoinColumn(name = "user_id"))
     private Set<Education> education = new HashSet<>();
     
-    @CreationTimestamp
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-    
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;

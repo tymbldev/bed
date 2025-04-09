@@ -4,7 +4,6 @@ CREATE TABLE IF NOT EXISTS skills (
     name VARCHAR(100) NOT NULL,
     description TEXT,
     category VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -14,7 +13,6 @@ CREATE TABLE IF NOT EXISTS company_designation_skills (
     designation_id BIGINT NOT NULL,
     skill_id BIGINT NOT NULL,
     importance_level VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -25,7 +23,6 @@ CREATE TABLE IF NOT EXISTS interview_topics (
     description TEXT,
     content TEXT,
     difficulty_level VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -35,7 +32,6 @@ CREATE TABLE IF NOT EXISTS interview_questions (
     question TEXT NOT NULL,
     answer TEXT,
     difficulty_level VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -45,7 +41,6 @@ CREATE TABLE IF NOT EXISTS company_interview_guides (
     title VARCHAR(200) NOT NULL,
     content TEXT,
     section VARCHAR(50),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -54,7 +49,6 @@ CREATE TABLE IF NOT EXISTS countries (
     name VARCHAR(100) NOT NULL,
     code VARCHAR(2) NOT NULL,
     phone_code VARCHAR(10),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -63,7 +57,6 @@ CREATE TABLE IF NOT EXISTS cities (
     name VARCHAR(100) NOT NULL,
     country_id BIGINT NOT NULL,
     zip_code VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -77,7 +70,6 @@ CREATE TABLE IF NOT EXISTS locations (
     city_id BIGINT,
     country_id BIGINT,
     is_remote BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -86,7 +78,6 @@ CREATE TABLE IF NOT EXISTS designations (
     title VARCHAR(100) NOT NULL,
     level INT,
     enabled BOOLEAN DEFAULT TRUE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
@@ -112,14 +103,12 @@ CREATE TABLE IF NOT EXISTS users (
     enabled BOOLEAN DEFAULT TRUE,
     email_verified BOOLEAN DEFAULT FALSE,
     email_verification_token VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS user_skills (
     user_id BIGINT NOT NULL,
     skill_id BIGINT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, skill_id)
 );
 
@@ -130,6 +119,5 @@ CREATE TABLE IF NOT EXISTS user_education (
     field_of_study VARCHAR(100),
     start_date DATE,
     end_date DATE,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (user_id, institution, degree)
 ); 

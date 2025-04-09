@@ -25,15 +25,11 @@ public class InterviewQuestion {
     @Column(name = "difficulty_level")
     private String difficultyLevel;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
-
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
     }
 
