@@ -34,11 +34,15 @@ public class SecurityConfig {
 
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
+
     CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList("*"));
+    configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Allow all origins
     configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
-    configuration.setAllowCredentials(true);
+    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
+    configuration.setExposedHeaders(Arrays.asList("Authorization")); // Optional: expose auth header to frontend
+    configuration.setAllowCredentials(false); // Important: false when using wildcard origin
+    configuration.setMaxAge(3600L);
+
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/**", configuration);
     return source;
@@ -48,10 +52,9 @@ public class SecurityConfig {
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
         .cors().configurationSource(corsConfigurationSource()).and()
+        .csrf().disable()
         .authorizeRequests()
-        // Allow pre-flight OPTIONS requests
-        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-        // Public endpoints
+        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight
         .antMatchers("/api/v1/auth/**", "/tymbl-service/api/v1/auth/**").permitAll()
         .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
         .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
@@ -64,8 +67,6 @@ public class SecurityConfig {
         .antMatchers("/swagger-ui/**", "/tymbl-service/swagger-ui/**").permitAll()
         .antMatchers("/swagger-ui.html", "/tymbl-service/swagger-ui.html").permitAll()
         .antMatchers("/api-docs/**", "/tymbl-service/api-docs/**").permitAll()
-
-        // Protected endpoints
         .antMatchers("/tymbl-service/api/v1/users/**").authenticated()
         .antMatchers("/tymbl-service/api/v1/jobs/**").authenticated()
         .antMatchers("/tymbl-service/api/v1/locations/**").authenticated()
@@ -94,9 +95,13 @@ public class SecurityConfig {
     return config.getAuthenticationManager();
   }
 
+
+
   @Bean
   @SuppressWarnings("deprecation")
   public PasswordEncoder passwordEncoder() {
     return NoOpPasswordEncoder.getInstance();
   }
+
+
 }
