@@ -14,7 +14,19 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/interview")
+@CrossOrigin(
+    origins = "*", 
+    allowedHeaders = "*", 
+    methods = {
+        RequestMethod.GET, 
+        RequestMethod.POST, 
+        RequestMethod.PUT, 
+        RequestMethod.DELETE, 
+        RequestMethod.OPTIONS, 
+        RequestMethod.PATCH
+    }
+)
+@RequestMapping("/api/v1/interview-preparation")
 @RequiredArgsConstructor
 @Tag(name = "Interview Preparation", description = "Endpoints for interview preparation content")
 public class InterviewPreparationController {

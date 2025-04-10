@@ -18,10 +18,8 @@ import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import java.util.Arrays;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 @Configuration
 @EnableWebSecurity
@@ -33,28 +31,12 @@ public class SecurityConfig {
   private final CustomOAuth2UserService customOAuth2UserService;
 
   @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOriginPatterns(Arrays.asList("*")); // Allow all origins
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept"));
-    configuration.setExposedHeaders(Arrays.asList("Authorization")); // Optional: expose auth header to frontend
-    configuration.setAllowCredentials(false); // Important: false when using wildcard origin
-    configuration.setMaxAge(3600L);
-
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
-
-  @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     http
-        .cors().configurationSource(corsConfigurationSource()).and()
-        .csrf().disable()
         .authorizeRequests()
-        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll() // Preflight
+        // Allow pre-flight OPTIONS requests
+        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+        // Public endpoints (no JWT required)
         .antMatchers("/api/v1/auth/**", "/tymbl-service/api/v1/auth/**").permitAll()
         .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
         .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
@@ -67,6 +49,8 @@ public class SecurityConfig {
         .antMatchers("/swagger-ui/**", "/tymbl-service/swagger-ui/**").permitAll()
         .antMatchers("/swagger-ui.html", "/tymbl-service/swagger-ui.html").permitAll()
         .antMatchers("/api-docs/**", "/tymbl-service/api-docs/**").permitAll()
+
+        // Protected endpoints (JWT required)
         .antMatchers("/tymbl-service/api/v1/users/**").authenticated()
         .antMatchers("/tymbl-service/api/v1/jobs/**").authenticated()
         .antMatchers("/tymbl-service/api/v1/locations/**").authenticated()
@@ -95,13 +79,9 @@ public class SecurityConfig {
     return config.getAuthenticationManager();
   }
 
-
-
   @Bean
   @SuppressWarnings("deprecation")
   public PasswordEncoder passwordEncoder() {
     return NoOpPasswordEncoder.getInstance();
   }
-
-
 }

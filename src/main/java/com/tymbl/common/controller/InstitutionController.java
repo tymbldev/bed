@@ -16,6 +16,18 @@ import javax.validation.Valid;
 import java.util.List;
 
 @RestController
+@CrossOrigin(
+    origins = "*", 
+    allowedHeaders = "*", 
+    methods = {
+        RequestMethod.GET, 
+        RequestMethod.POST, 
+        RequestMethod.PUT, 
+        RequestMethod.DELETE, 
+        RequestMethod.OPTIONS, 
+        RequestMethod.PATCH
+    }
+)
 @RequestMapping("/api/v1/institutions")
 @RequiredArgsConstructor
 @Tag(name = "Institutions", description = "APIs for managing educational institutions")

@@ -21,7 +21,20 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 
-@RestController
+@CrossOrigin(
+    origins = "*",                  // You can restrict to specific domains if needed
+    allowedHeaders = "*",
+    exposedHeaders = "Authorization", // Important to expose Authorization header
+    allowCredentials = "true",      // Critical for authentication scenarios
+    methods = {
+        RequestMethod.GET,
+        RequestMethod.POST,
+        RequestMethod.PUT,
+        RequestMethod.DELETE,
+        RequestMethod.OPTIONS,
+        RequestMethod.PATCH
+    }
+)
 @RequestMapping("/api/v1/job-applications")
 @RequiredArgsConstructor
 @Tag(name = "Job Applications", description = "APIs for job applications")

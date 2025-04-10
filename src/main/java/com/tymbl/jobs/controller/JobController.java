@@ -25,6 +25,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@CrossOrigin(
+    origins = "*", 
+    allowedHeaders = "*", 
+    methods = {
+        RequestMethod.GET, 
+        RequestMethod.POST, 
+        RequestMethod.PUT, 
+        RequestMethod.DELETE, 
+        RequestMethod.OPTIONS, 
+        RequestMethod.PATCH
+    }
+)
 @RequestMapping("/api/v1/jobs")
 @RequiredArgsConstructor
 @Tag(name = "Jobs", description = "Job posting and management APIs")
