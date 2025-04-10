@@ -28,11 +28,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.ArrayList;
 import java.util.List;
 
+@RestController
 @CrossOrigin(
-    origins = "*",                  // You can restrict to specific domains if needed
+    origins = "http://localhost:3000",
     allowedHeaders = "*",
-    exposedHeaders = "Authorization", // Important to expose Authorization header
-    allowCredentials = "true",      // Critical for authentication scenarios
+    exposedHeaders = {"Authorization"},
+    allowCredentials = "true",
+    maxAge = 3600,
     methods = {
         RequestMethod.GET,
         RequestMethod.POST,
