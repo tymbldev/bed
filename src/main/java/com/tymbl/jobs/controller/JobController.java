@@ -15,6 +15,8 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -25,24 +27,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@CrossOrigin(
-    origins = "*", 
-    allowedHeaders = "*", 
-    methods = {
-        RequestMethod.GET, 
-        RequestMethod.POST, 
-        RequestMethod.PUT, 
-        RequestMethod.DELETE, 
-        RequestMethod.OPTIONS, 
-        RequestMethod.PATCH
-    }
-)
 @RequestMapping("/api/v1/jobs")
 @RequiredArgsConstructor
-@Tag(name = "Jobs", description = "Job posting and management APIs")
-@SecurityRequirement(name = "bearerAuth")
+@Tag(name = "Jobs", description = "Job management endpoints")
 public class JobController {
 
+    private static final Logger logger = LoggerFactory.getLogger(JobController.class);
+    
     private final JobService jobService;
 
     @PostMapping

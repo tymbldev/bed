@@ -22,28 +22,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @RestController
-@CrossOrigin(
-    origins = "http://localhost:3000",
-    allowedHeaders = "*",
-    exposedHeaders = {"Authorization"},
-    allowCredentials = "true",
-    maxAge = 3600,
-    methods = {
-        RequestMethod.GET,
-        RequestMethod.POST,
-        RequestMethod.PUT,
-        RequestMethod.DELETE,
-        RequestMethod.OPTIONS,
-        RequestMethod.PATCH
-    }
-)
 @RequestMapping("/api/v1/users/profile")
 @RequiredArgsConstructor
 @Tag(name = "User Profile", description = "Authenticated user profile management endpoints")
