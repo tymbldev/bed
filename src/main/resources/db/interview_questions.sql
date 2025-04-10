@@ -66,7 +66,7 @@ INSERT IGNORE INTO interview_questions (topic_id, question, answer, difficulty_l
   <li><strong>Synchronization</strong>: HashMap has no synchronization. ConcurrentHashMap uses a more efficient segment-level locking (pre-Java 8) or fine-grained locking at the node level (Java 8+).</li>
   <li><strong>Null values</strong>: HashMap allows one null key and multiple null values. ConcurrentHashMap does not allow null keys or values.</li>
   <li><strong>Performance</strong>: HashMap is faster in single-threaded environments. ConcurrentHashMap performs better in multi-threaded environments.</li>
-  <li><strong>Iterator behavior</strong>: HashMap's iterator is fail-fast (throws ConcurrentModificationException if modified during iteration). ConcurrentHashMap's iterator is weakly consistent (reflects the state at construction time but may accommodate modifications during iteration).</li>
+  <li><strong>Iterator behavior</strong>: HashMap iterator is fail-fast (throws ConcurrentModificationException if modified during iteration). ConcurrentHashMap iterator is weakly consistent (reflects the state at construction time but may accommodate modifications during iteration).</li>
 </ul>
 <p><strong>When to use HashMap:</strong></p>
 <ul>
@@ -80,11 +80,11 @@ INSERT IGNORE INTO interview_questions (topic_id, question, answer, difficulty_l
   <li>When you need to avoid the performance bottleneck of synchronized collections like Hashtable</li>
   <li>In high-concurrency scenarios where map data is shared across threads</li>
 </ul>
-<p>At Amazon, where distributed systems are common, understanding the thread-safety implications of collection choices is crucial. You might be asked to explain how you would handle a scenario where a map is accessed by multiple services or threads.</p>', 
+<p>At Amazon, where distributed systems are common, understanding the thread-safety implications of collection choices is crucial. You might be asked to explain how you would handle a scenario where a map is accessed by multiple services or threads.</p>',
 'HARD'),
 
 -- Questions for "Java Concurrency" topic (topic_id = 2)
-(2, 'What is the difference between "synchronized" keyword and Lock interface in Java?', 
+(2, 'What is the difference between "synchronized" keyword and Lock interface in Java?',
 '<p>The <code>synchronized</code> keyword and the <code>Lock</code> interface are both mechanisms for controlling concurrent access to shared resources in Java, but they differ in several important ways:</p>
 
 <table>
@@ -137,11 +137,11 @@ try {
 }
 </code></pre>
 
-<p>At Amazon, this question often leads to discussions about handling concurrency in distributed systems and how you would design for thread safety while maintaining performance.</p>', 
+<p>At Amazon, this question often leads to discussions about handling concurrency in distributed systems and how you would design for thread safety while maintaining performance.</p>',
 'HARD'),
 
 -- Questions for "AWS S3 and DynamoDB" topic (topic_id = 4)
-(4, 'Compare and contrast Amazon S3 and DynamoDB. When would you choose one over the other?', 
+(4, 'Compare and contrast Amazon S3 and DynamoDB. When would you choose one over the other?',
 '<p><strong>S3 vs DynamoDB: Comparison</strong></p>
 
 <table>
@@ -206,11 +206,11 @@ try {
   <li>When you need transactional support across data items</li>
 </ul>
 
-<p>At Amazon, understanding these services is crucial as most applications leverage them. You might be asked to design a system that uses both - for example, storing large media files in S3 while keeping metadata and relationships in DynamoDB.</p>', 
+<p>At Amazon, understanding these services is crucial as most applications leverage them. You might be asked to design a system that uses both - for example, storing large media files in S3 while keeping metadata and relationships in DynamoDB.</p>',
 'MEDIUM'),
 
 -- Questions for "Sorting Algorithms" topic (topic_id = 6)
-(6, 'Implement QuickSort algorithm and analyze its time complexity in best, average, and worst cases.', 
+(6, 'Implement QuickSort algorithm and analyze its time complexity in best, average, and worst cases.',
 '<p><strong>QuickSort Implementation in Java:</strong></p>
 
 <pre><code>
@@ -218,7 +218,7 @@ public void quickSort(int[] arr, int low, int high) {
     if (low < high) {
         // pi is partitioning index
         int pi = partition(arr, low, high);
-        
+
         // Recursively sort elements before and after partition
         quickSort(arr, low, pi - 1);
         quickSort(arr, pi + 1, high);
@@ -229,24 +229,24 @@ private int partition(int[] arr, int low, int high) {
     // Taking the rightmost element as pivot
     int pivot = arr[high];
     int i = low - 1; // Index of smaller element
-    
+
     for (int j = low; j < high; j++) {
         // If current element is smaller than the pivot
         if (arr[j] < pivot) {
             i++;
-            
+
             // Swap arr[i] and arr[j]
             int temp = arr[i];
             arr[i] = arr[j];
             arr[j] = temp;
         }
     }
-    
+
     // Swap arr[i+1] and arr[high] (or pivot)
     int temp = arr[i + 1];
     arr[i + 1] = arr[high];
     arr[high] = temp;
-    
+
     return i + 1;
 }
 </code></pre>
@@ -276,7 +276,7 @@ private int partition(int[] arr, int low, int high) {
 'HARD'),
 
 -- Questions for "Graph Algorithms" topic (topic_id = 7)
-(7, 'Implement Dijkstra\'s algorithm to find the shortest path in a weighted graph.', 
+(7, 'Implement Dijkstra\'s algorithm to find the shortest path in a weighted graph.',
 '<p><strong>Dijkstra\'s Algorithm Implementation in Java:</strong></p>
 
 <pre><code>
@@ -285,16 +285,16 @@ import java.util.*;
 class Graph {
     private int V; // Number of vertices
     private List&lt;List&lt;Node&gt;&gt; adj;
-    
+
     class Node {
         int vertex, weight;
-        
+
         Node(int v, int w) {
             vertex = v;
             weight = w;
         }
     }
-    
+
     Graph(int vertices) {
         V = vertices;
         adj = new ArrayList&lt;&gt;();
@@ -302,47 +302,47 @@ class Graph {
             adj.add(new ArrayList&lt;&gt;());
         }
     }
-    
+
     void addEdge(int u, int v, int weight) {
         adj.get(u).add(new Node(v, weight));
         adj.get(v).add(new Node(u, weight)); // For undirected graph
     }
-    
+
     int[] dijkstra(int src) {
         // Array to store shortest distance from src to i
         int[] dist = new int[V];
         Arrays.fill(dist, Integer.MAX_VALUE);
         dist[src] = 0;
-        
+
         // Priority queue to get minimum distance vertex
         PriorityQueue&lt;Node&gt; pq = new PriorityQueue&lt;&gt;(
             Comparator.comparingInt(node -> node.weight));
-        
+
         // Add source to pq
         pq.add(new Node(src, 0));
-        
+
         // Set to keep track of vertices already processed
         Set&lt;Integer&gt; settled = new HashSet&lt;&gt;();
-        
+
         while (!pq.isEmpty()) {
             // Remove the minimum distance vertex
             int u = pq.poll().vertex;
-            
+
             // If already processed, skip
             if (settled.contains(u)) {
                 continue;
             }
-            
+
             // Mark as processed
             settled.add(u);
-            
+
             // Process neighbors
             for (Node neighbor : adj.get(u)) {
                 int v = neighbor.vertex;
                 int weight = neighbor.weight;
-                
+
                 // If v is not in settled and distance needs to be updated
-                if (!settled.contains(v) && dist[u] != Integer.MAX_VALUE && 
+                if (!settled.contains(v) && dist[u] != Integer.MAX_VALUE &&
                     dist[u] + weight < dist[v]) {
                     // Update distance
                     dist[v] = dist[u] + weight;
@@ -351,7 +351,7 @@ class Graph {
                 }
             }
         }
-        
+
         return dist;
     }
 }
@@ -385,4 +385,4 @@ class Graph {
 <p>Google interviewers might ask you to modify this algorithm for specific use cases, such as finding k shortest paths, or adapting it for different graph representations.</p>',
 'HARD');
 
--- Add more questions for other topics 
+-- Add more questions for other topics
