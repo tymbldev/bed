@@ -3,6 +3,7 @@ package com.tymbl.registration.dto;
 import com.tymbl.common.entity.Role;
 import com.tymbl.common.entity.User;
 import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.Max;
@@ -15,7 +16,10 @@ import java.util.Set;
 public class ProfileUpdateRequest {
     private String firstName;
     private String lastName;
-    private Role role;
+    
+    @JsonIgnore
+    private Role role = Role.USER; // Always set to USER, ignore frontend value
+    
     private String phoneNumber;
     private String company;
     private Long departmentId;
