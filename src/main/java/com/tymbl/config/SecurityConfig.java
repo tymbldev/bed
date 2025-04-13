@@ -31,7 +31,7 @@ import java.util.Arrays;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final JwtAuthenticationFilter jwtAuthFilter;
+  private final JwtAuthenticationFilter jwtAuthenticationFilter;
   private final UserDetailsService userDetailsService;
   private final CustomOAuth2UserService customOAuth2UserService;
 
@@ -55,11 +55,13 @@ public class SecurityConfig {
         .antMatchers("/v3/api-docs/**", "/tymbl-service/v3/api-docs/**").permitAll()
         .antMatchers("/swagger-ui/**", "/tymbl-service/swagger-ui/**").permitAll()
         .antMatchers("/swagger-ui.html", "/tymbl-service/swagger-ui.html").permitAll()
+        .antMatchers("/api/v1/jobs/**", "/tymbl-service/api/v1/jobs/**").permitAll()
         .antMatchers("/api-docs/**", "/tymbl-service/api-docs/**").permitAll()
 
-        // Protected endpoints (JWT required)
+    // Protected endpoints (JWT required)
         .antMatchers("/tymbl-service/api/v1/users/**").authenticated()
-        .antMatchers("/tymbl-service/api/v1/jobs/**").authenticated()
+        .antMatchers("/tymbl-service/api/v1/jobsmanagement/**").authenticated()
+        .antMatchers("/tymbl-service/api/v1/locations/**").authenticated()
         .antMatchers("/tymbl-service/api/v1/locations/**").authenticated()
         .anyRequest().authenticated()
         .and()
@@ -67,7 +69,7 @@ public class SecurityConfig {
         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
         .and()
         .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
     return http.build();
   }
@@ -76,22 +78,26 @@ public class SecurityConfig {
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(Arrays.asList("*"));
-    configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    configuration.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     configuration.setAllowedHeaders(Arrays.asList("*"));
     configuration.setAllowCredentials(false);
     configuration.setMaxAge(3600L);
-    
+
     // Specific configuration for /api/v1/users/profile
     CorsConfiguration profileConfig = new CorsConfiguration();
     profileConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
-    profileConfig.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-    profileConfig.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+    profileConfig.setAllowedMethods(
+        Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+    profileConfig.setAllowedHeaders(
+        Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
     profileConfig.setExposedHeaders(Arrays.asList("Authorization"));
     profileConfig.setAllowCredentials(true);
     profileConfig.setMaxAge(3600L);
-    
+
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/api/v1/users/profile", profileConfig);
+    source.registerCorsConfiguration("/api/v1/jobsmanagement/**", profileConfig);
     source.registerCorsConfiguration("/**", configuration);
     return source;
   }

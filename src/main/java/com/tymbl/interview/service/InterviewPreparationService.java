@@ -80,6 +80,14 @@ public class InterviewPreparationService {
         return interviewQuestionRepository.findByDifficultyLevel(difficultyLevel);
     }
 
+    @Transactional(readOnly = true)
+    public List<InterviewQuestionDTO> getQuestionsByTopic(Long topicId) {
+        List<InterviewQuestion> questions = interviewQuestionRepository.findByTopicId(topicId);
+        return questions.stream()
+                .map(this::convertToInterviewQuestionDTO)
+                .collect(Collectors.toList());
+    }
+
     // Company Interview Guide Management
     @Transactional(readOnly = true)
     public List<CompanyInterviewGuide> getCompanyGuide(Long companyId) {
@@ -259,6 +267,14 @@ public class InterviewPreparationService {
                 .orElseThrow(() -> new RuntimeException("Question not found with id: " + questionId));
         
         return convertToInterviewQuestionDTO(question);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<InterviewTopicDTO> getAllTopics() {
+        List<InterviewTopic> topics = interviewTopicRepository.findAll();
+        return topics.stream()
+                .map(this::convertToInterviewTopicDTO)
+                .collect(Collectors.toList());
     }
     
     // Helper methods for DTO conversion

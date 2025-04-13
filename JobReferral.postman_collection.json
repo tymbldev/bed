@@ -345,17 +345,17 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Tech Corp\",\n  \"departmentId\": 1,\n  \"designationId\": 2,\n  \"cityId\": 10,\n  \"countryId\": 101,\n  \"zipCode\": \"123456\",\n  \"linkedInProfile\": \"fdfgds\",\n  \"githubProfile\": \"fds\",\n  \"portfolioWebsite\": \"fwdefw\",\n  \"resume\": \"fsds\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor's\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"departmentId\": 1,\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/registration/profile",
+              "raw": "{{base_url}}/api/v1/users/profile",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "registration",
+                "users",
                 "profile"
               ]
             },
@@ -409,14 +409,14 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/registration/profile/completion",
+              "raw": "{{base_url}}/api/v1/users/profile/completion",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "registration",
+                "users",
                 "profile",
                 "completion"
               ]
@@ -432,481 +432,259 @@
       "name": "Jobs",
       "item": [
         {
-          "name": "Create Job",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+          "name": "Job Search",
+          "item": [
+            {
+              "name": "Get All Jobs",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs?page=0&size=10&sortBy=createdAt&sortDirection=DESC",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs"],
+                  "query": [
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "10" },
+                    { "key": "sortBy", "value": "createdAt" },
+                    { "key": "sortDirection", "value": "DESC" }
+                  ]
+                },
+                "description": "Get all active job postings with pagination"
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"We are looking for an experienced Java Developer...\",\n  \"company\": \"Example Corp\",\n  \"department\": \"Engineering\",\n  \"location\": \"San Francisco, CA\",\n  \"jobType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"minExperience\": 5,\n  \"maxExperience\": 10,\n  \"minSalary\": \"120000\",\n  \"maxSalary\": \"160000\",\n  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\"],\n  \"workplaceType\": \"HYBRID\",\n  \"remoteAllowed\": true,\n  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n  \"numberOfOpenings\": 2\n}"
             },
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs"
-              ]
-            },
-            "description": "Create a new job posting"
-          },
-          "response": []
-        },
-        {
-          "name": "Update Job",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "PUT",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
+            {
+              "name": "Get Job By ID",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "1"]
+                },
+                "description": "Get job posting details by ID"
               }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"Updated description for an experienced Java Developer...\",\n  \"company\": \"Example Corp\",\n  \"department\": \"Engineering\",\n  \"location\": \"San Francisco, CA\",\n  \"jobType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"minExperience\": 5,\n  \"maxExperience\": 10,\n  \"minSalary\": \"130000\",\n  \"maxSalary\": \"170000\",\n  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\", \"AWS\"],\n  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\", \"Lead system design\"],\n  \"workplaceType\": \"HYBRID\",\n  \"remoteAllowed\": true,\n  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n  \"numberOfOpenings\": 3\n}"
             },
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "1"
-              ]
+            {
+              "name": "Search Jobs",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/search?keyword=Java&page=0&size=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "search"],
+                  "query": [
+                    { "key": "keyword", "value": "Java" },
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "10" }
+                  ]
+                },
+                "description": "Search job postings by keyword"
+              }
             },
-            "description": "Update an existing job posting"
-          },
-          "response": []
+            {
+              "name": "Search By Skills",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/search/skills?skills=Java&skills=Spring&page=0&size=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "search", "skills"],
+                  "query": [
+                    { "key": "skills", "value": "Java" },
+                    { "key": "skills", "value": "Spring" },
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "10" }
+                  ]
+                },
+                "description": "Search job postings by required skills"
+              }
+            },
+            {
+              "name": "Get Jobs By Company",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/company/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "company", "1"]
+                },
+                "description": "Get jobs by company ID"
+              }
+            },
+            {
+              "name": "Get Jobs By Company And Title",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/company/1/search?title=Java",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "company", "1", "search"],
+                  "query": [
+                    { "key": "title", "value": "Java" }
+                  ]
+                },
+                "description": "Get jobs by company ID and title"
+              }
+            },
+            {
+              "name": "Get Jobs By Company Name",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/company/search?companyName=Example",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "company", "search"],
+                  "query": [
+                    { "key": "companyName", "value": "Example" }
+                  ]
+                },
+                "description": "Get jobs by company name"
+              }
+            },
+            {
+              "name": "Get Jobs By Company Name And Title",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobs/company/search/title?companyName=Example&title=Java",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobs", "company", "search", "title"],
+                  "query": [
+                    { "key": "companyName", "value": "Example" },
+                    { "key": "title", "value": "Java" }
+                  ]
+                },
+                "description": "Get jobs by company name and title"
+              }
+            }
+          ]
         },
         {
-          "name": "Get All Jobs",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs?page=0&size=10&sortBy=postedDate&sortDirection=DESC",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
+          "name": "Job Management",
+          "item": [
+            {
+              "name": "Create Job",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
-                {
-                  "key": "size",
-                  "value": "10"
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"Looking for experienced Java developer...\",\n  \"location\": \"Remote\",\n  \"employmentType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"salary\": 100000.0,\n  \"currency\": \"USD\",\n  \"companyId\": 1\n}"
                 },
-                {
-                  "key": "sortBy",
-                  "value": "postedDate"
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsmanagement",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobsmanagement"]
                 },
-                {
-                  "key": "sortDirection",
-                  "value": "DESC"
-                }
-              ]
+                "description": "Create a new job posting"
+              }
             },
-            "description": "Get all active job postings with pagination"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Job By ID",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "1"
-              ]
-            },
-            "description": "Get job posting details by ID"
-          },
-          "response": []
-        },
-        {
-          "name": "Get My Jobs",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/my-posts?page=0&size=10",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "my-posts"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
+            {
+              "name": "Update Job",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            },
-            "description": "Get all job postings by the current user"
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Job",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "1"
-              ]
-            },
-            "description": "Delete (deactivate) a job posting"
-          },
-          "response": []
-        },
-        {
-          "name": "Search Jobs",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/search?keyword=Java&page=0&size=10",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "search"
-              ],
-              "query": [
-                {
-                  "key": "keyword",
-                  "value": "Java"
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Senior Java Developer\",\n  \"description\": \"Updated description...\",\n  \"location\": \"Remote\",\n  \"employmentType\": \"FULL_TIME\",\n  \"experienceLevel\": \"SENIOR\",\n  \"salary\": 110000.0,\n  \"currency\": \"USD\",\n  \"companyId\": 1\n}"
                 },
-                {
-                  "key": "page",
-                  "value": "0"
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsmanagement/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobsmanagement", "1"]
                 },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
+                "description": "Update an existing job posting"
+              }
             },
-            "description": "Search job postings by keyword"
-          },
-          "response": []
-        },
-        {
-          "name": "Search By Skills",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/search/skills?skills=Java&skills=Spring&page=0&size=10",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "search",
-                "skills"
-              ],
-              "query": [
-                {
-                  "key": "skills",
-                  "value": "Java"
+            {
+              "name": "Delete Job",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
-                {
-                  "key": "skills",
-                  "value": "Spring"
+                "method": "DELETE",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsmanagement/1",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobsmanagement", "1"]
                 },
-                {
-                  "key": "page",
-                  "value": "0"
+                "description": "Delete (deactivate) a job posting"
+              }
+            },
+            {
+              "name": "Get My Jobs",
+              "request": {
+                "auth": {
+                  "type": "bearer",
+                  "bearer": [
+                    {
+                      "key": "token",
+                      "value": "{{jwt_token}}",
+                      "type": "string"
+                    }
+                  ]
                 },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            },
-            "description": "Search job postings by required skills"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Jobs By Company",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/company/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "company",
-                "1"
-              ]
-            },
-            "description": "Get jobs by company ID"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Jobs By Company And Title",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/company/1/search?title=Java",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "company",
-                "1",
-                "search"
-              ],
-              "query": [
-                {
-                  "key": "title",
-                  "value": "Java"
-                }
-              ]
-            },
-            "description": "Get jobs by company ID and title"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Jobs By Company Name",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/company/search?companyName=Example",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "company",
-                "search"
-              ],
-              "query": [
-                {
-                  "key": "companyName",
-                  "value": "Example"
-                }
-              ]
-            },
-            "description": "Get jobs by company name"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Jobs By Company Name And Title",
-          "request": {
-            "auth": {
-              "type": "bearer",
-              "bearer": [
-                {
-                  "key": "token",
-                  "value": "{{jwt_token}}",
-                  "type": "string"
-                }
-              ]
-            },
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/company/search/title?companyName=Example&title=Java",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "jobs",
-                "company",
-                "search",
-                "title"
-              ],
-              "query": [
-                {
-                  "key": "companyName",
-                  "value": "Example"
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsmanagement/my-posts?page=0&size=10",
+                  "host": ["{{base_url}}"],
+                  "path": ["api", "v1", "jobsmanagement", "my-posts"],
+                  "query": [
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "10" }
+                  ]
                 },
-                {
-                  "key": "title",
-                  "value": "Java"
-                }
-              ]
-            },
-            "description": "Get jobs by company name and title"
-          },
-          "response": []
+                "description": "Get all job postings by the current user"
+              }
+            }
+          ]
         }
       ],
       "description": "Job posting and management endpoints"
@@ -1366,6 +1144,74 @@
         }
       ],
       "description": "Location API endpoints"
+    },
+    {
+      "name": "Profile",
+      "item": [
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"departmentId\": 1,\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile"]
+            }
+          }
+        },
+        {
+          "name": "Get Profile Completion Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile/completion",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile", "completion"]
+            }
+          }
+        }
+      ]
     }
   ],
   "variable": [

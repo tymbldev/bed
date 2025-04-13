@@ -56,40 +56,27 @@ public class SkillController {
                           "  {\n" +
                           "    \"id\": 1,\n" +
                           "    \"name\": \"Java\",\n" +
-                          "    \"usageCount\": 156,\n" +
-                          "    \"enabled\": true\n" +
+                          "    \"usageCount\": 1000,\n" +
+                          "    \"category\": \"Programming Language\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 2,\n" +
                           "    \"name\": \"Spring Boot\",\n" +
-                          "    \"usageCount\": 128,\n" +
-                          "    \"enabled\": true\n" +
+                          "    \"usageCount\": 800,\n" +
+                          "    \"category\": \"Framework\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 3,\n" +
-                          "    \"name\": \"React\",\n" +
-                          "    \"usageCount\": 120,\n" +
-                          "    \"enabled\": true\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"id\": 4,\n" +
                           "    \"name\": \"AWS\",\n" +
-                          "    \"usageCount\": 98,\n" +
-                          "    \"enabled\": true\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"id\": 5,\n" +
-                          "    \"name\": \"Docker\",\n" +
-                          "    \"usageCount\": 87,\n" +
-                          "    \"enabled\": true\n" +
+                          "    \"usageCount\": 600,\n" +
+                          "    \"category\": \"Cloud Platform\"\n" +
                           "  }\n" +
                           "]"
                 )
             )
-        ),
-        @ApiResponse(responseCode = "500", description = "Server error")
+        )
     })
-    @Cacheable(value = "skillsList", key = "'all'")
+    @Cacheable(value = "skills")
     public ResponseEntity<List<Skill>> getAllSkills() {
         return ResponseEntity.ok(skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc());
     }

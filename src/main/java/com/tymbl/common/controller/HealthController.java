@@ -2,6 +2,7 @@ package com.tymbl.common.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -52,8 +53,11 @@ public class HealthController {
             description = "Application is healthy",
             content = @Content(
                 schema = @Schema(implementation = Map.class),
-                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"status\":\"UP\",\"timestamp\":\"2024-03-20T10:30:00\"}"
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"status\": \"UP\",\n" +
+                          "  \"timestamp\": \"2024-03-20T10:30:00\"\n" +
+                          "}"
                 )
             )
         )
@@ -68,16 +72,19 @@ public class HealthController {
     @GetMapping("/liveness")
     @Operation(
         summary = "Liveness probe",
-        description = "Indicates whether the application is alive and running"
+        description = "Returns the liveness state of the application"
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Application is alive",
+            description = "Liveness state retrieved successfully",
             content = @Content(
                 schema = @Schema(implementation = Map.class),
-                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"status\":\"CORRECT\",\"timestamp\":\"2024-03-20T10:30:00\"}"
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"status\": \"CORRECT\",\n" +
+                          "  \"timestamp\": \"2024-03-20T10:30:00\"\n" +
+                          "}"
                 )
             )
         )
@@ -92,16 +99,19 @@ public class HealthController {
     @GetMapping("/readiness")
     @Operation(
         summary = "Readiness probe",
-        description = "Indicates whether the application is ready to handle requests"
+        description = "Returns the readiness state of the application"
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Application is ready",
+            description = "Readiness state retrieved successfully",
             content = @Content(
                 schema = @Schema(implementation = Map.class),
-                examples = @io.swagger.v3.oas.annotations.media.ExampleObject(
-                    value = "{\"status\":\"ACCEPTING_TRAFFIC\",\"timestamp\":\"2024-03-20T10:30:00\"}"
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"status\": \"ACCEPTING_TRAFFIC\",\n" +
+                          "  \"timestamp\": \"2024-03-20T10:30:00\"\n" +
+                          "}"
                 )
             )
         )
@@ -113,24 +123,32 @@ public class HealthController {
         return ResponseEntity.ok(response);
     }
 
-    @PostMapping("/test-post")
-    @Operation(summary = "Test POST endpoint", description = "Test endpoint to verify POST requests are working")
-    public ResponseEntity<Map<String, Object>> testPost(@RequestBody Map<String, Object> request) {
+    @PostMapping("/state")
+    @Operation(
+        summary = "Update application state",
+        description = "Updates the application state (for testing purposes)"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "State updated successfully",
+            content = @Content(
+                schema = @Schema(implementation = Map.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"status\": \"BROKEN\",\n" +
+                          "  \"timestamp\": \"2024-03-20T10:30:00\"\n" +
+                          "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Invalid state provided")
+    })
+    public ResponseEntity<Map<String, Object>> updateState(@RequestBody Map<String, String> request) {
+        String state = request.get("state");
         Map<String, Object> response = new HashMap<>();
-        response.put("status", "SUCCESS");
-        response.put("timestamp", LocalDateTime.now().toString());
-        response.put("request", request);
-        return ResponseEntity.ok(response);
-    }
-
-    @PostMapping("/test-register")
-    @Operation(summary = "Test registration endpoint", description = "Test endpoint to verify registration-like POST requests")
-    public ResponseEntity<Map<String, Object>> testRegister(@RequestBody Map<String, Object> request) {
-        Map<String, Object> response = new HashMap<>();
-        response.put("status", "REGISTERED");
-        response.put("timestamp", LocalDateTime.now().toString());
-        response.put("email", request.get("email"));
-        response.put("token", "test-jwt-token-123456789");
+        response.put("status", state);
+        response.put("timestamp", LocalDateTime.now());
         return ResponseEntity.ok(response);
     }
 } 

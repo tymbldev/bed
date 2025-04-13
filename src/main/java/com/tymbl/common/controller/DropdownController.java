@@ -62,23 +62,18 @@ public class DropdownController {
                     value = "[\n" +
                           "  {\n" +
                           "    \"id\": 1,\n" +
-                          "    \"name\": \"Engineering\"\n" +
+                          "    \"name\": \"Engineering\",\n" +
+                          "    \"description\": \"Software development and engineering\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 2,\n" +
-                          "    \"name\": \"Product Management\"\n" +
+                          "    \"name\": \"Product Management\",\n" +
+                          "    \"description\": \"Product planning and management\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 3,\n" +
-                          "    \"name\": \"Marketing\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"id\": 4,\n" +
-                          "    \"name\": \"Human Resources\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"id\": 5,\n" +
-                          "    \"name\": \"Finance\"\n" +
+                          "    \"name\": \"Human Resources\",\n" +
+                          "    \"description\": \"HR and talent management\"\n" +
                           "  }\n" +
                           "]"
                 )
@@ -93,33 +88,22 @@ public class DropdownController {
     @Operation(summary = "Create a new department", description = "Creates a new department for dropdown selection")
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "Department created successfully",
             content = @Content(
                 schema = @Schema(implementation = Department.class),
                 examples = @ExampleObject(
                     value = "{\n" +
-                          "  \"id\": 6,\n" +
-                          "  \"name\": \"Sales\"\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"name\": \"Engineering\",\n" +
+                          "  \"description\": \"Software development and engineering\"\n" +
                           "}"
                 )
             )
         ),
-        @ApiResponse(responseCode = "400", description = "Invalid input or department already exists")
+        @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<Department> createDepartment(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Department details",
-                required = true,
-                content = @Content(
-                    examples = @ExampleObject(
-                        value = "{\n" +
-                              "  \"name\": \"Sales\"\n" +
-                              "}"
-                    )
-                )
-            )
-            @Valid @RequestBody Department department) {
+    public ResponseEntity<Department> createDepartment(@Valid @RequestBody Department department) {
         return ResponseEntity.ok(dropdownService.createDepartment(department));
     }
 
@@ -128,7 +112,7 @@ public class DropdownController {
     @Operation(summary = "Get all locations", description = "Returns a list of all locations for dropdown selection")
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "List of locations retrieved successfully",
             content = @Content(
                 schema = @Schema(implementation = Location.class),
@@ -136,21 +120,18 @@ public class DropdownController {
                     value = "[\n" +
                           "  {\n" +
                           "    \"id\": 1,\n" +
-                          "    \"city\": \"Bangalore\",\n" +
-                          "    \"state\": \"Karnataka\",\n" +
-                          "    \"country\": \"India\"\n" +
+                          "    \"name\": \"San Francisco\",\n" +
+                          "    \"description\": \"San Francisco Bay Area\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 2,\n" +
-                          "    \"city\": \"Mumbai\",\n" +
-                          "    \"state\": \"Maharashtra\",\n" +
-                          "    \"country\": \"India\"\n" +
+                          "    \"name\": \"New York\",\n" +
+                          "    \"description\": \"New York City\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 3,\n" +
-                          "    \"city\": \"Hyderabad\",\n" +
-                          "    \"state\": \"Telangana\",\n" +
-                          "    \"country\": \"India\"\n" +
+                          "    \"name\": \"Bangalore\",\n" +
+                          "    \"description\": \"Bangalore, India\"\n" +
                           "  }\n" +
                           "]"
                 )
@@ -165,46 +146,31 @@ public class DropdownController {
     @Operation(summary = "Create a new location", description = "Creates a new location for dropdown selection")
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "Location created successfully",
             content = @Content(
                 schema = @Schema(implementation = Location.class),
                 examples = @ExampleObject(
                     value = "{\n" +
-                          "  \"id\": 4,\n" +
-                          "  \"city\": \"Chennai\",\n" +
-                          "  \"state\": \"Tamil Nadu\",\n" +
-                          "  \"country\": \"India\"\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"name\": \"San Francisco\",\n" +
+                          "  \"description\": \"San Francisco Bay Area\"\n" +
                           "}"
                 )
             )
         ),
         @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<Location> createLocation(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Location details",
-                required = true,
-                content = @Content(
-                    examples = @ExampleObject(
-                        value = "{\n" +
-                              "  \"city\": \"Chennai\",\n" +
-                              "  \"state\": \"Tamil Nadu\",\n" +
-                              "  \"country\": \"India\"\n" +
-                              "}"
-                    )
-                )
-            )
-            @Valid @RequestBody Location location) {
+    public ResponseEntity<Location> createLocation(@Valid @RequestBody Location location) {
         return ResponseEntity.ok(dropdownService.createLocation(location));
     }
 
     // Designation endpoints
     @GetMapping("/designations")
-    @Operation(summary = "Get all designations", description = "Returns a list of all designations/positions for dropdown selection")
+    @Operation(summary = "Get all designations", description = "Returns a list of all designations for dropdown selection")
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "List of designations retrieved successfully",
             content = @Content(
                 schema = @Schema(implementation = Designation.class),
@@ -212,23 +178,18 @@ public class DropdownController {
                     value = "[\n" +
                           "  {\n" +
                           "    \"id\": 1,\n" +
-                          "    \"title\": \"Software Engineer\"\n" +
+                          "    \"name\": \"Software Engineer\",\n" +
+                          "    \"description\": \"Entry-level software development position\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 2,\n" +
-                          "    \"title\": \"Senior Software Engineer\"\n" +
+                          "    \"name\": \"Senior Software Engineer\",\n" +
+                          "    \"description\": \"Experienced software development position\"\n" +
                           "  },\n" +
                           "  {\n" +
                           "    \"id\": 3,\n" +
-                          "    \"title\": \"Tech Lead\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"id\": 4,\n" +
-                          "    \"title\": \"Product Manager\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"id\": 5,\n" +
-                          "    \"title\": \"UI/UX Designer\"\n" +
+                          "    \"name\": \"Technical Lead\",\n" +
+                          "    \"description\": \"Team leadership position\"\n" +
                           "  }\n" +
                           "]"
                 )
@@ -240,36 +201,25 @@ public class DropdownController {
     }
 
     @PostMapping("/designations")
-    @Operation(summary = "Create a new designation", description = "Creates a new designation/position for dropdown selection")
+    @Operation(summary = "Create a new designation", description = "Creates a new designation for dropdown selection")
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
+            responseCode = "200",
             description = "Designation created successfully",
             content = @Content(
                 schema = @Schema(implementation = Designation.class),
                 examples = @ExampleObject(
                     value = "{\n" +
-                          "  \"id\": 6,\n" +
-                          "  \"title\": \"DevOps Engineer\"\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"name\": \"Software Engineer\",\n" +
+                          "  \"description\": \"Entry-level software development position\"\n" +
                           "}"
                 )
             )
         ),
-        @ApiResponse(responseCode = "400", description = "Invalid input or designation already exists")
+        @ApiResponse(responseCode = "400", description = "Invalid input")
     })
-    public ResponseEntity<Designation> createDesignation(
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                description = "Designation details",
-                required = true,
-                content = @Content(
-                    examples = @ExampleObject(
-                        value = "{\n" +
-                              "  \"title\": \"DevOps Engineer\"\n" +
-                              "}"
-                    )
-                )
-            )
-            @Valid @RequestBody Designation designation) {
+    public ResponseEntity<Designation> createDesignation(@Valid @RequestBody Designation designation) {
         return ResponseEntity.ok(dropdownService.createDesignation(designation));
     }
 
@@ -320,44 +270,31 @@ public class DropdownController {
     }
 
     @GetMapping("/degrees")
-    @Operation(summary = "Get all degrees", description = "Returns all degree types for dropdown selection")
+    @Operation(summary = "Get all degree types", description = "Returns a list of all available degree types")
     @ApiResponses(value = {
         @ApiResponse(
-            responseCode = "200", 
-            description = "Degrees retrieved successfully",
+            responseCode = "200",
+            description = "List of degree types retrieved successfully",
             content = @Content(
+                schema = @Schema(implementation = Map.class),
                 examples = @ExampleObject(
-                    value = "[\n" +
-                          "  {\n" +
-                          "    \"value\": \"BACHELOR\",\n" +
-                          "    \"label\": \"Bachelor's Degree\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"value\": \"MASTER\",\n" +
-                          "    \"label\": \"Master's Degree\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"value\": \"PHD\",\n" +
-                          "    \"label\": \"PhD\"\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"value\": \"DIPLOMA\",\n" +
-                          "    \"label\": \"Diploma\"\n" +
-                          "  }\n" +
-                          "]"
+                    value = "{\n" +
+                          "  \"BACHELOR\": \"Bachelor's Degree\",\n" +
+                          "  \"MASTER\": \"Master's Degree\",\n" +
+                          "  \"DOCTORATE\": \"Doctorate Degree\",\n" +
+                          "  \"ASSOCIATE\": \"Associate Degree\",\n" +
+                          "  \"DIPLOMA\": \"Diploma\"\n" +
+                          "}"
                 )
             )
         )
     })
-    public ResponseEntity<List<Map<String, String>>> getDegrees() {
-        List<Map<String, String>> degrees = Arrays.stream(Degree.values())
-            .map(degree -> {
-                Map<String, String> map = new HashMap<>();
-                map.put("value", degree.name());
-                map.put("label", degree.getDisplayName());
-                return map;
-            })
-            .collect(Collectors.toList());
-        return ResponseEntity.ok(degrees);
+    public ResponseEntity<Map<String, String>> getAllDegrees() {
+        Map<String, String> degreeMap = Arrays.stream(Degree.values())
+            .collect(Collectors.toMap(
+                Degree::name,
+                degree -> degree.name().charAt(0) + degree.name().substring(1).toLowerCase().replace("_", " ")
+            ));
+        return ResponseEntity.ok(degreeMap);
     }
 } 
