@@ -935,7 +935,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"DevOps Engineer\"\n}"
+              "raw": "{\n  \"name\": \"DevOps Engineer\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/dropdowns/designations",
@@ -1212,6 +1212,128 @@
           }
         }
       ]
+    },
+    {
+      "name": "Companies",
+      "item": [
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies"]
+            },
+            "description": "Get all available companies"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Company by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies", "1"]
+            },
+            "description": "Get company details by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Create/Update Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 1000,\n  \"name\": \"Example Corp\",\n  \"description\": \"A leading technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://example.com/logo.png\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies"]
+            },
+            "description": "Create a new company or update an existing one"
+          },
+          "response": []
+        },
+        {
+          "name": "Create Multiple Companies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "[\n  {\n    \"id\": 1,\n    \"name\": \"Tata Consultancy Services\",\n    \"description\": \"Leading global IT services, consulting and business solutions organization\",\n    \"website\": \"https://www.tcs.com\",\n    \"logoUrl\": \"https://www.tcs.com/content/dam/global-tcs/en/images/home/tcs-logo-1x.png\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Infosys\",\n    \"description\": \"Global leader in next-generation digital services and consulting\",\n    \"website\": \"https://www.infosys.com\",\n    \"logoUrl\": \"https://www.infosys.com/content/dam/infosys-web/en/global-resources/media-resources/infosys-logo.jpg\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Wipro\",\n    \"description\": \"Leading global information technology, consulting and business process services company\",\n    \"website\": \"https://www.wipro.com\",\n    \"logoUrl\": \"https://www.wipro.com/content/dam/nexus/en/brand/images/wipro-logo.png\"\n  },\n  {\n    \"id\": 4,\n    \"name\": \"HCL Technologies\",\n    \"description\": \"Global technology company, homegrown in India\",\n    \"website\": \"https://www.hcltech.com\",\n    \"logoUrl\": \"https://www.hcltech.com/sites/default/files/2021-08/HCL-Logo.png\"\n  },\n  {\n    \"id\": 5,\n    \"name\": \"Tech Mahindra\",\n    \"description\": \"Leading provider of digital transformation, consulting and business reengineering services\",\n    \"website\": \"https://www.techmahindra.com\",\n    \"logoUrl\": \"https://www.techmahindra.com/content/dam/techmahindra/logo/techm-logo.png\"\n  }\n]"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/batch",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies", "batch"]
+            },
+            "description": "Create multiple companies in a single request"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Company Designations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/1/designations",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies", "1", "designations"]
+            },
+            "description": "Get all designations for a specific company"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Company Designation Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/1/designations/1/skills",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies", "1", "designations", "1", "skills"]
+            },
+            "description": "Get all skills for a specific company-designation combination"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Company Interview Guide",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/1/interview-guide",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "companies", "1", "interview-guide"]
+            },
+            "description": "Get interview preparation guide for a specific company"
+          },
+          "response": []
+        }
+      ],
+      "description": "Company management and interview preparation endpoints"
     }
   ],
   "variable": [

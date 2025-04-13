@@ -19,7 +19,7 @@ public class Designation {
     
     @NotBlank
     @Column(nullable = true, unique = true)
-    private String title;
+    private String name;
     
     @Column(nullable = true)
     private Integer level;
@@ -28,7 +28,7 @@ public class Designation {
     private boolean enabled = true;
     
     public Designation(String title) {
-        this.title = title;
+        this.name = title;
     }
     
     @Override

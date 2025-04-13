@@ -65,8 +65,8 @@ public class DropdownService {
 
     @Transactional
     public Designation createDesignation(Designation designation) {
-        if (designationRepository.existsByTitle(designation.getTitle())) {
-            throw new RuntimeException("Designation with title '" + designation.getTitle() + "' already exists");
+        if (designationRepository.existsByName(designation.getName())) {
+            throw new RuntimeException("Designation with title '" + designation.getName() + "' already exists");
         }
         return designationRepository.save(designation);
     }

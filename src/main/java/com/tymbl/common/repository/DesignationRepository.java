@@ -9,6 +9,6 @@ import java.util.Optional;
 
 @Repository
 public interface DesignationRepository extends JpaRepository<Designation, Long> {
-    Optional<Designation> findByTitle(String title);
-    boolean existsByTitle(String title);
+    Optional<Designation> findByName(String name);
+    boolean existsByName(String name);
 }

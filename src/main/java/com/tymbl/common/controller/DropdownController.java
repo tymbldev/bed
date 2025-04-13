@@ -262,7 +262,7 @@ public class DropdownController {
             .map(designation -> {
                 Map<String, String> map = new HashMap<>();
                 map.put("value", designation.getId().toString());
-                map.put("label", designation.getTitle());
+                map.put("label", designation.getName());
                 return map;
             })
             .collect(Collectors.toList());

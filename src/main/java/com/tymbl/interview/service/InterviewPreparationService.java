@@ -55,7 +55,7 @@ public class InterviewPreparationService {
     public Map<String, List<CompanyDesignationSkill>> getSkillsByCompany(Long companyId) {
         List<CompanyDesignationSkill> skills = companyDesignationSkillRepository.findByCompanyId(companyId);
         return skills.stream()
-                .collect(Collectors.groupingBy(skill -> skill.getDesignation().getTitle()));
+                .collect(Collectors.groupingBy(skill -> skill.getDesignation().getName()));
     }
 
     // Interview Topics Management
@@ -201,7 +201,7 @@ public class InterviewPreparationService {
                     
                     return CompanyDesignationDTO.builder()
                             .id(designationId)
-                            .title(designation.getTitle())
+                            .title(designation.getName())
                             .level(designation.getLevel())
                             .companyId(company.getId())
                             .companyName(company.getName())
@@ -297,7 +297,7 @@ public class InterviewPreparationService {
                 .content(topic.getContent())
                 .difficultyLevel(topic.getDifficultyLevel())
                 .companyName(cds.getCompany().getName())
-                .designationTitle(cds.getDesignation().getTitle())
+                .designationTitle(cds.getDesignation().getName())
                 .skillName(cds.getSkill().getName())
                 .build();
     }
