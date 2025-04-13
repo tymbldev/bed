@@ -164,6 +164,32 @@ public class UserProfileController {
     return ResponseEntity.ok(response);
   }
 
+  @GetMapping
+  @Operation(
+      summary = "Get user profile",
+      description = "Retrieves the profile details of the authenticated user."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Profile retrieved successfully",
+          content = @Content(schema = @Schema(implementation = User.class))
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
+      @ApiResponse(responseCode = "500", description = "Server error")
+  })
+  public ResponseEntity<User> getProfile(@AuthenticationPrincipal User currentUser) {
+    logger.info("Retrieving profile for user: {}", currentUser.getEmail());
+    try {
+      User user = registrationService.getUserById(currentUser.getId());
+      logger.info("Successfully retrieved profile for user: {}", currentUser.getEmail());
+      return ResponseEntity.ok(user);
+    } catch (Exception e) {
+      logger.error("Failed to retrieve profile for user: {}. Error: {}", currentUser.getEmail(), e.getMessage());
+      throw e;
+    }
+  }
+
   private ProfileCompletionResponse calculateProfileCompletion(User user) {
     ProfileCompletionResponse response = new ProfileCompletionResponse();
     List<PendingField> pendingFields = new ArrayList<>();

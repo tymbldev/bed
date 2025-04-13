@@ -27,6 +27,11 @@ public class RegistrationService {
   private final LinkedInService linkedInService;
   private final JwtService jwtService;
 
+  public User getUserById(Long userId) {
+    return userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+  }
+
   @Transactional
   public User registerUser(RegisterRequest request) {
     if (userRepository.existsByEmail(request.getEmail())) {
