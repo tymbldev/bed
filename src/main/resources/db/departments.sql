@@ -1,6 +1,6 @@
 -- SQL script to populate the departments table with comprehensive list
 
-TRUNCATE TABLE departments;
+
 ALTER TABLE departments AUTO_INCREMENT = 1;
 
 

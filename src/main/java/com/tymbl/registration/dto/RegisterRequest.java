@@ -42,7 +42,9 @@ public class RegisterRequest {
     private Integer yearsOfExperience;
     private Integer monthsOfExperience;
     private Integer currentSalary;
+    private Long currentSalaryCurrencyId;
     private Integer expectedSalary;
+    private Long expectedSalaryCurrencyId;
     private Integer noticePeriod;
     
     // Skills

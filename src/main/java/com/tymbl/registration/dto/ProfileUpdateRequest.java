@@ -11,6 +11,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Pattern;
 import java.util.Set;
+import java.util.HashSet;
 
 @Data
 public class ProfileUpdateRequest {
@@ -23,6 +24,7 @@ public class ProfileUpdateRequest {
     private String phoneNumber;
     private String company;
     private Long departmentId;
+    private String designation;
     private Long designationId;
     private Long cityId;
     private Long countryId;
@@ -40,8 +42,11 @@ public class ProfileUpdateRequest {
     private Integer monthsOfExperience;
     
     private Integer currentSalary;
+    private Long currentSalaryCurrencyId;
     private Integer expectedSalary;
+    private Long expectedSalaryCurrencyId;
     private Integer noticePeriod;
-    private Set<Long> skillIds;
-    private Set<User.Education> education;
+    private Set<Long> skillIds = new HashSet<>();
+    private Set<String> skillNames = new HashSet<>();
+    private Set<User.Education> education = new HashSet<>();
 } 

@@ -43,7 +43,8 @@ public class DropdownService {
     // Location methods
     @Transactional(readOnly = true)
     public List<Location> getAllLocations() {
-        return locationRepository.findAll();
+        List<Location> locations =  locationRepository.findAll();
+        return locations;
     }
 
     @Transactional

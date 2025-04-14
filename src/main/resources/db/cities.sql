@@ -1,150 +1,144 @@
--- SQL script to populate the cities table with major cities worldwide
--- These INSERT statements will add cities with references to the countries table
+-- SQL script to populate the cities table with a comprehensive list
+
+-- Disable foreign key checks
+SET FOREIGN_KEY_CHECKS = 0;
 
 -- Clear existing data
-
-
 TRUNCATE TABLE cities;
 ALTER TABLE cities AUTO_INCREMENT = 1;
 
+-- Enable foreign key checks
+SET FOREIGN_KEY_CHECKS = 1;
 
--- We'll create city entries for major countries
--- Note: country_id values should be based on the sequence from countries.sql
+-- United States
+INSERT IGNORE INTO cities (name, country_id) VALUES ('New York', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('San Francisco', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Los Angeles', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Chicago', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Boston', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Seattle', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Austin', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Denver', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Washington', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Portland', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Atlanta', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Dallas', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Houston', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Miami', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Philadelphia', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Phoenix', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('San Diego', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('San Jose', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Minneapolis', (SELECT id FROM countries WHERE code = 'US'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Detroit', (SELECT id FROM countries WHERE code = 'US'));
 
--- United States (country_id = 197)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('New York', 197, '10001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Los Angeles', 197, '90001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Chicago', 197, '60601');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Houston', 197, '77001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Phoenix', 197, '85001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Philadelphia', 197, '19101');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('San Antonio', 197, '78201');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('San Diego', 197, '92101');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Dallas', 197, '75201');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('San Jose', 197, '95101');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Austin', 197, '78701');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Jacksonville', 197, '32099');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Fort Worth', 197, '76101');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Columbus', 197, '43085');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('San Francisco', 197, '94102');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Charlotte', 197, '28201');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Indianapolis', 197, '46201');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Seattle', 197, '98101');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Denver', 197, '80201');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Washington DC', 197, '20001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Boston', 197, '02101');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Atlanta', 197, '30301');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Miami', 197, '33101');
+-- Canada
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Toronto', (SELECT id FROM countries WHERE code = 'CA'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Vancouver', (SELECT id FROM countries WHERE code = 'CA'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Montreal', (SELECT id FROM countries WHERE code = 'CA'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Calgary', (SELECT id FROM countries WHERE code = 'CA'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Ottawa', (SELECT id FROM countries WHERE code = 'CA'));
 
--- Canada (country_id = 30)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Toronto', 30, 'M5A');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Montreal', 30, 'H2Y');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Vancouver', 30, 'V5K');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Calgary', 30, 'T2P');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Edmonton', 30, 'T5J');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Ottawa', 30, 'K1P');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Winnipeg', 30, 'R3C');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Quebec City', 30, 'G1R');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Hamilton', 30, 'L8P');
+-- Europe
+INSERT IGNORE INTO cities (name, country_id) VALUES ('London', (SELECT id FROM countries WHERE code = 'GB'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Paris', (SELECT id FROM countries WHERE code = 'FR'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Berlin', (SELECT id FROM countries WHERE code = 'DE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Amsterdam', (SELECT id FROM countries WHERE code = 'NL'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Madrid', (SELECT id FROM countries WHERE code = 'ES'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Barcelona', (SELECT id FROM countries WHERE code = 'ES'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Rome', (SELECT id FROM countries WHERE code = 'IT'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Milan', (SELECT id FROM countries WHERE code = 'IT'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Dublin', (SELECT id FROM countries WHERE code = 'IE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Stockholm', (SELECT id FROM countries WHERE code = 'SE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Copenhagen', (SELECT id FROM countries WHERE code = 'DK'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Zurich', (SELECT id FROM countries WHERE code = 'CH'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Munich', (SELECT id FROM countries WHERE code = 'DE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Brussels', (SELECT id FROM countries WHERE code = 'BE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Vienna', (SELECT id FROM countries WHERE code = 'AT'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Lisbon', (SELECT id FROM countries WHERE code = 'PT'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Athens', (SELECT id FROM countries WHERE code = 'GR'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Warsaw', (SELECT id FROM countries WHERE code = 'PL'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Prague', (SELECT id FROM countries WHERE code = 'CZ'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Budapest', (SELECT id FROM countries WHERE code = 'HU'));
 
--- United Kingdom (country_id = 196)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('London', 196, 'EC1A');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Manchester', 196, 'M1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Birmingham', 196, 'B1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Glasgow', 196, 'G1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Liverpool', 196, 'L1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Bristol', 196, 'BS1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Edinburgh', 196, 'EH1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Leeds', 196, 'LS1');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Sheffield', 196, 'S1');
+-- Asia & Pacific
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Tokyo', (SELECT id FROM countries WHERE code = 'JP'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Singapore', (SELECT id FROM countries WHERE code = 'SG'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Hong Kong', (SELECT id FROM countries WHERE code = 'HK'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Seoul', (SELECT id FROM countries WHERE code = 'KR'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Sydney', (SELECT id FROM countries WHERE code = 'AU'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Melbourne', (SELECT id FROM countries WHERE code = 'AU'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Shanghai', (SELECT id FROM countries WHERE code = 'CN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Beijing', (SELECT id FROM countries WHERE code = 'CN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Shenzhen', (SELECT id FROM countries WHERE code = 'CN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Auckland', (SELECT id FROM countries WHERE code = 'NZ'));
 
--- Australia (country_id = 8)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Sydney', 8, '2000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Melbourne', 8, '3000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Brisbane', 8, '4000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Perth', 8, '6000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Adelaide', 8, '5000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Gold Coast', 8, '4217');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Canberra', 8, '2600');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Newcastle', 8, '2300');
+-- India
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Bangalore', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Mumbai', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('New Delhi', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Hyderabad', (SELECT id FROM countries WHERE code = 'IN'));
+-- Additional Indian Cities
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Visakhapatnam', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Vijayawada', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Guntur', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Nellore', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Tirupati', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Kurnool', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Kadapa', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Anantapur', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Kakinada', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Chennai', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Kolkata', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Ahmedabad', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Pune', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Jaipur', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Lucknow', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Kanpur', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Nagpur', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Indore', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Thane', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Bhopal', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Patna', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Gurgaon', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Noida', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Chandigarh', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Coimbatore', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Guwahati', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Bhubaneswar', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Dehradun', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Mysore', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Trivandrum', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Kochi', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Goa', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Shimla', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Gangtok', (SELECT id FROM countries WHERE code = 'IN'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Port Blair', (SELECT id FROM countries WHERE code = 'IN'));
 
--- Germany (country_id = 66)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Berlin', 66, '10115');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Hamburg', 66, '20095');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Munich', 66, '80331');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Cologne', 66, '50667');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Frankfurt', 66, '60311');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Stuttgart', 66, '70173');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Düsseldorf', 66, '40213');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Leipzig', 66, '04109');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Dortmund', 66, '44137');
+-- Rest of Asia & Pacific
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Bangkok', (SELECT id FROM countries WHERE code = 'TH'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Jakarta', (SELECT id FROM countries WHERE code = 'ID'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Manila', (SELECT id FROM countries WHERE code = 'PH'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Ho Chi Minh City', (SELECT id FROM countries WHERE code = 'VN'));
 
--- France (country_id = 62)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Paris', 62, '75001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Marseille', 62, '13001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Lyon', 62, '69001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Toulouse', 62, '31000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Nice', 62, '06000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Nantes', 62, '44000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Strasbourg', 62, '67000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Montpellier', 62, '34000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Bordeaux', 62, '33000');
+-- Middle East & Africa
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Dubai', (SELECT id FROM countries WHERE code = 'AE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Tel Aviv', (SELECT id FROM countries WHERE code = 'IL'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Cape Town', (SELECT id FROM countries WHERE code = 'ZA'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Johannesburg', (SELECT id FROM countries WHERE code = 'ZA'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Nairobi', (SELECT id FROM countries WHERE code = 'KE'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Lagos', (SELECT id FROM countries WHERE code = 'NG'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Cairo', (SELECT id FROM countries WHERE code = 'EG'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Riyadh', (SELECT id FROM countries WHERE code = 'SA'));
 
--- India (country_id = 81)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Mumbai', 81, '400001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Delhi', 81, '110001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Bangalore', 81, '560001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Hyderabad', 81, '500001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Chennai', 81, '600001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Kolkata', 81, '700001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Ahmedabad', 81, '380001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Pune', 81, '411001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Jaipur', 81, '302001');
+-- Latin America
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Mexico City', (SELECT id FROM countries WHERE code = 'MX'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('São Paulo', (SELECT id FROM countries WHERE code = 'BR'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Buenos Aires', (SELECT id FROM countries WHERE code = 'AR'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Rio de Janeiro', (SELECT id FROM countries WHERE code = 'BR'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Bogotá', (SELECT id FROM countries WHERE code = 'CO'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Santiago', (SELECT id FROM countries WHERE code = 'CL'));
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Lima', (SELECT id FROM countries WHERE code = 'PE'));
 
--- China (country_id = 35)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Beijing', 35, '100000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Shanghai', 35, '200000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Guangzhou', 35, '510000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Shenzhen', 35, '518000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Chengdu', 35, '610000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Tianjin', 35, '300000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Wuhan', 35, '430000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Xi\'an', 35, '710000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Hangzhou', 35, '310000');
-
--- Japan (country_id = 91)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Tokyo', 91, '100-0001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Osaka', 91, '530-0001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Yokohama', 91, '220-0000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Nagoya', 91, '450-0001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Sapporo', 91, '060-0000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Kobe', 91, '650-0000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Kyoto', 91, '600-0000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Fukuoka', 91, '810-0000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Kawasaki', 91, '210-0000');
-
--- Brazil (country_id = 23)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('São Paulo', 23, '01000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Rio de Janeiro', 23, '20000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Brasília', 23, '70000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Salvador', 23, '40000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Fortaleza', 23, '60000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Belo Horizonte', 23, '30000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Manaus', 23, '69000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Curitiba', 23, '80000-000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Recife', 23, '50000-000');
-
--- South Africa (country_id = 169)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Johannesburg', 169, '2000');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Cape Town', 169, '8001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Durban', 169, '4001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Pretoria', 169, '0001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Port Elizabeth', 169, '6001');
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Bloemfontein', 169, '9301');
-
--- Singapore (country_id = 165)
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Singapore', 165, '018956');
-
--- Remote (country_id = 206)
--- Note: In countries.sql, the last entry is 'Remote' with country_id=206
-INSERT IGNORE INTO cities (name, country_id, zip_code) VALUES ('Remote', 206, ''); 
+-- Remote
+INSERT IGNORE INTO cities (name, country_id) VALUES ('Remote', (SELECT id FROM countries WHERE code = 'RM')); 

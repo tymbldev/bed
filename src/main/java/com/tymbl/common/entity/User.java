@@ -1,28 +1,32 @@
 package com.tymbl.common.entity;
 
-import javax.persistence.*;
-import javax.persistence.criteria.CriteriaBuilder.In;
-import javax.validation.constraints.Email;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.DecimalMax;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Pattern;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Set;
 import java.util.HashSet;
+import java.util.Set;
+import javax.persistence.CollectionTable;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embeddable;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.Table;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 @Data
 @NoArgsConstructor
@@ -56,6 +60,9 @@ public class User implements UserDetails {
     @Column(name = "designation_id")
     private Long designationId;
     
+    @Column(name = "designation")
+    private String designation;
+    
     @Column(name = "department_id")
     private Long departmentId;
     
@@ -85,11 +92,22 @@ public class User implements UserDetails {
     @Column(name = "years_of_experience")
     private Integer yearsOfExperience;
     
+    @Column(name = "months_of_experience")
+    @Min(value = 0, message = "Months of experience must be greater than or equal to 0")
+    @Max(value = 11, message = "Months of experience must be less than 12")
+    private Integer monthsOfExperience;
+    
     @Column(name = "current_salary")
     private Integer currentSalary;
     
+    @Column(name = "current_salary_currency_id")
+    private Long currentSalaryCurrencyId;
+    
     @Column(name = "expected_salary")
     private Integer expectedSalary;
+    
+    @Column(name = "expected_salary_currency_id")
+    private Long expectedSalaryCurrencyId;
     
     @Column(name = "notice_period")
     private Integer noticePeriod;
@@ -132,6 +150,11 @@ public class User implements UserDetails {
     @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "skill_id")
     private Set<Long> skillIds = new HashSet<>();
+
+    @ElementCollection
+    @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
+    @Column(name = "skill_name")
+    private Set<String> skillNames = new HashSet<>();
     
     @ElementCollection
     @CollectionTable(name = "user_education", joinColumns = @JoinColumn(name = "user_id"))
@@ -189,36 +212,5 @@ public class User implements UserDetails {
         return true;
     }
     
-    // Convenience methods for UI display
-    @Transient
-    public String getPositionDisplay() {
-        return designationId != null ? designationId.toString() : null;
-    }
-    
-    @Transient
-    public String getDepartmentDisplay() {
-        return departmentId != null ? departmentId.toString() : null;
-    }
-    
-    @Transient
-    public String getLocationDisplay() {
-        StringBuilder location = new StringBuilder();
-        
-        if (cityId != null) {
-            location.append(cityId.toString());
-        }
-        
-        if (countryId != null) {
-            if (location.length() > 0) {
-                location.append(", ");
-            }
-            location.append(countryId.toString());
-        }
-        
-        if (zipCode != null && !zipCode.isEmpty()) {
-            location.append(" ").append(zipCode);
-        }
-        
-        return location.length() > 0 ? location.toString() : null;
-    }
+
 } 

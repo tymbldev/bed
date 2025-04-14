@@ -47,6 +47,7 @@ public class Location {
     
     public Location(Country country, boolean isRemote) {
         this.country = country.getName();
+        this.countryId = country.getId();
         this.isRemote = isRemote;
         updateDisplayName();
     }

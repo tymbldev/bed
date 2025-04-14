@@ -339,25 +339,24 @@
             "method": "PUT",
             "header": [
               {
+                "key": "Authorization",
+                "value": "Bearer {{jwt_token}}",
+                "type": "text"
+              },
+              {
                 "key": "Content-Type",
-                "value": "application/json"
+                "value": "application/json",
+                "type": "text"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"departmentId\": 1,\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"departmentId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"currentSalaryCurrencyId\": 1,\n  \"expectedSalary\": 120000,\n  \"expectedSalaryCurrencyId\": 1,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"skillNames\": [\"Java\", \"Spring\", \"Hibernate\"],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/users/profile",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "profile"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile"]
             },
             "description": "Update user profile"
           },
@@ -1184,7 +1183,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"departmentId\": 1,\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"departmentId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"currentSalaryCurrencyId\": 1,\n  \"expectedSalary\": 120000,\n  \"expectedSalaryCurrencyId\": 1,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"skillNames\": [\"Java\", \"Spring\", \"Hibernate\"],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/users/profile",
