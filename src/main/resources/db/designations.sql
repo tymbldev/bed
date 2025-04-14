@@ -325,4 +325,5 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('VP of Communications', 11, true),
 ('Chief Communications Officer', 12, true),
 ('Documentation Manager', 4, true),
+('Other', 1, true),
 ('Brand Manager', 4, true);

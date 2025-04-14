@@ -5,6 +5,7 @@ ALTER TABLE departments AUTO_INCREMENT = 1;
 
 
 -- Insert statements for departments
+INSERT IGNORE INTO departments (name, description) VALUES ('Other', 'Other');
 INSERT IGNORE INTO departments (name, description) VALUES ('Engineering', 'Software development and engineering teams');
 INSERT IGNORE INTO departments (name, description) VALUES ('Product', 'Product management and product strategy');
 INSERT IGNORE INTO departments (name, description) VALUES ('Design', 'User experience, user interface, and design teams');
