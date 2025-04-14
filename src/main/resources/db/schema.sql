@@ -191,10 +191,10 @@ CREATE TABLE IF NOT EXISTS users (
 );
 
 CREATE TABLE IF NOT EXISTS user_skills (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
-    skill_id BIGINT NOT NULL,
+    skill_id BIGINT,
     skill_name VARCHAR(100),
-    PRIMARY KEY (user_id, skill_id),
     FOREIGN KEY (user_id) REFERENCES users(id),
     FOREIGN KEY (skill_id) REFERENCES skills(id)
 );

@@ -4,28 +4,35 @@ import com.tymbl.auth.dto.AuthResponse;
 import com.tymbl.auth.service.JwtService;
 import com.tymbl.common.entity.Role;
 import com.tymbl.common.entity.User;
+import com.tymbl.common.entity.UserSkill;
 import com.tymbl.common.repository.UserRepository;
+import com.tymbl.common.repository.UserSkillRepository;
+import com.tymbl.common.service.EmailService;
 import com.tymbl.common.service.LinkedInService;
 import com.tymbl.exception.EmailAlreadyExistsException;
 import com.tymbl.registration.dto.LinkedInProfile;
 import com.tymbl.registration.dto.LinkedInRegisterRequest;
 import com.tymbl.registration.dto.ProfileUpdateRequest;
 import com.tymbl.registration.dto.RegisterRequest;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
 public class RegistrationService {
 
   private final UserRepository userRepository;
+  private final UserSkillRepository userSkillRepository;
   private final PasswordEncoder passwordEncoder;
   private final LinkedInService linkedInService;
   private final JwtService jwtService;
+  private final EmailService emailService;
 
   public User getUserById(Long userId) {
     return userRepository.findById(userId)
@@ -34,26 +41,38 @@ public class RegistrationService {
 
   @Transactional
   public User registerUser(RegisterRequest request) {
-    if (userRepository.existsByEmail(request.getEmail())) {
-      throw new EmailAlreadyExistsException(request.getEmail());
+    try {
+      if (userRepository.existsByEmail(request.getEmail())) {
+        throw new EmailAlreadyExistsException(request.getEmail());
+      }
+
+      User user = new User();
+      user.setEmail(request.getEmail());
+      user.setPassword(passwordEncoder.encode(request.getPassword()));
+      user.setRole(request.getRole() != null ? request.getRole() : com.tymbl.common.entity.Role.USER);
+
+      // Set optional fields if provided
+      if (request.getFirstName() != null) {
+        user.setFirstName(request.getFirstName());
+      }
+
+      if (request.getLastName() != null) {
+        user.setLastName(request.getLastName());
+      }
+      updateUserFields(user, request);
+
+      User savedUser = userRepository.save(user);
+      
+      // Save skills separately
+      saveUserSkills(savedUser.getId(), request.getSkillIds(), request.getSkillNames());
+
+      return savedUser;
+    } catch (Exception e) {
+      if (e.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+        throw new RuntimeException("Database constraint violation: " + e.getCause().getMessage());
+      }
+      throw new RuntimeException("Error registering user: " + e.getMessage());
     }
-
-    User user = new User();
-    user.setEmail(request.getEmail());
-    user.setPassword(request.getPassword());
-    user.setRole(Role.USER);
-
-    // Set optional fields if provided
-    if (request.getFirstName() != null) {
-      user.setFirstName(request.getFirstName());
-    }
-
-    if (request.getLastName() != null) {
-      user.setLastName(request.getLastName());
-    }
-    updateUserFields(user, request);
-
-    return userRepository.save(user);
   }
 
   @Transactional
@@ -82,162 +101,82 @@ public class RegistrationService {
 
   @Transactional
   public User updateUserProfile(Long userId, ProfileUpdateRequest request) {
-    User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("User not found"));
+    try {
+      User user = userRepository.findById(userId)
+          .orElseThrow(() -> new RuntimeException("User not found"));
 
-    // Update basic info if provided
-    if (request.getFirstName() != null) {
-      user.setFirstName(request.getFirstName());
+      // Update the user fields
+      updateUserFields(user, request);
+      
+      User savedUser = userRepository.save(user);
+      
+      // Handle skills separately
+      if (request.getSkillIds() != null || request.getSkillNames() != null) {
+        // Delete existing skills
+        userSkillRepository.deleteAllByUserId(userId);
+        
+        // Save new skills
+        saveUserSkills(userId, request.getSkillIds(), request.getSkillNames());
+      }
+
+      return savedUser;
+    } catch (Exception e) {
+      if (e.getCause() instanceof org.hibernate.exception.ConstraintViolationException) {
+        throw new RuntimeException("Database constraint violation: " + e.getCause().getMessage());
+      }
+      throw new RuntimeException("Error updating user profile: " + e.getMessage());
     }
-
-    if (request.getLastName() != null) {
-      user.setLastName(request.getLastName());
-    }
-
-    if (request.getRole() != null) {
-      user.setRole(request.getRole());
-    }
-
-    if (request.getPhoneNumber() != null) {
-      user.setPhoneNumber(request.getPhoneNumber());
-    }
-
-    // Update the rest of the fields
-    updateUserFields(user, request);
-
-    return userRepository.save(user);
   }
 
   private void updateUserFields(User user, Object requestObj) {
-    // Handle both RegisterRequest and ProfileUpdateRequest types
-    String phoneNumber = null;
-    String company = null;
-    Long departmentId = null;
-    Long designationId = null;
-    Long cityId = null;
-    Long countryId = null;
-    String zipCode = null;
-    String linkedInProfile = null;
-    String githubProfile = null;
-    String portfolioWebsite = null;
-    String resume = null;
-    Integer yearsOfExperience = null;
-    Integer currentSalary = null;
-    Integer expectedSalary = null;
-    Integer noticePeriod = null;
-    java.util.Set<Long> skillIds = null;
-    java.util.Set<User.Education> education = null;
-
-    // Extract fields based on request type
     if (requestObj instanceof RegisterRequest) {
-      RegisterRequest request = (RegisterRequest) requestObj;
-      phoneNumber = request.getPhoneNumber();
-      company = request.getCompany();
-      departmentId = request.getDepartmentId();
-      designationId = request.getDesignationId();
-      cityId = request.getCityId();
-      countryId = request.getCountryId();
-      zipCode = request.getZipCode();
-      linkedInProfile = request.getLinkedInProfile();
-      githubProfile = request.getGithubProfile();
-      portfolioWebsite = request.getPortfolioWebsite();
-      resume = request.getResume();
-      yearsOfExperience = request.getYearsOfExperience();
-      currentSalary = request.getCurrentSalary();
-      expectedSalary = request.getExpectedSalary();
-      noticePeriod = request.getNoticePeriod();
-      skillIds = request.getSkillIds();
-      education = request.getEducation();
+      RegisterRequest registerRequest = (RegisterRequest) requestObj;
+      user.setFirstName(registerRequest.getFirstName());
+      user.setLastName(registerRequest.getLastName());
+      user.setPhoneNumber(registerRequest.getPhoneNumber());
+      user.setCompany(registerRequest.getCompany());
+      user.setDepartmentId(registerRequest.getDepartmentId());
+      user.setDesignation(registerRequest.getDesignation());
+      user.setDesignationId(registerRequest.getDesignationId());
+      user.setCityId(registerRequest.getCityId());
+      user.setCountryId(registerRequest.getCountryId());
+      user.setZipCode(registerRequest.getZipCode());
+      user.setLinkedInProfile(registerRequest.getLinkedInProfile());
+      user.setGithubProfile(registerRequest.getGithubProfile());
+      user.setPortfolioWebsite(registerRequest.getPortfolioWebsite());
+      user.setResume(registerRequest.getResume());
+      user.setYearsOfExperience(registerRequest.getYearsOfExperience());
+      user.setMonthsOfExperience(registerRequest.getMonthsOfExperience());
+      user.setCurrentSalary(registerRequest.getCurrentSalary());
+      user.setCurrentSalaryCurrencyId(registerRequest.getCurrentSalaryCurrencyId());
+      user.setExpectedSalary(registerRequest.getExpectedSalary());
+      user.setExpectedSalaryCurrencyId(registerRequest.getExpectedSalaryCurrencyId());
+      user.setNoticePeriod(registerRequest.getNoticePeriod());
+      user.setEducation(registerRequest.getEducation());
     } else if (requestObj instanceof ProfileUpdateRequest) {
-      ProfileUpdateRequest request = (ProfileUpdateRequest) requestObj;
-      phoneNumber = request.getPhoneNumber();
-      company = request.getCompany();
-      departmentId = request.getDepartmentId();
-      designationId = request.getDesignationId();
-      cityId = request.getCityId();
-      countryId = request.getCountryId();
-      zipCode = request.getZipCode();
-      linkedInProfile = request.getLinkedInProfile();
-      githubProfile = request.getGithubProfile();
-      portfolioWebsite = request.getPortfolioWebsite();
-      resume = request.getResume();
-      yearsOfExperience = request.getYearsOfExperience();
-      currentSalary = request.getCurrentSalary();
-      expectedSalary = request.getExpectedSalary();
-      noticePeriod = request.getNoticePeriod();
-      skillIds = request.getSkillIds();
-      education = request.getEducation();
-    }
-
-    // Update fields if provided
-    if (phoneNumber != null) {
-      user.setPhoneNumber(phoneNumber);
-    }
-
-    if (company != null) {
-      user.setCompany(company);
-    }
-
-    if (zipCode != null) {
-      user.setZipCode(zipCode);
-    }
-
-    // Set IDs directly
-    if (departmentId != null) {
-      user.setDepartmentId(departmentId);
-    }
-
-    if (designationId != null) {
-      user.setDesignationId(designationId);
-    }
-
-    if (cityId != null) {
-      user.setCityId(cityId);
-    }
-
-    if (countryId != null) {
-      user.setCountryId(countryId);
-    }
-
-    // Set additional fields if available
-    if (skillIds != null) {
-      user.setSkillIds(skillIds);
-    }
-
-    if (education != null) {
-      user.setEducation(education);
-    }
-
-    if (yearsOfExperience != null) {
-      user.setYearsOfExperience(yearsOfExperience);
-    }
-
-    if (currentSalary != null) {
-      user.setCurrentSalary(currentSalary);
-    }
-
-    if (expectedSalary != null) {
-      user.setExpectedSalary(expectedSalary);
-    }
-
-    if (noticePeriod != null) {
-      user.setNoticePeriod(noticePeriod);
-    }
-
-    if (linkedInProfile != null) {
-      user.setLinkedInProfile(linkedInProfile);
-    }
-
-    if (githubProfile != null) {
-      user.setGithubProfile(githubProfile);
-    }
-
-    if (portfolioWebsite != null) {
-      user.setPortfolioWebsite(portfolioWebsite);
-    }
-
-    if (resume != null) {
-      user.setResume(resume);
+      ProfileUpdateRequest profileUpdateRequest = (ProfileUpdateRequest) requestObj;
+      if (profileUpdateRequest.getFirstName() != null) user.setFirstName(profileUpdateRequest.getFirstName());
+      if (profileUpdateRequest.getLastName() != null) user.setLastName(profileUpdateRequest.getLastName());
+      if (profileUpdateRequest.getPhoneNumber() != null) user.setPhoneNumber(profileUpdateRequest.getPhoneNumber());
+      if (profileUpdateRequest.getCompany() != null) user.setCompany(profileUpdateRequest.getCompany());
+      if (profileUpdateRequest.getDepartmentId() != null) user.setDepartmentId(profileUpdateRequest.getDepartmentId());
+      if (profileUpdateRequest.getDesignation() != null) user.setDesignation(profileUpdateRequest.getDesignation());
+      if (profileUpdateRequest.getDesignationId() != null) user.setDesignationId(profileUpdateRequest.getDesignationId());
+      if (profileUpdateRequest.getCityId() != null) user.setCityId(profileUpdateRequest.getCityId());
+      if (profileUpdateRequest.getCountryId() != null) user.setCountryId(profileUpdateRequest.getCountryId());
+      if (profileUpdateRequest.getZipCode() != null) user.setZipCode(profileUpdateRequest.getZipCode());
+      if (profileUpdateRequest.getLinkedInProfile() != null) user.setLinkedInProfile(profileUpdateRequest.getLinkedInProfile());
+      if (profileUpdateRequest.getGithubProfile() != null) user.setGithubProfile(profileUpdateRequest.getGithubProfile());
+      if (profileUpdateRequest.getPortfolioWebsite() != null) user.setPortfolioWebsite(profileUpdateRequest.getPortfolioWebsite());
+      if (profileUpdateRequest.getResume() != null) user.setResume(profileUpdateRequest.getResume());
+      if (profileUpdateRequest.getYearsOfExperience() != null) user.setYearsOfExperience(profileUpdateRequest.getYearsOfExperience());
+      if (profileUpdateRequest.getMonthsOfExperience() != null) user.setMonthsOfExperience(profileUpdateRequest.getMonthsOfExperience());
+      if (profileUpdateRequest.getCurrentSalary() != null) user.setCurrentSalary(profileUpdateRequest.getCurrentSalary());
+      if (profileUpdateRequest.getCurrentSalaryCurrencyId() != null) user.setCurrentSalaryCurrencyId(profileUpdateRequest.getCurrentSalaryCurrencyId());
+      if (profileUpdateRequest.getExpectedSalary() != null) user.setExpectedSalary(profileUpdateRequest.getExpectedSalary());
+      if (profileUpdateRequest.getExpectedSalaryCurrencyId() != null) user.setExpectedSalaryCurrencyId(profileUpdateRequest.getExpectedSalaryCurrencyId());
+      if (profileUpdateRequest.getNoticePeriod() != null) user.setNoticePeriod(profileUpdateRequest.getNoticePeriod());
+      if (profileUpdateRequest.getEducation() != null) user.setEducation(profileUpdateRequest.getEducation());
     }
   }
 
@@ -279,5 +218,34 @@ public class RegistrationService {
         .role(String.valueOf(user.getRole()))
         .emailVerified(user.isEmailVerified())
         .build();
+  }
+
+  @Transactional(readOnly = true)
+  public User getUserByEmail(String email) {
+    return userRepository.findByEmail(email)
+            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+  }
+
+  private void saveUserSkills(Long userId, Set<Long> skillIds, Set<String> skillNames) {
+    List<UserSkill> skills = new ArrayList<>();
+    
+    // Add skills with IDs
+    if (skillIds != null && !skillIds.isEmpty()) {
+      for (Long skillId : skillIds) {
+        skills.add(new UserSkill(userId, skillId));
+      }
+    }
+    
+    // Add skills with names only
+    if (skillNames != null && !skillNames.isEmpty()) {
+      for (String skillName : skillNames) {
+        skills.add(new UserSkill(userId, skillName));
+      }
+    }
+    
+    // Save all skills
+    if (!skills.isEmpty()) {
+      userSkillRepository.saveAll(skills);
+    }
   }
 } 

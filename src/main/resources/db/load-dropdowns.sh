@@ -100,6 +100,16 @@ else
     exit 1
 fi
 
+# Load companies data for interviews
+echo "Loading currency data..."
+$MYSQL_CMD < ./currencies.sql
+if [ $? -eq 0 ]; then
+    echo "currency loaded successfully."
+else
+    echo "Error loading currency."
+    exit 1
+fi
+
 # Load company-designation-skills data
 echo "Loading company-designation-skills data..."
 $MYSQL_CMD < ./company_designation_skills.sql
