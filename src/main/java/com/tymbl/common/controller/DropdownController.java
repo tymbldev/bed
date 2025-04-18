@@ -3,8 +3,10 @@ package com.tymbl.common.controller;
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
 import com.tymbl.common.entity.Location;
+import com.tymbl.common.entity.Currency;
 import com.tymbl.common.enums.Degree;
 import com.tymbl.common.service.DropdownService;
+import com.tymbl.common.service.CurrencyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -28,6 +30,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @CrossOrigin(
@@ -44,10 +47,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 )
 @RequestMapping("/api/v1/dropdowns")
 @RequiredArgsConstructor
-@Tag(name = "Dropdowns", description = "APIs for managing dropdown data like departments, locations, and designations")
+@Tag(name = "Dropdowns", description = "APIs for managing dropdown data like departments, locations, designations, and currencies")
 public class DropdownController {
 
     private final DropdownService dropdownService;
+    private final CurrencyService currencyService;
 
     // Department endpoints
     @GetMapping("/departments")
@@ -296,5 +300,93 @@ public class DropdownController {
                 degree -> degree.name().charAt(0) + degree.name().substring(1).toLowerCase().replace("_", " ")
             ));
         return ResponseEntity.ok(degreeMap);
+    }
+
+    // Currency endpoints
+    @GetMapping("/currencies")
+    @Operation(summary = "Get all currencies", description = "Returns a list of all available currencies")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of currencies retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = Currency.class),
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"id\": 1,\n" +
+                          "    \"code\": \"USD\",\n" +
+                          "    \"name\": \"US Dollar\",\n" +
+                          "    \"symbol\": \"$\",\n" +
+                          "    \"exchangeRate\": 1.00\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"id\": 2,\n" +
+                          "    \"code\": \"EUR\",\n" +
+                          "    \"name\": \"Euro\",\n" +
+                          "    \"symbol\": \"€\",\n" +
+                          "    \"exchangeRate\": 0.92\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<Currency>> getAllCurrencies() {
+        return ResponseEntity.ok(currencyService.getAllCurrencies());
+    }
+
+    @GetMapping("/currencies/{id}")
+    @Operation(summary = "Get currency by ID", description = "Returns a currency by its ID")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Currency retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = Currency.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"code\": \"USD\",\n" +
+                          "  \"name\": \"US Dollar\",\n" +
+                          "  \"symbol\": \"$\",\n" +
+                          "  \"exchangeRate\": 1.00\n" +
+                          "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Currency not found")
+    })
+    public ResponseEntity<Currency> getCurrencyById(@PathVariable Long id) {
+        return currencyService.getCurrencyById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/currencies/code/{code}")
+    @Operation(summary = "Get currency by code", description = "Returns a currency by its code (e.g., USD, EUR)")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Currency retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = Currency.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"code\": \"USD\",\n" +
+                          "  \"name\": \"US Dollar\",\n" +
+                          "  \"symbol\": \"$\",\n" +
+                          "  \"exchangeRate\": 1.00\n" +
+                          "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Currency not found")
+    })
+    public ResponseEntity<Currency> getCurrencyByCode(@PathVariable String code) {
+        return currencyService.getCurrencyByCode(code)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 } 

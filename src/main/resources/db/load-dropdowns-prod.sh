@@ -20,15 +20,7 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-# Load schema if needed
-echo "Loading schema..."
-$MYSQL_CMD < ./schema.sql
-if [ $? -eq 0 ]; then
-    echo "Schema loaded successfully."
-else
-    echo "Error loading schema."
-    exit 1
-fi
+
 
 # Load countries
 echo "Loading countries..."
