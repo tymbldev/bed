@@ -1,7 +1,7 @@
 package com.tymbl.auth.filter;
 
 import com.tymbl.auth.service.JwtService;
-import com.tymbl.auth.service.CustomUserDetailsService;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
@@ -26,7 +26,7 @@ import java.util.List;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
     
     @Value("${server.servlet.context-path:/}")
     private String contextPath;
@@ -35,7 +35,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final List<String> publicPaths = Arrays.asList(
         "/api/v1/auth",
         "/api/v1/registration",
-        "/api/v1/health"
+        "/api/v1/health",
+        "/api/v1/jobsearch",
+        "/api/v1/locations",
+        "/api/v1/dropdowns",
+        "/api/v1/skills",
+        "/api/v1/companies"
     );
 
     @Override
@@ -63,32 +68,44 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             HttpServletResponse response,
             FilterChain filterChain
     ) throws ServletException, IOException {
-        final String authHeader = request.getHeader("Authorization");
-        final String jwt;
-        final String userEmail;
+        try {
+            final String authHeader = request.getHeader("Authorization");
+            final String jwt;
+            final String userEmail;
 
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            filterChain.doFilter(request, response);
-            return;
-        }
-
-        jwt = authHeader.substring(7);
-        userEmail = jwtService.extractUsername(jwt);
-
-        if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
-
-            if (jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails,
-                        null,
-                        userDetails.getAuthorities()
-                );
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.getWriter().write("{\"status\": 401, \"message\": \"Authorization header is missing or invalid\"}");
+                return;
             }
+
+            jwt = authHeader.substring(7);
+            userEmail = jwtService.extractUsername(jwt);
+
+            if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userEmail);
+
+                if (jwtService.isTokenValid(jwt, userDetails)) {
+                    UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                    log.debug("Authentication successful for user: {}", userEmail);
+                } else {
+                    response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    response.getWriter().write("{\"status\": 401, \"message\": \"Invalid or expired token\"}");
+                    return;
+                }
+            }
+            
+            filterChain.doFilter(request, response);
+        } catch (Exception e) {
+            log.error("Error processing JWT authentication", e);
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.getWriter().write("{\"status\": 401, \"message\": \"Authentication failed\"}");
         }
-        
-        filterChain.doFilter(request, response);
     }
 } 

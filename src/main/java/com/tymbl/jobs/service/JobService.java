@@ -22,6 +22,13 @@ public class JobService {
 
     @Transactional
     public JobResponse createJob(JobRequest request, User postedBy) {
+        if (postedBy == null) {
+            throw new RuntimeException("User must be authenticated to create a job");
+        }
+        if (postedBy.getId() == null) {
+            throw new RuntimeException("Invalid user ID");
+        }
+
         Job job = new Job();
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());

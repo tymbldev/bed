@@ -56,14 +56,13 @@ public class SecurityConfig {
         .antMatchers("/v3/api-docs/**", "/tymbl-service/v3/api-docs/**").permitAll()
         .antMatchers("/swagger-ui/**", "/tymbl-service/swagger-ui/**").permitAll()
         .antMatchers("/swagger-ui.html", "/tymbl-service/swagger-ui.html").permitAll()
-        .antMatchers("/api/v1/jobs/**", "/tymbl-service/api/v1/jobs/**").permitAll()
+        .antMatchers("/api/v1/jobsearch/**", "/tymbl-service/api/v1/jobsearch/**").permitAll()
         .antMatchers("/api-docs/**", "/tymbl-service/api-docs/**").permitAll()
 
-    // Protected endpoints (JWT required)
-        .antMatchers("/tymbl-service/api/v1/users/**").authenticated()
-        .antMatchers("/tymbl-service/api/v1/jobsmanagement/**").authenticated()
-        .antMatchers("/tymbl-service/api/v1/locations/**").authenticated()
-        .antMatchers("/tymbl-service/api/v1/locations/**").authenticated()
+        // Protected endpoints (JWT required)
+        .antMatchers("/api/v1/jobmanagement/**").authenticated()
+        .antMatchers("/api/v1/users/**").authenticated()
+        .antMatchers("/api/v1/job-applications/**").authenticated()
         .anyRequest().authenticated()
         .and()
         .sessionManagement()
@@ -98,7 +97,7 @@ public class SecurityConfig {
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/api/v1/users/profile", profileConfig);
-    source.registerCorsConfiguration("/api/v1/jobsmanagement/**", profileConfig);
+    source.registerCorsConfiguration("/api/v1/jobmanagement/**", profileConfig);
     source.registerCorsConfiguration("/**", configuration);
     return source;
   }

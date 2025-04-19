@@ -576,7 +576,226 @@
       ]
     },
     {
-      "name": "Jobs",
+      "name": "Job Search",
+      "item": [
+        {
+          "name": "Get All Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch?page=0&size=10&sortBy=createdAt&sortDirection=DESC",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "DESC"
+                }
+              ]
+            },
+            "description": "Get all active jobs with pagination and sorting"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Job by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "1"]
+            },
+            "description": "Get a specific job by ID"
+          },
+          "response": []
+        },
+        {
+          "name": "Get My Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/my-posts?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "my-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all job postings by the current user"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/search?keyword=Java&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "search"],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Java"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search job postings by keyword"
+          },
+          "response": []
+        },
+        {
+          "name": "Search by Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/search/skills?skills=Java&skills=Spring&page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "search", "skills"],
+              "query": [
+                {
+                  "key": "skills",
+                  "value": "Java"
+                },
+                {
+                  "key": "skills",
+                  "value": "Spring"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search job postings by required skills"
+          },
+          "response": []
+        },
+        {
+          "name": "Get Jobs by Company",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/company/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "company", "1"]
+            },
+            "description": "Get all jobs posted by a specific company"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Jobs by Company and Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/company/1/search?title=Software Engineer",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "company", "1", "search"],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "Software Engineer"
+                }
+              ]
+            },
+            "description": "Search jobs by company ID and title"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Jobs by Company Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/company/search?companyName=Tech Corp",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "company", "search"],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Tech Corp"
+                }
+              ]
+            },
+            "description": "Search jobs by company name"
+          },
+          "response": []
+        },
+        {
+          "name": "Search Jobs by Company Name and Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/company/search/title?companyName=Tech Corp&title=Software Engineer",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobsearch", "company", "search", "title"],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Tech Corp"
+                },
+                {
+                  "key": "title",
+                  "value": "Software Engineer"
+                }
+              ]
+            },
+            "description": "Search jobs by company name and title"
+          },
+          "response": []
+        }
+      ],
+      "description": "Job search and retrieval endpoints"
+    },
+    {
+      "name": "Job Management",
       "item": [
         {
           "name": "Create Job",
@@ -597,65 +816,65 @@
               "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Job description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/jobs",
+              "raw": "{{base_url}}/api/v1/jobmanagement",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "jobs"]
+              "path": ["api", "v1", "jobmanagement"]
             },
-            "description": "Create a new job posting"
+            "description": "Create a new job posting. Requires authentication with JWT token."
           },
-          "response": []
-        },
-        {
-          "name": "Get All Jobs",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs?page=0&size=10&sort=createdAt,desc",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "jobs"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                },
-                {
-                  "key": "sort",
-                  "value": "createdAt,desc"
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Job description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
                 }
-              ]
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Job description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"createdAt\": \"2024-03-20T10:30:00\",\n  \"updatedAt\": \"2024-03-20T10:30:00\",\n  \"active\": true\n}"
             },
-            "description": "Get all jobs with pagination"
-          },
-          "response": []
-        },
-        {
-          "name": "Get Job by ID",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobs/1",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "jobs", "1"]
-            },
-            "description": "Get a specific job by ID"
-          },
-          "response": []
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Job description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Authorization header is missing or invalid\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            }
+          ]
         },
         {
           "name": "Update Job",
@@ -676,13 +895,95 @@
               "raw": "{\n  \"title\": \"Updated Job Title\",\n  \"description\": \"Updated description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/jobs/1",
+              "raw": "{{base_url}}/api/v1/jobmanagement/1",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "jobs", "1"]
+              "path": ["api", "v1", "jobmanagement", "1"]
             },
-            "description": "Update a job posting"
+            "description": "Update an existing job posting. Requires authentication with JWT token and ownership of the job."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Job Title\",\n  \"description\": \"Updated description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Updated Job Title\",\n  \"description\": \"Updated description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"createdAt\": \"2024-03-20T10:30:00\",\n  \"updatedAt\": \"2024-03-20T10:35:00\",\n  \"active\": true\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Job Title\",\n  \"description\": \"Updated description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
+                }
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Authorization header is missing or invalid\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "PUT",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Updated Job Title\",\n  \"description\": \"Updated description\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\"\n}"
+                }
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 403,\n  \"message\": \"You are not authorized to update this job\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            }
+          ]
         },
         {
           "name": "Delete Job",
@@ -695,15 +996,78 @@
               }
             ],
             "url": {
-              "raw": "{{base_url}}/api/v1/jobs/1",
+              "raw": "{{base_url}}/api/v1/jobmanagement/1",
               "host": ["{{base_url}}"],
-              "path": ["api", "v1", "jobs", "1"]
+              "path": ["api", "v1", "jobmanagement", "1"]
             },
-            "description": "Delete a job posting"
+            "description": "Delete (deactivate) a job posting. Requires authentication with JWT token and ownership of the job."
           },
-          "response": []
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ]
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"message\": \"Job deleted successfully\"\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": []
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Authorization header is missing or invalid\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            },
+            {
+              "name": "Forbidden",
+              "originalRequest": {
+                "method": "DELETE",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ]
+              },
+              "status": "Forbidden",
+              "code": 403,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 403,\n  \"message\": \"You are not authorized to delete this job\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            }
+          ]
         }
-      ]
+      ],
+      "description": "Job management endpoints (create/update/delete) that require authentication with JWT token"
     },
     {
       "name": "Job Applications",
