@@ -409,16 +409,8 @@
             "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/users/profile/completion",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "users",
-                "profile",
-                "completion"
-              ]
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "users", "profile", "completion"]
             },
             "description": "Get profile completion status"
           },
@@ -625,35 +617,6 @@
           "response": []
         },
         {
-          "name": "Get My Jobs",
-          "request": {
-            "method": "GET",
-            "header": [
-              {
-                "key": "Authorization",
-                "value": "Bearer {{token}}"
-              }
-            ],
-            "url": {
-              "raw": "{{base_url}}/api/v1/jobsearch/my-posts?page=0&size=10",
-              "host": ["{{base_url}}"],
-              "path": ["api", "v1", "jobsearch", "my-posts"],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "10"
-                }
-              ]
-            },
-            "description": "Get all job postings by the current user"
-          },
-          "response": []
-        },
-        {
           "name": "Search Jobs",
           "request": {
             "method": "GET",
@@ -797,6 +760,75 @@
     {
       "name": "Job Management",
       "item": [
+        {
+          "name": "Get My Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/my-posts?page=0&size=10",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "jobmanagement", "my-posts"],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all job postings by the current user. Requires authentication with JWT token."
+          },
+          "response": [
+            {
+              "name": "Success",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ]
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"title\": \"Software Engineer\",\n      \"description\": \"Job description\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designation\": \"Software Engineer\",\n      \"salary\": 100000,\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"company\": \"Tech Corp\",\n      \"createdAt\": \"2024-03-20T10:30:00\",\n      \"updatedAt\": \"2024-03-20T10:30:00\",\n      \"active\": true\n    }\n  ],\n  \"pageable\": {\n    \"pageNumber\": 0,\n    \"pageSize\": 10,\n    \"sort\": {\n      \"sorted\": true,\n      \"unsorted\": false,\n      \"empty\": false\n    },\n    \"offset\": 0,\n    \"paged\": true,\n    \"unpaged\": false\n  },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"size\": 10,\n  \"number\": 0,\n  \"sort\": {\n    \"sorted\": true,\n    \"unsorted\": false,\n    \"empty\": false\n  },\n  \"numberOfElements\": 1,\n  \"first\": true,\n  \"empty\": false\n}"
+            },
+            {
+              "name": "Unauthorized",
+              "originalRequest": {
+                "method": "GET",
+                "header": []
+              },
+              "status": "Unauthorized",
+              "code": 401,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "body": "{\n  \"status\": 401,\n  \"message\": \"Authorization header is missing or invalid\",\n  \"timestamp\": \"2024-03-20T10:30:00\"\n}"
+            }
+          ]
+        },
         {
           "name": "Create Job",
           "request": {

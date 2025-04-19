@@ -14,7 +14,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -95,5 +98,26 @@ public class JobManagementController {
         User currentUser = registrationService.getUserByEmail(email);
         jobService.deleteJob(jobId, currentUser);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/my-posts")
+    @Operation(
+        summary = "Get all job postings by the current user",
+        description = "Returns a paginated list of all job postings created by the authenticated user."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized")
+    })
+    public ResponseEntity<Page<JobResponse>> getMyJobs(
+        @RequestHeader("Authorization") String token,
+        @Parameter(description = "Page number (0-based)", example = "0")
+        @RequestParam(defaultValue = "0") int page,
+        @Parameter(description = "Page size", example = "10")
+        @RequestParam(defaultValue = "10") int size) {
+        String email = jwtService.extractUsername(token.substring(7));
+        User currentUser = registrationService.getUserByEmail(email);
+        return ResponseEntity.ok(
+            jobService.getJobsByUser(currentUser, PageRequest.of(page, size)));
     }
 } 

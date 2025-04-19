@@ -68,25 +68,6 @@ public class JobSearchController {
         return ResponseEntity.ok(jobService.getJobById(jobId));
     }
 
-    @GetMapping("/my-posts")
-    @Operation(
-        summary = "Get all job postings by the current user",
-        description = "Returns a paginated list of all job postings created by the authenticated user."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully"),
-        @ApiResponse(responseCode = "401", description = "Unauthorized")
-    })
-    public ResponseEntity<Page<JobResponse>> getMyJobs(
-            @AuthenticationPrincipal User currentUser,
-            @Parameter(description = "Page number (0-based)", example = "0")
-            @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Page size", example = "10")
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(
-                jobService.getJobsByUser(currentUser, PageRequest.of(page, size)));
-    }
-
     @GetMapping("/search")
     @Operation(
         summary = "Search job postings by keyword",
