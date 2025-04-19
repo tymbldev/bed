@@ -141,10 +141,6 @@ CREATE TABLE IF NOT EXISTS locations (
     FOREIGN KEY (country_id) REFERENCES countries(id)
 );
 
-
-
-
-
 -- User Tables
 CREATE TABLE IF NOT EXISTS users (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -190,6 +186,20 @@ CREATE TABLE IF NOT EXISTS users (
     FOREIGN KEY (expected_salary_currency_id) REFERENCES currencies(id)
 );
 
+CREATE TABLE IF NOT EXISTS user_resumes (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    user_id BIGINT NOT NULL,
+    file_name VARCHAR(255) NOT NULL,
+    file_type VARCHAR(50) NOT NULL,
+    file_size BIGINT NOT NULL,
+    resume_data BLOB NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    CONSTRAINT valid_file_type CHECK (file_type IN ('application/pdf', 'text/plain', 'application/msword')),
+    CONSTRAINT valid_file_size CHECK (file_size <= 5242880) -- 5MB in bytes
+);
+
 CREATE TABLE IF NOT EXISTS user_skills (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     user_id BIGINT NOT NULL,
@@ -215,19 +225,24 @@ CREATE TABLE IF NOT EXISTS jobs (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    location VARCHAR(255) NOT NULL,
-    employment_type VARCHAR(50) NOT NULL,
-    experience_level VARCHAR(50) NOT NULL,
+    city_id BIGINT,
+    country_id BIGINT,
+    designation_id BIGINT,
+    designation VARCHAR(100),
     salary DOUBLE NOT NULL,
-    currency VARCHAR(3) NOT NULL,
+    currency_id BIGINT NOT NULL,
     company_id BIGINT NOT NULL,
-    company_name VARCHAR(100),
+    company VARCHAR(100),
     posted_by BIGINT NOT NULL,
     active BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (company_id) REFERENCES companies(id),
-    FOREIGN KEY (posted_by) REFERENCES users(id)
+    FOREIGN KEY (posted_by) REFERENCES users(id),
+    FOREIGN KEY (currency_id) REFERENCES currencies(id),
+    FOREIGN KEY (city_id) REFERENCES cities(id),
+    FOREIGN KEY (country_id) REFERENCES countries(id),
+    FOREIGN KEY (designation_id) REFERENCES designations(id)
 );
 
 CREATE TABLE IF NOT EXISTS job_applications (

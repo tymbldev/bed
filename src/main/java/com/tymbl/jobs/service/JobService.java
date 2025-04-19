@@ -4,8 +4,6 @@ import com.tymbl.common.entity.Job;
 import com.tymbl.common.entity.User;
 import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
-import com.tymbl.jobs.entity.Company;
-import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,32 +19,21 @@ import java.util.stream.Collectors;
 public class JobService {
 
     private final JobRepository jobRepository;
-    private final CompanyRepository companyRepository;
 
     @Transactional
     public JobResponse createJob(JobRequest request, User postedBy) {
-        Company company;
-        if (request.getCompanyId() == 1000) {
-            // New company
-            company = new Company();
-            company.setName(request.getCompanyName());
-            company = companyRepository.save(company);
-        } else {
-            // Existing company
-            company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Company not found"));
-        }
-
         Job job = new Job();
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
-        job.setLocation(request.getLocation());
-        job.setEmploymentType(request.getEmploymentType());
-        job.setExperienceLevel(request.getExperienceLevel());
+        job.setCityId(request.getCityId());
+        job.setCountryId(request.getCountryId());
+        job.setDesignationId(request.getDesignationId());
+        job.setDesignation(request.getDesignation());
         job.setSalary(request.getSalary());
-        job.setCurrency(request.getCurrency());
-        job.setCompany(company);
-        job.setPostedBy(postedBy);
+        job.setCurrencyId(request.getCurrencyId());
+        job.setCompanyId(request.getCompanyId());
+        job.setCompany(request.getCompany());
+        job.setPostedById(postedBy.getId());
 
         job = jobRepository.save(job);
         return mapToResponse(job);
@@ -60,7 +47,7 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public Page<JobResponse> getJobsByUser(User user, Pageable pageable) {
-        return jobRepository.findByPostedByAndActiveTrue(user, pageable)
+        return jobRepository.findByPostedByIdAndActiveTrue(user.getId(), pageable)
             .map(this::mapToResponse);
     }
 
@@ -76,7 +63,7 @@ public class JobService {
         Job job = jobRepository.findById(jobId)
             .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        if (!job.getPostedBy().getId().equals(currentUser.getId())) {
+        if (!job.getPostedById().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to delete this job");
         }
 
@@ -109,33 +96,30 @@ public class JobService {
         
         String combinedSkills = String.join(" ", lowerCaseSkills);
         
-        return jobRepository.findBySkills(lowerCaseSkills, combinedSkills, pageable)
+        return jobRepository.findBySkills(combinedSkills, pageable)
             .map(this::mapToResponse);
     }
 
     public List<JobResponse> getJobsByCompany(Long companyId) {
-        Company company = companyRepository.findById(companyId)
-            .orElseThrow(() -> new RuntimeException("Company not found"));
-
-        return jobRepository.findByCompany(company).stream()
+        return jobRepository.findByCompanyId(companyId).stream()
             .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
     public List<JobResponse> getJobsByCompanyAndTitle(Long companyId, String title) {
-        return jobRepository.findActiveJobsByCompanyAndTitle(companyId, title).stream()
+        return jobRepository.findActiveJobsByCompanyIdAndTitle(companyId, title).stream()
             .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
     public List<JobResponse> getJobsByCompanyName(String companyName) {
-        return jobRepository.findByCompanyNameContainingIgnoreCase(companyName).stream()
+        return jobRepository.findByCompanyContainingIgnoreCase(companyName).stream()
             .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
 
     public List<JobResponse> getJobsByCompanyNameAndTitle(String companyName, String title) {
-        return jobRepository.findActiveJobsByCompanyNameAndTitle(companyName, title).stream()
+        return jobRepository.findActiveJobsByCompanyAndTitle(companyName, title).stream()
             .map(this::mapToResponse)
             .collect(Collectors.toList());
     }
@@ -146,25 +130,21 @@ public class JobService {
             .orElseThrow(() -> new RuntimeException("Job not found"));
 
         // Check if user is authorized to update the job
-        if (!job.getPostedBy().getId().equals(currentUser.getId())) {
+        if (!job.getPostedById().equals(currentUser.getId())) {
             throw new RuntimeException("You are not authorized to update this job");
-        }
-
-        // Update company if needed
-        if (request.getCompanyId() != null && !request.getCompanyId().equals(job.getCompany().getId())) {
-            Company company = companyRepository.findById(request.getCompanyId())
-                .orElseThrow(() -> new RuntimeException("Company not found"));
-            job.setCompany(company);
         }
 
         // Update job details
         job.setTitle(request.getTitle());
         job.setDescription(request.getDescription());
-        job.setLocation(request.getLocation());
-        job.setEmploymentType(request.getEmploymentType());
-        job.setExperienceLevel(request.getExperienceLevel());
+        job.setCityId(request.getCityId());
+        job.setCountryId(request.getCountryId());
+        job.setDesignationId(request.getDesignationId());
+        job.setDesignation(request.getDesignation());
         job.setSalary(request.getSalary());
-        job.setCurrency(request.getCurrency());
+        job.setCurrencyId(request.getCurrencyId());
+        job.setCompanyId(request.getCompanyId());
+        job.setCompany(request.getCompany());
 
         job = jobRepository.save(job);
         return mapToResponse(job);
@@ -175,14 +155,15 @@ public class JobService {
         response.setId(job.getId());
         response.setTitle(job.getTitle());
         response.setDescription(job.getDescription());
-        response.setLocation(job.getLocation());
-        response.setEmploymentType(job.getEmploymentType());
-        response.setExperienceLevel(job.getExperienceLevel());
+        response.setCityId(job.getCityId());
+        response.setCountryId(job.getCountryId());
+        response.setDesignationId(job.getDesignationId());
+        response.setDesignation(job.getDesignation());
         response.setSalary(job.getSalary());
-        response.setCurrency(job.getCurrency());
-        response.setCompanyId(job.getCompany().getId());
-        response.setCompanyName(job.getCompanyName());
-        response.setPostedBy(job.getPostedBy().getId());
+        response.setCurrencyId(job.getCurrencyId());
+        response.setCompanyId(job.getCompanyId());
+        response.setCompany(job.getCompany());
+        response.setPostedBy(job.getPostedById());
         response.setActive(job.isActive());
         response.setCreatedAt(job.getCreatedAt());
         response.setUpdatedAt(job.getUpdatedAt());

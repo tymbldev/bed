@@ -2,6 +2,7 @@ package com.tymbl.jobs.service;
 
 import com.tymbl.common.entity.Job;
 import com.tymbl.common.entity.User;
+import com.tymbl.common.repository.UserRepository;
 import com.tymbl.jobs.dto.JobApplicationRequest;
 import com.tymbl.jobs.dto.JobApplicationResponse;
 import com.tymbl.jobs.dto.JobApplicationResponseExtendedDetails;
@@ -23,37 +24,38 @@ public class JobApplicationService {
 
     private final JobApplicationRepository jobApplicationRepository;
     private final JobRepository jobRepository;
+    private final UserRepository userRepository;
 
     @Transactional
     public JobApplicationResponse applyForJob(JobApplicationRequest request, User applicant) {
         Job job = jobRepository.findById(request.getJobId())
             .orElseThrow(() -> new RuntimeException("Job not found"));
 
-        if (jobApplicationRepository.existsByJobAndApplicant(job, applicant)) {
+        // Check if already applied
+        List<JobApplication> existingApplications = jobApplicationRepository.findByJobIdAndApplicantId(job.getId(), applicant.getId());
+        if (existingApplications != null && !existingApplications.isEmpty()) {
             throw new RuntimeException("You have already applied for this job");
         }
 
         JobApplication application = new JobApplication();
-        application.setJob(job);
-        application.setApplicant(applicant);
+        application.setJobId(job.getId());
+        application.setApplicantId(applicant.getId());
         application.setCoverLetter(request.getCoverLetter());
         application.setResumeUrl(request.getResumeUrl());
+        application.setStatus(JobApplication.ApplicationStatus.PENDING);
 
         application = jobApplicationRepository.save(application);
         return mapToBasicResponse(application);
     }
 
     public List<JobApplicationResponse> getApplicationsByJob(Long jobId) {
-        Job job = jobRepository.findById(jobId)
-            .orElseThrow(() -> new RuntimeException("Job not found"));
-
-        return jobApplicationRepository.findByJob(job).stream()
+        return jobApplicationRepository.findByJobId(jobId).stream()
             .map(this::mapToBasicResponse)
             .collect(Collectors.toList());
     }
 
     public List<JobApplicationResponse> getApplicationsByApplicant(User applicant) {
-        return jobApplicationRepository.findByApplicant(applicant).stream()
+        return jobApplicationRepository.findByApplicantId(applicant.getId()).stream()
             .map(this::mapToBasicResponse)
             .collect(Collectors.toList());
     }
@@ -61,48 +63,63 @@ public class JobApplicationService {
     public JobApplicationResponseExtendedDetails getApplicationDetails(Long applicationId) {
         JobApplication application = jobApplicationRepository.findById(applicationId)
             .orElseThrow(() -> new RuntimeException("Application not found"));
-        return mapToExtendedResponse(application);
+        return mapToExtendedDetails(application);
     }
 
     private JobApplicationResponse mapToBasicResponse(JobApplication application) {
+        Job job = jobRepository.findById(application.getJobId())
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        User applicant = userRepository.findById(application.getApplicantId())
+            .orElseThrow(() -> new RuntimeException("Applicant not found"));
+
         JobApplicationResponse response = new JobApplicationResponse();
         response.setId(application.getId());
-        response.setJobId(application.getJob().getId());
-        response.setJobTitle(application.getJob().getTitle());
-        response.setApplicantId(application.getApplicant().getId());
-        response.setApplicantName(application.getApplicant().getFirstName() + " " + application.getApplicant().getLastName());
+        response.setJobId(job.getId());
+        response.setJobTitle(job.getTitle());
+        response.setApplicantId(applicant.getId());
+        response.setApplicantName(applicant.getFirstName() + " " + applicant.getLastName());
         response.setStatus(convertStatus(application.getStatus()));
-        response.setCreatedAt(application.getAppliedAt());
+        response.setCreatedAt(application.getCreatedAt());
         return response;
     }
 
-    private JobApplicationResponseExtendedDetails mapToExtendedResponse(JobApplication application) {
-        JobApplicationResponseExtendedDetails response = new JobApplicationResponseExtendedDetails();
-        response.setId(application.getId());
-        response.setJobId(application.getJob().getId());
-        response.setJobTitle(application.getJob().getTitle());
-        response.setJobDescription(application.getJob().getDescription());
-        response.setJobLocation(application.getJob().getLocation());
-        response.setJobEmploymentType(application.getJob().getEmploymentType());
-        response.setJobExperienceLevel(application.getJob().getExperienceLevel());
-        response.setJobSalary(application.getJob().getSalary());
-        response.setJobCurrency(application.getJob().getCurrency());
-        response.setApplicantId(application.getApplicant().getId());
-        response.setApplicantName(application.getApplicant().getFirstName() + " " + application.getApplicant().getLastName());
-        response.setApplicantEmail(application.getApplicant().getEmail());
-        response.setCoverLetter(application.getCoverLetter());
-        response.setResumeUrl(application.getResumeUrl());
-        response.setStatus(convertStatus(application.getStatus()));
-        
-        // These fields may not exist in the entity, setting them to null or default values
-        response.setSkills(new ArrayList<>());
-        response.setExperience(null);
-        response.setEducation(null);
-        response.setLinkedInUrl(application.getApplicant().getLinkedInProfile());
-        response.setGithubUrl(null);
-        response.setCreatedAt(application.getAppliedAt());
-        response.setUpdatedAt(application.getUpdatedAt());
-        return response;
+    private JobApplicationResponseExtendedDetails mapToExtendedDetails(JobApplication application) {
+        Job job = jobRepository.findById(application.getJobId())
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        User applicant = userRepository.findById(application.getApplicantId())
+            .orElseThrow(() -> new RuntimeException("Applicant not found"));
+
+        JobApplicationResponseExtendedDetails details = new JobApplicationResponseExtendedDetails();
+        details.setId(application.getId());
+        details.setJobId(job.getId());
+        details.setJobTitle(job.getTitle());
+        details.setJobDescription(job.getDescription());
+        details.setJobCityId(job.getCityId());
+        details.setJobCountryId(job.getCountryId());
+        details.setJobDesignationId(job.getDesignationId());
+        details.setJobDesignation(job.getDesignation());
+        details.setJobSalary(job.getSalary());
+        details.setJobCurrencyId(job.getCurrencyId());
+        details.setJobCompanyId(job.getCompanyId());
+        details.setJobCompany(job.getCompany());
+        details.setJobSkillIds(new ArrayList<>(job.getSkillIds()));
+        details.setApplicantId(applicant.getId());
+        details.setApplicantName(applicant.getFirstName() + " " + applicant.getLastName());
+        details.setApplicantEmail(applicant.getEmail());
+        details.setCoverLetter(application.getCoverLetter());
+        details.setResumeUrl(application.getResumeUrl());
+        details.setStatus(convertStatus(application.getStatus()));
+        details.setApplicantSkillIds(new ArrayList<>(applicant.getSkillIds()));
+        details.setExperience(applicant.getYearsOfExperience() + " years " + applicant.getMonthsOfExperience() + " months");
+        details.setEducation(applicant.getEducation().stream()
+            .map(edu -> edu.getDegree() + " from " + edu.getInstitution())
+            .collect(Collectors.joining(", ")));
+        details.setPortfolioUrl(applicant.getPortfolioWebsite());
+        details.setLinkedInUrl(applicant.getLinkedInProfile());
+        details.setGithubUrl(applicant.getGithubProfile());
+        details.setCreatedAt(application.getCreatedAt());
+        details.setUpdatedAt(application.getUpdatedAt());
+        return details;
     }
     
     /**
@@ -123,5 +140,26 @@ public class JobApplicationService {
             default:
                 return ApplicationStatus.PENDING;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public List<JobApplicationResponseExtendedDetails> getJobApplicationsByUser(User user) {
+        return jobApplicationRepository.findByApplicantId(user.getId()).stream()
+            .map(this::mapToExtendedDetails)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<JobApplicationResponseExtendedDetails> getJobApplicationsByJob(Long jobId) {
+        return jobApplicationRepository.findByJobId(jobId).stream()
+            .map(this::mapToExtendedDetails)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public JobApplicationResponseExtendedDetails getJobApplication(Long applicationId) {
+        return jobApplicationRepository.findById(applicationId)
+            .map(this::mapToExtendedDetails)
+            .orElseThrow(() -> new RuntimeException("Job application not found"));
     }
 } 

@@ -1,12 +1,14 @@
 package com.tymbl.common.entity;
 
-import com.tymbl.jobs.entity.Company;
 import javax.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
 @Data
@@ -22,46 +24,44 @@ public class Job {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(nullable = false)
-    private String location;
+    @Column(name = "city_id")
+    private Long cityId;
+
+    @Column(name = "country_id")
+    private Long countryId;
+
+    @Column(name = "designation_id")
+    private Long designationId;
+
+    @Column(name = "designation")
+    private String designation;
 
     @Column(nullable = false)
-    private String employmentType;
+    private BigDecimal salary;
 
-    @Column(nullable = false)
-    private String experienceLevel;
+    @Column(name = "currency_id", nullable = false)
+    private Long currencyId;
 
-    @Column(nullable = false)
-    private Double salary;
+    @Column(name = "company_id", nullable = false)
+    private Long companyId;
 
-    @Column(nullable = false)
-    private String currency;
+    @Column(name = "company")
+    private String company;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
-
-    @Column(name = "company_name")
-    private String companyName;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "posted_by", nullable = false)
-    private User postedBy;
+    @Column(name = "posted_by", nullable = false)
+    private Long postedById;
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @ElementCollection
+    @CollectionTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"))
+    @Column(name = "skill_id")
+    private Set<Long> skillIds = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-
-    @PrePersist
-    @PreUpdate
-    public void updateCompanyName() {
-        if (company != null) {
-            this.companyName = company.getName();
-        }
-    }
 } 

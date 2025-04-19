@@ -1,12 +1,10 @@
 package com.tymbl.jobs.entity;
 
-import com.tymbl.common.entity.Job;
-import com.tymbl.common.entity.User;
-import javax.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -17,17 +15,16 @@ public class JobApplication {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id", nullable = false)
-    private Job job;
+    @Column(name = "job_id", nullable = false)
+    private Long jobId;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "applicant_id", nullable = false)
-    private User applicant;
+    @Column(name = "applicant_id", nullable = false)
+    private Long applicantId;
 
     @Column(columnDefinition = "TEXT")
     private String coverLetter;
 
+    @Column(name = "resume_url")
     private String resumeUrl;
 
     @Enumerated(EnumType.STRING)
@@ -35,7 +32,7 @@ public class JobApplication {
     private ApplicationStatus status = ApplicationStatus.PENDING;
 
     @CreationTimestamp
-    private LocalDateTime appliedAt;
+    private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;

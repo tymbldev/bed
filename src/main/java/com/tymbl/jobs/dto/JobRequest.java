@@ -4,6 +4,7 @@ import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 @Data
 public class JobRequest {
@@ -13,23 +14,25 @@ public class JobRequest {
     @NotBlank(message = "Description is required")
     private String description;
 
-    @NotBlank(message = "Location is required")
-    private String location;
+    @NotNull(message = "City ID is required")
+    private Long cityId;
 
-    @NotBlank(message = "Employment type is required")
-    private String employmentType;
+    @NotNull(message = "Country ID is required")
+    private Long countryId;
 
-    @NotBlank(message = "Experience level is required")
-    private String experienceLevel;
+    @NotNull(message = "Designation ID is required")
+    private Long designationId;
+
+    private String designation;
 
     @NotNull(message = "Salary is required")
-    private Double salary;
+    private BigDecimal salary;
 
-    @NotBlank(message = "Currency is required")
-    private String currency;
+    @NotNull(message = "Currency ID is required")
+    private Long currencyId;
 
     @NotNull(message = "Company ID is required")
     private Long companyId;
 
-    private String companyName;
+    private String company;
 } 
