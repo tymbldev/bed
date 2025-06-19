@@ -37,33 +37,6 @@ public class UserController {
     private final RegistrationService registrationService;
     private final JwtService jwtService;
 
-    /**
-     * Register a new user
-     */
-    @PostMapping("/register")
-    @Operation(
-        summary = "Register a new user",
-        description = "Registers a new user with email and password"
-    )
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "User registered successfully"),
-        @ApiResponse(responseCode = "400", description = "Email already registered or invalid input"),
-        @ApiResponse(responseCode = "500", description = "Server error")
-    })
-    public ResponseEntity<Object> registerUser(@RequestBody RegisterRequest request) {
-        try {
-            logger.info("Received registration request for email: {}", request.getEmail());
-            User user = registrationService.registerUser(request);
-            logger.info("Successfully registered user with email: {}", request.getEmail());
-            return ResponseEntity.ok(user);
-        } catch (EmailAlreadyExistsException e) {
-            logger.error("Failed to register user - email already exists: {}", request.getEmail());
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-        } catch (RuntimeException e) {
-            logger.error("Failed to register user: {}. Error: {}", request.getEmail(), e.getMessage());
-            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
-        }
-    }
 
     /**
      * Update user profile using token

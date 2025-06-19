@@ -58,6 +58,11 @@ public class Job {
     @CollectionTable(name = "job_skills", joinColumns = @JoinColumn(name = "job_id"))
     @Column(name = "skill_id")
     private Set<Long> skillIds = new HashSet<>();
+    
+    @ElementCollection
+    @CollectionTable(name = "job_tags", joinColumns = @JoinColumn(name = "job_id"))
+    @Column(name = "tag")
+    private Set<String> tags = new HashSet<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

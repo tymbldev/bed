@@ -20,6 +20,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/v1/jobsearch")
@@ -104,6 +105,70 @@ public class JobSearchController {
             @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(
                 jobService.searchBySkills(skills, PageRequest.of(page, size)));
+    }
+    
+    @GetMapping("/tags")
+    @Operation(
+        summary = "Get all job tags",
+        description = "Returns a list of all unique tags used in active job postings."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved tags successfully")
+    })
+    public ResponseEntity<List<String>> getAllTags() {
+        return ResponseEntity.ok(jobService.getAllTags());
+    }
+
+    @GetMapping("/search/tags")
+    @Operation(
+        summary = "Search jobs by tags",
+        description = "Returns a paginated list of job postings that have any of the specified tags."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully")
+    })
+    public ResponseEntity<Page<JobResponse>> searchJobsByTags(
+            @Parameter(description = "Tags to search for")
+            @RequestParam Set<String> tags,
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field", example = "createdAt")
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Sort direction (ASC or DESC)", example = "DESC")
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        return ResponseEntity.ok(jobService.searchJobsByTags(tags, pageRequest));
+    }
+
+    @GetMapping("/search/tag-keyword")
+    @Operation(
+        summary = "Search jobs by tag keyword",
+        description = "Returns a paginated list of job postings that have tags containing the specified keyword."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully")
+    })
+    public ResponseEntity<Page<JobResponse>> searchJobsByTagKeyword(
+            @Parameter(description = "Keyword to search for in tags")
+            @RequestParam String keyword,
+            @Parameter(description = "Page number (0-based)", example = "0")
+            @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Page size", example = "10")
+            @RequestParam(defaultValue = "10") int size,
+            @Parameter(description = "Sort field", example = "createdAt")
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @Parameter(description = "Sort direction (ASC or DESC)", example = "DESC")
+            @RequestParam(defaultValue = "DESC") String sortDirection) {
+        
+        Sort.Direction direction = sortDirection.equalsIgnoreCase("ASC") ? Sort.Direction.ASC : Sort.Direction.DESC;
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        
+        return ResponseEntity.ok(jobService.searchJobsByTagKeyword(keyword, pageRequest));
     }
 
     @GetMapping("/company/{companyId}")

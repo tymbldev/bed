@@ -2,6 +2,7 @@ package com.tymbl.jobs.service;
 
 import com.tymbl.common.entity.Job;
 import com.tymbl.common.entity.User;
+import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
 import com.tymbl.jobs.repository.JobRepository;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 public class JobService {
 
     private final JobRepository jobRepository;
+    private final SkillRepository skillRepository;
 
     @Transactional
     public JobResponse createJob(JobRequest request, User postedBy) {
@@ -41,6 +44,11 @@ public class JobService {
         job.setCompanyId(request.getCompanyId());
         job.setCompany(request.getCompany());
         job.setPostedById(postedBy.getId());
+        
+        // Set tags if provided
+        if (request.getTags() != null && !request.getTags().isEmpty()) {
+            job.setTags(request.getTags());
+        }
 
         job = jobRepository.save(job);
         return mapToResponse(job);
@@ -90,20 +98,18 @@ public class JobService {
             return getAllActiveJobs(pageable);
         }
         
-        // For single skill searches, use the simpler method
-        if (skills.size() == 1) {
-            return jobRepository.findBySkill(skills.get(0), pageable)
-                .map(this::mapToResponse);
+        // Convert skill names to skill IDs
+        Set<Long> skillIds = skills.stream()
+            .map(skillName -> skillRepository.findByNameContainingIgnoreCase(skillName))
+            .filter(skillsList -> !skillsList.isEmpty())
+            .map(skillsList -> skillsList.get(0).getId())
+            .collect(Collectors.toSet());
+        
+        if (skillIds.isEmpty()) {
+            return Page.empty(pageable);
         }
         
-        // For multiple skills, create a combined string for LIKE search
-        List<String> lowerCaseSkills = skills.stream()
-            .map(String::toLowerCase)
-            .collect(Collectors.toList());
-        
-        String combinedSkills = String.join(" ", lowerCaseSkills);
-        
-        return jobRepository.findBySkills(combinedSkills, pageable)
+        return jobRepository.findBySkillsIn(skillIds, pageable)
             .map(this::mapToResponse);
     }
 
@@ -152,9 +158,39 @@ public class JobService {
         job.setCurrencyId(request.getCurrencyId());
         job.setCompanyId(request.getCompanyId());
         job.setCompany(request.getCompany());
+        
+        // Update tags
+        if (request.getTags() != null) {
+            job.setTags(request.getTags());
+        }
 
         job = jobRepository.save(job);
         return mapToResponse(job);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<JobResponse> searchJobsByTags(Set<String> tags, Pageable pageable) {
+        if (tags == null || tags.isEmpty()) {
+            return getAllActiveJobs(pageable);
+        }
+        
+        return jobRepository.findByTagsIn(tags, pageable)
+            .map(this::mapToResponse);
+    }
+    
+    @Transactional(readOnly = true)
+    public Page<JobResponse> searchJobsByTagKeyword(String tagKeyword, Pageable pageable) {
+        if (tagKeyword == null || tagKeyword.isEmpty()) {
+            return getAllActiveJobs(pageable);
+        }
+        
+        return jobRepository.findByTagsContaining(tagKeyword, pageable)
+            .map(this::mapToResponse);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<String> getAllTags() {
+        return jobRepository.findAllTags();
     }
 
     private JobResponse mapToResponse(Job job) {
@@ -174,6 +210,12 @@ public class JobService {
         response.setActive(job.isActive());
         response.setCreatedAt(job.getCreatedAt());
         response.setUpdatedAt(job.getUpdatedAt());
+        
+        // Map tags to response
+        if (job.getTags() != null) {
+            response.setTags(job.getTags());
+        }
+        
         return response;
     }
 }

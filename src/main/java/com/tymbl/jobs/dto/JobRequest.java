@@ -5,6 +5,8 @@ import lombok.Data;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class JobRequest {
@@ -35,4 +37,6 @@ public class JobRequest {
     private Long companyId;
 
     private String company;
+    
+    private Set<String> tags = new HashSet<>();
 } 

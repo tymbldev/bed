@@ -28,8 +28,30 @@ public class JobApplicationService {
 
     @Transactional
     public JobApplicationResponse applyForJob(JobApplicationRequest request, User applicant) {
+        // Validate input parameters
+        if (request == null) {
+            throw new RuntimeException("Job application request cannot be null");
+        }
+        
+        if (applicant == null) {
+            throw new RuntimeException("Applicant cannot be null");
+        }
+        
+        if (request.getJobId() == null) {
+            throw new RuntimeException("Job ID is required");
+        }
+        
+        if (request.getCoverLetter() == null || request.getCoverLetter().trim().isEmpty()) {
+            throw new RuntimeException("Cover letter is required");
+        }
+
         Job job = jobRepository.findById(request.getJobId())
             .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Check if user is trying to apply to their own job
+        if (job.getPostedById().equals(applicant.getId())) {
+            throw new RuntimeException("You cannot apply to your own job posting");
+        }
 
         // Check if already applied
         List<JobApplication> existingApplications = jobApplicationRepository.findByJobIdAndApplicantId(job.getId(), applicant.getId());
@@ -54,15 +76,51 @@ public class JobApplicationService {
             .collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     public List<JobApplicationResponse> getApplicationsByApplicant(User applicant) {
         return jobApplicationRepository.findByApplicantId(applicant.getId()).stream()
             .map(this::mapToBasicResponse)
             .collect(Collectors.toList());
     }
 
-    public JobApplicationResponseExtendedDetails getApplicationDetails(Long applicationId) {
+    @Transactional(readOnly = true)
+    public List<JobApplicationResponseExtendedDetails> getApplicationsForJobsPostedByUser(User user) {
+        List<Job> userJobs = jobRepository.findByPostedById(user.getId());
+        List<Long> jobIds = userJobs.stream().map(Job::getId).collect(Collectors.toList());
+        
+        return jobApplicationRepository.findByJobIdIn(jobIds).stream()
+            .map(this::mapToExtendedDetails)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<JobApplicationResponseExtendedDetails> getApplicationsByJob(Long jobId, User user) {
+        Job job = jobRepository.findById(jobId)
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Verify that the user is the job poster
+        if (!job.getPostedById().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to view applications for this job");
+        }
+
+        return jobApplicationRepository.findByJobId(jobId).stream()
+            .map(this::mapToExtendedDetails)
+            .collect(Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public JobApplicationResponseExtendedDetails getApplicationDetails(Long applicationId, User user) {
         JobApplication application = jobApplicationRepository.findById(applicationId)
             .orElseThrow(() -> new RuntimeException("Application not found"));
+
+        Job job = jobRepository.findById(application.getJobId())
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+
+        // Verify that the user is the job poster
+        if (!job.getPostedById().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to view this application");
+        }
+
         return mapToExtendedDetails(application);
     }
 
