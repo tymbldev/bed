@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -60,4 +61,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     List<Job> findByCompanyIdAndTitleContainingIgnoreCase(Long companyId, String title);
     List<Job> findByCompanyContainingIgnoreCaseAndTitleContainingIgnoreCase(String companyName, String title);
     List<Job> findByPostedById(Long postedById);
+
+    Optional<Job> findByTitleAndCompanyId(String title, Long companyId);
+
+    List<Job> findByCompanyIdAndPostedByIdAndActiveTrue(Long companyId, Long postedById);
 } 

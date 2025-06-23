@@ -24,6 +24,32 @@ public class Company {
 
     private String logoUrl;
 
+    private String aboutUs;
+    private String vision;
+    private String mission;
+    private String culture;
+
+    @Column(name = "linkedin_url")
+    private String linkedinUrl;
+
+    @Column(name = "headquarters")
+    private String headquarters;
+
+    @Column(name = "industry")
+    private String industry;
+
+    @Column(name = "company_size")
+    private String companySize;
+
+    @Column(name = "specialties")
+    private String specialties;
+
+    @Column(name = "is_crawled", nullable = false)
+    private boolean isCrawled = false;
+
+    @Column(name = "last_crawled_at")
+    private LocalDateTime lastCrawledAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

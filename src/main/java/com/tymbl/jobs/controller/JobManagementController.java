@@ -21,6 +21,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/jobmanagement")
@@ -119,5 +120,21 @@ public class JobManagementController {
         User currentUser = registrationService.getUserByEmail(email);
         return ResponseEntity.ok(
             jobService.getJobsByUser(currentUser, PageRequest.of(page, size)));
+    }
+
+    @GetMapping("/company/{companyId}/super-admin-jobs")
+    @Operation(
+        summary = "Get jobs posted in a company by super admin",
+        description = "Returns a list of jobs posted in the specified company by super admin only."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved jobs successfully"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "404", description = "Company not found")
+    })
+    public ResponseEntity<List<JobResponse>> getJobsByCompanyPostedBySuperAdmin(
+            @Parameter(description = "Company ID", required = true)
+            @PathVariable Long companyId) {
+        return ResponseEntity.ok(jobService.getJobsByCompanyPostedBySuperAdmin(companyId));
     }
 } 

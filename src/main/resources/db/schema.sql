@@ -44,9 +44,24 @@ CREATE TABLE IF NOT EXISTS companies (
     description TEXT,
     website VARCHAR(255),
     logo_url VARCHAR(255),
+    about_us TEXT,
+    vision TEXT,
+    mission TEXT,
+    values TEXT,
+    culture TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
+
+-- Add new columns to companies table
+ALTER TABLE companies 
+ADD COLUMN IF NOT EXISTS linkedin_url VARCHAR(255),
+ADD COLUMN IF NOT EXISTS headquarters VARCHAR(255),
+ADD COLUMN IF NOT EXISTS industry VARCHAR(255),
+ADD COLUMN IF NOT EXISTS company_size VARCHAR(255),
+ADD COLUMN IF NOT EXISTS specialties TEXT,
+ADD COLUMN IF NOT EXISTS is_crawled BOOLEAN DEFAULT FALSE,
+ADD COLUMN IF NOT EXISTS last_crawled_at TIMESTAMP;
 
 -- Organization Tables
 CREATE TABLE IF NOT EXISTS designations (
@@ -225,24 +240,18 @@ CREATE TABLE IF NOT EXISTS jobs (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
-    city_id BIGINT,
-    country_id BIGINT,
-    designation_id BIGINT,
-    designation VARCHAR(100),
-    salary DOUBLE NOT NULL,
-    currency_id BIGINT NOT NULL,
     company_id BIGINT NOT NULL,
-    company VARCHAR(100),
-    posted_by BIGINT NOT NULL,
-    active BOOLEAN DEFAULT TRUE,
+    posted_by_id BIGINT NOT NULL,
+    location VARCHAR(255),
+    employment_type VARCHAR(100),
+    salary_range VARCHAR(255),
+    experience_required VARCHAR(255),
+    skills_required TEXT,
+    application_url VARCHAR(1000),
+    status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (company_id) REFERENCES companies(id),
-    FOREIGN KEY (posted_by) REFERENCES users(id),
-    FOREIGN KEY (currency_id) REFERENCES currencies(id),
-    FOREIGN KEY (city_id) REFERENCES cities(id),
-    FOREIGN KEY (country_id) REFERENCES countries(id),
-    FOREIGN KEY (designation_id) REFERENCES designations(id)
+    FOREIGN KEY (company_id) REFERENCES companies(id)
 );
 
 CREATE TABLE IF NOT EXISTS job_applications (

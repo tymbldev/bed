@@ -193,6 +193,14 @@ public class JobService {
         return jobRepository.findAllTags();
     }
 
+    public List<JobResponse> getJobsByCompanyPostedBySuperAdmin(Long companyId) {
+        Long superAdminId = 0L; // Convention for super admin
+        return jobRepository.findByCompanyIdAndPostedByIdAndActiveTrue(companyId, superAdminId)
+            .stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
+    }
+
     private JobResponse mapToResponse(Job job) {
         JobResponse response = new JobResponse();
         response.setId(job.getId());

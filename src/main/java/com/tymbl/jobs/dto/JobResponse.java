@@ -25,4 +25,5 @@ public class JobResponse {
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
     private Set<String> tags = new HashSet<>();
+    private boolean isSuperAdminPosted;
 } 

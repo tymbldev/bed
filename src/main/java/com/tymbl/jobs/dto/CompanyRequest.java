@@ -16,4 +16,8 @@ public class CompanyRequest {
     private String description;
     private String website;
     private String logoUrl;
+    private String aboutUs;
+    private String vision;
+    private String mission;
+    private String culture;
 } 
