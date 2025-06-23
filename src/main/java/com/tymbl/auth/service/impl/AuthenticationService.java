@@ -11,6 +11,7 @@ import java.util.UUID;
 import javax.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,23 +30,31 @@ public class AuthenticationService {
 
     
     public AuthResponse login(LoginRequest request) {
-        Authentication authentication = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-        );
+        try {
+            Authentication authentication = authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+            );
 
-        User user = userRepository.findByEmail(authentication.getName())
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-        
-        String token = jwtService.generateToken(user);
+            User user = userRepository.findByEmail(authentication.getName())
+                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + request.getEmail()));
+            
+            String token = jwtService.generateToken(user);
 
-        return AuthResponse.builder()
-                .token(token)
-                .email(user.getEmail())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .role(user.getRole().name())
-                .emailVerified(user.isEmailVerified())
-                .build();
+            return AuthResponse.builder()
+                    .token(token)
+                    .email(user.getEmail())
+                    .firstName(user.getFirstName())
+                    .lastName(user.getLastName())
+                    .role(user.getRole().name())
+                    .emailVerified(user.isEmailVerified())
+                    .build();
+        } catch (BadCredentialsException e) {
+            throw new BadCredentialsException("Invalid email or password");
+        } catch (UsernameNotFoundException e) {
+            throw new UsernameNotFoundException("User not found with email: " + request.getEmail());
+        } catch (Exception e) {
+            throw new RuntimeException("Authentication failed: " + e.getMessage());
+        }
     }
 
     

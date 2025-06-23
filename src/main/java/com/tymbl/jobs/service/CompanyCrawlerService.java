@@ -28,44 +28,14 @@ public class CompanyCrawlerService {
     private final CompanyRepository companyRepository;
     private final JobRepository jobRepository;
 
-    @Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
-    @Transactional
+    //@Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
     public void crawlCompanies() {
         log.info("Starting company crawling process");
         List<CompanyInfo> companies = readCompaniesFile();
         
         for (CompanyInfo companyInfo : companies) {
             try {
-                Optional<Company> existingCompany = companyRepository.findByName(companyInfo.name);
-                
-                if (existingCompany.isPresent() && existingCompany.get().isCrawled()) {
-                    log.debug("Company {} already crawled, skipping", companyInfo.name);
-                    continue;
-                }
-
-                Optional<Company> crawledCompany = linkedInCrawler.crawlCompanyPage(companyInfo.linkedinUrl);
-                
-                if (crawledCompany.isPresent()) {
-                    Company company = crawledCompany.get();
-                    if (existingCompany.isPresent()) {
-                        // Update existing company
-                        Company existing = existingCompany.get();
-                        updateCompanyFields(existing, company);
-                        companyRepository.save(existing);
-                        log.info("Updated company information for: {}", company.getName());
-                        
-                        // Crawl jobs for existing company
-                        crawlJobsForCompany(existing);
-                    } else {
-                        // Save new company
-                        Company savedCompany = companyRepository.save(company);
-                        log.info("Saved new company: {}", company.getName());
-                        
-                        // Crawl jobs for new company
-                        crawlJobsForCompany(savedCompany);
-                    }
-                }
-                
+                processCompanyInTransaction(companyInfo);
                 // Add delay to avoid rate limiting
                 Thread.sleep(5000);
             } catch (Exception e) {
@@ -73,6 +43,39 @@ public class CompanyCrawlerService {
             }
         }
         log.info("Completed company crawling process");
+    }
+
+    @Transactional
+    public void processCompanyInTransaction(CompanyInfo companyInfo) {
+        Optional<Company> existingCompany = companyRepository.findByName(companyInfo.name);
+        
+        if (existingCompany.isPresent() && existingCompany.get().isCrawled()) {
+            log.debug("Company {} already crawled, skipping", companyInfo.name);
+            return;
+        }
+
+        Optional<Company> crawledCompany = linkedInCrawler.crawlCompanyPage(companyInfo.linkedinUrl);
+        
+        if (crawledCompany.isPresent()) {
+            Company company = crawledCompany.get();
+            if (existingCompany.isPresent()) {
+                // Update existing company
+                Company existing = existingCompany.get();
+                updateCompanyFields(existing, company);
+                companyRepository.save(existing);
+                log.info("Updated company information for: {}", company.getName());
+                
+                // Crawl jobs for existing company
+                crawlJobsForCompany(existing);
+            } else {
+                // Save new company
+                Company savedCompany = companyRepository.save(company);
+                log.info("Saved new company: {}", company.getName());
+                
+                // Crawl jobs for new company
+                crawlJobsForCompany(savedCompany);
+            }
+        }
     }
 
     @Transactional

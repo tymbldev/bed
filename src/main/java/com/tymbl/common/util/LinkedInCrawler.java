@@ -1,12 +1,14 @@
 package com.tymbl.common.util;
 
 import com.tymbl.common.entity.Job;
+import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.entity.Company;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -16,9 +18,12 @@ import org.springframework.stereotype.Component;
 
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class LinkedInCrawler {
 
     private static final String USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
+    
+    private final GeminiService geminiService;
 
     public Optional<Company> crawlCompanyPage(String linkedinUrl) {
         try {
@@ -26,47 +31,32 @@ public class LinkedInCrawler {
                     .userAgent(USER_AGENT)
                     .get();
 
-            Company company = new Company();
-            company.setLinkedinUrl(linkedinUrl);
-            company.setLastCrawledAt(LocalDateTime.now());
-
-            // Extract company name
-            Elements nameElement = doc.select("h1.org-top-card-summary__title");
-            company.setName(nameElement.text().trim());
-
-            // Extract about/description
-            Elements aboutElement = doc.select("div.org-about-us-organization-description__text");
-            company.setAboutUs(aboutElement.text().trim());
-
-            // Extract headquarters
-            Elements locationElement = doc.select("div.org-location-card");
-            company.setHeadquarters(locationElement.text().trim());
-
-            // Extract industry
-            Elements industryElement = doc.select("div.org-about-company-module__industry");
-            company.setIndustry(industryElement.text().trim());
-
-            // Extract company size
-            Elements sizeElement = doc.select("div.org-about-company-module__company-size");
-            company.setCompanySize(sizeElement.text().trim());
-
-            // Extract specialties
-            Elements specialtiesElement = doc.select("div.org-about-company-module__specialties");
-            company.setSpecialties(specialtiesElement.text().trim());
-
-            // Extract website
-            Elements websiteElement = doc.select("a.org-about-us-company-module__website");
-            company.setWebsite(websiteElement.attr("href"));
-
-            // Extract logo
-            Elements logoElement = doc.select("img.org-top-card-primary-content__logo");
-            company.setLogoUrl(logoElement.attr("src"));
-
-            company.setCrawled(true);
-
-            return Optional.of(company);
+            // Extract the document text for Gemini AI processing
+            String documentText = doc.text();
+            
+            // Use Gemini AI to extract company information
+            Optional<Company> extractedCompany = geminiService.extractCompanyInfo(documentText);
+            
+            if (extractedCompany.isPresent()) {
+                Company company = extractedCompany.get();
+                // Ensure the LinkedIn URL is set
+                company.setLinkedinUrl(linkedinUrl);
+                log.info("Successfully extracted company information for: {}", company.getName());
+                return Optional.of(company);
+            } else {
+                log.warn("Failed to extract company information from LinkedIn page: {}", linkedinUrl);
+                // Fallback: create a basic company object
+                Company company = new Company();
+                company.setLinkedinUrl(linkedinUrl);
+                company.setLastCrawledAt(LocalDateTime.now());
+                company.setCrawled(true);
+                return Optional.of(company);
+            }
         } catch (IOException e) {
             log.error("Error crawling LinkedIn page: " + linkedinUrl, e);
+            return Optional.empty();
+        } catch (Exception e) {
+            log.error("Unexpected error while crawling LinkedIn page: " + linkedinUrl, e);
             return Optional.empty();
         }
     }

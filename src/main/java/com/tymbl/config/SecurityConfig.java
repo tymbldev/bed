@@ -48,6 +48,7 @@ public class SecurityConfig {
         .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
         .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
         .antMatchers("/api/v1/locations/**", "/tymbl-service/api/v1/locations/**").permitAll()
+        .antMatchers("/api/v1/crawler/**", "/tymbl-service/api/v1/crawler/**").permitAll()
         .antMatchers("/api/v1/dropdowns/**", "/tymbl-service/api/v1/dropdowns/**").permitAll()
         .antMatchers("/api/v1/skills/**", "/tymbl-service/api/v1/skills/**").permitAll()
         .antMatchers("/api/v1/companies/**", "/tymbl-service/api/v1/companies/**").permitAll()

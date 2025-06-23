@@ -70,6 +70,11 @@ public class CompanyService {
         return companies.map(this::mapToResponse);
     }
 
+    @Transactional(readOnly = true)
+    public List<Company> getAllCompaniesForDropdown() {
+        return companyRepository.findAll();
+    }
+
     private CompanyResponse mapToResponse(Company company) {
         List<Job> jobs = jobRepository.findByCompanyId(company.getId());
         return mapToResponse(company, jobs);

@@ -39,6 +39,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         "/api/v1/jobsearch",
         "/api/v1/locations",
         "/api/v1/dropdowns",
+        "/api/v1/crawler",
         "/api/v1/skills",
         "/api/v1/companies"
     );

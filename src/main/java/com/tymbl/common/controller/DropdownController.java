@@ -7,6 +7,8 @@ import com.tymbl.common.entity.Currency;
 import com.tymbl.common.enums.Degree;
 import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.CurrencyService;
+import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -47,11 +49,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 @RequestMapping("/api/v1/dropdowns")
 @RequiredArgsConstructor
-@Tag(name = "Dropdowns", description = "APIs for managing dropdown data like departments, locations, designations, and currencies")
+@Tag(name = "Dropdowns", description = "APIs for managing dropdown data like departments, locations, designations, currencies, and companies")
 public class DropdownController {
 
     private final DropdownService dropdownService;
     private final CurrencyService currencyService;
+    private final CompanyService companyService;
 
     // Department endpoints
     @GetMapping("/departments")
@@ -388,5 +391,74 @@ public class DropdownController {
         return currencyService.getCurrencyByCode(code)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/companies")
+    @Operation(summary = "Get all companies for dropdown", description = "Returns a list of all companies with id and name for dropdown selection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of companies retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = Company.class),
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"id\": 1,\n" +
+                          "    \"name\": \"Google\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"id\": 2,\n" +
+                          "    \"name\": \"Microsoft\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"id\": 3,\n" +
+                          "    \"name\": \"Amazon\"\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<Company>> getAllCompanies() {
+        return ResponseEntity.ok(companyService.getAllCompaniesForDropdown());
+    }
+
+    @GetMapping("/companies-map")
+    @Operation(summary = "Get all companies as a map", description = "Returns companies as a map of value/label pairs for dropdown selection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Companies map retrieved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"value\": \"1\",\n" +
+                          "    \"label\": \"Google\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"value\": \"2\",\n" +
+                          "    \"label\": \"Microsoft\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"value\": \"3\",\n" +
+                          "    \"label\": \"Amazon\"\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<Map<String, String>>> getCompaniesAsMap() {
+        List<Map<String, String>> companyMaps = companyService.getAllCompaniesForDropdown().stream()
+            .map(company -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("value", company.getId().toString());
+                map.put("label", company.getName());
+                return map;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(companyMaps);
     }
 } 

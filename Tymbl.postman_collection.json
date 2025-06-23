@@ -6,8 +6,14 @@
     "description": "Comprehensive Postman collection for Tymbl backend API. All endpoints grouped by controller with detailed request/response examples."
   },
   "variable": [
-    { "key": "baseUrl", "value": "http://localhost:8080" },
-    { "key": "authToken", "value": "{{authToken}}" }
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "authToken",
+      "value": "{{authToken}}"
+    }
   ],
   "item": [
     {
@@ -19,9 +25,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
@@ -51,7 +71,24 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=verification_token_here", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "verify-email" ], "query": [ { "key": "token", "value": "verification_token_here" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=verification_token_here",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-email"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "verification_token_here"
+                }
+              ]
+            },
             "description": "Verify user's email address using the token sent to their email."
           },
           "response": [
@@ -77,9 +114,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "forgot-password" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com"
+                }
+              ]
+            },
             "description": "Request password reset. Initiates the password reset process by sending a reset token to the user's email."
           },
           "response": [
@@ -100,9 +157,33 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=reset_token_here&newPassword=NewPassword123", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "reset-password" ], "query": [ { "key": "token", "value": "reset_token_here" }, { "key": "newPassword", "value": "NewPassword123" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=reset_token_here&newPassword=NewPassword123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "reset_token_here"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "NewPassword123"
+                }
+              ]
+            },
             "description": "Reset password using token. Resets a user's password using the token sent to their email."
           },
           "response": [
@@ -128,9 +209,29 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+              {
+                "key": "Content-Type",
+                "value": "application/x-www-form-urlencoded"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "resend-verification" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "resend-verification"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com"
+                }
+              ]
+            },
             "description": "Resend email verification. Resends the email verification token to the user's email."
           },
           "response": [
@@ -156,9 +257,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/login/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login", "linkedin" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login/linkedin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login",
+                "linkedin"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accessToken\": \"AQV...\"\n}"
@@ -189,9 +305,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "linkedin" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/linkedin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "linkedin"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accessToken\": \"AQV...\",\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}"
@@ -232,9 +362,22 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/registration", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "registration" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
@@ -270,10 +413,27 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/users/profile", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "users", "profile" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3]\n}"
@@ -308,9 +468,23 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/users/profile", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "users", "profile" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            },
             "description": "Get user profile. Retrieves the profile details of the authenticated user."
           },
           "response": [
@@ -336,9 +510,24 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/users/profile/completion", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "users", "profile", "completion" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/users/profile/completion",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile",
+                "completion"
+              ]
+            },
             "description": "Get profile completion status. Returns the user's profile completion percentage and pending fields."
           },
           "response": [
@@ -370,10 +559,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"tags\": [\"java\", \"spring\"]\n}"
@@ -381,10 +586,26 @@
             "description": "Create a new job posting. The job posting will be associated with the authenticated user."
           },
           "response": [
-            { "code": 200, "name": "Job posting created successfully", "body": "{ ...JobResponse example... }" },
-            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
-            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
+            {
+              "code": 200,
+              "name": "Job posting created successfully",
+              "body": "{ ...JobResponse example... }"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
           ]
         },
         {
@@ -392,10 +613,27 @@
           "request": {
             "method": "PUT",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "1" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "1"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{ ...JobRequest example... }"
@@ -403,11 +641,31 @@
             "description": "Update an existing job posting. Only the user who posted the job can update it."
           },
           "response": [
-            { "code": 200, "name": "Job posting updated successfully", "body": "{ ...JobResponse example... }" },
-            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
-            { "code": 403, "name": "Forbidden - Not the job owner", "body": "{\n  \"error\": \"Forbidden\"\n}" },
-            { "code": 404, "name": "Job posting not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Job posting updated successfully",
+              "body": "{ ...JobResponse example... }"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not the job owner",
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job posting not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         },
         {
@@ -415,16 +673,46 @@
           "request": {
             "method": "DELETE",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "1" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "1"
+              ]
+            },
             "description": "Delete (deactivate) a job posting with the specified ID. Only the user who posted the job can delete it."
           },
           "response": [
-            { "code": 200, "name": "Job posting deleted successfully", "body": "" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
-            { "code": 403, "name": "Forbidden - Not the job owner", "body": "{\n  \"error\": \"Forbidden\"\n}" },
-            { "code": 404, "name": "Job posting not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Job posting deleted successfully",
+              "body": ""
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not the job owner",
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job posting not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         },
         {
@@ -432,14 +720,36 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/my-posts", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "my-posts" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/my-posts",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "my-posts"
+              ]
+            },
             "description": "Get all job postings by the current user. Returns a paginated list."
           },
           "response": [
-            { "code": 200, "name": "Retrieved job postings successfully", "body": "[ ...JobResponse list example... ]" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" }
+            {
+              "code": 200,
+              "name": "Retrieved job postings successfully",
+              "body": "[ ...JobResponse list example... ]"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            }
           ]
         },
         {
@@ -447,13 +757,38 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/company/1/super-admin-jobs", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "company", "1", "super-admin-jobs" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/company/1/super-admin-jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "company",
+                "1",
+                "super-admin-jobs"
+              ]
+            },
             "description": "Get jobs posted in a company by super admin."
           },
           "response": [
-            { "code": 200, "name": "Retrieved jobs successfully", "body": "[ ...JobResponse list example... ]" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
-            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Retrieved jobs successfully",
+              "body": "[ ...JobResponse list example... ]"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         }
       ]
@@ -467,11 +802,43 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobsearch?page=0&size=10&sortBy=createdAt&sortDirection=DESC", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobsearch" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" }, { "key": "sortBy", "value": "createdAt" }, { "key": "sortDirection", "value": "DESC" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch?page=0&size=10&sortBy=createdAt&sortDirection=DESC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "DESC"
+                }
+              ]
+            },
             "description": "Get all active job postings with pagination."
           },
           "response": [
-            { "code": 200, "name": "Retrieved job postings successfully", "body": "[ ...JobResponse list example... ]" }
+            {
+              "code": 200,
+              "name": "Retrieved job postings successfully",
+              "body": "[ ...JobResponse list example... ]"
+            }
           ]
         },
         {
@@ -479,12 +846,31 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobsearch/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobsearch", "1" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "1"
+              ]
+            },
             "description": "Get job posting details by ID."
           },
           "response": [
-            { "code": 200, "name": "Retrieved job posting successfully", "body": "{ ...JobResponse example... }" },
-            { "code": 404, "name": "Job posting not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Retrieved job posting successfully",
+              "body": "{ ...JobResponse example... }"
+            },
+            {
+              "code": 404,
+              "name": "Job posting not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         },
         {
@@ -492,11 +878,40 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/jobsearch/search?keyword=Java&page=0&size=10", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobsearch", "search" ], "query": [ { "key": "keyword", "value": "Java" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/search?keyword=Java&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "Java"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
             "description": "Search job postings by keyword."
           },
           "response": [
-            { "code": 200, "name": "Search completed successfully", "body": "[ ...JobResponse list example... ]" }
+            {
+              "code": 200,
+              "name": "Search completed successfully",
+              "body": "[ ...JobResponse list example... ]"
+            }
           ]
         }
       ]
@@ -509,13 +924,37 @@
           "name": "Get Applications For My Jobs",
           "request": {
             "method": "GET",
-            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
-            "url": { "raw": "{{baseUrl}}/api/v1/job-applications/my-jobs", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "job-applications", "my-jobs" ] },
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/job-applications/my-jobs",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "my-jobs"
+              ]
+            },
             "description": "Get applications for jobs posted by the authenticated user."
           },
           "response": [
-            { "code": 200, "name": "Applications retrieved successfully", "body": "[ ...JobApplicationResponseExtendedDetails list example... ]" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" }
+            {
+              "code": 200,
+              "name": "Applications retrieved successfully",
+              "body": "[ ...JobApplicationResponseExtendedDetails list example... ]"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            }
           ]
         }
       ]
@@ -529,10 +968,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/my-applications", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "my-applications" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/my-applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{ ...JobApplicationRequest example... }"
@@ -540,11 +995,31 @@
             "description": "Apply for a job. The applicant is determined by the authenticated user."
           },
           "response": [
-            { "code": 200, "name": "Application submitted successfully", "body": "{ ...JobApplicationResponse example... }" },
-            { "code": 400, "name": "Invalid input or already applied", "body": "{\n  \"error\": \"Invalid input or already applied\"\n}" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
-            { "code": 403, "name": "Forbidden - Cannot apply to your own job posting", "body": "{\n  \"error\": \"Forbidden\"\n}" },
-            { "code": 404, "name": "Job not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Application submitted successfully",
+              "body": "{ ...JobApplicationResponse example... }"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or already applied",
+              "body": "{\n  \"error\": \"Invalid input or already applied\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Cannot apply to your own job posting",
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         }
       ]
@@ -558,29 +1033,167 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/interview-preparation/companies", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "interview-preparation", "companies" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "companies"
+              ]
+            },
             "description": "Get all companies with their interview preparation content."
           },
           "response": [
-            { "code": 200, "name": "List of companies retrieved successfully", "body": "[ ...CompanyDTO list example... ]" }
+            {
+              "code": 200,
+              "name": "List of companies retrieved successfully",
+              "body": "[ ...CompanyDTO list example... ]"
+            }
           ]
         }
       ]
     },
     {
       "name": "Dropdowns",
-      "description": "APIs for managing dropdown data like departments, locations, designations, and currencies.",
+      "description": "APIs for managing dropdown data like departments, locations, designations, currencies, and companies.",
       "item": [
         {
           "name": "Get All Departments",
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/dropdowns/departments", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "dropdowns", "departments" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dropdowns/departments",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "departments"
+              ]
+            },
             "description": "Get all departments for dropdown selection."
           },
           "response": [
-            { "code": 200, "name": "List of departments retrieved successfully", "body": "[ ...Department list example... ]" }
+            {
+              "code": 200,
+              "name": "List of departments retrieved successfully",
+              "body": "[ ...Department list example... ]"
+            }
+          ]
+        },
+        {
+          "name": "Get All Companies for Dropdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dropdowns/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies"
+              ]
+            },
+            "description": "Get all companies with id and name for dropdown selection."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "List of companies retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Microsoft\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Amazon\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Companies as Map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dropdowns/companies-map",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies-map"
+              ]
+            },
+            "description": "Get companies as a map of value/label pairs for dropdown components."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Companies map retrieved successfully",
+              "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get All Companies for Dropdown",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dropdowns/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies"
+              ]
+            },
+            "description": "Get all companies with id and name for dropdown selection."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "List of companies retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Microsoft\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Amazon\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Companies as Map",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/dropdowns/companies-map",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies-map"
+              ]
+            },
+            "description": "Get companies as a map of value/label pairs for dropdown components."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Companies map retrieved successfully",
+              "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
+            }
           ]
         }
       ]
@@ -593,12 +1206,47 @@
           "name": "Upload Resume",
           "request": {
             "method": "POST",
-            "header": [ { "key": "Content-Type", "value": "multipart/form-data" } ],
-            "url": { "raw": "{{baseUrl}}/api/v1/resumes/upload", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "resumes", "upload" ] },
-            "body": { "mode": "formdata", "formdata": [ { "key": "file", "type": "file" }, { "key": "userId", "value": "1", "type": "text" } ] },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/upload",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "upload"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file"
+                },
+                {
+                  "key": "userId",
+                  "value": "1",
+                  "type": "text"
+                }
+              ]
+            },
             "description": "Upload a resume file for a specific user."
           },
-          "response": [ { "code": 200, "name": "Resume uploaded successfully", "body": "{ ...resume upload response... }" } ]
+          "response": [
+            {
+              "code": 200,
+              "name": "Resume uploaded successfully",
+              "body": "{ ...resume upload response... }"
+            }
+          ]
         }
       ]
     },
@@ -611,10 +1259,26 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/institutions", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "institutions" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/institutions",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions"
+              ]
+            },
             "description": "Get all educational institutions."
           },
-          "response": [ { "code": 200, "name": "List of institutions retrieved successfully", "body": "[ ...Institution list example... ]" } ]
+          "response": [
+            {
+              "code": 200,
+              "name": "List of institutions retrieved successfully",
+              "body": "[ ...Institution list example... ]"
+            }
+          ]
         }
       ]
     },
@@ -627,10 +1291,26 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/health", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "health" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/health",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
+            },
             "description": "Basic health check. Returns basic health status of the application."
           },
-          "response": [ { "code": 200, "name": "Application is healthy", "body": "{ ...health response... }" } ]
+          "response": [
+            {
+              "code": 200,
+              "name": "Application is healthy",
+              "body": "{ ...health response... }"
+            }
+          ]
         }
       ]
     },
@@ -643,10 +1323,26 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/skills", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "skills" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/skills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "skills"
+              ]
+            },
             "description": "Get all available skills sorted by usage count and name."
           },
-          "response": [ { "code": 200, "name": "Successfully retrieved skills list", "body": "[ ...Skill list example... ]" } ]
+          "response": [
+            {
+              "code": 200,
+              "name": "Successfully retrieved skills list",
+              "body": "[ ...Skill list example... ]"
+            }
+          ]
         }
       ]
     },
@@ -659,10 +1355,141 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/locations/countries", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "locations", "countries" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/locations/countries",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "countries"
+              ]
+            },
             "description": "Get all available countries."
           },
-          "response": [ { "code": 200, "name": "List of countries retrieved successfully", "body": "[ ...CountryDTO list example... ]" } ]
+          "response": [
+            {
+              "code": 200,
+              "name": "List of countries retrieved successfully",
+              "body": "[ ...CountryDTO list example... ]"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Company Crawler",
+      "description": "APIs for crawling company information and jobs from LinkedIn.",
+      "item": [
+        {
+          "name": "Crawl All Companies",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "crawler",
+                "companies",
+                "crawl"
+              ]
+            },
+            "description": "Triggers the crawling process for all companies from the companies.txt file."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Company crawling process completed successfully",
+              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Internal server error during crawling process",
+              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crawl Jobs for Company by ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "crawler",
+                "companies",
+                "1",
+                "jobs",
+                "crawl"
+              ]
+            },
+            "description": "Triggers job crawling for a specific company by ID."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Job crawling process completed successfully",
+              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Company not found\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Internal server error during crawling process",
+              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crawl Jobs for Company by Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "crawler",
+                "companies",
+                "Google",
+                "jobs",
+                "crawl-by-name"
+              ]
+            },
+            "description": "Triggers job crawling for a company by name."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Job crawling process completed successfully",
+              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Internal server error during crawling process",
+              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
+            }
+          ]
         }
       ]
     },
@@ -675,9 +1502,22 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/companies", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "companies" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/companies",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"name\": \"Example Corp\",\n  \"description\": \"A leading technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://logo.example.com\",\n  \"aboutUs\": \"About Example Corp\",\n  \"vision\": \"To innovate\",\n  \"mission\": \"Empower people\",\n  \"culture\": \"Inclusive\"\n}"
@@ -685,10 +1525,26 @@
             "description": "Create or update a company. Creates a new company or updates an existing one if the company name already exists."
           },
           "response": [
-            { "code": 200, "name": "Company created/updated successfully", "body": "{ ...CompanyResponse example... }" },
-            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" },
-            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Not found\"\n}" },
-            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
+            {
+              "code": 200,
+              "name": "Company created/updated successfully",
+              "body": "{ ...CompanyResponse example... }"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
           ]
         },
         {
@@ -696,12 +1552,40 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/companies?page=0&size=100", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "companies" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "100" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/companies?page=0&size=100",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            },
             "description": "Get all companies. Returns a paginated list of all registered companies, each with their jobs."
           },
           "response": [
-            { "code": 200, "name": "Paginated list of companies retrieved successfully", "body": "{ ...Page<CompanyResponse> example... }" },
-            { "code": 404, "name": "No companies found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Paginated list of companies retrieved successfully",
+              "body": "{ ...Page<CompanyResponse> example... }"
+            },
+            {
+              "code": 404,
+              "name": "No companies found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         },
         {
@@ -709,15 +1593,148 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/companies/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "companies", "1" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/companies/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "1"
+              ]
+            },
             "description": "Get company by ID. Returns the details of a specific company by its ID, including all jobs."
           },
           "response": [
-            { "code": 200, "name": "Company retrieved successfully", "body": "{ ...CompanyResponse example... }" },
-            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Company retrieved successfully",
+              "body": "{ ...CompanyResponse example... }"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Company Crawler",
+      "description": "APIs for crawling company information and jobs from LinkedIn.",
+      "item": [
+        {
+          "name": "Crawl All Companies",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "crawler",
+                "companies",
+                "crawl"
+              ]
+            },
+            "description": "Triggers the crawling process for all companies from the companies.txt file."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Company crawling process completed successfully",
+              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Internal server error during crawling process",
+              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crawl Jobs for Company by ID",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "crawler",
+                "companies",
+                "1",
+                "jobs",
+                "crawl"
+              ]
+            },
+            "description": "Triggers job crawling for a specific company by ID."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Job crawling process completed successfully",
+              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Company not found\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Internal server error during crawling process",
+              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Crawl Jobs for Company by Name",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "crawler",
+                "companies",
+                "Google",
+                "jobs",
+                "crawl-by-name"
+              ]
+            },
+            "description": "Triggers job crawling for a company by name."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Job crawling process completed successfully",
+              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Internal server error during crawling process",
+              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
+            }
           ]
         }
       ]
     }
   ]
-} 
+}
