@@ -1,17 +1,10 @@
 package com.tymbl.jobs.service;
 
+import com.tymbl.common.entity.Job;
 import com.tymbl.common.util.LinkedInCrawler;
 import com.tymbl.jobs.entity.Company;
-import com.tymbl.jobs.entity.Job;
 import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.JobRepository;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -19,6 +12,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Service
@@ -84,7 +83,7 @@ public class CompanyCrawlerService {
         for (Job job : jobs) {
             try {
                 // Check if job already exists based on title and company
-                Optional<Job> existingJob = jobRepository.findByTitleAndCompanyId(job.getTitle(), company.getId());
+                Optional<com.tymbl.common.entity.Job> existingJob = jobRepository.findByTitleAndCompanyId(job.getTitle(), company.getId());
                 
                 if (existingJob.isPresent()) {
                     // Update existing job
@@ -105,11 +104,11 @@ public class CompanyCrawlerService {
     }
 
     private void updateJobFields(Job existing, Job crawled) {
-        existing.setLocation(crawled.getLocation());
+        //existing.setLocation(crawled.getLocation());
         existing.setDescription(crawled.getDescription());
-        existing.setEmploymentType(crawled.getEmploymentType());
-        existing.setApplicationUrl(crawled.getApplicationUrl());
-        existing.setStatus(crawled.getStatus());
+        //existing.setEmploymentType(crawled.getEmploymentType());
+        //existing.setApplicationUrl(crawled.getApplicationUrl());
+        //existing.setStatus(crawled.getStatus());
         existing.setUpdatedAt(crawled.getUpdatedAt());
     }
 

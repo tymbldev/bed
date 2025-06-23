@@ -1,19 +1,18 @@
 package com.tymbl.common.util;
 
+import com.tymbl.common.entity.Job;
 import com.tymbl.jobs.entity.Company;
-import com.tymbl.jobs.entity.Job;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
 
 @Slf4j
 @Component
@@ -97,7 +96,7 @@ public class LinkedInCrawler {
 
                     // Extract job location
                     Elements locationElement = jobElement.select("span.job-card-container__metadata-item");
-                    job.setLocation(locationElement.text().trim());
+                   // job.setLocation(locationElement.text().trim());
 
                     // Extract job description
                     Elements descriptionElement = jobElement.select("div.job-card-list__description");
@@ -105,18 +104,18 @@ public class LinkedInCrawler {
 
                     // Extract employment type
                     Elements typeElement = jobElement.select("span.job-card-container__metadata-item--workplace-type");
-                    job.setEmploymentType(typeElement.text().trim());
+                   // job.setEmploymentType(typeElement.text().trim());
 
                     // Extract application URL
                     Elements linkElement = jobElement.select("a.job-card-list__title");
                     String jobUrl = linkElement.attr("href");
-                    job.setApplicationUrl("https://www.linkedin.com" + jobUrl);
+                    //job.setApplicationUrl("https://www.linkedin.com" + jobUrl);
 
                     // Set default values
-                    job.setStatus("ACTIVE");
-                    job.setSalaryRange("Not specified");
-                    job.setExperienceRequired("Not specified");
-                    job.setSkillsRequired("Not specified");
+                   // job.setStatus("ACTIVE");
+                    //job.setSalaryRange("Not specified");
+                   // job.setExperienceRequired("Not specified");
+                    //job.setSkillsRequired("Not specified");
 
                     jobs.add(job);
                 } catch (Exception e) {
