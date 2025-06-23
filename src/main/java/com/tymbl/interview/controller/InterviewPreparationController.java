@@ -75,7 +75,20 @@ public class InterviewPreparationController {
     }
 
     @GetMapping("/companies/{companyId}")
-    @Operation(summary = "Get company details with available designations")
+    @Operation(
+        summary = "Get company details with available designations",
+        description = "Returns detailed information about a specific company including available designations for interview preparation."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Company details retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = CompanyDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Company not found")
+    })
     public ResponseEntity<CompanyDTO> getCompanyWithDesignations(@PathVariable Long companyId) {
         return ResponseEntity.ok(interviewPreparationService.getCompanyWithDesignations(companyId));
     }
@@ -118,7 +131,20 @@ public class InterviewPreparationController {
     }
 
     @GetMapping("/companies/{companyId}/designations/{designationId}/skills")
-    @Operation(summary = "Get all skills for a company-designation combination")
+    @Operation(
+        summary = "Get all skills for a company-designation combination",
+        description = "Returns a list of skills required for a specific designation at a particular company."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Skills retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = String.class)
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Company or designation not found")
+    })
     public ResponseEntity<List<String>> getCompanyDesignationSkills(
             @PathVariable Long companyId,
             @PathVariable Long designationId) {
@@ -126,7 +152,20 @@ public class InterviewPreparationController {
     }
 
     @GetMapping("/companies/{companyId}/designations/{designationId}/skills/{skillId}/topics")
-    @Operation(summary = "Get all topics for a company-designation-skill combination")
+    @Operation(
+        summary = "Get all topics for a company-designation-skill combination",
+        description = "Returns interview preparation topics for a specific skill at a particular designation and company."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Topics retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = InterviewTopicDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Company, designation, or skill not found")
+    })
     public ResponseEntity<List<InterviewTopicDTO>> getTopics(
             @PathVariable Long companyId,
             @PathVariable Long designationId,
@@ -170,7 +209,20 @@ public class InterviewPreparationController {
     }
 
     @GetMapping("/topics/{topicId}")
-    @Operation(summary = "Get topic details with questions")
+    @Operation(
+        summary = "Get topic details with questions",
+        description = "Returns detailed information about a specific interview topic including all related questions."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Topic details retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = InterviewTopicDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Topic not found")
+    })
     public ResponseEntity<InterviewTopicDTO> getTopicWithQuestions(@PathVariable Long topicId) {
         return ResponseEntity.ok(interviewPreparationService.getTopicWithQuestions(topicId));
     }
@@ -213,7 +265,20 @@ public class InterviewPreparationController {
     }
 
     @GetMapping("/questions/{questionId}")
-    @Operation(summary = "Get interview question details")
+    @Operation(
+        summary = "Get interview question details",
+        description = "Returns detailed information about a specific interview question."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Question details retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = InterviewQuestionDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Question not found")
+    })
     public ResponseEntity<InterviewQuestionDTO> getInterviewQuestion(@PathVariable Long questionId) {
         return ResponseEntity.ok(interviewPreparationService.getInterviewQuestion(questionId));
     }

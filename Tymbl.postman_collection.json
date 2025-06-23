@@ -1,0 +1,723 @@
+{
+  "info": {
+    "_postman_id": "tymbl-collection-001",
+    "name": "Tymbl API Collection",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Comprehensive Postman collection for Tymbl backend API. All endpoints grouped by controller with detailed request/response examples."
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "authToken", "value": "{{authToken}}" }
+  ],
+  "item": [
+    {
+      "name": "Authentication",
+      "description": "Authentication endpoints for user login and account management",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
+            },
+            "description": "Authenticate user and return JWT token. Authenticates a user with their email and password, and returns a JWT token that can be used for protected API endpoints."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Authentication successful",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
+            },
+            {
+              "code": 401,
+              "name": "Invalid credentials",
+              "body": "{\n  \"error\": \"Invalid credentials\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input data\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Verify Email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=verification_token_here", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "verify-email" ], "query": [ { "key": "token", "value": "verification_token_here" } ] },
+            "description": "Verify user's email address using the token sent to their email."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Email verified successfully",
+              "body": "Email verified successfully"
+            },
+            {
+              "code": 400,
+              "name": "Invalid token or email already verified",
+              "body": "{\n  \"error\": \"Invalid token or email already verified\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Token not found",
+              "body": "{\n  \"error\": \"Token not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "forgot-password" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "description": "Request password reset. Initiates the password reset process by sending a reset token to the user's email."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Password reset instructions sent",
+              "body": "Password reset instructions sent to your email"
+            },
+            {
+              "code": 404,
+              "name": "Email not found",
+              "body": "{\n  \"error\": \"Email not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=reset_token_here&newPassword=NewPassword123", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "reset-password" ], "query": [ { "key": "token", "value": "reset_token_here" }, { "key": "newPassword", "value": "NewPassword123" } ] },
+            "description": "Reset password using token. Resets a user's password using the token sent to their email."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Password reset successfully",
+              "body": "Password reset successfully"
+            },
+            {
+              "code": 400,
+              "name": "Invalid or expired token",
+              "body": "{\n  \"error\": \"Invalid or expired token\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Token not found",
+              "body": "{\n  \"error\": \"Token not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Resend Verification Email",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/x-www-form-urlencoded" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "resend-verification" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "description": "Resend email verification. Resends the email verification token to the user's email."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Verification email sent successfully",
+              "body": "Verification email sent successfully"
+            },
+            {
+              "code": 400,
+              "name": "Email already verified",
+              "body": "{\n  \"error\": \"Email already verified\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Email not found",
+              "body": "{\n  \"error\": \"Email not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Login with LinkedIn",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login", "linkedin" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"AQV...\"\n}"
+            },
+            "description": "Authenticate user with LinkedIn. Authenticates a user using their LinkedIn account and returns a JWT token that can be used for protected API endpoints."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Successfully authenticated with LinkedIn",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid LinkedIn access token",
+              "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "LinkedIn Authentication",
+      "description": "LinkedIn authentication endpoints",
+      "item": [
+        {
+          "name": "Authenticate with LinkedIn",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "linkedin" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"accessToken\": \"AQV...\",\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}"
+            },
+            "description": "Authenticate with LinkedIn. Authenticates a user using their LinkedIn profile data. The frontend should provide the LinkedIn access token obtained from the LinkedIn OAuth flow."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "User authenticated successfully with LinkedIn",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or email already registered",
+              "body": "{\n  \"error\": \"Invalid input or email already registered\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Invalid LinkedIn access token",
+              "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Registration",
+      "description": "User registration endpoints",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/registration", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "registration" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
+            },
+            "description": "Register a new user. Registers a new user with email and password. Only email and password are mandatory."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "User registered successfully",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
+            },
+            {
+              "code": 400,
+              "name": "Email already registered",
+              "body": "{\n  \"error\": \"Email already registered\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "User Management",
+      "description": "User profile management endpoints",
+      "item": [
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/users/profile", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "users", "profile" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3]\n}"
+            },
+            "description": "Update user profile. Updates the profile of the authenticated user. All fields are optional. The user's identity is verified using the JWT token."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Profile updated successfully",
+              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input data\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/users/profile", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "users", "profile" ] },
+            "description": "Get user profile. Retrieves the profile details of the authenticated user."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Profile retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Profile Completion Status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/users/profile/completion", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "users", "profile", "completion" ] },
+            "description": "Get profile completion status. Returns the user's profile completion percentage and pending fields."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Profile completion status retrieved successfully",
+              "body": "{\n  \"completionPercentage\": 75,\n  \"pendingFields\": [\n    {\n      \"field\": \"company\",\n      \"label\": \"Company\",\n      \"message\": \"Add your company\"\n    },\n    {\n      \"field\": \"linkedInProfile\",\n      \"label\": \"LinkedIn Profile\",\n      \"message\": \"Add your LinkedIn profile\"\n    }\n  ]\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Job Management",
+      "description": "Endpoints for creating, updating, deleting, and retrieving job postings.",
+      "item": [
+        {
+          "name": "Create Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"tags\": [\"java\", \"spring\"]\n}"
+            },
+            "description": "Create a new job posting. The job posting will be associated with the authenticated user."
+          },
+          "response": [
+            { "code": 200, "name": "Job posting created successfully", "body": "{ ...JobResponse example... }" },
+            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
+            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
+          ]
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "1" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{ ...JobRequest example... }"
+            },
+            "description": "Update an existing job posting. Only the user who posted the job can update it."
+          },
+          "response": [
+            { "code": 200, "name": "Job posting updated successfully", "body": "{ ...JobResponse example... }" },
+            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
+            { "code": 403, "name": "Forbidden - Not the job owner", "body": "{\n  \"error\": \"Forbidden\"\n}" },
+            { "code": 404, "name": "Job posting not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "1" ] },
+            "description": "Delete (deactivate) a job posting with the specified ID. Only the user who posted the job can delete it."
+          },
+          "response": [
+            { "code": 200, "name": "Job posting deleted successfully", "body": "" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
+            { "code": 403, "name": "Forbidden - Not the job owner", "body": "{\n  \"error\": \"Forbidden\"\n}" },
+            { "code": 404, "name": "Job posting not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        },
+        {
+          "name": "Get My Job Posts",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/my-posts", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "my-posts" ] },
+            "description": "Get all job postings by the current user. Returns a paginated list."
+          },
+          "response": [
+            { "code": 200, "name": "Retrieved job postings successfully", "body": "[ ...JobResponse list example... ]" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" }
+          ]
+        },
+        {
+          "name": "Get Company Super Admin Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobmanagement/company/1/super-admin-jobs", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobmanagement", "company", "1", "super-admin-jobs" ] },
+            "description": "Get jobs posted in a company by super admin."
+          },
+          "response": [
+            { "code": 200, "name": "Retrieved jobs successfully", "body": "[ ...JobResponse list example... ]" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
+            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Job Search",
+      "description": "Endpoints for searching and retrieving job postings.",
+      "item": [
+        {
+          "name": "Get All Jobs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobsearch?page=0&size=10&sortBy=createdAt&sortDirection=DESC", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobsearch" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "10" }, { "key": "sortBy", "value": "createdAt" }, { "key": "sortDirection", "value": "DESC" } ] },
+            "description": "Get all active job postings with pagination."
+          },
+          "response": [
+            { "code": 200, "name": "Retrieved job postings successfully", "body": "[ ...JobResponse list example... ]" }
+          ]
+        },
+        {
+          "name": "Get Job By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobsearch/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobsearch", "1" ] },
+            "description": "Get job posting details by ID."
+          },
+          "response": [
+            { "code": 200, "name": "Retrieved job posting successfully", "body": "{ ...JobResponse example... }" },
+            { "code": 404, "name": "Job posting not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        },
+        {
+          "name": "Search Jobs By Keyword",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/jobsearch/search?keyword=Java&page=0&size=10", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "jobsearch", "search" ], "query": [ { "key": "keyword", "value": "Java" }, { "key": "page", "value": "0" }, { "key": "size", "value": "10" } ] },
+            "description": "Search job postings by keyword."
+          },
+          "response": [
+            { "code": 200, "name": "Search completed successfully", "body": "[ ...JobResponse list example... ]" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Job Applications Management",
+      "description": "Endpoints for managing job applications received for jobs posted by the current user.",
+      "item": [
+        {
+          "name": "Get Applications For My Jobs",
+          "request": {
+            "method": "GET",
+            "header": [ { "key": "Authorization", "value": "Bearer {{authToken}}" } ],
+            "url": { "raw": "{{baseUrl}}/api/v1/job-applications/my-jobs", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "job-applications", "my-jobs" ] },
+            "description": "Get applications for jobs posted by the authenticated user."
+          },
+          "response": [
+            { "code": 200, "name": "Applications retrieved successfully", "body": "[ ...JobApplicationResponseExtendedDetails list example... ]" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "My Job Applications",
+      "description": "Endpoints for managing job applications made by the current user.",
+      "item": [
+        {
+          "name": "Apply For Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/my-applications", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "my-applications" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{ ...JobApplicationRequest example... }"
+            },
+            "description": "Apply for a job. The applicant is determined by the authenticated user."
+          },
+          "response": [
+            { "code": 200, "name": "Application submitted successfully", "body": "{ ...JobApplicationResponse example... }" },
+            { "code": 400, "name": "Invalid input or already applied", "body": "{\n  \"error\": \"Invalid input or already applied\"\n}" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
+            { "code": 403, "name": "Forbidden - Cannot apply to your own job posting", "body": "{\n  \"error\": \"Forbidden\"\n}" },
+            { "code": 404, "name": "Job not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Interview Preparation",
+      "description": "Endpoints for interview preparation content (companies, designations, skills, topics, questions).",
+      "item": [
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/interview-preparation/companies", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "interview-preparation", "companies" ] },
+            "description": "Get all companies with their interview preparation content."
+          },
+          "response": [
+            { "code": 200, "name": "List of companies retrieved successfully", "body": "[ ...CompanyDTO list example... ]" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Dropdowns",
+      "description": "APIs for managing dropdown data like departments, locations, designations, and currencies.",
+      "item": [
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/dropdowns/departments", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "dropdowns", "departments" ] },
+            "description": "Get all departments for dropdown selection."
+          },
+          "response": [
+            { "code": 200, "name": "List of departments retrieved successfully", "body": "[ ...Department list example... ]" }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resume Management",
+      "description": "Endpoints for uploading, downloading, and managing user resumes.",
+      "item": [
+        {
+          "name": "Upload Resume",
+          "request": {
+            "method": "POST",
+            "header": [ { "key": "Content-Type", "value": "multipart/form-data" } ],
+            "url": { "raw": "{{baseUrl}}/api/v1/resumes/upload", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "resumes", "upload" ] },
+            "body": { "mode": "formdata", "formdata": [ { "key": "file", "type": "file" }, { "key": "userId", "value": "1", "type": "text" } ] },
+            "description": "Upload a resume file for a specific user."
+          },
+          "response": [ { "code": 200, "name": "Resume uploaded successfully", "body": "{ ...resume upload response... }" } ]
+        }
+      ]
+    },
+    {
+      "name": "Institution Management",
+      "description": "Endpoints for managing educational institutions.",
+      "item": [
+        {
+          "name": "Get All Institutions",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/institutions", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "institutions" ] },
+            "description": "Get all educational institutions."
+          },
+          "response": [ { "code": 200, "name": "List of institutions retrieved successfully", "body": "[ ...Institution list example... ]" } ]
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "description": "Application health check endpoints.",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/health", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "health" ] },
+            "description": "Basic health check. Returns basic health status of the application."
+          },
+          "response": [ { "code": 200, "name": "Application is healthy", "body": "{ ...health response... }" } ]
+        }
+      ]
+    },
+    {
+      "name": "Skills",
+      "description": "Skills suggester endpoints.",
+      "item": [
+        {
+          "name": "Get All Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/skills", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "skills" ] },
+            "description": "Get all available skills sorted by usage count and name."
+          },
+          "response": [ { "code": 200, "name": "Successfully retrieved skills list", "body": "[ ...Skill list example... ]" } ]
+        }
+      ]
+    },
+    {
+      "name": "Location",
+      "description": "APIs for managing geographical locations (countries, cities).",
+      "item": [
+        {
+          "name": "Get All Countries",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/locations/countries", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "locations", "countries" ] },
+            "description": "Get all available countries."
+          },
+          "response": [ { "code": 200, "name": "List of countries retrieved successfully", "body": "[ ...CountryDTO list example... ]" } ]
+        }
+      ]
+    },
+    {
+      "name": "Company Management",
+      "description": "Endpoints for creating, updating, and retrieving companies.",
+      "item": [
+        {
+          "name": "Create or Update Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/companies", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "companies" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Example Corp\",\n  \"description\": \"A leading technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://logo.example.com\",\n  \"aboutUs\": \"About Example Corp\",\n  \"vision\": \"To innovate\",\n  \"mission\": \"Empower people\",\n  \"culture\": \"Inclusive\"\n}"
+            },
+            "description": "Create or update a company. Creates a new company or updates an existing one if the company name already exists."
+          },
+          "response": [
+            { "code": 200, "name": "Company created/updated successfully", "body": "{ ...CompanyResponse example... }" },
+            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" },
+            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Not found\"\n}" },
+            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
+          ]
+        },
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/companies?page=0&size=100", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "companies" ], "query": [ { "key": "page", "value": "0" }, { "key": "size", "value": "100" } ] },
+            "description": "Get all companies. Returns a paginated list of all registered companies, each with their jobs."
+          },
+          "response": [
+            { "code": 200, "name": "Paginated list of companies retrieved successfully", "body": "{ ...Page<CompanyResponse> example... }" },
+            { "code": 404, "name": "No companies found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        },
+        {
+          "name": "Get Company By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/companies/1", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "companies", "1" ] },
+            "description": "Get company by ID. Returns the details of a specific company by its ID, including all jobs."
+          },
+          "response": [
+            { "code": 200, "name": "Company retrieved successfully", "body": "{ ...CompanyResponse example... }" },
+            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        }
+      ]
+    }
+  ]
+} 

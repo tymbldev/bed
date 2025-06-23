@@ -1,9 +1,0 @@
-{
-  "info": {
-    "_postman_id": "tymbl-api-collection",
-    "name": "Tymbl API Collection",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Comprehensive collection for all Tymbl backend endpoints. Detailed requests and responses included."
-  },
-  "item": []
-} 

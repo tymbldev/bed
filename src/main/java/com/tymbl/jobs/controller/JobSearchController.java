@@ -177,9 +177,12 @@ public class JobSearchController {
         description = "Returns all jobs posted by a specific company."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Retrieved jobs successfully")
+        @ApiResponse(responseCode = "200", description = "Retrieved jobs successfully"),
+        @ApiResponse(responseCode = "404", description = "Company not found")
     })
-    public ResponseEntity<List<JobResponse>> getJobsByCompany(@PathVariable Long companyId) {
+    public ResponseEntity<List<JobResponse>> getJobsByCompany(
+            @Parameter(description = "Company ID", required = true)
+            @PathVariable Long companyId) {
         return ResponseEntity.ok(jobService.getJobsByCompany(companyId));
     }
 
@@ -189,10 +192,13 @@ public class JobSearchController {
         description = "Returns jobs posted by a specific company matching the given title."
     )
     @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Search completed successfully")
+        @ApiResponse(responseCode = "200", description = "Search completed successfully"),
+        @ApiResponse(responseCode = "404", description = "Company not found")
     })
     public ResponseEntity<List<JobResponse>> getJobsByCompanyAndTitle(
+            @Parameter(description = "Company ID", required = true)
             @PathVariable Long companyId,
+            @Parameter(description = "Job title to search for", required = true)
             @RequestParam String title) {
         return ResponseEntity.ok(jobService.getJobsByCompanyAndTitle(companyId, title));
     }
@@ -206,6 +212,7 @@ public class JobSearchController {
         @ApiResponse(responseCode = "200", description = "Search completed successfully")
     })
     public ResponseEntity<List<JobResponse>> getJobsByCompanyName(
+            @Parameter(description = "Company name to search for", required = true)
             @RequestParam String companyName) {
         return ResponseEntity.ok(jobService.getJobsByCompanyName(companyName));
     }
@@ -219,7 +226,9 @@ public class JobSearchController {
         @ApiResponse(responseCode = "200", description = "Search completed successfully")
     })
     public ResponseEntity<List<JobResponse>> getJobsByCompanyNameAndTitle(
+            @Parameter(description = "Company name to search for", required = true)
             @RequestParam String companyName,
+            @Parameter(description = "Job title to search for", required = true)
             @RequestParam String title) {
         return ResponseEntity.ok(jobService.getJobsByCompanyNameAndTitle(companyName, title));
     }
