@@ -87,7 +87,12 @@ public class SecurityConfig {
 
     // Specific configuration for /api/v1/users/profile
     CorsConfiguration profileConfig = new CorsConfiguration();
-    profileConfig.setAllowedOrigins(Arrays.asList("http://localhost:3000"));
+
+    profileConfig.setAllowedOrigins(Arrays.asList(
+        "http://localhost:3000",        // ✅ Local development
+        "https://www.tymblhub.com",     // ✅ Production
+        "https://tymblhub.com"          // ✅ Production alternative
+    ));
     profileConfig.setAllowedMethods(
         Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
     profileConfig.setAllowedHeaders(
