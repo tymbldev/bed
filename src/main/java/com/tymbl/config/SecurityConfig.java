@@ -97,7 +97,7 @@ public class SecurityConfig {
     profileConfig.setMaxAge(3600L);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/api/v1/users/profile", profileConfig);
+    source.registerCorsConfiguration("/api/v1/users/**", profileConfig);
     source.registerCorsConfiguration("/api/v1/jobmanagement/**", profileConfig);
     source.registerCorsConfiguration("/**", configuration);
     return source;
