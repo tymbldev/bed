@@ -1,21 +1,16 @@
 package com.tymbl.jobs.service;
 
-import com.tymbl.common.entity.Job;
-import com.tymbl.common.util.LinkedInCrawler;
+import com.tymbl.common.util.CrawlingService;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.repository.CompanyRepository;
-import com.tymbl.jobs.repository.JobRepository;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,137 +19,140 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class CompanyCrawlerService {
 
-    private final LinkedInCrawler linkedInCrawler;
+    private final CrawlingService crawlingService;
     private final CompanyRepository companyRepository;
-    private final JobRepository jobRepository;
+    
+    private static final int BATCH_SIZE = 10; // Process 10 companies at a time
 
     //@Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
     public void crawlCompanies() {
         log.info("Starting company crawling process");
-        List<CompanyInfo> companies = readCompaniesFile();
         
-        for (CompanyInfo companyInfo : companies) {
+        int pageNumber = 0;
+        boolean hasMoreCompanies = true;
+        
+        while (hasMoreCompanies) {
             try {
-                processCompanyInTransaction(companyInfo);
-                // Add delay to avoid rate limiting
-                Thread.sleep(5000);
+                Pageable pageable = PageRequest.of(pageNumber, BATCH_SIZE);
+                Page<Company> companyPage = companyRepository.findByIsCrawledFalse(pageable);
+                if (companyPage.isEmpty()) {
+                    log.info("No more companies to crawl");
+                    hasMoreCompanies = false;
+                    break;
+                }
+                
+                log.info("Processing batch {} with {} companies", pageNumber + 1, companyPage.getContent().size());
+                
+                for (Company company : companyPage.getContent()) {
+                    try {
+                        processCompanyInTransaction(company);
+                        // Add delay to avoid rate limiting
+                       Thread.sleep(5000);
+                    } catch (Exception e) {
+                        log.error("Error processing company: " + company.getName(), e);
+                    }
+                }
+                
+                pageNumber++;
+                
             } catch (Exception e) {
-                log.error("Error processing company: " + companyInfo.name, e);
+                log.error("Error processing batch {}", pageNumber + 1, e);
+                break;
             }
         }
+        
         log.info("Completed company crawling process");
     }
 
     @Transactional
-    public void processCompanyInTransaction(CompanyInfo companyInfo) {
-        Optional<Company> existingCompany = companyRepository.findByName(companyInfo.name);
-        
-        if (existingCompany.isPresent() && existingCompany.get().isCrawled()) {
-            log.debug("Company {} already crawled, skipping", companyInfo.name);
-            return;
-        }
-
-        Optional<Company> crawledCompany = linkedInCrawler.crawlCompanyPage(companyInfo.linkedinUrl);
-        
-        if (crawledCompany.isPresent()) {
-            Company company = crawledCompany.get();
-            if (existingCompany.isPresent()) {
-                // Update existing company
-                Company existing = existingCompany.get();
-                updateCompanyFields(existing, company);
-                companyRepository.save(existing);
-                log.info("Updated company information for: {}", company.getName());
-                
-                // Crawl jobs for existing company
-                crawlJobsForCompany(existing);
-            } else {
-                // Save new company
-                Company savedCompany = companyRepository.save(company);
-                log.info("Saved new company: {}", company.getName());
-                
-                // Crawl jobs for new company
-                crawlJobsForCompany(savedCompany);
-            }
-        }
-    }
-
-    @Transactional
-    public void crawlJobsForCompany(Company company) {
-        log.info("Starting job crawling for company: {}", company.getName());
-        List<Job> jobs = linkedInCrawler.crawlCompanyJobs(company.getName(), company.getId());
-        
-        for (Job job : jobs) {
-            try {
-                // Check if job already exists based on title and company
-                Optional<com.tymbl.common.entity.Job> existingJob = jobRepository.findByTitleAndCompanyId(job.getTitle(), company.getId());
-                
-                if (existingJob.isPresent()) {
-                    // Update existing job
-                    Job existing = existingJob.get();
-                    updateJobFields(existing, job);
-                    jobRepository.save(existing);
-                    log.info("Updated job: {} for company: {}", job.getTitle(), company.getName());
-                } else {
-                    // Save new job
-                    jobRepository.save(job);
-                    log.info("Saved new job: {} for company: {}", job.getTitle(), company.getName());
-                }
-            } catch (Exception e) {
-                log.error("Error saving job: {} for company: {}", job.getTitle(), company.getName(), e);
-            }
-        }
-        log.info("Completed job crawling for company: {}", company.getName());
-    }
-
-    private void updateJobFields(Job existing, Job crawled) {
-        //existing.setLocation(crawled.getLocation());
-        existing.setDescription(crawled.getDescription());
-        //existing.setEmploymentType(crawled.getEmploymentType());
-        //existing.setApplicationUrl(crawled.getApplicationUrl());
-        //existing.setStatus(crawled.getStatus());
-        existing.setUpdatedAt(crawled.getUpdatedAt());
-    }
-
-    private List<CompanyInfo> readCompaniesFile() {
-        List<CompanyInfo> companies = new ArrayList<>();
+    public void processCompanyInTransaction(Company company) {
         try {
-            ClassPathResource resource = new ClassPathResource("companies.txt");
-            try (BufferedReader reader = new BufferedReader(
-                    new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8))) {
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] parts = line.split(",");
-                    if (parts.length == 2) {
-                        companies.add(new CompanyInfo(parts[0].trim(), parts[1].trim()));
-                    }
-                }
+            log.info("Processing company: {} (ID: {})", company.getName(), company.getId());
+            
+            // Check if company has LinkedIn URL
+            if (company.getLinkedinUrl() == null || company.getLinkedinUrl().trim().isEmpty()) {
+                log.warn("Company {} has no LinkedIn URL, marking as failed to crawl", company.getName());
+                company.setCrawled(false);
+                company.setLastCrawledAt(LocalDateTime.now());
+                companyRepository.save(company);
+                return;
             }
-        } catch (IOException e) {
-            log.error("Error reading companies file", e);
+
+            Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPage(company.getLinkedinUrl());
+            
+            if (crawlResult.isPresent()) {
+                CrawlingService.CrawlResult result = crawlResult.get();
+                Company generatedCompany = result.getCompany();
+                String rawData = result.getRawData();
+                
+                // Update company with generated information
+                updateCompanyFields(company, generatedCompany);
+                company.setCrawledData(rawData);
+                company.setCrawled(true); // Success - flag = 1
+                company.setLastCrawledAt(LocalDateTime.now());
+                
+                companyRepository.save(company);
+                log.info("Successfully updated company information for: {} (ID: {})", company.getName(), company.getId());
+                
+            } else {
+                // Failed to generate information - flag = 2
+                log.warn("Failed to generate company information for: {} (ID: {}), marking as failed", company.getName(), company.getId());
+                company.setCrawled(false);
+                company.setLastCrawledAt(LocalDateTime.now());
+                companyRepository.save(company);
+            }
+            
+        } catch (Exception e) {
+            log.error("Error processing company: {} (ID: {})", company.getName(), company.getId(), e);
+            // Mark as failed to crawl - flag = 2
+            company.setCrawled(false);
+            company.setLastCrawledAt(LocalDateTime.now());
+            companyRepository.save(company);
+            throw e; // Re-throw to ensure transaction rollback
         }
-        return companies;
     }
 
-    private void updateCompanyFields(Company existing, Company crawled) {
-        existing.setAboutUs(crawled.getAboutUs());
-        existing.setWebsite(crawled.getWebsite());
-        existing.setLogoUrl(crawled.getLogoUrl());
-        existing.setHeadquarters(crawled.getHeadquarters());
-        existing.setIndustry(crawled.getIndustry());
-        existing.setCompanySize(crawled.getCompanySize());
-        existing.setSpecialties(crawled.getSpecialties());
-        existing.setLinkedinUrl(crawled.getLinkedinUrl());
-        existing.setCrawled(true);
-        existing.setLastCrawledAt(crawled.getLastCrawledAt());
-    }
-
-    private static class CompanyInfo {
-        final String name;
-        final String linkedinUrl;
-
-        CompanyInfo(String name, String linkedinUrl) {
-            this.name = name;
-            this.linkedinUrl = linkedinUrl;
+    private void updateCompanyFields(Company existing, Company generated) {
+        // Update all available fields from the generated company data
+        if (generated.getDescription() != null && !generated.getDescription().trim().isEmpty()) {
+            existing.setDescription(generated.getDescription());
+        }
+        if (generated.getLogoUrl() != null && !generated.getLogoUrl().trim().isEmpty()) {
+            existing.setLogoUrl(generated.getLogoUrl());
+        }
+        if (generated.getWebsite() != null && !generated.getWebsite().trim().isEmpty()) {
+            existing.setWebsite(generated.getWebsite());
+        }
+        if (generated.getCareerPageUrl() != null && !generated.getCareerPageUrl().trim().isEmpty()) {
+            existing.setCareerPageUrl(generated.getCareerPageUrl());
+        }
+        if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty()) {
+            existing.setAboutUs(generated.getAboutUs());
+        }
+        if (generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
+            existing.setCulture(generated.getCulture());
+        }
+        if (generated.getMission() != null && !generated.getMission().trim().isEmpty()) {
+            existing.setMission(generated.getMission());
+        }
+        if (generated.getVision() != null && !generated.getVision().trim().isEmpty()) {
+            existing.setVision(generated.getVision());
+        }
+        if (generated.getCompanySize() != null && !generated.getCompanySize().trim().isEmpty()) {
+            existing.setCompanySize(generated.getCompanySize());
+        }
+        if (generated.getHeadquarters() != null && !generated.getHeadquarters().trim().isEmpty()) {
+            existing.setHeadquarters(generated.getHeadquarters());
+        }
+        if (generated.getIndustry() != null && !generated.getIndustry().trim().isEmpty()) {
+            existing.setIndustry(generated.getIndustry());
+        }
+        if (generated.getSpecialties() != null && !generated.getSpecialties().trim().isEmpty()) {
+            existing.setSpecialties(generated.getSpecialties());
+        }
+        // Keep the existing LinkedIn URL as it was provided
+        if (generated.getLinkedinUrl() != null && !generated.getLinkedinUrl().trim().isEmpty()) {
+            existing.setLinkedinUrl(generated.getLinkedinUrl());
         }
     }
 } 

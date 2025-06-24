@@ -108,8 +108,7 @@ public class CompanyCrawlerController {
             company.setId(companyId);
             company.setName(companyResponse.getName());
             
-            companyCrawlerService.crawlJobsForCompany(company);
-            
+
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Job crawling process completed successfully for company: " + companyResponse.getName());
             response.put("companyId", companyId);
@@ -151,9 +150,7 @@ public class CompanyCrawlerController {
             // Create a company object with just the name for the crawler service
             Company company = new Company();
             company.setName(companyName);
-            
-            companyCrawlerService.crawlJobsForCompany(company);
-            
+
             Map<String, String> response = new HashMap<>();
             response.put("message", "Job crawling process completed successfully for company: " + companyName);
             response.put("companyName", companyName);

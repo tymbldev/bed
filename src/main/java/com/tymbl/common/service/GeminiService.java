@@ -9,9 +9,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -52,24 +54,153 @@ public class GeminiService {
             
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
             
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            
-            log.debug("Gemini API response status: {}", response.getStatusCodeValue());
-            
-            if (response.getStatusCodeValue() == 200) {
-                log.info("Successfully received response from Gemini API");
-                return parseGeminiResponse(response.getBody());
-            } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return Optional.empty();
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(
+                    GEMINI_API_URL + "?key=" + apiKey,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+                );
+                
+                log.debug("Gemini API response status: {}", response.getStatusCodeValue());
+                
+                if (response.getStatusCodeValue() == 200) {
+                    log.info("Successfully received response from Gemini API");
+                    return parseGeminiResponse(response.getBody());
+                } else {
+                    log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                    return Optional.empty();
+                }
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                    log.error("Rate limit exceeded for Gemini API. Pausing execution for 15 minutes.");
+                    log.error("Rate limit error details: {}", e.getResponseBodyAsString());
+                    
+                    try {
+                        log.info("Starting 15-minute pause due to rate limiting...");
+                        Thread.sleep(15 * 60 * 1000); // 15 minutes in milliseconds
+                        log.info("Resumed execution after 15-minute pause");
+                        
+                        // Retry the request once after the pause
+                        log.info("Retrying request for document extraction");
+                        ResponseEntity<String> retryResponse = restTemplate.exchange(
+                            GEMINI_API_URL + "?key=" + apiKey,
+                            HttpMethod.POST,
+                            request,
+                            String.class
+                        );
+                        
+                        if (retryResponse.getStatusCodeValue() == 200) {
+                            log.info("Successfully received response from Gemini API after retry");
+                            return parseGeminiResponse(retryResponse.getBody());
+                        } else {
+                            log.error("Gemini API error after retry: {} - {}", retryResponse.getStatusCodeValue(), retryResponse.getBody());
+                            return Optional.empty();
+                        }
+                    } catch (InterruptedException ie) {
+                        log.error("Thread interrupted during rate limit pause", ie);
+                        Thread.currentThread().interrupt();
+                        return Optional.empty();
+                    } catch (HttpClientErrorException retryException) {
+                        if (retryException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                            log.error("Rate limit still exceeded after 15-minute pause. Skipping document extraction.");
+                        } else {
+                            log.error("Unexpected error during retry for document extraction", retryException);
+                        }
+                        return Optional.empty();
+                    }
+                } else {
+                    log.error("HTTP error calling Gemini API", e);
+                    return Optional.empty();
+                }
             }
         } catch (Exception e) {
             log.error("Error calling Gemini API", e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Company> generateCompanyInfo(String companyName, String linkedinUrl) {
+        try {
+            log.info("Starting company information generation for: {} using Gemini AI", companyName);
+            
+            if (companyName == null || companyName.trim().isEmpty()) {
+                log.warn("Company name is null or empty");
+                return Optional.empty();
+            }
+            
+            String prompt = buildCompanyGenerationPrompt(companyName, linkedinUrl);
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+            
+            log.debug("Sending request to Gemini API for company: {}", companyName);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(
+                    GEMINI_API_URL + "?key=" + apiKey,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+                );
+                
+                log.debug("Gemini API response status: {}", response.getStatusCodeValue());
+                
+                if (response.getStatusCodeValue() == 200) {
+                    log.info("Successfully received response from Gemini API for company: {}", companyName);
+                    return parseGeminiResponse(response.getBody());
+                } else {
+                    log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                    return Optional.empty();
+                }
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                    log.error("Rate limit exceeded for Gemini API. Pausing execution for 15 minutes. Company: {}", companyName);
+                    log.error("Rate limit error details: {}", e.getResponseBodyAsString());
+                    
+                    try {
+                        log.info("Starting 15-minute pause due to rate limiting...");
+                        Thread.sleep(15 * 60 * 1000); // 15 minutes in milliseconds
+                        log.info("Resumed execution after 15-minute pause");
+                        
+                        // Retry the request once after the pause
+                        log.info("Retrying request for company: {}", companyName);
+                        ResponseEntity<String> retryResponse = restTemplate.exchange(
+                            GEMINI_API_URL + "?key=" + apiKey,
+                            HttpMethod.POST,
+                            request,
+                            String.class
+                        );
+                        
+                        if (retryResponse.getStatusCodeValue() == 200) {
+                            log.info("Successfully received response from Gemini API after retry for company: {}", companyName);
+                            return parseGeminiResponse(retryResponse.getBody());
+                        } else {
+                            log.error("Gemini API error after retry: {} - {}", retryResponse.getStatusCodeValue(), retryResponse.getBody());
+                            return Optional.empty();
+                        }
+                    } catch (InterruptedException ie) {
+                        log.error("Thread interrupted during rate limit pause", ie);
+                        Thread.currentThread().interrupt();
+                        return Optional.empty();
+                    } catch (HttpClientErrorException retryException) {
+                        if (retryException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                            log.error("Rate limit still exceeded after 15-minute pause. Skipping company: {}", companyName);
+                        } else {
+                            log.error("Unexpected error during retry for company: {}", companyName, retryException);
+                        }
+                        return Optional.empty();
+                    }
+                } else {
+                    log.error("HTTP error calling Gemini API for company: {}", companyName, e);
+                    return Optional.empty();
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error calling Gemini API for company: {}", companyName, e);
             return Optional.empty();
         }
     }
@@ -82,6 +213,7 @@ public class GeminiService {
                "  \"description\": \"\",\n" +
                "  \"logo_url\": \"\",\n" +
                "  \"website\": \"\",\n" +
+               "  \"career_page_url\": \"\",\n" +
                "  \"about_us\": \"\",\n" +
                "  \"culture\": \"\",\n" +
                "  \"mission\": \"\",\n" +
@@ -101,6 +233,8 @@ public class GeminiService {
                "- Leave fields blank (\"\") if not found.\n" +
                "- For \"about_us\": Extract the detailed, comprehensive description of the company. Look for longer paragraphs, detailed company descriptions, and comprehensive information about what the company does, its history, achievements, and full business description. Do not use short summaries or brief descriptions.\n" +
                "- For \"description\": Use a concise summary or tagline of the company.\n" +
+               "- For \"website\": Extract the main company website URL if available.\n" +
+               "- For \"career_page_url\": Extract the company's career/jobs page URL if available.\n" +
                "- Ensure valid JSON output.\n\n" +
                "Input:\n\n" +
                "<<< \n" +
@@ -136,11 +270,20 @@ public class GeminiService {
                     if (parts != null && parts.isArray() && parts.size() > 0) {
                         String generatedText = parts.get(0).get("text").asText();
                         
+                        log.debug("Raw generated text from Gemini: {}", generatedText);
+                        
                         // Extract JSON from the generated text (it might be wrapped in markdown)
                         String jsonText = extractJsonFromText(generatedText);
-                        JsonNode companyData = objectMapper.readTree(jsonText);
                         
-                        return mapJsonToCompany(companyData);
+                        log.debug("Extracted JSON text: {}", jsonText);
+                        
+                        try {
+                            JsonNode companyData = objectMapper.readTree(jsonText);
+                            return mapJsonToCompany(companyData);
+                        } catch (Exception jsonParseException) {
+                            log.error("Failed to parse extracted JSON: {}", jsonText, jsonParseException);
+                            return Optional.empty();
+                        }
                     }
                 }
             }
@@ -158,12 +301,25 @@ public class GeminiService {
         text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
         text = text.trim();
         
-        // Find JSON object boundaries
-        int start = text.indexOf('{');
-        int end = text.lastIndexOf('}');
+        // Remove any comments or explanations before the JSON
+        int jsonStart = text.indexOf('{');
+        if (jsonStart > 0) {
+            text = text.substring(jsonStart);
+        }
         
-        if (start >= 0 && end >= 0 && end > start) {
-            return text.substring(start, end + 1);
+        // Remove any text after the JSON object
+        int jsonEnd = text.lastIndexOf('}');
+        if (jsonEnd >= 0) {
+            text = text.substring(0, jsonEnd + 1);
+        }
+        
+        // Clean up any remaining whitespace or newlines
+        text = text.trim();
+        
+        // Validate that we have a proper JSON object
+        if (!text.startsWith("{") || !text.endsWith("}")) {
+            log.warn("Extracted text does not appear to be valid JSON: {}", text);
+            return "{}";
         }
         
         return text;
@@ -177,6 +333,7 @@ public class GeminiService {
             company.setDescription(getStringValue(companyData, "description"));
             company.setLogoUrl(getStringValue(companyData, "logo_url"));
             company.setWebsite(getStringValue(companyData, "website"));
+            company.setCareerPageUrl(getStringValue(companyData, "career_page_url"));
             company.setAboutUs(getStringValue(companyData, "about_us"));
             company.setCulture(getStringValue(companyData, "culture"));
             company.setMission(getStringValue(companyData, "mission"));
@@ -212,5 +369,49 @@ public class GeminiService {
     private String getStringValue(JsonNode node, String fieldName) {
         JsonNode fieldNode = node.get(fieldName);
         return fieldNode != null ? fieldNode.asText() : "";
+    }
+
+    private String buildCompanyGenerationPrompt(String companyName, String linkedinUrl) {
+        return "You are a company information generator. Generate comprehensive and detailed information for the company: " + companyName + "\n\n" +
+               "IMPORTANT: Return ONLY valid JSON without any comments, explanations, or markdown formatting.\n\n" +
+               "JSON Schema:\n" +
+               "{\n" +
+               "  \"name\": \"" + companyName + "\",\n" +
+               "  \"description\": \"\",\n" +
+               "  \"logo_url\": \"\",\n" +
+               "  \"website\": \"\",\n" +
+               "  \"career_page_url\": \"\",\n" +
+               "  \"about_us\": \"\",\n" +
+               "  \"culture\": \"\",\n" +
+               "  \"mission\": \"\",\n" +
+               "  \"vision\": \"\",\n" +
+               "  \"company_size\": \"\",\n" +
+               "  \"headquarters\": \"\",\n" +
+               "  \"industry\": \"\",\n" +
+               "  \"linkedin_url\": \"" + linkedinUrl + "\",\n" +
+               "  \"specialties\": \"\",\n" +
+               "  \"is_crawled\": true,\n" +
+               "  \"last_crawled_at\": \"" + Instant.now().toString() + "\"\n" +
+               "}\n\n" +
+               "Instructions:\n" +
+               "- Return ONLY the JSON object, no additional text or formatting\n" +
+               "- Do not include any comments, explanations, or markdown code blocks\n" +
+               "- Ensure all string values are properly escaped\n" +
+               "- For \"about_us\": Include detailed, comprehensive description with company history, achievements, business model, and full business description. Make it extensive and informative.\n" +
+               "- For \"description\": Use a concise summary or tagline\n" +
+               "- For \"website\": Provide the main company website URL (e.g., https://www.company.com)\n" +
+               "- For \"career_page_url\": Provide the company's career/jobs page URL (e.g., https://careers.company.com or https://www.company.com/careers)\n" +
+               "- For \"company_size\": Include employee count and growth information\n" +
+               "- For \"headquarters\": Include city, state, and country\n" +
+               "- For \"industry\": Be specific about the industry sector\n" +
+               "- For \"specialties\": List key products, services, or technologies\n" +
+               "- For \"culture\": Describe company culture, values, and work environment\n" +
+               "- For \"mission\": Include company mission statement\n" +
+               "- For \"vision\": Include company vision statement\n" +
+               "- Ensure all information is accurate and up-to-date\n" +
+               "- Make the content detailed and comprehensive, not brief summaries\n" +
+               "- Provide comprehensive, detailed information about the company\n\n" +
+               "Generate detailed information for: " + companyName + "\n\n" +
+               "Return ONLY the JSON object:";
     }
 } 

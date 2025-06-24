@@ -22,6 +22,9 @@ public class Company {
 
     private String website;
 
+    @Column(name = "career_page_url")
+    private String careerPageUrl;
+
     private String logoUrl;
 
     private String aboutUs;
@@ -49,6 +52,9 @@ public class Company {
 
     @Column(name = "last_crawled_at")
     private LocalDateTime lastCrawledAt;
+
+    @Column(name = "crawled_data", columnDefinition = "LONGTEXT")
+    private String crawledData;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
