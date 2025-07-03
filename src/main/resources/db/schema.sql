@@ -251,6 +251,10 @@ CREATE TABLE IF NOT EXISTS jobs (
     status VARCHAR(50) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    opening_count INT NOT NULL DEFAULT 1,
+    unique_url VARCHAR(1000) UNIQUE,
+    platform VARCHAR(100),
+    auto_approved BOOLEAN NOT NULL DEFAULT FALSE,
     FOREIGN KEY (company_id) REFERENCES companies(id)
 );
 
@@ -263,7 +267,31 @@ CREATE TABLE IF NOT EXISTS job_applications (
     status VARCHAR(20) NOT NULL DEFAULT 'PENDING',
     applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    job_referrer_id BIGINT NOT NULL,
     FOREIGN KEY (job_id) REFERENCES jobs(id),
+    FOREIGN KEY (applicant_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS job_referrers (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    job_id BIGINT NOT NULL,
+    user_id BIGINT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (job_id, user_id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id),
+    FOREIGN KEY (user_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS referrer_feedback (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    job_referrer_id BIGINT NOT NULL,
+    applicant_id BIGINT NOT NULL,
+    feedback_text TEXT,
+    got_call BOOLEAN,
+    score INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (job_referrer_id, applicant_id),
+    FOREIGN KEY (job_referrer_id) REFERENCES job_referrers(id),
     FOREIGN KEY (applicant_id) REFERENCES users(id)
 );
 

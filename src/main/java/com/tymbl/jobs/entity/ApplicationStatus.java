@@ -11,11 +11,6 @@ public enum ApplicationStatus {
     PENDING,
     
     /**
-     * Application is currently being reviewed
-     */
-    REVIEWING,
-    
-    /**
      * Application has been shortlisted for interview
      */
     SHORTLISTED,
@@ -23,11 +18,5 @@ public enum ApplicationStatus {
     /**
      * Application has been rejected
      */
-    REJECTED,
-    
-    /**
-     * Candidate has been accepted/hired for the position
-     * Maps to JobApplication.ApplicationStatus.HIRED for compatibility
-     */
-    ACCEPTED
+    REJECTED
 } 

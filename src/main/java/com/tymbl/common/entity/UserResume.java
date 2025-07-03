@@ -1,6 +1,7 @@
 package com.tymbl.common.entity;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -33,6 +34,9 @@ public class UserResume {
     @Column(name = "file_size", nullable = false)
     private Long fileSize;
     
+    @Column(name = "uuid", nullable = false, unique = true)
+    private String uuid;
+    
     @Column(name = "resume_data", nullable = false)
     @Lob
     private byte[] resumeData;
@@ -44,4 +48,12 @@ public class UserResume {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+    
+    // Pre-persist method to generate UUID
+    @javax.persistence.PrePersist
+    protected void onCreate() {
+        if (uuid == null) {
+            uuid = UUID.randomUUID().toString();
+        }
+    }
 } 

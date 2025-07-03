@@ -14,5 +14,6 @@ public class JobApplicationRequest {
     @NotBlank(message = "Cover letter is required")
     private String coverLetter;
     
-    private String resumeUrl;
+    @NotNull(message = "Job Referrer ID is required")
+    private Long jobReferrerId;
 } 

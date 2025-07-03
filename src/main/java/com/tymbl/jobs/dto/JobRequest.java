@@ -39,4 +39,9 @@ public class JobRequest {
     private String company;
     
     private Set<String> tags = new HashSet<>();
+
+    private Integer openingCount = 1;
+
+    private String uniqueUrl;
+    private String platform;
 } 

@@ -1,5 +1,6 @@
 package com.tymbl.jobs.dto;
 
+import com.tymbl.common.entity.JobApprovalStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -26,4 +27,15 @@ public class JobResponse {
     private LocalDateTime updatedAt;
     private Set<String> tags = new HashSet<>();
     private boolean isSuperAdminPosted;
+    private Integer openingCount;
+    private String uniqueUrl;
+    private String platform;
+    private Integer approved;
+    private Integer referrerCount;
+    
+    // Helper method to get approval status string
+    public String getApprovalStatus() {
+        if (approved == null) return "PENDING";
+        return JobApprovalStatus.fromValue(approved).name();
+    }
 } 

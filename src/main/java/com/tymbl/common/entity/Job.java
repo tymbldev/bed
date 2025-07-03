@@ -8,6 +8,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -64,9 +65,45 @@ public class Job {
     @Column(name = "tag")
     private Set<String> tags = new HashSet<>();
 
+    @Column(name = "opening_count", nullable = false)
+    private Integer openingCount = 1;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    @Column(name = "unique_url", unique = true)
+    private String uniqueUrl;
+
+    @Column(name = "platform")
+    private String platform;
+
+    @Column(name = "approved", nullable = false)
+    private Integer approved = JobApprovalStatus.PENDING.getValue();
+
+    @OneToMany(mappedBy = "job")
+    private List<JobReferrer> referrers;
+    
+    // Helper methods for approval status
+    public JobApprovalStatus getApprovalStatus() {
+        return JobApprovalStatus.fromValue(this.approved);
+    }
+    
+    public void setApprovalStatus(JobApprovalStatus status) {
+        this.approved = status.getValue();
+    }
+    
+    public boolean isApproved() {
+        return this.approved == JobApprovalStatus.APPROVED.getValue();
+    }
+    
+    public boolean isPending() {
+        return this.approved == JobApprovalStatus.PENDING.getValue();
+    }
+    
+    public boolean isRejected() {
+        return this.approved == JobApprovalStatus.REJECTED.getValue();
+    }
 } 

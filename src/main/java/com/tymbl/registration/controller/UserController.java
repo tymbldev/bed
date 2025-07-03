@@ -24,7 +24,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -62,7 +64,11 @@ public class UserController {
             logger.info("Updating profile for user: {}", user.getEmail());
             User updatedUser = registrationService.updateUserProfile(user.getId(), request);
             logger.info("Successfully updated profile for user: {}", user.getEmail());
-            return ResponseEntity.ok(updatedUser);
+            String newToken = jwtService.generateToken(updatedUser);
+            Map<String, Object> response = new HashMap<>();
+            response.put("token", newToken);
+            response.put("user", updatedUser);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             logger.error("Failed to update profile. Error: {}", e);
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));

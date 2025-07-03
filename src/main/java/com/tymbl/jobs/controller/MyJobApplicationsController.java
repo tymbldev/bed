@@ -4,7 +4,9 @@ import com.tymbl.auth.service.JwtService;
 import com.tymbl.common.entity.User;
 import com.tymbl.jobs.dto.JobApplicationRequest;
 import com.tymbl.jobs.dto.JobApplicationResponse;
+import com.tymbl.jobs.dto.ReferrerFeedbackRequest;
 import com.tymbl.jobs.service.JobApplicationService;
+import com.tymbl.jobs.service.JobService;
 import com.tymbl.registration.controller.UserController.ErrorResponse;
 import com.tymbl.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,11 +32,12 @@ public class MyJobApplicationsController {
     private final JobApplicationService jobApplicationService;
     private final JwtService jwtService;
     private final RegistrationService registrationService;
+    private final JobService jobService;
 
     @PostMapping
     @Operation(
-        summary = "Apply for a job",
-        description = "Submit an application for a specific job posting. The applicant is determined by the authenticated user."
+        summary = "Apply for a referral",
+        description = "Submit an application for a specific job via a selected referrer. The applicant is determined by the authenticated user. The resume URL is automatically fetched from the user's profile."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -42,12 +45,12 @@ public class MyJobApplicationsController {
             description = "Application submitted successfully",
             content = @Content(schema = @Schema(implementation = JobApplicationResponse.class))
         ),
-        @ApiResponse(responseCode = "400", description = "Invalid input or already applied"),
+        @ApiResponse(responseCode = "400", description = "Invalid input, already applied, or resume URL not found in profile"),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden - Cannot apply to your own job posting"),
         @ApiResponse(responseCode = "404", description = "Job not found")
     })
-    public ResponseEntity<?> applyForJob(
+    public ResponseEntity<?> applyForReferral(
             @Valid @RequestBody JobApplicationRequest request,
             @RequestHeader("Authorization") String token) {
         try {
@@ -79,4 +82,52 @@ public class MyJobApplicationsController {
         User currentUser = registrationService.getUserByEmail(email);
         return ResponseEntity.ok(jobApplicationService.getApplicationsByApplicant(currentUser));
     }
+
+    @PostMapping("/feedback")
+    @Operation(
+        summary = "Submit feedback for a referrer",
+        description = "Allows an applicant to submit feedback about a referrer for a job."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Feedback submitted successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input or not allowed")
+    })
+    public ResponseEntity<?> submitReferrerFeedback(
+            @Valid @RequestBody ReferrerFeedbackRequest request,
+            @RequestHeader("Authorization") String token) {
+        try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User currentUser = registrationService.getUserByEmail(email);
+            jobService.submitReferrerFeedback(request, currentUser);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @PostMapping("/switch-referrer")
+    @Operation(
+        summary = "Switch referrer for an application",
+        description = "Allows an applicant to transfer their application to another referrer if not yet accepted."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Referrer switched successfully", content = @Content(schema = @Schema(implementation = JobApplicationResponse.class))),
+        @ApiResponse(responseCode = "400", description = "Invalid input or not allowed")
+    })
+    public ResponseEntity<?> switchReferrer(
+            @RequestParam Long applicationId,
+            @RequestParam Long newJobReferrerId,
+            @RequestHeader("Authorization") String token) {
+        try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User currentUser = registrationService.getUserByEmail(email);
+            JobApplicationResponse response = jobApplicationService.switchReferrer(applicationId, newJobReferrerId, currentUser);
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+
+
 } 

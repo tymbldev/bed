@@ -21,6 +21,9 @@ public class JobApplication {
     @Column(name = "applicant_id", nullable = false)
     private Long applicantId;
 
+    @Column(name = "job_referrer_id", nullable = false)
+    private Long jobReferrerId;
+
     @Column(columnDefinition = "TEXT")
     private String coverLetter;
 
@@ -39,9 +42,7 @@ public class JobApplication {
 
     public enum ApplicationStatus {
         PENDING,
-        REVIEWING,
         SHORTLISTED,
-        REJECTED,
-        HIRED
+        REJECTED
     }
 } 

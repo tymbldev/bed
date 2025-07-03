@@ -14,4 +14,6 @@ public class JobApplicationResponse {
     private String applicantName;
     private ApplicationStatus status;
     private LocalDateTime createdAt;
+    private Long jobReferrerId;
+    private SudoIdentityDTO referrerSudoIdentity;
 } 

@@ -32,15 +32,15 @@ public class JobApplicationService {
         if (request == null) {
             throw new RuntimeException("Job application request cannot be null");
         }
-        
         if (applicant == null) {
             throw new RuntimeException("Applicant cannot be null");
         }
-        
         if (request.getJobId() == null) {
             throw new RuntimeException("Job ID is required");
         }
-        
+        if (request.getJobReferrerId() == null) {
+            throw new RuntimeException("Job Referrer ID is required");
+        }
         if (request.getCoverLetter() == null || request.getCoverLetter().trim().isEmpty()) {
             throw new RuntimeException("Cover letter is required");
         }
@@ -53,7 +53,7 @@ public class JobApplicationService {
             throw new RuntimeException("You cannot apply to your own job posting");
         }
 
-        // Check if already applied
+        // Check if already applied for this job (any referrer)
         List<JobApplication> existingApplications = jobApplicationRepository.findByJobIdAndApplicantId(job.getId(), applicant.getId());
         if (existingApplications != null && !existingApplications.isEmpty()) {
             throw new RuntimeException("You have already applied for this job");
@@ -62,8 +62,9 @@ public class JobApplicationService {
         JobApplication application = new JobApplication();
         application.setJobId(job.getId());
         application.setApplicantId(applicant.getId());
+        application.setJobReferrerId(request.getJobReferrerId());
         application.setCoverLetter(request.getCoverLetter());
-        application.setResumeUrl(request.getResumeUrl());
+        application.setResumeUrl(applicant.getResume());
         application.setStatus(JobApplication.ApplicationStatus.PENDING);
 
         application = jobApplicationRepository.save(application);
@@ -138,6 +139,17 @@ public class JobApplicationService {
         response.setApplicantName(applicant.getFirstName() + " " + applicant.getLastName());
         response.setStatus(convertStatus(application.getStatus()));
         response.setCreatedAt(application.getCreatedAt());
+        response.setJobReferrerId(application.getJobReferrerId());
+
+        // Populate referrer sudo identity
+        if (application.getJobReferrerId() != null) {
+            userRepository.findById(application.getJobReferrerId()).ifPresent(refUser -> {
+                com.tymbl.jobs.dto.SudoIdentityDTO sudo = new com.tymbl.jobs.dto.SudoIdentityDTO();
+                sudo.setDesignation(refUser.getDesignation());
+                sudo.setCompany(refUser.getCompany());
+                response.setReferrerSudoIdentity(sudo);
+            });
+        }
         return response;
     }
 
@@ -187,14 +199,10 @@ public class JobApplicationService {
         switch (status) {
             case PENDING:
                 return ApplicationStatus.PENDING;
-            case REVIEWING:
-                return ApplicationStatus.REVIEWING;
             case SHORTLISTED:
                 return ApplicationStatus.SHORTLISTED;
             case REJECTED:
                 return ApplicationStatus.REJECTED;
-            case HIRED:
-                return ApplicationStatus.ACCEPTED;
             default:
                 return ApplicationStatus.PENDING;
         }
@@ -219,5 +227,20 @@ public class JobApplicationService {
         return jobApplicationRepository.findById(applicationId)
             .map(this::mapToExtendedDetails)
             .orElseThrow(() -> new RuntimeException("Job application not found"));
+    }
+
+    @Transactional
+    public JobApplicationResponse switchReferrer(Long applicationId, Long newJobReferrerId, User applicant) {
+        JobApplication application = jobApplicationRepository.findById(applicationId)
+            .orElseThrow(() -> new RuntimeException("Application not found"));
+        if (!application.getApplicantId().equals(applicant.getId())) {
+            throw new RuntimeException("You are not authorized to modify this application");
+        }
+        if (application.getStatus() != JobApplication.ApplicationStatus.PENDING) {
+            throw new RuntimeException("You cannot switch referrer after your application is already shared with the other referrer");
+        }
+        application.setJobReferrerId(newJobReferrerId);
+        application = jobApplicationRepository.save(application);
+        return mapToBasicResponse(application);
     }
 } 

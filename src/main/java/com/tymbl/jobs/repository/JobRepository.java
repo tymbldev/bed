@@ -65,4 +65,37 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     Optional<Job> findByTitleAndCompanyId(String title, Long companyId);
 
     List<Job> findByCompanyIdAndPostedByIdAndActiveTrue(Long companyId, Long postedById);
+
+    Job findByUniqueUrlAndPlatform(String uniqueUrl, String platform);
+    
+    // New methods for approval functionality
+    Page<Job> findByActiveTrueAndApproved(Integer approved, Pageable pageable);
+    
+    @Query("SELECT j FROM Job j WHERE j.active = true AND j.approved = :approved AND " +
+           "(LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(j.company) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Job> searchApprovedJobs(@Param("keyword") String keyword, @Param("approved") Integer approved, Pageable pageable);
+    
+    @Query("SELECT j FROM Job j WHERE j.active = true AND j.approved = :approved AND " +
+           "EXISTS (SELECT s FROM j.skillIds s WHERE s IN :skills)")
+    Page<Job> findBySkillsInAndApproved(@Param("skills") Set<Long> skills, @Param("approved") Integer approved, Pageable pageable);
+    
+    List<Job> findByCompanyIdAndApproved(Long companyId, Integer approved);
+    
+    @Query("SELECT j FROM Job j WHERE LOWER(j.company) LIKE LOWER(CONCAT('%', :companyName, '%')) AND j.approved = :approved")
+    List<Job> findByCompanyContainingIgnoreCaseAndApproved(@Param("companyName") String companyName, @Param("approved") Integer approved);
+    
+    @Query("SELECT j FROM Job j WHERE j.companyId = :companyId AND j.title LIKE %:title% AND j.active = true AND j.approved = :approved")
+    List<Job> findActiveJobsByCompanyIdAndTitleAndApproved(@Param("companyId") Long companyId, @Param("title") String title, @Param("approved") Integer approved);
+    
+    @Query("SELECT j FROM Job j WHERE j.company LIKE %:companyName% AND j.title LIKE %:title% AND j.active = true AND j.approved = :approved")
+    List<Job> findActiveJobsByCompanyAndTitleAndApproved(@Param("companyName") String companyName, @Param("title") String title, @Param("approved") Integer approved);
+    
+    // Override existing searchJobs method to use approved jobs
+    @Query("SELECT j FROM Job j WHERE j.active = true AND j.approved = 1 AND " +
+           "(LOWER(j.title) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
+           "LOWER(j.company) LIKE LOWER(CONCAT('%', :keyword, '%')))")
+    Page<Job> searchApprovedJobs(@Param("keyword") String keyword, Pageable pageable);
 } 

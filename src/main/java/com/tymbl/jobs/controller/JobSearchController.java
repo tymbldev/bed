@@ -2,7 +2,9 @@ package com.tymbl.jobs.controller;
 
 import com.tymbl.common.entity.User;
 import com.tymbl.jobs.dto.JobResponse;
+import com.tymbl.jobs.dto.JobReferrerResponse;
 import com.tymbl.jobs.service.JobService;
+import com.tymbl.registration.controller.UserController.ErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -33,7 +35,7 @@ public class JobSearchController {
     @GetMapping
     @Operation(
         summary = "Get all active job postings with pagination",
-        description = "Returns a paginated list of all active job postings, sorted by the specified field and direction."
+        description = "Returns a paginated list of all active job postings, sorted by the specified field and direction. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully")
@@ -57,7 +59,7 @@ public class JobSearchController {
     @GetMapping("/{jobId}")
     @Operation(
         summary = "Get job posting details by ID",
-        description = "Returns the details of a job posting with the specified ID."
+        description = "Returns the details of a job posting with the specified ID. The response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieved job posting successfully"),
@@ -72,7 +74,7 @@ public class JobSearchController {
     @GetMapping("/search")
     @Operation(
         summary = "Search job postings by keyword",
-        description = "Returns a paginated list of job postings matching the specified keyword in the title, description, or company name."
+        description = "Returns a paginated list of job postings matching the specified keyword in the title, description, or company name. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search completed successfully")
@@ -91,7 +93,7 @@ public class JobSearchController {
     @GetMapping("/search/skills")
     @Operation(
         summary = "Search job postings by required skills",
-        description = "Returns a paginated list of job postings requiring the specified skills."
+        description = "Returns a paginated list of job postings requiring the specified skills. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search completed successfully")
@@ -122,7 +124,7 @@ public class JobSearchController {
     @GetMapping("/search/tags")
     @Operation(
         summary = "Search jobs by tags",
-        description = "Returns a paginated list of job postings that have any of the specified tags."
+        description = "Returns a paginated list of job postings that have any of the specified tags. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully")
@@ -148,7 +150,7 @@ public class JobSearchController {
     @GetMapping("/search/tag-keyword")
     @Operation(
         summary = "Search jobs by tag keyword",
-        description = "Returns a paginated list of job postings that have tags containing the specified keyword."
+        description = "Returns a paginated list of job postings that have tags containing the specified keyword. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully")
@@ -174,7 +176,7 @@ public class JobSearchController {
     @GetMapping("/company/{companyId}")
     @Operation(
         summary = "Get jobs by company ID",
-        description = "Returns all jobs posted by a specific company."
+        description = "Returns all jobs posted by a specific company. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieved jobs successfully"),
@@ -189,7 +191,7 @@ public class JobSearchController {
     @GetMapping("/company/{companyId}/search")
     @Operation(
         summary = "Search jobs by company ID and title",
-        description = "Returns jobs posted by a specific company matching the given title."
+        description = "Returns jobs posted by a specific company matching the given title. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search completed successfully"),
@@ -206,7 +208,7 @@ public class JobSearchController {
     @GetMapping("/company/search")
     @Operation(
         summary = "Search jobs by company name",
-        description = "Returns jobs posted by companies matching the given name."
+        description = "Returns jobs posted by companies matching the given name. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search completed successfully")
@@ -220,7 +222,7 @@ public class JobSearchController {
     @GetMapping("/company/search/title")
     @Operation(
         summary = "Search jobs by company name and title",
-        description = "Returns jobs posted by companies matching the given name and title."
+        description = "Returns jobs posted by companies matching the given name and title. Each job response includes the count of referrers for that job."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Search completed successfully")
@@ -232,4 +234,19 @@ public class JobSearchController {
             @RequestParam String title) {
         return ResponseEntity.ok(jobService.getJobsByCompanyNameAndTitle(companyName, title));
     }
+
+    @GetMapping("/{jobId}/referrers")
+    @Operation(
+        summary = "Get all referrers for a job",
+        description = "Returns a list of all users accepting applications for the specified job."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Retrieved referrers successfully")
+    })
+    public ResponseEntity<List<JobReferrerResponse>> getReferrersForJob(
+            @Parameter(description = "Job ID", required = true)
+            @PathVariable Long jobId) {
+        return ResponseEntity.ok(jobService.getReferrersForJob(jobId));
+    }
+
 } 

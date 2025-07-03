@@ -23,6 +23,7 @@ public class ProfileUpdateRequest {
     
     private String phoneNumber;
     private String company;
+    private Long companyId;
     private Long departmentId;
     private String designation;
     private Long designationId;

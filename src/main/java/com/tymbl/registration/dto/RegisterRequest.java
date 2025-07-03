@@ -39,6 +39,8 @@ public class RegisterRequest {
     @Size(max = 100, message = "Company name must be less than 100 characters")
     private String company;
     
+    private Long companyId;
+    
     private Long departmentId;
     
     @Size(max = 100, message = "Designation must be less than 100 characters")

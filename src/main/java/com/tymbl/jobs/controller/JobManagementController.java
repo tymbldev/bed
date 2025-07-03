@@ -4,7 +4,11 @@ import com.tymbl.auth.service.JwtService;
 import com.tymbl.common.entity.User;
 import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
+import com.tymbl.jobs.dto.JobReferrerRegistrationRequest;
+import com.tymbl.jobs.dto.JobDetailsWithReferrersResponse;
+import com.tymbl.jobs.entity.ApplicationStatus;
 import com.tymbl.jobs.service.JobService;
+import com.tymbl.registration.controller.UserController.ErrorResponse;
 import com.tymbl.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,6 +37,20 @@ public class JobManagementController {
     private final JwtService jwtService;
     private final RegistrationService registrationService;
 
+    private boolean isCompanyAllowed(Long userCompanyId, String userCompany, Long targetCompanyId, String targetCompany) {
+        boolean idPresent = userCompanyId != null;
+        boolean namePresent = userCompany != null && !userCompany.isEmpty();
+        if (idPresent && !namePresent) {
+            return targetCompanyId != null && targetCompanyId.equals(userCompanyId);
+        } else if (!idPresent && namePresent) {
+            return targetCompany != null && targetCompany.equalsIgnoreCase(userCompany);
+        } else if (idPresent && namePresent) {
+            return (targetCompanyId != null && targetCompanyId.equals(userCompanyId)) ||
+                   (targetCompany != null && targetCompany.equalsIgnoreCase(userCompany));
+        }
+        return false;
+    }
+
     @PostMapping
     @Operation(
         summary = "Create a new job posting",
@@ -53,6 +71,11 @@ public class JobManagementController {
     public ResponseEntity<JobResponse> createJob(
             @Valid @RequestBody JobRequest request,
             @RequestHeader("Authorization") String token) {
+        Long userCompanyId = jwtService.extractCompanyId(token.substring(7));
+        String userCompany = jwtService.extractCompany(token.substring(7));
+        if (!isCompanyAllowed(userCompanyId, userCompany, request.getCompanyId(), request.getCompany())) {
+            return ResponseEntity.status(403).build();
+        }
         String email = jwtService.extractUsername(token.substring(7));
         User currentUser = registrationService.getUserByEmail(email);
         return ResponseEntity.ok(jobService.createJob(request, currentUser));
@@ -75,6 +98,12 @@ public class JobManagementController {
             @PathVariable Long jobId,
             @Valid @RequestBody JobRequest request,
             @RequestHeader("Authorization") String token) {
+        Long userCompanyId = jwtService.extractCompanyId(token.substring(7));
+        String userCompany = jwtService.extractCompany(token.substring(7));
+        JobResponse job = jobService.getJobById(jobId);
+        if (!isCompanyAllowed(userCompanyId, userCompany, job.getCompanyId(), job.getCompany())) {
+            return ResponseEntity.status(403).build();
+        }
         String email = jwtService.extractUsername(token.substring(7));
         User currentUser = registrationService.getUserByEmail(email);
         return ResponseEntity.ok(jobService.updateJob(jobId, request, currentUser));
@@ -95,6 +124,12 @@ public class JobManagementController {
             @Parameter(description = "Job ID", required = true)
             @PathVariable Long jobId,
             @RequestHeader("Authorization") String token) {
+        Long userCompanyId = jwtService.extractCompanyId(token.substring(7));
+        String userCompany = jwtService.extractCompany(token.substring(7));
+        JobResponse job = jobService.getJobById(jobId);
+        if (!isCompanyAllowed(userCompanyId, userCompany, job.getCompanyId(), job.getCompany())) {
+            return ResponseEntity.status(403).build();
+        }
         String email = jwtService.extractUsername(token.substring(7));
         User currentUser = registrationService.getUserByEmail(email);
         jobService.deleteJob(jobId, currentUser);
@@ -136,5 +171,95 @@ public class JobManagementController {
             @Parameter(description = "Company ID", required = true)
             @PathVariable Long companyId) {
         return ResponseEntity.ok(jobService.getJobsByCompanyPostedBySuperAdmin(companyId));
+    }
+
+    @PostMapping("/register-referrer")
+    @Operation(
+        summary = "Register as a JobReferrer for a job",
+        description = "Register yourself as a referrer for a job from your company. You can only register for jobs from the same company as yours."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Successfully registered as referrer"),
+        @ApiResponse(responseCode = "400", description = "Invalid input or already registered"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Different company"),
+        @ApiResponse(responseCode = "404", description = "Job not found"),
+        @ApiResponse(responseCode = "500", description = "Server error")
+    })
+    public ResponseEntity<Void> registerAsJobReferrer(
+            @Valid @RequestBody JobReferrerRegistrationRequest request,
+            @RequestHeader("Authorization") String token) {
+        String email = jwtService.extractUsername(token.substring(7));
+        User currentUser = registrationService.getUserByEmail(email);
+        jobService.registerAsJobReferrer(request.getJobId(), currentUser);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/accept/{applicationId}")
+    @Operation(
+        summary = "Accept referral application as referrer",
+        description = "Allows the job poster or any user from the same company to accept a referral application and set its status to SHORTLISTED or REJECTED."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Referral application status updated successfully"),
+        @ApiResponse(responseCode = "400", description = "Invalid input or not allowed"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Not authorized")
+    })
+    public ResponseEntity<?> acceptReferralAsReferrer(
+        @PathVariable Long applicationId,
+        @RequestParam ApplicationStatus status,
+        @RequestHeader("Authorization") String token) {
+        try {
+            // Validate status parameter
+            if (status != ApplicationStatus.SHORTLISTED && status != ApplicationStatus.REJECTED) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("Status must be either SHORTLISTED or REJECTED"));
+            }
+            
+            String email = jwtService.extractUsername(token.substring(7));
+            User currentUser = registrationService.getUserByEmail(email);
+            jobService.acceptReferralAsReferrer(applicationId, currentUser, status);
+            return ResponseEntity.ok().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
+        }
+    }
+
+    @GetMapping("/{jobId}/details")
+    @Operation(
+        summary = "Get job details with referrer profiles",
+        description = "Get comprehensive job details along with profile information of all users who have registered as referrers for this job. Only accessible by job poster or users from the same company."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Job details with referrer profiles retrieved successfully",
+            content = @Content(schema = @Schema(implementation = JobDetailsWithReferrersResponse.class))
+        ),
+        @ApiResponse(responseCode = "401", description = "Unauthorized"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - Not authorized to view this job"),
+        @ApiResponse(responseCode = "404", description = "Job not found")
+    })
+    public ResponseEntity<JobDetailsWithReferrersResponse> getJobDetailsWithReferrers(
+            @Parameter(description = "Job ID", required = true)
+            @PathVariable Long jobId,
+            @RequestHeader("Authorization") String token) {
+        try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User currentUser = registrationService.getUserByEmail(email);
+            
+            // Get job details to check authorization
+            JobDetailsWithReferrersResponse jobDetails = jobService.getJobDetailsWithReferrers(jobId);
+            
+            // Check if user is authorized to view this job (job poster or same company)
+            if (!jobDetails.getPostedBy().equals(currentUser.getId()) &&
+                (currentUser.getCompanyId() == null || !currentUser.getCompanyId().equals(jobDetails.getCompanyId()))) {
+                return ResponseEntity.status(403).build();
+            }
+            
+            return ResponseEntity.ok(jobDetails);
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Job not found");
+        }
     }
 } 

@@ -65,6 +65,7 @@ public class RegistrationController {
                               "  \"role\": \"USER\",\n" +
                               "  \"phoneNumber\": \"+1234567890\",\n" +
                               "  \"company\": \"Example Corp\",\n" +
+                              "  \"companyId\": 123,\n" +
                               "  \"designationId\": 1,\n" +
                               "  \"departmentId\": 1,\n" +
                               "  \"cityId\": 1,\n" +

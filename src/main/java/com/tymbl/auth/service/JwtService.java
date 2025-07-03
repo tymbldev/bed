@@ -98,11 +98,23 @@ public class JwtService {
     public String generateToken(User user) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("userId", user.getId());
+        claims.put("companyId", user.getCompanyId());
+        claims.put("company", user.getCompany());
         return createToken(claims, user.getEmail());
     }
 
     public boolean isTokenValid(String token, User user) {
         final String username = extractUsername(token);
         return (username.equals(user.getEmail()) && !isTokenExpired(token));
+    }
+
+    public Long extractCompanyId(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("companyId", Long.class);
+    }
+
+    public String extractCompany(String token) {
+        Claims claims = extractAllClaims(token);
+        return claims.get("company", String.class);
     }
 } 

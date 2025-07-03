@@ -17,53 +17,27 @@
   ],
   "item": [
     {
-      "name": "Authentication",
-      "description": "Authentication endpoints for user login and account management",
+      "name": "Authentication & Registration",
+      "description": "Endpoints for user authentication, registration, and LinkedIn login.",
       "item": [
         {
           "name": "Login",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login"
-              ]
-            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login" ] },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
             },
-            "description": "Authenticate user and return JWT token. Authenticates a user with their email and password, and returns a JWT token that can be used for protected API endpoints."
+            "description": "Authenticate user and return JWT token."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Authentication successful",
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
-            },
-            {
-              "code": 401,
-              "name": "Invalid credentials",
-              "body": "{\n  \"error\": \"Invalid credentials\"\n}"
-            },
-            {
-              "code": 400,
-              "name": "Invalid input",
-              "body": "{\n  \"error\": \"Invalid input data\"\n}"
-            }
+            { "code": 200, "name": "Authentication successful", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}" },
+            { "code": 401, "name": "Invalid credentials", "body": "{\n  \"error\": \"Invalid credentials\"\n}" },
+            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" }
           ]
         },
         {
@@ -71,185 +45,54 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=verification_token_here",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "verify-email"
-              ],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "verification_token_here"
-                }
-              ]
-            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=abc123", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "verify-email" ], "query": [ { "key": "token", "value": "abc123" } ] },
             "description": "Verify user's email address using the token sent to their email."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Email verified successfully",
-              "body": "Email verified successfully"
-            },
-            {
-              "code": 400,
-              "name": "Invalid token or email already verified",
-              "body": "{\n  \"error\": \"Invalid token or email already verified\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Token not found",
-              "body": "{\n  \"error\": \"Token not found\"\n}"
-            }
+            { "code": 200, "name": "Email verified successfully", "body": "Email verified successfully" },
+            { "code": 400, "name": "Invalid token or email already verified", "body": "{\n  \"error\": \"Invalid token or email already verified\"\n}" },
+            { "code": 404, "name": "Token not found", "body": "{\n  \"error\": \"Token not found\"\n}" }
           ]
         },
         {
           "name": "Forgot Password",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/x-www-form-urlencoded"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "forgot-password"
-              ],
-              "query": [
-                {
-                  "key": "email",
-                  "value": "user@example.com"
-                }
-              ]
-            },
-            "description": "Request password reset. Initiates the password reset process by sending a reset token to the user's email."
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "forgot-password" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "description": "Request password reset. Sends a reset token to the user's email."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Password reset instructions sent",
-              "body": "Password reset instructions sent to your email"
-            },
-            {
-              "code": 404,
-              "name": "Email not found",
-              "body": "{\n  \"error\": \"Email not found\"\n}"
-            }
+            { "code": 200, "name": "Password reset instructions sent", "body": "Password reset instructions sent to your email" },
+            { "code": 404, "name": "Email not found", "body": "{\n  \"error\": \"Email not found\"\n}" }
           ]
         },
         {
           "name": "Reset Password",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/x-www-form-urlencoded"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=reset_token_here&newPassword=NewPassword123",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "reset-password"
-              ],
-              "query": [
-                {
-                  "key": "token",
-                  "value": "reset_token_here"
-                },
-                {
-                  "key": "newPassword",
-                  "value": "NewPassword123"
-                }
-              ]
-            },
-            "description": "Reset password using token. Resets a user's password using the token sent to their email."
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=abc123&newPassword=NewPass123", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "reset-password" ], "query": [ { "key": "token", "value": "abc123" }, { "key": "newPassword", "value": "NewPass123" } ] },
+            "description": "Reset password using token."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Password reset successfully",
-              "body": "Password reset successfully"
-            },
-            {
-              "code": 400,
-              "name": "Invalid or expired token",
-              "body": "{\n  \"error\": \"Invalid or expired token\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Token not found",
-              "body": "{\n  \"error\": \"Token not found\"\n}"
-            }
+            { "code": 200, "name": "Password reset successfully", "body": "Password reset successfully" },
+            { "code": 400, "name": "Invalid or expired token", "body": "{\n  \"error\": \"Invalid or expired token\"\n}" },
+            { "code": 404, "name": "Token not found", "body": "{\n  \"error\": \"Token not found\"\n}" }
           ]
         },
         {
           "name": "Resend Verification Email",
           "request": {
             "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/x-www-form-urlencoded"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "resend-verification"
-              ],
-              "query": [
-                {
-                  "key": "email",
-                  "value": "user@example.com"
-                }
-              ]
-            },
-            "description": "Resend email verification. Resends the email verification token to the user's email."
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "resend-verification" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "description": "Resend email verification token to the user's email."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Verification email sent successfully",
-              "body": "Verification email sent successfully"
-            },
-            {
-              "code": 400,
-              "name": "Email already verified",
-              "body": "{\n  \"error\": \"Email already verified\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Email not found",
-              "body": "{\n  \"error\": \"Email not found\"\n}"
-            }
+            { "code": 200, "name": "Verification email sent successfully", "body": "Verification email sent successfully" },
+            { "code": 400, "name": "Email already verified", "body": "{\n  \"error\": \"Email already verified\"\n}" },
+            { "code": 404, "name": "Email not found", "body": "{\n  \"error\": \"Email not found\"\n}" }
           ]
         },
         {
@@ -257,149 +100,59 @@
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/login/linkedin",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "login",
-                "linkedin"
-              ]
-            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login", "linkedin" ] },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accessToken\": \"AQV...\"\n}"
             },
-            "description": "Authenticate user with LinkedIn. Authenticates a user using their LinkedIn account and returns a JWT token that can be used for protected API endpoints."
+            "description": "Authenticate user with LinkedIn and return JWT token."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Successfully authenticated with LinkedIn",
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
-            },
-            {
-              "code": 400,
-              "name": "Invalid LinkedIn access token",
-              "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
-            }
+            { "code": 200, "name": "Successfully authenticated with LinkedIn", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}" },
+            { "code": 400, "name": "Invalid LinkedIn access token", "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}" }
           ]
-        }
-      ]
-    },
-    {
-      "name": "LinkedIn Authentication",
-      "description": "LinkedIn authentication endpoints",
-      "item": [
+        },
         {
-          "name": "Authenticate with LinkedIn",
+          "name": "LinkedIn Authentication",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/auth/linkedin",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "auth",
-                "linkedin"
-              ]
-            },
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "linkedin" ] },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accessToken\": \"AQV...\",\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}"
             },
-            "description": "Authenticate with LinkedIn. Authenticates a user using their LinkedIn profile data. The frontend should provide the LinkedIn access token obtained from the LinkedIn OAuth flow."
+            "description": "Authenticate with LinkedIn using profile data."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "User authenticated successfully with LinkedIn",
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
-            },
-            {
-              "code": 400,
-              "name": "Invalid input or email already registered",
-              "body": "{\n  \"error\": \"Invalid input or email already registered\"\n}"
-            },
-            {
-              "code": 401,
-              "name": "Invalid LinkedIn access token",
-              "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Server error",
-              "body": "{\n  \"error\": \"Server error\"\n}"
-            }
+            { "code": 200, "name": "User authenticated successfully with LinkedIn", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}" },
+            { "code": 400, "name": "Invalid input or email already registered", "body": "{\n  \"error\": \"Invalid input or email already registered\"\n}" },
+            { "code": 401, "name": "Invalid LinkedIn access token", "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}" },
+            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
           ]
-        }
-      ]
-    },
-    {
-      "name": "Registration",
-      "description": "User registration endpoints",
-      "item": [
+        },
         {
-          "name": "Register User",
+          "name": "Register",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
+              { "key": "Content-Type", "value": "application/json" }
             ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/registration",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "registration"
-              ]
-            },
+            "url": { "raw": "{{baseUrl}}/api/v1/registration", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "registration" ] },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
             },
-            "description": "Register a new user. Registers a new user with email and password. Only email and password are mandatory."
+            "description": "Register a new user. Only email and password are mandatory."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "User registered successfully",
-              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
-            },
-            {
-              "code": 400,
-              "name": "Email already registered",
-              "body": "{\n  \"error\": \"Email already registered\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Server error",
-              "body": "{\n  \"error\": \"Server error\"\n}"
-            }
+            { "code": 200, "name": "User registered successfully", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}" },
+            { "code": 400, "name": "Email already registered", "body": "{\n  \"error\": \"Email already registered\"\n}" },
+            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
           ]
         }
       ]
@@ -436,7 +189,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3]\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3]\n}"
             },
             "description": "Update user profile. Updates the profile of the authenticated user. All fields are optional. The user's identity is verified using the JWT token."
           },
@@ -444,7 +197,7 @@
             {
               "code": 200,
               "name": "Profile updated successfully",
-              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
+              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
             },
             {
               "code": 400,
@@ -491,7 +244,7 @@
             {
               "code": 200,
               "name": "Profile retrieved successfully",
-              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
+              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
             },
             {
               "code": 401,
@@ -581,15 +334,15 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"tags\": [\"java\", \"spring\"]\n}"
+              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"tags\": [\"java\", \"spring\"]\n}"
             },
-            "description": "Create a new job posting. The job posting will be associated with the authenticated user."
+            "description": "Create a new job posting. The job posting will be associated with the authenticated user. The job poster is automatically registered as a JobReferrer for this job."
           },
           "response": [
             {
               "code": 200,
               "name": "Job posting created successfully",
-              "body": "{ ...JobResponse example... }"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
             },
             {
               "code": 400,
@@ -636,20 +389,25 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{ ...JobRequest example... }"
+              "raw": "{\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"Develop advanced software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"openingCount\": 2,\n  \"tags\": [\"java\", \"spring\", \"senior\"]\n}"
             },
-            "description": "Update an existing job posting. Only the user who posted the job can update it."
+            "description": "Update an existing job posting. Only the user who posted the job can update it. Company and designation cannot be updated after job is posted."
           },
           "response": [
             {
               "code": 200,
               "name": "Job posting updated successfully",
-              "body": "{ ...JobResponse example... }"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"Develop advanced software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T11:00:00\",\n  \"tags\": [\"java\", \"spring\", \"senior\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
             },
             {
               "code": 400,
               "name": "Invalid input",
               "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Cannot update company/designation",
+              "body": "{\n  \"error\": \"Cannot update company after job is posted\"\n}"
             },
             {
               "code": 401,
@@ -690,7 +448,7 @@
                 "1"
               ]
             },
-            "description": "Delete (deactivate) a job posting with the specified ID. Only the user who posted the job can delete it."
+            "description": "Delete (deactivate) a job posting with the specified ID. Only the user who posted the job can delete it. This will also delete all JobReferrer entries for this job."
           },
           "response": [
             {
@@ -743,7 +501,7 @@
             {
               "code": 200,
               "name": "Retrieved job postings successfully",
-              "body": "[ ...JobResponse list example... ]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\"\n  },\n  {\n    \"id\": 2,\n    \"title\": \"Data Analyst\",\n    \"description\": \"Analyze data and create reports\",\n    \"cityId\": 2,\n    \"countryId\": 1,\n    \"designationId\": 2,\n    \"designation\": \"Data Analyst\",\n    \"salary\": 80000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-02T10:00:00\",\n    \"updatedAt\": \"2024-01-02T10:00:00\",\n    \"tags\": [\"python\", \"sql\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  }\n]"
             },
             {
               "code": 401,
@@ -777,7 +535,7 @@
             {
               "code": 200,
               "name": "Retrieved jobs successfully",
-              "body": "[ ...JobResponse list example... ]"
+              "body": "[\n  {\n    \"id\": 3,\n    \"title\": \"Product Manager\",\n    \"description\": \"Manage product development\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 3,\n    \"designation\": \"Product Manager\",\n    \"salary\": 150000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 0,\n    \"active\": true,\n    \"createdAt\": \"2024-01-03T10:00:00\",\n    \"updatedAt\": \"2024-01-03T10:00:00\",\n    \"tags\": [\"product\", \"management\"],\n    \"isSuperAdminPosted\": true,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/3\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\"\n  }\n]"
             },
             {
               "code": 401,
@@ -788,6 +546,308 @@
               "code": 404,
               "name": "Company not found",
               "body": "{\n  \"error\": \"Not found\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Super Admin",
+      "description": "Super admin job approval endpoints. Only accessible by super admin (user ID 0).",
+      "item": [
+        {
+          "name": "Get Pending Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/superadmin/jobs/pending?page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "superadmin",
+                "jobs",
+                "pending"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Get all pending jobs for approval. Only accessible by super admin (user ID 0)."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Retrieved pending jobs successfully",
+              "body": "[\n  {\n    \"id\": 2,\n    \"title\": \"Data Analyst\",\n    \"description\": \"Analyze data and create reports\",\n    \"cityId\": 2,\n    \"countryId\": 1,\n    \"designationId\": 2,\n    \"designation\": \"Data Analyst\",\n    \"salary\": 80000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-02T10:00:00\",\n    \"updatedAt\": \"2024-01-02T10:00:00\",\n    \"tags\": [\"python\", \"sql\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  },\n  {\n    \"id\": 4,\n    \"title\": \"UX Designer\",\n    \"description\": \"Design user interfaces\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 4,\n    \"designation\": \"UX Designer\",\n    \"salary\": 90000,\n    \"currencyId\": 1,\n    \"companyId\": 2,\n    \"company\": \"Design Studio\",\n    \"postedBy\": 2,\n    \"active\": true,\n    \"createdAt\": \"2024-01-04T10:00:00\",\n    \"updatedAt\": \"2024-01-04T10:00:00\",\n    \"tags\": [\"ui\", \"ux\", \"figma\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  }\n]"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not super admin",
+              "body": "{\n  \"error\": \"Forbidden - Not super admin\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Approve/Reject Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/superadmin/jobs/approve",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "superadmin",
+                "jobs",
+                "approve"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": 1,\n  \"status\": \"APPROVED\",\n  \"rejectionReason\": null\n}"
+            },
+            "description": "Approve or reject a job posting. Only accessible by super admin (user ID 0). Status can be APPROVED, REJECTED, or PENDING."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Job approval status updated successfully",
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not super admin",
+              "body": "{\n  \"error\": \"Forbidden - Not super admin\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Job not found\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Register as JobReferrer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/register-referrer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "register-referrer"
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": 1\n}"
+            },
+            "description": "Register yourself as a referrer for a job from your company. You can only register for jobs from the same company as yours."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Successfully registered as referrer",
+              "body": ""
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or already registered",
+              "body": "{\n  \"error\": \"You are already registered as a referrer for this job\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Different company",
+              "body": "{\n  \"error\": \"You can only register as a referrer for jobs from your company\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Job not found\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Accept Referral Application",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/accept/1?status=SHORTLISTED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "accept",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "SHORTLISTED"
+                }
+              ]
+            },
+            "description": "Accept a referral application and set its status to SHORTLISTED or REJECTED. Only job poster or users from the same company can accept applications."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Referral application status updated successfully",
+              "body": ""
+            },
+            {
+              "code": 400,
+              "name": "Invalid status",
+              "body": "{\n  \"error\": \"Status must be either SHORTLISTED or REJECTED\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Application not found",
+              "body": "{\n  \"error\": \"Application not found\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not authorized",
+              "body": "{\n  \"error\": \"You are not authorized to accept this referral application\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Job Details With Referrers",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobmanagement/1/details",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "1",
+                "details"
+              ]
+            },
+            "description": "Get comprehensive job details along with profile information of all users who have registered as referrers for this job. Only accessible by job poster or users from the same company."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Job details with referrer profiles retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2,\n  \"referrers\": [\n    {\n      \"userId\": 12,\n      \"userName\": \"Alice Manager\",\n      \"email\": \"alice@techcorp.com\",\n      \"designation\": \"Manager\",\n      \"company\": \"Tech Corp\",\n      \"companyId\": 1,\n      \"yearsOfExperience\": \"5\",\n      \"monthsOfExperience\": \"6\",\n      \"education\": \"MBA from Harvard, BS from MIT\",\n      \"portfolioWebsite\": \"https://alice.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/alice\",\n      \"githubProfile\": \"https://github.com/alice\",\n      \"numApplicationsAccepted\": 5,\n      \"feedbackScore\": 4.5,\n      \"overallScore\": 4.1,\n      \"registeredAt\": \"2024-01-01T10:00:00\"\n    },\n    {\n      \"userId\": 15,\n      \"userName\": \"Bob Lead\",\n      \"email\": \"bob@techcorp.com\",\n      \"designation\": \"Lead Engineer\",\n      \"company\": \"Tech Corp\",\n      \"companyId\": 1,\n      \"yearsOfExperience\": \"3\",\n      \"monthsOfExperience\": \"2\",\n      \"education\": \"MS from Stanford, BS from UC Berkeley\",\n      \"portfolioWebsite\": \"https://bob.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/bob\",\n      \"githubProfile\": \"https://github.com/bob\",\n      \"numApplicationsAccepted\": 3,\n      \"feedbackScore\": 4.0,\n      \"overallScore\": 3.2,\n      \"registeredAt\": \"2024-01-02T10:00:00\"\n    }\n  ]\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not authorized",
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Job not found\"\n}"
             }
           ]
         }
@@ -837,7 +897,7 @@
             {
               "code": 200,
               "name": "Retrieved job postings successfully",
-              "body": "[ ...JobResponse list example... ]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  },\n  {\n    \"id\": 3,\n    \"title\": \"Product Manager\",\n    \"description\": \"Manage product development\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 3,\n    \"designation\": \"Product Manager\",\n    \"salary\": 150000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 0,\n    \"active\": true,\n    \"createdAt\": \"2024-01-03T10:00:00\",\n    \"updatedAt\": \"2024-01-03T10:00:00\",\n    \"tags\": [\"product\", \"management\"],\n    \"isSuperAdminPosted\": true,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/3\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 1\n  }\n]"
             }
           ]
         },
@@ -864,7 +924,7 @@
             {
               "code": 200,
               "name": "Retrieved job posting successfully",
-              "body": "{ ...JobResponse example... }"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2\n}"
             },
             {
               "code": 404,
@@ -904,13 +964,356 @@
                 }
               ]
             },
-            "description": "Search job postings by keyword."
+            "description": "Search job postings by keyword. Each job response includes the count of referrers for that job."
           },
           "response": [
             {
               "code": 200,
               "name": "Search completed successfully",
-              "body": "[ ...JobResponse list example... ]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 3\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Referrers For Job",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/1/referrers",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "jobsearch", "1", "referrers"]
+            },
+            "description": "Get all users accepting applications for a job, sorted by overall score."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Referrers retrieved successfully",
+              "body": "[\n  {\"userId\": 12,\"userName\": \"Alice Manager\",\"designation\": \"Manager\",\"numApplicationsAccepted\": 5,\"feedbackScore\": 4.5,\"overallScore\": 4.1},\n  {\"userId\": 15,\"userName\": \"Bob Lead\",\"designation\": \"Lead Engineer\",\"numApplicationsAccepted\": 3,\"feedbackScore\": 4.0,\"overallScore\": 3.2}\n]"
+            }
+          ]
+        },
+        {
+          "name": "Search Jobs By Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/search/skills?skills=Java&skills=Spring&page=0&size=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "search",
+                "skills"
+              ],
+              "query": [
+                {
+                  "key": "skills",
+                  "value": "Java"
+                },
+                {
+                  "key": "skills",
+                  "value": "Spring"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Search job postings by required skills. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Search completed successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java and Spring\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get All Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/tags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "tags"
+              ]
+            },
+            "description": "Get all unique tags used in active job postings."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Retrieved tags successfully",
+              "body": "[\n  \"java\",\n  \"spring\",\n  \"react\",\n  \"nodejs\",\n  \"python\",\n  \"product\",\n  \"management\"\n]"
+            }
+          ]
+        },
+        {
+          "name": "Search Jobs By Tags",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/search/tags?tags=java&tags=spring&page=0&size=10&sortBy=createdAt&sortDirection=DESC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "search",
+                "tags"
+              ],
+              "query": [
+                {
+                  "key": "tags",
+                  "value": "java"
+                },
+                {
+                  "key": "tags",
+                  "value": "spring"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "DESC"
+                }
+              ]
+            },
+            "description": "Search jobs by tags. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Retrieved job postings successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java and Spring\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Search Jobs By Tag Keyword",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/search/tag-keyword?keyword=java&page=0&size=10&sortBy=createdAt&sortDirection=DESC",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "search",
+                "tag-keyword"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "java"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                },
+                {
+                  "key": "sortBy",
+                  "value": "createdAt"
+                },
+                {
+                  "key": "sortDirection",
+                  "value": "DESC"
+                }
+              ]
+            },
+            "description": "Search jobs by tag keyword. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Retrieved job postings successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Jobs By Company ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/company/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "company",
+                "1"
+              ]
+            },
+            "description": "Get all jobs posted by a specific company. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Retrieved jobs successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Company not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search Jobs By Company ID And Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/company/1/search?title=Engineer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "company",
+                "1",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "title",
+                  "value": "Engineer"
+                }
+              ]
+            },
+            "description": "Search jobs by company ID and title. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Search completed successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Company not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Search Jobs By Company Name",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/company/search?companyName=Tech",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "company",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Tech"
+                }
+              ]
+            },
+            "description": "Search jobs by company name. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Search completed successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Search Jobs By Company Name And Title",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/jobsearch/company/search/title?companyName=Tech&title=Engineer",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "company",
+                "search",
+                "title"
+              ],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Tech"
+                },
+                {
+                  "key": "title",
+                  "value": "Engineer"
+                }
+              ]
+            },
+            "description": "Search jobs by company name and title. Each job response includes the count of referrers for that job."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Search completed successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             }
           ]
         }
@@ -948,12 +1351,117 @@
             {
               "code": 200,
               "name": "Applications retrieved successfully",
-              "body": "[ ...JobApplicationResponseExtendedDetails list example... ]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"jobId\": 123,\n    \"jobTitle\": \"Software Engineer\",\n    \"applicantId\": 456,\n    \"applicantName\": \"John Doe\",\n    \"applicantEmail\": \"john@example.com\",\n    \"status\": \"PENDING\",\n    \"coverLetter\": \"I am interested in this position\",\n    \"resumeUrl\": \"https://example.com/resume.pdf\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"jobReferrerId\": 789,\n    \"referrerName\": \"Jane Smith\",\n    \"referrerEmail\": \"jane@company.com\"\n  }\n]"
             },
             {
               "code": 401,
               "name": "Unauthorized",
               "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Applications By Job",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/job-applications/job/123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "job",
+                "123"
+              ]
+            },
+            "description": "Get all applications for a specific job. Only accessible by the job poster."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Applications retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"jobId\": 123,\n    \"jobTitle\": \"Software Engineer\",\n    \"applicantId\": 456,\n    \"applicantName\": \"John Doe\",\n    \"applicantEmail\": \"john@example.com\",\n    \"status\": \"PENDING\",\n    \"coverLetter\": \"I am interested in this position\",\n    \"resumeUrl\": \"https://example.com/resume.pdf\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"jobReferrerId\": 789,\n    \"referrerName\": \"Jane Smith\",\n    \"referrerEmail\": \"jane@company.com\"\n  }\n]"
+            },
+            {
+              "code": 400,
+              "name": "Bad request",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not authorized",
+              "body": "{\n  \"error\": \"You are not authorized to view these applications\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Job not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Application Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/job-applications/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "1"
+              ]
+            },
+            "description": "Get detailed information about a specific job application. Only accessible by the job poster."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Application details retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 456,\n  \"applicantName\": \"John Doe\",\n  \"applicantEmail\": \"john@example.com\",\n  \"status\": \"PENDING\",\n  \"coverLetter\": \"I am interested in this position\",\n  \"resumeUrl\": \"https://example.com/resume.pdf\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 789,\n  \"referrerName\": \"Jane Smith\",\n  \"referrerEmail\": \"jane@company.com\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Bad request",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not authorized",
+              "body": "{\n  \"error\": \"You are not authorized to view this application\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Application not found",
+              "body": "{\n  \"error\": \"Application not found\"\n}"
             }
           ]
         }
@@ -964,62 +1472,108 @@
       "description": "Endpoints for managing job applications made by the current user.",
       "item": [
         {
-          "name": "Apply For Job",
+          "name": "Apply For Referral",
           "request": {
             "method": "POST",
             "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              },
-              {
-                "key": "Authorization",
-                "value": "Bearer {{authToken}}"
-              }
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/my-applications", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "my-applications" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobId\": 123,\n  \"coverLetter\": \"I would like a referral for this job.\",\n  \"jobReferrerId\": 456\n}"
+            },
+            "description": "Apply for a referral for a job via a selected referrer. The applicant is determined by the authenticated user. The resume URL is automatically fetched from the user's profile."
+          },
+          "response": [
+            { "code": 200, "name": "Application submitted successfully", "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 789,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 456,\n  \"referrerSudoIdentity\": {\n    \"designation\": \"Senior Engineer\",\n    \"company\": \"Acme Corp\"\n  }\n}" },
+            { "code": 400, "name": "Invalid input or already applied", "body": "{\n  \"error\": \"Invalid input or already applied\"\n}" },
+            { "code": 400, "name": "Resume URL not found in profile", "body": "{\n  \"error\": \"Resume URL is required in your profile before applying for jobs\"\n}" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
+            { "code": 403, "name": "Forbidden - Cannot apply to your own job posting", "body": "{\n  \"error\": \"Forbidden\"\n}" },
+            { "code": 404, "name": "Job not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+          ]
+        },
+        {
+          "name": "Switch Referrer",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/my-applications/switch-referrer?applicationId=1&newJobReferrerId=789",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "my-applications", "switch-referrer" ],
+              "query": [
+                { "key": "applicationId", "value": "1" },
+                { "key": "newJobReferrerId", "value": "789" }
+              ]
+            },
+            "description": "Switch the referrer for an existing application if not yet accepted."
+          },
+          "response": [
+            { "code": 200, "name": "Referrer switched successfully", "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 789,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 789\n}" },
+            { "code": 400, "name": "Invalid input or not allowed", "body": "{\n  \"error\": \"Invalid input or not allowed\"\n}" }
+          ]
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/my-applications",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "my-applications"
-              ]
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "my-applications" ]
             },
-            "body": {
-              "mode": "raw",
-              "raw": "{ ...JobApplicationRequest example... }"
-            },
-            "description": "Apply for a job. The applicant is determined by the authenticated user."
+            "description": "Get all job applications submitted by the authenticated user."
           },
           "response": [
-            {
-              "code": 200,
-              "name": "Application submitted successfully",
-              "body": "{ ...JobApplicationResponse example... }"
+            { "code": 200, "name": "Applications retrieved successfully", "body": "[\n  {\n    \"id\": 1,\n    \"jobId\": 123,\n    \"jobTitle\": \"Software Engineer\",\n    \"applicantId\": 456,\n    \"applicantName\": \"John Doe\",\n    \"status\": \"PENDING\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"jobReferrerId\": 789,\n    \"referrerSudoIdentity\": {\n      \"designation\": \"Senior Engineer\",\n      \"company\": \"Tech Corp\"\n    }\n  }\n]" },
+            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" }
+          ]
+        },
+        {
+          "name": "Submit Referrer Feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": { "raw": "{{baseUrl}}/api/v1/my-applications/feedback", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "my-applications", "feedback" ] },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"jobReferrerId\": 456,\n  \"rating\": 5,\n  \"feedback\": \"Great communication and helpful throughout the process.\"\n}"
             },
-            {
-              "code": 400,
-              "name": "Invalid input or already applied",
-              "body": "{\n  \"error\": \"Invalid input or already applied\"\n}"
+            "description": "Submit feedback for a referrer after applying for a job."
+          },
+          "response": [
+            { "code": 200, "name": "Feedback submitted successfully", "body": "{\n  \"message\": \"Feedback submitted successfully\"\n}" },
+            { "code": 400, "name": "Invalid input or not allowed", "body": "{\n  \"error\": \"Invalid input or not allowed\"\n}" }
+          ]
+        },
+        {
+          "name": "List Referrers For Job",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/my-applications/referrers/123",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "my-applications", "referrers", "123" ]
             },
-            {
-              "code": 401,
-              "name": "Unauthorized",
-              "body": "{\n  \"error\": \"Unauthorized\"\n}"
-            },
-            {
-              "code": 403,
-              "name": "Forbidden - Cannot apply to your own job posting",
-              "body": "{\n  \"error\": \"Forbidden\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Job not found",
-              "body": "{\n  \"error\": \"Not found\"\n}"
-            }
+            "description": "List all referrers for a job with sudo identity and stats."
+          },
+          "response": [
+            { "code": 200, "name": "Referrers listed successfully", "body": "[\n  {\"userId\": 456,\n    \"userName\": \"Someone at Company\",\n    \"designation\": \"Senior Engineer\",\n    \"numApplicationsAccepted\": 12,\n    \"feedbackScore\": 4.8,\n    \"overallScore\": 8.2\n  },\n  {\"userId\": 789,\n    \"userName\": \"Someone at Company\",\n    \"designation\": \"Manager\",\n    \"numApplicationsAccepted\": 20,\n    \"feedbackScore\": 4.9,\n    \"overallScore\": 9.1\n  }\n]" },
+            { "code": 404, "name": "Job not found", "body": "{\n  \"error\": \"Not found\"\n}" }
           ]
         }
       ]
@@ -1051,7 +1605,279 @@
             {
               "code": 200,
               "name": "List of companies retrieved successfully",
-              "body": "[ ...CompanyDTO list example... ]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\",\n    \"description\": \"Technology company\",\n    \"interviewProcess\": \"Multiple rounds including coding, system design, and behavioral interviews\",\n    \"preparationTips\": \"Focus on data structures, algorithms, and system design\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Amazon\",\n    \"description\": \"E-commerce and cloud computing company\",\n    \"interviewProcess\": \"Online assessment followed by onsite interviews\",\n    \"preparationTips\": \"Practice leadership principles and coding problems\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Company Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/companies/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "companies",
+                "1"
+              ]
+            },
+            "description": "Get detailed information about a specific company including available designations."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Company details retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Google\",\n  \"description\": \"Technology company\",\n  \"interviewProcess\": \"Multiple rounds including coding, system design, and behavioral interviews\",\n  \"preparationTips\": \"Focus on data structures, algorithms, and system design\",\n  \"designations\": [\n    {\n      \"id\": 1,\n      \"name\": \"Software Engineer\",\n      \"description\": \"Entry-level software development position\"\n    }\n  ]\n}"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Company not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Designations By Company",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/companies/1/designations",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "companies",
+                "1",
+                "designations"
+              ]
+            },
+            "description": "Get designations and their interview preparation content for a specific company."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "List of designations retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Software Engineer\",\n    \"description\": \"Entry-level software development position\",\n    \"interviewProcess\": \"Coding rounds followed by system design\",\n    \"preparationTips\": \"Focus on data structures and algorithms\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Senior Software Engineer\",\n    \"description\": \"Experienced software development position\",\n    \"interviewProcess\": \"System design and leadership rounds\",\n    \"preparationTips\": \"Focus on system design and leadership principles\"\n  }\n]"
+            },
+            {
+              "code": 404,
+              "name": "Company not found",
+              "body": "{\n  \"error\": \"Company not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Skills By Company Designation",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/companies/1/designations/1/skills",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "companies",
+                "1",
+                "designations",
+                "1",
+                "skills"
+              ]
+            },
+            "description": "Get skills required for a specific designation at a particular company."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Skills retrieved successfully",
+              "body": "[\n  \"Java\",\n  \"Spring Boot\",\n  \"System Design\",\n  \"Data Structures\"\n]"
+            },
+            {
+              "code": 404,
+              "name": "Company or designation not found",
+              "body": "{\n  \"error\": \"Company or designation not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Topics By Company Designation Skill",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/companies/1/designations/1/skills/1/topics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "companies",
+                "1",
+                "designations",
+                "1",
+                "skills",
+                "1",
+                "topics"
+              ]
+            },
+            "description": "Get interview preparation topics for a specific skill at a particular designation and company."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Topics retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Data Structures\",\n    \"description\": \"Fundamental data structures and their implementations\",\n    \"difficultyLevel\": \"INTERMEDIATE\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Algorithms\",\n    \"description\": \"Common algorithms and their complexity analysis\",\n    \"difficultyLevel\": \"INTERMEDIATE\"\n  }\n]"
+            },
+            {
+              "code": 404,
+              "name": "Company, designation, or skill not found",
+              "body": "{\n  \"error\": \"Company, designation, or skill not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Topics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/topics",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "topics"
+              ]
+            },
+            "description": "Get all interview preparation topics."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "List of topics retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Data Structures\",\n    \"description\": \"Fundamental data structures and their implementations\",\n    \"difficultyLevel\": \"INTERMEDIATE\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"System Design\",\n    \"description\": \"Designing scalable and distributed systems\",\n    \"difficultyLevel\": \"ADVANCED\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Topic Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/topics/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "topics",
+                "1"
+              ]
+            },
+            "description": "Get detailed information about a specific interview topic including all related questions."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Topic details retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"name\": \"Data Structures\",\n  \"description\": \"Fundamental data structures and their implementations\",\n  \"difficultyLevel\": \"INTERMEDIATE\",\n  \"questions\": [\n    {\n      \"id\": 1,\n      \"question\": \"What is the difference between ArrayList and LinkedList?\",\n      \"answer\": \"ArrayList is a resizable array implementation...\",\n      \"difficultyLevel\": \"INTERMEDIATE\"\n    }\n  ]\n}"
+            },
+            {
+              "code": 404,
+              "name": "Topic not found",
+              "body": "{\n  \"error\": \"Topic not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Questions By Topic",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/questions?topicId=1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "questions"
+              ],
+              "query": [
+                {
+                  "key": "topicId",
+                  "value": "1"
+                }
+              ]
+            },
+            "description": "Get interview questions for a specific topic."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "List of questions retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"question\": \"What is the difference between ArrayList and LinkedList?\",\n    \"answer\": \"ArrayList is a resizable array implementation...\",\n    \"difficultyLevel\": \"INTERMEDIATE\",\n    \"topicId\": 1\n  },\n  {\n    \"id\": 2,\n    \"question\": \"How would you design a URL shortening service?\",\n    \"answer\": \"A URL shortening service requires...\",\n    \"difficultyLevel\": \"ADVANCED\",\n    \"topicId\": 1\n  }\n]"
+            },
+            {
+              "code": 404,
+              "name": "Topic not found",
+              "body": "{\n  \"error\": \"Topic not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Question Details",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/interview-preparation/questions/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-preparation",
+                "questions",
+                "1"
+              ]
+            },
+            "description": "Get detailed information about a specific interview question."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Question details retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"question\": \"What is the difference between ArrayList and LinkedList?\",\n  \"answer\": \"ArrayList is a resizable array implementation that provides dynamic arrays in Java. LinkedList is a doubly-linked list implementation. ArrayList provides O(1) random access but O(n) insertion/deletion. LinkedList provides O(n) random access but O(1) insertion/deletion at the beginning and end.\",\n  \"difficultyLevel\": \"INTERMEDIATE\",\n  \"topicId\": 1\n}"
+            },
+            {
+              "code": 404,
+              "name": "Question not found",
+              "body": "{\n  \"error\": \"Question not found\"\n}"
             }
           ]
         }
@@ -1303,228 +2129,12 @@
               "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
             }
           ]
-        },
-        {
-          "name": "Get All Companies for Dropdown",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies"
-              ]
-            },
-            "description": "Get all companies with id and name for dropdown selection."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "List of companies retrieved successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Microsoft\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get Companies as Map",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies-map",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies-map"
-              ]
-            },
-            "description": "Get companies as a map of value/label pairs for dropdown components."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Companies map retrieved successfully",
-              "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get All Companies for Dropdown",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies"
-              ]
-            },
-            "description": "Get all companies with id and name for dropdown selection."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "List of companies retrieved successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Microsoft\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get Companies as Map",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies-map",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies-map"
-              ]
-            },
-            "description": "Get companies as a map of value/label pairs for dropdown components."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Companies map retrieved successfully",
-              "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get All Companies for Dropdown",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies"
-              ]
-            },
-            "description": "Get all companies with id and name for dropdown selection."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "List of companies retrieved successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Microsoft\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get Companies as Map",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies-map",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies-map"
-              ]
-            },
-            "description": "Get companies as a map of value/label pairs for dropdown components."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Companies map retrieved successfully",
-              "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get All Companies for Dropdown",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies"
-              ]
-            },
-            "description": "Get all companies with id and name for dropdown selection."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "List of companies retrieved successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Google\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Microsoft\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"Amazon\"\n  }\n]"
-            }
-          ]
-        },
-        {
-          "name": "Get Companies as Map",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/dropdowns/companies-map",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdowns",
-                "companies-map"
-              ]
-            },
-            "description": "Get companies as a map of value/label pairs for dropdown components."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Companies map retrieved successfully",
-              "body": "[\n  {\n    \"value\": \"1\",\n    \"label\": \"Google\"\n  },\n  {\n    \"value\": \"2\",\n    \"label\": \"Microsoft\"\n  },\n  {\n    \"value\": \"3\",\n    \"label\": \"Amazon\"\n  }\n]"
-            }
-          ]
         }
       ]
     },
     {
       "name": "Resume Management",
-      "description": "Endpoints for uploading, downloading, and managing user resumes.",
+      "description": "Endpoints for uploading, downloading, and managing user resumes with UUID-based file storage.",
       "item": [
         {
           "name": "Upload Resume",
@@ -1562,13 +2172,266 @@
                 }
               ]
             },
-            "description": "Upload a resume file for a specific user."
+            "description": "Upload a resume file for a specific user. Supports PDF, DOC, DOCX formats. Automatically updates the user's resume field with the download link."
           },
           "response": [
             {
               "code": 200,
               "name": "Resume uploaded successfully",
-              "body": "{ ...resume upload response... }"
+              "body": "{\n  \"message\": \"Resume uploaded successfully\",\n  \"resumeId\": 1,\n  \"fileName\": \"resume.pdf\",\n  \"uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"downloadUrl\": \"http://localhost:8080/api/v1/resumes/download/550e8400-e29b-41d4-a716-446655440000\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid file type or size",
+              "body": "{\n  \"error\": \"Invalid file type. Only PDF, DOC, and DOCX files are allowed.\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "User not found",
+              "body": "{\n  \"error\": \"User not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Download Resume by UUID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/download/550e8400-e29b-41d4-a716-446655440000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "download",
+                "550e8400-e29b-41d4-a716-446655440000"
+              ]
+            },
+            "description": "Download a resume file using its UUID. This is the primary download endpoint."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Resume file downloaded successfully",
+              "body": "Binary file content"
+            },
+            {
+              "code": 404,
+              "name": "Resume not found",
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Get Resume by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "1"
+              ]
+            },
+            "description": "Get resume details by its ID."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Resume retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"fileName\": \"resume.pdf\",\n  \"fileType\": \"application/pdf\",\n  \"fileSize\": 1024000,\n  \"uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"updatedAt\": \"2024-06-01T12:00:00Z\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Resume not found",
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Get All Resumes for User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/user/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "user",
+                "1"
+              ]
+            },
+            "description": "Get all resume files uploaded by a specific user."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "User resumes retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"userId\": 1,\n    \"fileName\": \"resume.pdf\",\n    \"fileType\": \"application/pdf\",\n    \"fileSize\": 1024000,\n    \"uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"updatedAt\": \"2024-06-01T12:00:00Z\"\n  }\n]"
+            }
+          ]
+        },
+        {
+          "name": "Get Latest Resume for User",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/user/1/latest",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "user",
+                "1",
+                "latest"
+              ]
+            },
+            "description": "Get the most recently uploaded resume for a specific user."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Latest resume retrieved successfully",
+              "body": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"fileName\": \"resume.pdf\",\n  \"fileType\": \"application/pdf\",\n  \"fileSize\": 1024000,\n  \"uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"updatedAt\": \"2024-06-01T12:00:00Z\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "No resume found for user",
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Update Resume",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "multipart/form-data"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "1"
+              ]
+            },
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file"
+                }
+              ]
+            },
+            "description": "Update an existing resume file with a new file."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Resume updated successfully",
+              "body": "{\n  \"message\": \"Resume updated successfully\",\n  \"resumeId\": 2,\n  \"fileName\": \"updated-resume.pdf\",\n  \"uuid\": \"660e8400-e29b-41d4-a716-446655440000\",\n  \"downloadUrl\": \"http://localhost:8080/api/v1/resumes/download/660e8400-e29b-41d4-a716-446655440000\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid file",
+              "body": "{\n  \"error\": \"Invalid file type. Only PDF, DOC, and DOCX files are allowed.\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Resume not found",
+              "body": ""
+            }
+          ]
+        },
+        {
+          "name": "Delete Resume by ID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/1",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "1"
+              ]
+            },
+            "description": "Delete a specific resume file by its ID."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Resume deleted successfully",
+              "body": "{\n  \"message\": \"Resume deleted successfully\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Resume not found",
+              "body": "{\n  \"error\": \"Resume not found\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Delete Resume by UUID",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/resumes/uuid/550e8400-e29b-41d4-a716-446655440000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "uuid",
+                "550e8400-e29b-41d4-a716-446655440000"
+              ]
+            },
+            "description": "Delete a specific resume file using its UUID."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Resume deleted successfully",
+              "body": "{\n  \"message\": \"Resume deleted successfully\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Resume not found",
+              "body": "{\n  \"error\": \"Resume not found\"\n}"
             }
           ]
         }
@@ -1698,933 +2561,6 @@
               "code": 200,
               "name": "List of countries retrieved successfully",
               "body": "[ ...CountryDTO list example... ]"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Crawler",
-      "description": "APIs for crawling company information and jobs from LinkedIn.",
-      "item": [
-        {
-          "name": "Crawl All Companies",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "crawl"
-              ]
-            },
-            "description": "Triggers the crawling process for all companies from the companies.txt file."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company crawling process completed successfully",
-              "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during company crawling process: [error details]\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by ID",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/1/jobs/crawl",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "1",
-                "jobs",
-                "crawl"
-              ]
-            },
-            "description": "Triggers job crawling for a specific company by ID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Company not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyId\": 1,\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Crawl Jobs for Company by Name",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/crawler/companies/Google/jobs/crawl-by-name",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "crawler",
-                "companies",
-                "Google",
-                "jobs",
-                "crawl-by-name"
-              ]
-            },
-            "description": "Triggers job crawling for a company by name."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Job crawling process completed successfully",
-              "body": "{\n  \"message\": \"Job crawling process completed successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Internal server error during crawling process",
-              "body": "{\n  \"message\": \"Error during job crawling process: [error details]\",\n  \"companyName\": \"Google\",\n  \"status\": \"ERROR\"\n}"
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "Company Management",
-      "description": "Endpoints for creating, updating, and retrieving companies.",
-      "item": [
-        {
-          "name": "Create or Update Company",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/companies",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "companies"
-              ]
-            },
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"name\": \"Example Corp\",\n  \"description\": \"A leading technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://logo.example.com\",\n  \"aboutUs\": \"About Example Corp\",\n  \"vision\": \"To innovate\",\n  \"mission\": \"Empower people\",\n  \"culture\": \"Inclusive\"\n}"
-            },
-            "description": "Create or update a company. Creates a new company or updates an existing one if the company name already exists."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company created/updated successfully",
-              "body": "{ ...CompanyResponse example... }"
-            },
-            {
-              "code": 400,
-              "name": "Invalid input",
-              "body": "{\n  \"error\": \"Invalid input\"\n}"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Not found\"\n}"
-            },
-            {
-              "code": 500,
-              "name": "Server error",
-              "body": "{\n  \"error\": \"Server error\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Get All Companies",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/companies?page=0&size=100",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "companies"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "0"
-                },
-                {
-                  "key": "size",
-                  "value": "100"
-                }
-              ]
-            },
-            "description": "Get all companies. Returns a paginated list of all registered companies, each with their jobs."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Paginated list of companies retrieved successfully",
-              "body": "{ ...Page<CompanyResponse> example... }"
-            },
-            {
-              "code": 404,
-              "name": "No companies found",
-              "body": "{\n  \"error\": \"Not found\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Get Company By ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/companies/1",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "companies",
-                "1"
-              ]
-            },
-            "description": "Get company by ID. Returns the details of a specific company by its ID, including all jobs."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Company retrieved successfully",
-              "body": "{ ...CompanyResponse example... }"
-            },
-            {
-              "code": 404,
-              "name": "Company not found",
-              "body": "{\n  \"error\": \"Not found\"\n}"
             }
           ]
         }
