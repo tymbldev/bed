@@ -240,22 +240,27 @@ CREATE TABLE IF NOT EXISTS jobs (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     description TEXT,
+    city_id BIGINT,
+    country_id BIGINT,
+    designation_id BIGINT,
+    designation VARCHAR(255),
+    salary DECIMAL(10,2) NOT NULL,
+    currency_id BIGINT NOT NULL,
     company_id BIGINT NOT NULL,
+    company VARCHAR(255),
     posted_by_id BIGINT NOT NULL,
-    location VARCHAR(255),
-    employment_type VARCHAR(100),
-    salary_range VARCHAR(255),
-    experience_required VARCHAR(255),
-    skills_required TEXT,
-    application_url VARCHAR(1000),
-    status VARCHAR(50) NOT NULL,
+    active BOOLEAN NOT NULL DEFAULT TRUE,
+    opening_count INT NOT NULL DEFAULT 1,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    opening_count INT NOT NULL DEFAULT 1,
     unique_url VARCHAR(1000) UNIQUE,
     platform VARCHAR(100),
-    auto_approved BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (company_id) REFERENCES companies(id)
+    approved INT NOT NULL DEFAULT 0,
+    FOREIGN KEY (company_id) REFERENCES companies(id),
+    FOREIGN KEY (city_id) REFERENCES cities(id),
+    FOREIGN KEY (country_id) REFERENCES countries(id),
+    FOREIGN KEY (designation_id) REFERENCES designations(id),
+    FOREIGN KEY (currency_id) REFERENCES currencies(id)
 );
 
 CREATE TABLE IF NOT EXISTS job_applications (
@@ -270,6 +275,21 @@ CREATE TABLE IF NOT EXISTS job_applications (
     job_referrer_id BIGINT NOT NULL,
     FOREIGN KEY (job_id) REFERENCES jobs(id),
     FOREIGN KEY (applicant_id) REFERENCES users(id)
+);
+
+CREATE TABLE IF NOT EXISTS job_skills (
+    job_id BIGINT NOT NULL,
+    skill_id BIGINT NOT NULL,
+    PRIMARY KEY (job_id, skill_id),
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE,
+    FOREIGN KEY (skill_id) REFERENCES skills(id)
+);
+
+CREATE TABLE IF NOT EXISTS job_tags (
+    job_id BIGINT NOT NULL,
+    tag VARCHAR(255) NOT NULL,
+    PRIMARY KEY (job_id, tag),
+    FOREIGN KEY (job_id) REFERENCES jobs(id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS job_referrers (

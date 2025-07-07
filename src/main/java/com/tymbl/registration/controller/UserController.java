@@ -92,10 +92,8 @@ public class UserController {
         try {
             String email = jwtService.extractUsername(token.substring(7));
             User user = registrationService.getUserByEmail(email);
-            logger.info("Retrieving profile for user: {}", user.getEmail());
-            User userProfile = registrationService.getUserById(user.getId());
             logger.info("Successfully retrieved profile for user: {}", user.getEmail());
-            return ResponseEntity.ok(userProfile);
+            return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             logger.error("Failed to get profile. Error: {}", e.getMessage());
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));

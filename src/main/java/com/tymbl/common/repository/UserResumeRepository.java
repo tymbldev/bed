@@ -12,5 +12,5 @@ public interface UserResumeRepository extends JpaRepository<UserResume, Long> {
     List<UserResume> findByUserId(Long userId);
     UserResume findFirstByUserIdOrderByCreatedAtDesc(Long userId);
     Optional<UserResume> findByUuid(String uuid);
-    UserResume findFirstByUserIdOrderByCreatedAtDescAndUuidNotNull(Long userId);
+    UserResume findFirstByUserIdAndUuidIsNotNullOrderByCreatedAtDesc(Long userId);
 } 

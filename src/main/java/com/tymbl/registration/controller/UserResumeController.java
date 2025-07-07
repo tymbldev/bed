@@ -1,7 +1,10 @@
 package com.tymbl.registration.controller;
 
+import com.tymbl.auth.service.JwtService;
+import com.tymbl.common.entity.User;
 import com.tymbl.common.entity.UserResume;
 import com.tymbl.common.service.UserResumeService;
+import com.tymbl.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -10,7 +13,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,16 +30,20 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/resumes")
+@RequiredArgsConstructor
 @Tag(name = "User Resumes", description = "Resume management endpoints")
 public class UserResumeController {
 
-    @Autowired
-    private UserResumeService userResumeService;
+    private static final Logger logger = LoggerFactory.getLogger("com.tymbl");
+    
+    private final UserResumeService userResumeService;
+    private final JwtService jwtService;
+    private final RegistrationService registrationService;
 
     @PostMapping("/upload")
     @Operation(
         summary = "Upload user resume",
-        description = "Uploads a resume file for a specific user. Supports PDF, DOC, DOCX formats. Automatically updates the user's resume field with the download link."
+        description = "Uploads a resume file for the authenticated user. Supports PDF, DOC, DOCX formats. Automatically updates the user's resume field with the download link."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -53,38 +62,44 @@ public class UserResumeController {
                 )
             )
         ),
-        @ApiResponse(responseCode = "400", description = "Invalid file or user ID"),
+        @ApiResponse(responseCode = "400", description = "Invalid file"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
         @ApiResponse(responseCode = "500", description = "Server error during upload")
     })
     public ResponseEntity<?> uploadResume(
             @Parameter(description = "Resume file to upload", required = true)
             @RequestParam("file") MultipartFile file,
-            @Parameter(description = "User ID", required = true)
-            @RequestParam("userId") Long userId) {
+            @RequestHeader("Authorization") String token) {
         try {
-            UserResume resume = userResumeService.uploadResume(userId, file);
+            String email = jwtService.extractUsername(token.substring(7));
+            User user = registrationService.getUserByEmail(email);
+            logger.info("Uploading resume for user: {}", user.getEmail());
+            UserResume resume = userResumeService.uploadResume(user.getId(), file);
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Resume uploaded successfully");
             response.put("resumeId", resume.getId());
             response.put("fileName", resume.getFileName());
             response.put("uuid", resume.getUuid());
             response.put("downloadUrl", userResumeService.getDownloadUrl(resume.getUuid()));
+            logger.info("Successfully uploaded resume for user: {}", user.getEmail());
             return ResponseEntity.ok().body(response);
         } catch (IllegalArgumentException e) {
+            logger.error("Failed to upload resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         } catch (IOException e) {
+            logger.error("Failed to upload resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Failed to upload resume");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
         }
     }
 
-    @GetMapping("/user/{userId}")
+    @GetMapping("/user")
     @Operation(
-        summary = "Get all resumes for a user",
-        description = "Retrieves all resume files uploaded by a specific user."
+        summary = "Get all resumes for authenticated user",
+        description = "Retrieves all resume files uploaded by the authenticated user."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -94,19 +109,28 @@ public class UserResumeController {
                 schema = @Schema(implementation = UserResume.class)
             )
         ),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
         @ApiResponse(responseCode = "404", description = "User not found")
     })
     public ResponseEntity<List<UserResume>> getUserResumes(
-            @Parameter(description = "User ID", required = true)
-            @PathVariable Long userId) {
-        List<UserResume> resumes = userResumeService.getUserResumes(userId);
-        return ResponseEntity.ok(resumes);
+            @RequestHeader("Authorization") String token) {
+        try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User user = registrationService.getUserByEmail(email);
+            logger.info("Retrieving resumes for user: {}", user.getEmail());
+            List<UserResume> resumes = userResumeService.getUserResumes(user.getId());
+            logger.info("Successfully retrieved {} resumes for user: {}", resumes.size(), user.getEmail());
+            return ResponseEntity.ok(resumes);
+        } catch (RuntimeException e) {
+            logger.error("Failed to get user resumes. Error: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
+        }
     }
 
-    @GetMapping("/user/{userId}/latest")
+    @GetMapping("/user/latest")
     @Operation(
-        summary = "Get latest resume for a user",
-        description = "Retrieves the most recently uploaded resume for a specific user."
+        summary = "Get latest resume for authenticated user",
+        description = "Retrieves the most recently uploaded resume for the authenticated user."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -116,16 +140,26 @@ public class UserResumeController {
                 schema = @Schema(implementation = UserResume.class)
             )
         ),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
         @ApiResponse(responseCode = "404", description = "No resume found for user")
     })
     public ResponseEntity<UserResume> getLatestResume(
-            @Parameter(description = "User ID", required = true)
-            @PathVariable Long userId) {
-        UserResume resume = userResumeService.getLatestResume(userId);
-        if (resume == null) {
-            return ResponseEntity.notFound().build();
+            @RequestHeader("Authorization") String token) {
+        try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User user = registrationService.getUserByEmail(email);
+            logger.info("Retrieving latest resume for user: {}", user.getEmail());
+            UserResume resume = userResumeService.getLatestResume(user.getId());
+            if (resume == null) {
+                logger.info("No resume found for user: {}", user.getEmail());
+                return ResponseEntity.notFound().build();
+            }
+            logger.info("Successfully retrieved latest resume for user: {}", user.getEmail());
+            return ResponseEntity.ok(resume);
+        } catch (RuntimeException e) {
+            logger.error("Failed to get latest resume. Error: {}", e.getMessage());
+            return ResponseEntity.badRequest().build();
         }
-        return ResponseEntity.ok(resume);
     }
 
     @GetMapping("/{resumeId}")
@@ -218,7 +252,7 @@ public class UserResumeController {
     @PutMapping("/{resumeId}")
     @Operation(
         summary = "Update resume file",
-        description = "Updates an existing resume file with a new file."
+        description = "Updates an existing resume file with a new file. Only the owner of the resume can update it."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -237,6 +271,8 @@ public class UserResumeController {
             )
         ),
         @ApiResponse(responseCode = "400", description = "Invalid file"),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - User can only update their own resumes"),
         @ApiResponse(responseCode = "404", description = "Resume not found"),
         @ApiResponse(responseCode = "500", description = "Server error during update")
     })
@@ -244,17 +280,33 @@ public class UserResumeController {
             @Parameter(description = "Resume ID", required = true)
             @PathVariable Long resumeId,
             @Parameter(description = "New resume file", required = true)
-            @RequestParam("file") MultipartFile file) {
+            @RequestParam("file") MultipartFile file,
+            @RequestHeader("Authorization") String token) {
         try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User user = registrationService.getUserByEmail(email);
+            logger.info("Updating resume {} for user: {}", resumeId, user.getEmail());
+            
+            // Verify the resume belongs to the authenticated user
+            UserResume existingResume = userResumeService.getResumeById(resumeId);
+            if (existingResume == null) {
+                logger.warn("Resume {} not found", resumeId);
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!existingResume.getUserId().equals(user.getId())) {
+                logger.warn("User {} attempted to update resume {} which belongs to user {}", 
+                    user.getEmail(), resumeId, existingResume.getUserId());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "You can only update your own resumes");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+            }
+            
             // Delete existing resume
             userResumeService.deleteResume(resumeId);
             
-            // Get the user ID from the deleted resume
-            UserResume deletedResume = userResumeService.getResumeById(resumeId);
-            Long userId = deletedResume.getUserId();
-            
             // Upload new resume
-            UserResume newResume = userResumeService.uploadResume(userId, file);
+            UserResume newResume = userResumeService.uploadResume(user.getId(), file);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Resume updated successfully");
@@ -262,12 +314,15 @@ public class UserResumeController {
             response.put("fileName", newResume.getFileName());
             response.put("uuid", newResume.getUuid());
             response.put("downloadUrl", userResumeService.getDownloadUrl(newResume.getUuid()));
+            logger.info("Successfully updated resume {} for user: {}", resumeId, user.getEmail());
             return ResponseEntity.ok().body(response);
         } catch (IllegalArgumentException e) {
+            logger.error("Failed to update resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         } catch (IOException e) {
+            logger.error("Failed to update resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Failed to update resume");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -277,7 +332,7 @@ public class UserResumeController {
     @DeleteMapping("/{resumeId}")
     @Operation(
         summary = "Delete resume by ID",
-        description = "Deletes a specific resume file by its ID."
+        description = "Deletes a specific resume file by its ID. Only the owner of the resume can delete it."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -292,22 +347,47 @@ public class UserResumeController {
                 )
             )
         ),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - User can only delete their own resumes"),
         @ApiResponse(responseCode = "404", description = "Resume not found"),
         @ApiResponse(responseCode = "500", description = "Server error during deletion")
     })
     public ResponseEntity<?> deleteResume(
             @Parameter(description = "Resume ID", required = true)
-            @PathVariable Long resumeId) {
+            @PathVariable Long resumeId,
+            @RequestHeader("Authorization") String token) {
         try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User user = registrationService.getUserByEmail(email);
+            logger.info("Deleting resume {} for user: {}", resumeId, user.getEmail());
+            
+            // Verify the resume belongs to the authenticated user
+            UserResume existingResume = userResumeService.getResumeById(resumeId);
+            if (existingResume == null) {
+                logger.warn("Resume {} not found", resumeId);
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!existingResume.getUserId().equals(user.getId())) {
+                logger.warn("User {} attempted to delete resume {} which belongs to user {}", 
+                    user.getEmail(), resumeId, existingResume.getUserId());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "You can only delete your own resumes");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+            }
+            
             userResumeService.deleteResume(resumeId);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Resume deleted successfully");
+            logger.info("Successfully deleted resume {} for user: {}", resumeId, user.getEmail());
             return ResponseEntity.ok().body(response);
         } catch (IllegalArgumentException e) {
+            logger.error("Failed to delete resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         } catch (Exception e) {
+            logger.error("Failed to delete resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Failed to delete resume");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
@@ -317,7 +397,7 @@ public class UserResumeController {
     @DeleteMapping("/uuid/{uuid}")
     @Operation(
         summary = "Delete resume by UUID",
-        description = "Deletes a specific resume file using its UUID."
+        description = "Deletes a specific resume file using its UUID. Only the owner of the resume can delete it."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -332,22 +412,47 @@ public class UserResumeController {
                 )
             )
         ),
+        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
+        @ApiResponse(responseCode = "403", description = "Forbidden - User can only delete their own resumes"),
         @ApiResponse(responseCode = "404", description = "Resume not found"),
         @ApiResponse(responseCode = "500", description = "Server error during deletion")
     })
     public ResponseEntity<?> deleteResumeByUuid(
             @Parameter(description = "Resume UUID", required = true)
-            @PathVariable String uuid) {
+            @PathVariable String uuid,
+            @RequestHeader("Authorization") String token) {
         try {
+            String email = jwtService.extractUsername(token.substring(7));
+            User user = registrationService.getUserByEmail(email);
+            logger.info("Deleting resume with UUID {} for user: {}", uuid, user.getEmail());
+            
+            // Verify the resume belongs to the authenticated user
+            UserResume existingResume = userResumeService.getResumeByUuid(uuid).orElse(null);
+            if (existingResume == null) {
+                logger.warn("Resume with UUID {} not found", uuid);
+                return ResponseEntity.notFound().build();
+            }
+            
+            if (!existingResume.getUserId().equals(user.getId())) {
+                logger.warn("User {} attempted to delete resume with UUID {} which belongs to user {}", 
+                    user.getEmail(), uuid, existingResume.getUserId());
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "You can only delete your own resumes");
+                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+            }
+            
             userResumeService.deleteResumeByUuid(uuid);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Resume deleted successfully");
+            logger.info("Successfully deleted resume with UUID {} for user: {}", uuid, user.getEmail());
             return ResponseEntity.ok().body(response);
         } catch (IllegalArgumentException e) {
+            logger.error("Failed to delete resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", e.getMessage());
             return ResponseEntity.badRequest().body(error);
         } catch (Exception e) {
+            logger.error("Failed to delete resume. Error: {}", e.getMessage());
             Map<String, String> error = new HashMap<>();
             error.put("error", "Failed to delete resume");
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);

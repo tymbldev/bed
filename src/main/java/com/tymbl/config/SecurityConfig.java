@@ -63,6 +63,7 @@ public class SecurityConfig {
         // Protected endpoints (JWT required)
         .antMatchers("/api/v1/jobmanagement/**").authenticated()
         .antMatchers("/api/v1/users/**").authenticated()
+        .antMatchers("/api/v1/resumes/**").authenticated()
         .antMatchers("/api/v1/job-applications/**").authenticated()
         .anyRequest().authenticated()
         .and()
@@ -103,6 +104,7 @@ public class SecurityConfig {
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
     source.registerCorsConfiguration("/api/v1/users/**", profileConfig);
+    source.registerCorsConfiguration("/api/v1/resumes/**", profileConfig);
     source.registerCorsConfiguration("/api/v1/jobmanagement/**", profileConfig);
     source.registerCorsConfiguration("/**", configuration);
     return source;

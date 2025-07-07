@@ -26,7 +26,7 @@
         <springdoc.version>1.6.15</springdoc.version>
         <jwt.version>0.11.5</jwt.version>
         <mysql.version>8.0.28</mysql.version>
-        <lombok.version>1.18.24</lombok.version>
+        <lombok.version>1.18.30</lombok.version>
     </properties>
     
     <dependencies>
@@ -117,7 +117,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>${lombok.version}</version>
+            <version>1.18.30</version>
             <optional>true</optional>
         </dependency>
 
@@ -171,12 +171,7 @@
             <version>5.6.15.Final</version>
         </dependency>
 
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <version>1.18.30</version>
-            <scope>provided</scope>
-        </dependency>
+
 
         <!-- JSoup HTML Parser -->
         <dependency>

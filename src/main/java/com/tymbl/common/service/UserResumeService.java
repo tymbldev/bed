@@ -1,6 +1,5 @@
 package com.tymbl.common.service;
 
-import com.tymbl.common.entity.User;
 import com.tymbl.common.entity.UserResume;
 import com.tymbl.common.repository.UserRepository;
 import com.tymbl.common.repository.UserResumeRepository;
@@ -23,8 +22,11 @@ public class UserResumeService {
     @Autowired
     private UserRepository userRepository;
     
-    @Value("${app.base-url:http://localhost:8080}")
+    @Value("${app.base-url:http://localhost:8085}")
     private String baseUrl;
+    
+    @Value("${server.servlet.context-path:}")
+    private String contextPath;
 
     @Transactional
     public UserResume uploadResume(Long userId, MultipartFile file) throws IOException {
@@ -42,7 +44,7 @@ public class UserResumeService {
         }
 
         // Check if user exists
-        User user = userRepository.findById(userId)
+        com.tymbl.common.entity.User user = userRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
         UserResume resume = new UserResume();
@@ -55,7 +57,7 @@ public class UserResumeService {
         resume = userResumeRepository.save(resume);
         
         // Update user's resume field with download link
-        String downloadUrl = baseUrl + "/api/v1/resumes/download/" + resume.getUuid();
+        String downloadUrl = baseUrl + contextPath + "/api/v1/resumes/download/" + resume.getUuid();
         user.setResume(downloadUrl);
         userRepository.save(user);
         
@@ -84,7 +86,7 @@ public class UserResumeService {
         UserResume resume = getResumeById(resumeId);
         
         // If this is the user's current resume, clear the User.resume field
-        User user = userRepository.findById(resume.getUserId())
+        com.tymbl.common.entity.User user = userRepository.findById(resume.getUserId())
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
             
         if (user.getResume() != null && user.getResume().contains(resume.getUuid())) {
@@ -103,6 +105,6 @@ public class UserResumeService {
     }
     
     public String getDownloadUrl(String uuid) {
-        return baseUrl + "/api/v1/resumes/download/" + uuid;
+        return baseUrl + contextPath + "/api/v1/resumes/download/" + uuid;
     }
 } 
