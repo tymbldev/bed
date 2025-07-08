@@ -5,6 +5,7 @@ import com.tymbl.common.dto.ProfileCompletionResponse;
 import com.tymbl.common.dto.ProfileCompletionResponse.PendingField;
 import com.tymbl.common.entity.User;
 import com.tymbl.exception.EmailAlreadyExistsException;
+import com.tymbl.jobs.service.CompanyService;
 import com.tymbl.registration.dto.ProfileUpdateRequest;
 import com.tymbl.registration.dto.RegisterRequest;
 import com.tymbl.registration.service.RegistrationService;
@@ -38,7 +39,25 @@ public class UserController {
     
     private final RegistrationService registrationService;
     private final JwtService jwtService;
+    private final CompanyService companyService;
 
+
+    /**
+     * Helper method to enrich user data with company name from dropdown
+     */
+    private User enrichUserWithCompanyName(User user) {
+        try {
+            if (user.getCompanyId() != null) {
+                // Fetch company name from CompanyService using companyId
+                String companyName = companyService.getCompanyById(user.getCompanyId()).getName();
+                user.setCompany(companyName);
+            }
+        } catch (Exception e) {
+            logger.warn("Could not fetch company name for companyId: {}. Error: {}", user.getCompanyId(), e.getMessage());
+            // Keep the existing company field as is if there's an error
+        }
+        return user;
+    }
 
     /**
      * Update user profile using token
@@ -64,6 +83,10 @@ public class UserController {
             logger.info("Updating profile for user: {}", user.getEmail());
             User updatedUser = registrationService.updateUserProfile(user.getId(), request);
             logger.info("Successfully updated profile for user: {}", user.getEmail());
+            
+            // Enrich user data with company name from dropdown
+            updatedUser = enrichUserWithCompanyName(updatedUser);
+            
             String newToken = jwtService.generateToken(updatedUser);
             Map<String, Object> response = new HashMap<>();
             response.put("token", newToken);
@@ -93,6 +116,10 @@ public class UserController {
             String email = jwtService.extractUsername(token.substring(7));
             User user = registrationService.getUserByEmail(email);
             logger.info("Successfully retrieved profile for user: {}", user.getEmail());
+            
+            // Enrich user data with company name from dropdown
+            user = enrichUserWithCompanyName(user);
+            
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {
             logger.error("Failed to get profile. Error: {}", e.getMessage());

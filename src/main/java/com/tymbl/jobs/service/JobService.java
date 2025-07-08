@@ -27,6 +27,8 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -37,12 +39,15 @@ import org.springframework.beans.factory.annotation.Value;
 @RequiredArgsConstructor
 public class JobService {
 
+    private static final Logger logger = LoggerFactory.getLogger(JobService.class);
+
     private final JobRepository jobRepository;
     private final SkillRepository skillRepository;
     private final JobReferrerRepository jobReferrerRepository;
     private final ReferrerFeedbackRepository referrerFeedbackRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final UserRepository userRepository;
+    private final CompanyService companyService;
 
     @Value("${referrer.sort.weight.designation:0.3}")
     private double designationWeight;
@@ -50,6 +55,23 @@ public class JobService {
     private double acceptedWeight;
     @Value("${referrer.sort.weight.feedback:0.4}")
     private double feedbackWeight;
+
+    /**
+     * Helper method to enrich user data with company name from dropdown
+     */
+    private User enrichUserWithCompanyName(User user) {
+        try {
+            if (user.getCompanyId() != null) {
+                // Fetch company name from CompanyService using companyId
+                String companyName = companyService.getCompanyById(user.getCompanyId()).getName();
+                user.setCompany(companyName);
+            }
+        } catch (Exception e) {
+            logger.warn("Could not fetch company name for companyId: {}. Error: {}", user.getCompanyId(), e.getMessage());
+            // Keep the existing company field as is if there's an error
+        }
+        return user;
+    }
 
     @Transactional
     public JobResponse createJob(JobRequest request, User postedBy) {
@@ -496,6 +518,9 @@ public class JobService {
         
         for (JobReferrer ref : referrers) {
             User user = ref.getUser();
+            // Enrich user data with company name from dropdown
+            user = enrichUserWithCompanyName(user);
+            
             JobDetailsWithReferrersResponse.JobReferrerWithProfileResponse referrerResponse = new JobDetailsWithReferrersResponse.JobReferrerWithProfileResponse();
             
             // Basic user info

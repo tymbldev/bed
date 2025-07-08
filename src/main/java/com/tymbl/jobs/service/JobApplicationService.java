@@ -11,6 +11,8 @@ import com.tymbl.jobs.entity.JobApplication;
 import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +24,29 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class JobApplicationService {
 
+    private static final Logger logger = LoggerFactory.getLogger(JobApplicationService.class);
+
     private final JobApplicationRepository jobApplicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final CompanyService companyService;
+
+    /**
+     * Helper method to enrich user data with company name from dropdown
+     */
+    private User enrichUserWithCompanyName(User user) {
+        try {
+            if (user.getCompanyId() != null) {
+                // Fetch company name from CompanyService using companyId
+                String companyName = companyService.getCompanyById(user.getCompanyId()).getName();
+                user.setCompany(companyName);
+            }
+        } catch (Exception e) {
+            logger.warn("Could not fetch company name for companyId: {}. Error: {}", user.getCompanyId(), e.getMessage());
+            // Keep the existing company field as is if there's an error
+        }
+        return user;
+    }
 
     @Transactional
     public JobApplicationResponse applyForJob(JobApplicationRequest request, User applicant) {
@@ -131,6 +153,9 @@ public class JobApplicationService {
         User applicant = userRepository.findById(application.getApplicantId())
             .orElseThrow(() -> new RuntimeException("Applicant not found"));
 
+        // Enrich applicant data with company name from dropdown
+        applicant = enrichUserWithCompanyName(applicant);
+
         JobApplicationResponse response = new JobApplicationResponse();
         response.setId(application.getId());
         response.setJobId(job.getId());
@@ -144,6 +169,9 @@ public class JobApplicationService {
         // Populate referrer sudo identity
         if (application.getJobReferrerId() != null) {
             userRepository.findById(application.getJobReferrerId()).ifPresent(refUser -> {
+                // Enrich referrer data with company name from dropdown
+                refUser = enrichUserWithCompanyName(refUser);
+                
                 com.tymbl.jobs.dto.SudoIdentityDTO sudo = new com.tymbl.jobs.dto.SudoIdentityDTO();
                 sudo.setDesignation(refUser.getDesignation());
                 sudo.setCompany(refUser.getCompany());
@@ -158,6 +186,9 @@ public class JobApplicationService {
             .orElseThrow(() -> new RuntimeException("Job not found"));
         User applicant = userRepository.findById(application.getApplicantId())
             .orElseThrow(() -> new RuntimeException("Applicant not found"));
+
+        // Enrich applicant data with company name from dropdown
+        applicant = enrichUserWithCompanyName(applicant);
 
         JobApplicationResponseExtendedDetails details = new JobApplicationResponseExtendedDetails();
         details.setId(application.getId());
