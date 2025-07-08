@@ -85,7 +85,7 @@ public class JobService {
                     ref.setUser(postedBy);
                     jobReferrerRepository.save(ref);
                 }
-                throw new ConflictException("Job with this URL and platform already exists.");
+                throw new ConflictException("Job with this URL and platform already exists.", existingJob.getId());
             }
         }
         Job job = new Job();
@@ -234,7 +234,7 @@ public class JobService {
             Job existingJob = jobRepository.findByUniqueUrlAndPlatform(request.getUniqueUrl(), request.getPlatform());
             if (existingJob != null && !existingJob.getId().equals(jobId)) {
                 logger.warn("User {} attempted to update job {} with duplicate uniqueUrl '{}' and platform '{}' (existing job: {})", currentUser.getId(), jobId, request.getUniqueUrl(), request.getPlatform(), existingJob.getId());
-                throw new ConflictException("Job with this URL and platform already exists.");
+                throw new ConflictException("Job with this URL and platform already exists.", existingJob.getId());
             }
         }
 

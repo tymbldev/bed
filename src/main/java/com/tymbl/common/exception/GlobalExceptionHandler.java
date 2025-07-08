@@ -76,8 +76,11 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConflictException.class)
     public ResponseEntity<Object> handleConflict(ConflictException ex) {
         logger.error("Conflict: {}", ex.getMessage());
-        Map<String, String> error = new HashMap<>();
+        Map<String, Object> error = new HashMap<>();
         error.put("error", ex.getMessage());
+        if (ex.getJobId() != null) {
+            error.put("jobId", ex.getJobId());
+        }
         return new ResponseEntity<>(error, HttpStatus.CONFLICT);
     }
 
