@@ -138,8 +138,8 @@ public class JobManagementController {
 
     @GetMapping("/my-posts")
     @Operation(
-        summary = "Get all job postings by the current user",
-        description = "Returns a paginated list of all job postings created by the authenticated user."
+        summary = "Get all job postings by the current user and jobs where user is a referrer",
+        description = "Returns a paginated list of all job postings created by the authenticated user and jobs where the user is registered as a referrer."
     )
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Retrieved job postings successfully"),
@@ -154,7 +154,7 @@ public class JobManagementController {
         String email = jwtService.extractUsername(token.substring(7));
         User currentUser = registrationService.getUserByEmail(email);
         return ResponseEntity.ok(
-            jobService.getJobsByUser(currentUser, PageRequest.of(page, size)));
+            jobService.getMyPosts(currentUser, PageRequest.of(page, size)));
     }
 
     @GetMapping("/company/{companyId}/super-admin-jobs")

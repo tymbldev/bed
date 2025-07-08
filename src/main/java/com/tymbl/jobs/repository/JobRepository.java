@@ -98,4 +98,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
            "LOWER(j.description) LIKE LOWER(CONCAT('%', :keyword, '%')) OR " +
            "LOWER(j.company) LIKE LOWER(CONCAT('%', :keyword, '%')))")
     Page<Job> searchApprovedJobs(@Param("keyword") String keyword, Pageable pageable);
+    
+    // Find jobs by IDs that are active
+    List<Job> findByIdInAndActiveTrue(List<Long> jobIds);
 } 

@@ -35,6 +35,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageImpl;
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -135,6 +137,53 @@ public class JobService {
     public Page<JobResponse> getJobsByUser(User user, Pageable pageable) {
         return jobRepository.findByPostedByIdAndActiveTrue(user.getId(), pageable)
             .map(this::mapToResponse);
+    }
+
+    @Transactional(readOnly = true)
+    public Page<JobResponse> getMyPosts(User user, Pageable pageable) {
+        // Get jobs posted by the user
+        Page<Job> postedJobs = jobRepository.findByPostedByIdAndActiveTrue(user.getId(), pageable);
+        
+        // Get jobs where user is a referrer
+        List<JobReferrer> userReferrers = jobReferrerRepository.findByUserId(user.getId());
+        List<Long> referrerJobIds = userReferrers.stream()
+            .map(ref -> ref.getJob().getId())
+            .filter(jobId -> !jobId.equals(user.getId())) // Exclude jobs posted by the user (already included above)
+            .collect(Collectors.toList());
+        
+        List<Job> referrerJobs = new ArrayList<>();
+        if (!referrerJobIds.isEmpty()) {
+            referrerJobs = jobRepository.findByIdInAndActiveTrue(referrerJobIds);
+        }
+        
+        // Combine both lists
+        List<Job> allJobs = new ArrayList<>();
+        allJobs.addAll(postedJobs.getContent());
+        allJobs.addAll(referrerJobs);
+        
+        // Remove duplicates (in case user is both poster and referrer)
+        allJobs = allJobs.stream()
+            .collect(Collectors.toMap(Job::getId, job -> job, (existing, replacement) -> existing))
+            .values()
+            .stream()
+            .collect(Collectors.toList());
+        
+        // Sort by creation date (newest first)
+        allJobs.sort((a, b) -> b.getCreatedAt().compareTo(a.getCreatedAt()));
+        
+        // Apply pagination manually
+        int start = (int) pageable.getOffset();
+        int end = Math.min(start + pageable.getPageSize(), allJobs.size());
+        
+        List<Job> paginatedJobs = allJobs.subList(start, end);
+        
+        // Convert to JobResponse with role information
+        List<JobResponse> jobResponses = paginatedJobs.stream()
+            .map(job -> mapToResponseWithRole(job, user))
+            .collect(Collectors.toList());
+        
+        // Create a new Page with the combined results
+        return new PageImpl<>(jobResponses, pageable, allJobs.size());
     }
 
     @Transactional(readOnly = true)
@@ -488,6 +537,21 @@ public class JobService {
         // Count referrers for this job
         int referrerCount = jobReferrerRepository.countByJobId(job.getId());
         response.setReferrerCount(referrerCount);
+        
+        return response;
+    }
+
+    private JobResponse mapToResponseWithRole(Job job, User user) {
+        JobResponse response = mapToResponse(job);
+        
+        // Set user role based on whether the user is the poster or a referrer
+        if (job.getPostedById().equals(user.getId())) {
+            response.setUserRole("POSTER");
+            response.setActualPostedBy(job.getPostedById()); // Same as postedBy
+        } else {
+            response.setUserRole("REFERRER");
+            response.setActualPostedBy(job.getPostedById()); // The actual poster's ID
+        }
         
         return response;
     }

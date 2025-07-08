@@ -33,6 +33,10 @@ public class JobResponse {
     private Integer approved;
     private Integer referrerCount;
     
+    // New fields for user role information
+    private String userRole; // "POSTER" or "REFERRER"
+    private Long actualPostedBy; // The actual poster's ID (same as postedBy if user is poster, different if user is referrer)
+    
     // Helper method to get approval status string
     public String getApprovalStatus() {
         if (approved == null) return "PENDING";
