@@ -1464,6 +1464,69 @@
               "body": "{\n  \"error\": \"Application not found\"\n}"
             }
           ]
+        },
+        {
+          "name": "Accept or Reject Application as Referrer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/job-applications/123/referrer-action?applicantId=456&status=SHORTLISTED",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "123",
+                "referrer-action"
+              ],
+              "query": [
+                {
+                  "key": "applicantId",
+                  "value": "456"
+                },
+                {
+                  "key": "status",
+                  "value": "SHORTLISTED"
+                }
+              ]
+            },
+            "description": "Accept (SHORTLISTED) or reject (REJECTED) an application that is in PENDING status. Only the referrer assigned to the application can perform this action. Uses jobId and applicantId instead of applicationId."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Application status updated successfully",
+              "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 456,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"SHORTLISTED\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 789,\n  \"referrerSudoIdentity\": {\n    \"designation\": \"Senior Engineer\",\n    \"company\": \"Tech Corp\"\n  }\n}"
+            },
+            {
+              "code": 400,
+              "name": "Bad request - Invalid status or application not in PENDING status",
+              "body": "{\n  \"error\": \"Application is not in PENDING status\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Not the referrer for this application",
+              "body": "{\n  \"error\": \"You are not authorized to accept/reject this application\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Application not found",
+              "body": "{\n  \"error\": \"Application not found\"\n}"
+            }
+          ]
         }
       ]
     },

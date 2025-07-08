@@ -23,24 +23,17 @@ public class JobApplicationResponseExtendedDetails {
     private Long jobCompanyId;
     private String jobCompany;
     private List<Long> jobSkillIds;
+
     private Long applicantId;
     private String applicantName;
     private String applicantEmail;
-    private String coverLetter;
-    private String resumeUrl;
-    private ApplicationStatus status;
+    private ApplicationStatus applicationStatus;
     private List<Long> applicantSkillIds;
-    private String experience;
-    private String education;
-    private String portfolioUrl;
-    private String linkedInUrl;
-    private String githubUrl;
-    private LocalDateTime createdAt;
-    private LocalDateTime updatedAt;
-    
+    private String applicantPortfolioUrl;
+    private String applicantLinkedInUrl;
+    private String applicantGithubUrl;
+
     // Additional applicant details
-    private String applicantFirstName;
-    private String applicantLastName;
     private String applicantPhoneNumber;
     private String applicantCompany;
     private Long applicantCompanyId;

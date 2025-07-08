@@ -209,8 +209,6 @@ public class JobApplicationService {
         details.setApplicantId(applicant.getId());
         details.setApplicantName(applicant.getFirstName() + " " + applicant.getLastName());
         details.setApplicantEmail(applicant.getEmail());
-        details.setApplicantFirstName(applicant.getFirstName());
-        details.setApplicantLastName(applicant.getLastName());
         details.setApplicantPhoneNumber(applicant.getPhoneNumber());
         
         // Applicant professional details
@@ -233,9 +231,9 @@ public class JobApplicationService {
         details.setApplicantNoticePeriod(applicant.getNoticePeriod());
         
         // Applicant social profiles and resume
-        details.setPortfolioUrl(applicant.getPortfolioWebsite());
-        details.setLinkedInUrl(applicant.getLinkedInProfile());
-        details.setGithubUrl(applicant.getGithubProfile());
+        details.setApplicantPortfolioUrl(applicant.getPortfolioWebsite());
+        details.setApplicantLinkedInUrl(applicant.getLinkedInProfile());
+        details.setApplicantGithubUrl(applicant.getGithubProfile());
         details.setApplicantResume(applicant.getResume());
         
         // Applicant skills and education
@@ -253,15 +251,7 @@ public class JobApplicationService {
         details.setApplicantUpdatedAt(applicant.getUpdatedAt());
         
         // Application details
-        details.setCoverLetter(application.getCoverLetter());
-        details.setResumeUrl(application.getResumeUrl());
-        details.setStatus(convertStatus(application.getStatus()));
-        details.setExperience(applicant.getYearsOfExperience() + " years " + applicant.getMonthsOfExperience() + " months");
-        details.setEducation(applicant.getEducation().stream()
-            .map(edu -> edu.getDegree() + " from " + edu.getInstitution())
-            .collect(Collectors.joining(", ")));
-        details.setCreatedAt(application.getCreatedAt());
-        details.setUpdatedAt(application.getUpdatedAt());
+        details.setApplicationStatus(convertStatus(application.getStatus()));
         return details;
     }
     
@@ -314,6 +304,45 @@ public class JobApplicationService {
         }
         application.setJobReferrerId(newJobReferrerId);
         application = jobApplicationRepository.save(application);
+        return mapToBasicResponse(application);
+    }
+
+    @Transactional
+    public JobApplicationResponse acceptOrRejectApplicationByReferrer(Long jobId, Long applicantId, ApplicationStatus status, User referrer) {
+        // Find the application by jobId and applicantId
+        List<JobApplication> applications = jobApplicationRepository.findByJobIdAndApplicantId(jobId, applicantId);
+        if (applications.isEmpty()) {
+            throw new RuntimeException("Application not found");
+        }
+        JobApplication application = applications.get(0); // Should only be one application per job per applicant
+        
+        // Verify the current user is the referrer for this application
+        if (!application.getJobReferrerId().equals(referrer.getId())) {
+            throw new RuntimeException("You are not authorized to accept/reject this application");
+        }
+        
+        // Verify the application is in PENDING status
+        if (application.getStatus() != JobApplication.ApplicationStatus.PENDING) {
+            throw new RuntimeException("Application is not in PENDING status");
+        }
+        
+        // Convert ApplicationStatus to JobApplication.ApplicationStatus
+        JobApplication.ApplicationStatus jobApplicationStatus;
+        switch (status) {
+            case SHORTLISTED:
+                jobApplicationStatus = JobApplication.ApplicationStatus.SHORTLISTED;
+                break;
+            case REJECTED:
+                jobApplicationStatus = JobApplication.ApplicationStatus.REJECTED;
+                break;
+            default:
+                throw new RuntimeException("Invalid status. Only SHORTLISTED or REJECTED allowed");
+        }
+        
+        // Update the application status
+        application.setStatus(jobApplicationStatus);
+        application = jobApplicationRepository.save(application);
+        
         return mapToBasicResponse(application);
     }
 } 
