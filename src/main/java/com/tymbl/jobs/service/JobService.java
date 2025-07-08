@@ -225,23 +225,37 @@ public class JobService {
 
         // Check if user is authorized to update the job
         if (!job.getPostedById().equals(currentUser.getId())) {
+            logger.warn("User {} is not authorized to update job {}", currentUser.getId(), jobId);
             throw new ForbiddenException("You are not authorized to update this job");
+        }
+
+        // Check for duplicate uniqueUrl and platform combination
+        if (request.getUniqueUrl() != null && request.getPlatform() != null) {
+            Job existingJob = jobRepository.findByUniqueUrlAndPlatform(request.getUniqueUrl(), request.getPlatform());
+            if (existingJob != null && !existingJob.getId().equals(jobId)) {
+                logger.warn("User {} attempted to update job {} with duplicate uniqueUrl '{}' and platform '{}' (existing job: {})", currentUser.getId(), jobId, request.getUniqueUrl(), request.getPlatform(), existingJob.getId());
+                throw new ConflictException("Job with this URL and platform already exists.");
+            }
         }
 
         // Prevent updating company and designation after job is posted
         if (request.getCompanyId() != null && !request.getCompanyId().equals(job.getCompanyId())) {
+            logger.warn("User {} attempted to change companyId from {} to {} for job {}", currentUser.getId(), job.getCompanyId(), request.getCompanyId(), jobId);
             throw new BadRequestException("Cannot update company after job is posted");
         }
         
         if (request.getCompany() != null && !request.getCompany().equals(job.getCompany())) {
+            logger.warn("User {} attempted to change company from '{}' to '{}' for job {}", currentUser.getId(), job.getCompany(), request.getCompany(), jobId);
             throw new BadRequestException("Cannot update company after job is posted");
         }
         
         if (request.getDesignationId() != null && !request.getDesignationId().equals(job.getDesignationId())) {
+            logger.warn("User {} attempted to change designationId from {} to {} for job {}", currentUser.getId(), job.getDesignationId(), request.getDesignationId(), jobId);
             throw new BadRequestException("Cannot update designation after job is posted");
         }
         
         if (request.getDesignation() != null && !request.getDesignation().equals(job.getDesignation())) {
+            logger.warn("User {} attempted to change designation from '{}' to '{}' for job {}", currentUser.getId(), job.getDesignation(), request.getDesignation(), jobId);
             throw new BadRequestException("Cannot update designation after job is posted");
         }
 
@@ -253,6 +267,10 @@ public class JobService {
         job.setSalary(request.getSalary());
         job.setCurrencyId(request.getCurrencyId());
         job.setOpeningCount(request.getOpeningCount() != null ? request.getOpeningCount() : job.getOpeningCount());
+        
+        // Update uniqueUrl and platform from request
+        job.setUniqueUrl(request.getUniqueUrl());
+        job.setPlatform(request.getPlatform());
         
         // Update tags
         if (request.getTags() != null) {
