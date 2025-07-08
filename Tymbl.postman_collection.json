@@ -189,7 +189,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3]\n}"
+              "raw": "{\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"institution\": \"Example University\",\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"startDate\": \"2015-09-01T00:00:00\",\n      \"endDate\": \"2019-05-15T00:00:00\"\n    },\n    {\n      \"institution\": \"Tech Institute\",\n      \"degree\": \"Master of Science\",\n      \"fieldOfStudy\": \"Software Engineering\",\n      \"startDate\": \"2019-09-01T00:00:00\",\n      \"endDate\": \"2021-05-15T00:00:00\"\n    }\n  ]\n}"
             },
             "description": "Update user profile. Updates the profile of the authenticated user. All fields are optional. The user's identity is verified using the JWT token."
           },
@@ -197,7 +197,7 @@
             {
               "code": 200,
               "name": "Profile updated successfully",
-              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
+              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"institution\": \"Example University\",\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"startDate\": \"2015-09-01T00:00:00\",\n      \"endDate\": \"2019-05-15T00:00:00\"\n    },\n    {\n      \"institution\": \"Tech Institute\",\n      \"degree\": \"Master of Science\",\n      \"fieldOfStudy\": \"Software Engineering\",\n      \"startDate\": \"2019-09-01T00:00:00\",\n      \"endDate\": \"2021-05-15T00:00:00\"\n    }\n  ]\n}"
             },
             {
               "code": 400,
@@ -244,7 +244,7 @@
             {
               "code": 200,
               "name": "Profile retrieved successfully",
-              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30\n}"
+              "body": "{\n  \"id\": 1,\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"institution\": \"Example University\",\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"startDate\": \"2015-09-01T00:00:00\",\n      \"endDate\": \"2019-05-15T00:00:00\"\n    },\n    {\n      \"institution\": \"Tech Institute\",\n      \"degree\": \"Master of Science\",\n      \"fieldOfStudy\": \"Software Engineering\",\n      \"startDate\": \"2019-09-01T00:00:00\",\n      \"endDate\": \"2021-05-15T00:00:00\"\n    }\n  ]\n}"
             },
             {
               "code": 401,
@@ -2144,6 +2144,10 @@
               {
                 "key": "Content-Type",
                 "value": "multipart/form-data"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
               }
             ],
             "url": {
@@ -2164,11 +2168,6 @@
                 {
                   "key": "file",
                   "type": "file"
-                },
-                {
-                  "key": "userId",
-                  "value": "1",
-                  "type": "text"
                 }
               ]
             },
@@ -2189,6 +2188,11 @@
               "code": 400,
               "name": "User not found",
               "body": "{\n  \"error\": \"User not found\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
             }
           ]
         },
@@ -2261,9 +2265,14 @@
           "name": "Get All Resumes for User",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/resumes/user/1",
+              "raw": "{{baseUrl}}/api/v1/resumes/user",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2271,17 +2280,26 @@
                 "api",
                 "v1",
                 "resumes",
-                "user",
-                "1"
+                "user"
               ]
             },
-            "description": "Get all resume files uploaded by a specific user."
+            "description": "Get all resume files uploaded by the authenticated user."
           },
           "response": [
             {
               "code": 200,
               "name": "User resumes retrieved successfully",
               "body": "[\n  {\n    \"id\": 1,\n    \"userId\": 1,\n    \"fileName\": \"resume.pdf\",\n    \"fileType\": \"application/pdf\",\n    \"fileSize\": 1024000,\n    \"uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"updatedAt\": \"2024-06-01T12:00:00Z\"\n  }\n]"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "User not found",
+              "body": "{\n  \"error\": \"User not found\"\n}"
             }
           ]
         },
@@ -2289,9 +2307,14 @@
           "name": "Get Latest Resume for User",
           "request": {
             "method": "GET",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/resumes/user/1/latest",
+              "raw": "{{baseUrl}}/api/v1/resumes/user/latest",
               "host": [
                 "{{baseUrl}}"
               ],
@@ -2300,17 +2323,21 @@
                 "v1",
                 "resumes",
                 "user",
-                "1",
                 "latest"
               ]
             },
-            "description": "Get the most recently uploaded resume for a specific user."
+            "description": "Get the most recently uploaded resume for the authenticated user."
           },
           "response": [
             {
               "code": 200,
               "name": "Latest resume retrieved successfully",
               "body": "{\n  \"id\": 1,\n  \"userId\": 1,\n  \"fileName\": \"resume.pdf\",\n  \"fileType\": \"application/pdf\",\n  \"fileSize\": 1024000,\n  \"uuid\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"updatedAt\": \"2024-06-01T12:00:00Z\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
             },
             {
               "code": 404,
@@ -2327,6 +2354,10 @@
               {
                 "key": "Content-Type",
                 "value": "multipart/form-data"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
               }
             ],
             "url": {
@@ -2364,6 +2395,16 @@
               "body": "{\n  \"error\": \"Invalid file type. Only PDF, DOC, and DOCX files are allowed.\"\n}"
             },
             {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden",
+              "body": "{\n  \"error\": \"User can only update their own resumes\"\n}"
+            },
+            {
               "code": 404,
               "name": "Resume not found",
               "body": ""
@@ -2371,23 +2412,27 @@
           ]
         },
         {
-          "name": "Delete Resume by ID",
+          "name": "Delete Resume",
           "request": {
             "method": "DELETE",
-            "header": [],
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
             "url": {
-              "raw": "{{baseUrl}}/api/v1/resumes/1",
+              "raw": "{{baseUrl}}/api/v1/resumes",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "resumes",
-                "1"
+                "resumes"
               ]
             },
-            "description": "Delete a specific resume file by its ID."
+            "description": "Delete the authenticated user's resume. Since a user can have only one resume, no identifier is needed."
           },
           "response": [
             {
@@ -2396,42 +2441,19 @@
               "body": "{\n  \"message\": \"Resume deleted successfully\"\n}"
             },
             {
-              "code": 404,
-              "name": "Resume not found",
-              "body": "{\n  \"error\": \"Resume not found\"\n}"
-            }
-          ]
-        },
-        {
-          "name": "Delete Resume by UUID",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/api/v1/resumes/uuid/550e8400-e29b-41d4-a716-446655440000",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "resumes",
-                "uuid",
-                "550e8400-e29b-41d4-a716-446655440000"
-              ]
-            },
-            "description": "Delete a specific resume file using its UUID."
-          },
-          "response": [
-            {
-              "code": 200,
-              "name": "Resume deleted successfully",
-              "body": "{\n  \"message\": \"Resume deleted successfully\"\n}"
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
             },
             {
               "code": 404,
-              "name": "Resume not found",
-              "body": "{\n  \"error\": \"Resume not found\"\n}"
+              "name": "No resume found for user",
+              "body": "{\n  \"error\": \"No resume found for user\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Failed to delete resume\"\n}"
             }
           ]
         }

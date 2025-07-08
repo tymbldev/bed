@@ -160,9 +160,7 @@ public class User implements UserDetails {
     @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "skill_name")
     private Set<String> skillNames = new HashSet<>();
-    
-    @Transient
-    private List<UserSkill> skills;
+
     
     @ElementCollection
     @CollectionTable(name = "user_education", joinColumns = @JoinColumn(name = "user_id"))

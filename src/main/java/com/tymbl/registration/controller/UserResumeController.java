@@ -329,10 +329,10 @@ public class UserResumeController {
         }
     }
 
-    @DeleteMapping("/{resumeId}")
+    @DeleteMapping
     @Operation(
-        summary = "Delete resume by ID",
-        description = "Deletes a specific resume file by its ID. Only the owner of the resume can delete it."
+        summary = "Delete user's resume",
+        description = "Deletes the authenticated user's resume. Since a user can have only one resume, no identifier is needed."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -348,103 +348,30 @@ public class UserResumeController {
             )
         ),
         @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - User can only delete their own resumes"),
-        @ApiResponse(responseCode = "404", description = "Resume not found"),
+        @ApiResponse(responseCode = "404", description = "No resume found for user"),
         @ApiResponse(responseCode = "500", description = "Server error during deletion")
     })
     public ResponseEntity<?> deleteResume(
-            @Parameter(description = "Resume ID", required = true)
-            @PathVariable Long resumeId,
             @RequestHeader("Authorization") String token) {
         try {
             String email = jwtService.extractUsername(token.substring(7));
             User user = registrationService.getUserByEmail(email);
-            logger.info("Deleting resume {} for user: {}", resumeId, user.getEmail());
+            logger.info("Deleting resume for user: {}", user.getEmail());
             
-            // Verify the resume belongs to the authenticated user
-            UserResume existingResume = userResumeService.getResumeById(resumeId);
-            if (existingResume == null) {
-                logger.warn("Resume {} not found", resumeId);
-                return ResponseEntity.notFound().build();
-            }
-            
-            if (!existingResume.getUserId().equals(user.getId())) {
-                logger.warn("User {} attempted to delete resume {} which belongs to user {}", 
-                    user.getEmail(), resumeId, existingResume.getUserId());
+            // Get the user's resume
+            UserResume userResume = userResumeService.getLatestResume(user.getId());
+            if (userResume == null) {
+                logger.warn("No resume found for user: {}", user.getEmail());
                 Map<String, String> error = new HashMap<>();
-                error.put("error", "You can only delete your own resumes");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+                error.put("error", "No resume found for user");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
             }
             
-            userResumeService.deleteResume(resumeId);
+            // Delete the resume
+            userResumeService.deleteResume(userResume.getId());
             Map<String, String> response = new HashMap<>();
             response.put("message", "Resume deleted successfully");
-            logger.info("Successfully deleted resume {} for user: {}", resumeId, user.getEmail());
-            return ResponseEntity.ok().body(response);
-        } catch (IllegalArgumentException e) {
-            logger.error("Failed to delete resume. Error: {}", e.getMessage());
-            Map<String, String> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.badRequest().body(error);
-        } catch (Exception e) {
-            logger.error("Failed to delete resume. Error: {}", e.getMessage());
-            Map<String, String> error = new HashMap<>();
-            error.put("error", "Failed to delete resume");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
-        }
-    }
-
-    @DeleteMapping("/uuid/{uuid}")
-    @Operation(
-        summary = "Delete resume by UUID",
-        description = "Deletes a specific resume file using its UUID. Only the owner of the resume can delete it."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Resume deleted successfully",
-            content = @Content(
-                schema = @Schema(implementation = Map.class),
-                examples = @ExampleObject(
-                    value = "{\n" +
-                          "  \"message\": \"Resume deleted successfully\"\n" +
-                          "}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "401", description = "Unauthorized - Invalid or missing JWT token"),
-        @ApiResponse(responseCode = "403", description = "Forbidden - User can only delete their own resumes"),
-        @ApiResponse(responseCode = "404", description = "Resume not found"),
-        @ApiResponse(responseCode = "500", description = "Server error during deletion")
-    })
-    public ResponseEntity<?> deleteResumeByUuid(
-            @Parameter(description = "Resume UUID", required = true)
-            @PathVariable String uuid,
-            @RequestHeader("Authorization") String token) {
-        try {
-            String email = jwtService.extractUsername(token.substring(7));
-            User user = registrationService.getUserByEmail(email);
-            logger.info("Deleting resume with UUID {} for user: {}", uuid, user.getEmail());
-            
-            // Verify the resume belongs to the authenticated user
-            UserResume existingResume = userResumeService.getResumeByUuid(uuid).orElse(null);
-            if (existingResume == null) {
-                logger.warn("Resume with UUID {} not found", uuid);
-                return ResponseEntity.notFound().build();
-            }
-            
-            if (!existingResume.getUserId().equals(user.getId())) {
-                logger.warn("User {} attempted to delete resume with UUID {} which belongs to user {}", 
-                    user.getEmail(), uuid, existingResume.getUserId());
-                Map<String, String> error = new HashMap<>();
-                error.put("error", "You can only delete your own resumes");
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
-            }
-            
-            userResumeService.deleteResumeByUuid(uuid);
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Resume deleted successfully");
-            logger.info("Successfully deleted resume with UUID {} for user: {}", uuid, user.getEmail());
+            logger.info("Successfully deleted resume for user: {}", user.getEmail());
             return ResponseEntity.ok().body(response);
         } catch (IllegalArgumentException e) {
             logger.error("Failed to delete resume. Error: {}", e.getMessage());
