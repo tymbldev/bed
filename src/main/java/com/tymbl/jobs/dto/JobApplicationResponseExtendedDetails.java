@@ -24,6 +24,8 @@ public class JobApplicationResponseExtendedDetails {
     private String jobCompany;
     private List<Long> jobSkillIds;
 
+    private LocalDateTime createdAt;
+
     private Long applicantId;
     private String applicantName;
     private String applicantEmail;

@@ -204,6 +204,8 @@ public class JobApplicationService {
         details.setJobCompanyId(job.getCompanyId());
         details.setJobCompany(job.getCompany());
         details.setJobSkillIds(new ArrayList<>(job.getSkillIds()));
+
+        details.setCreatedAt(application.getCreatedAt());
         
         // Applicant basic info
         details.setApplicantId(applicant.getId());
