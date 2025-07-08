@@ -136,6 +136,10 @@ public class RegistrationService {
       user.setPhoneNumber(registerRequest.getPhoneNumber());
       user.setCompany(registerRequest.getCompany());
       user.setCompanyId(registerRequest.getCompanyId());
+      // If companyId is set, set company name to null to avoid inconsistency
+      if (registerRequest.getCompanyId() != null) {
+        user.setCompany(null);
+      }
       user.setDepartmentId(registerRequest.getDepartmentId());
       user.setDesignation(registerRequest.getDesignation());
       user.setDesignationId(registerRequest.getDesignationId());
@@ -160,7 +164,11 @@ public class RegistrationService {
       if (profileUpdateRequest.getLastName() != null) user.setLastName(profileUpdateRequest.getLastName());
       if (profileUpdateRequest.getPhoneNumber() != null) user.setPhoneNumber(profileUpdateRequest.getPhoneNumber());
       if (profileUpdateRequest.getCompany() != null) user.setCompany(profileUpdateRequest.getCompany());
-      if (profileUpdateRequest.getCompanyId() != null) user.setCompanyId(profileUpdateRequest.getCompanyId());
+      if (profileUpdateRequest.getCompanyId() != null) {
+        user.setCompanyId(profileUpdateRequest.getCompanyId());
+        // If companyId is set, set company name to null to avoid inconsistency
+        user.setCompany(null);
+      }
       if (profileUpdateRequest.getDepartmentId() != null) user.setDepartmentId(profileUpdateRequest.getDepartmentId());
       if (profileUpdateRequest.getDesignation() != null) user.setDesignation(profileUpdateRequest.getDesignation());
       if (profileUpdateRequest.getDesignationId() != null) user.setDesignationId(profileUpdateRequest.getDesignationId());
