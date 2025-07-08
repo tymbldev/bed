@@ -6,6 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Data
 public class JobApplicationResponseExtendedDetails {
@@ -36,4 +37,34 @@ public class JobApplicationResponseExtendedDetails {
     private String githubUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    
+    // Additional applicant details
+    private String applicantFirstName;
+    private String applicantLastName;
+    private String applicantPhoneNumber;
+    private String applicantCompany;
+    private Long applicantCompanyId;
+    private Long applicantDesignationId;
+    private String applicantDesignation;
+    private Long applicantDepartmentId;
+    private Long applicantCityId;
+    private Long applicantCountryId;
+    private String applicantZipCode;
+    private Integer applicantYearsOfExperience;
+    private Integer applicantMonthsOfExperience;
+    private Integer applicantCurrentSalary;
+    private Long applicantCurrentSalaryCurrencyId;
+    private Integer applicantExpectedSalary;
+    private Long applicantExpectedSalaryCurrencyId;
+    private Integer applicantNoticePeriod;
+    private String applicantResume;
+    private Set<String> applicantSkillNames;
+    private Set<com.tymbl.common.entity.User.Education> applicantEducationDetails;
+    private String applicantProvider;
+    private String applicantProviderId;
+    private boolean applicantEmailVerified;
+    private boolean applicantEnabled;
+    private String applicantProfilePicture;
+    private int applicantProfileCompletionPercentage;
+    private LocalDateTime applicantUpdatedAt;
 } 

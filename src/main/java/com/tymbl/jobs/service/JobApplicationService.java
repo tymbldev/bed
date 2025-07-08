@@ -204,20 +204,62 @@ public class JobApplicationService {
         details.setJobCompanyId(job.getCompanyId());
         details.setJobCompany(job.getCompany());
         details.setJobSkillIds(new ArrayList<>(job.getSkillIds()));
+        
+        // Applicant basic info
         details.setApplicantId(applicant.getId());
         details.setApplicantName(applicant.getFirstName() + " " + applicant.getLastName());
         details.setApplicantEmail(applicant.getEmail());
+        details.setApplicantFirstName(applicant.getFirstName());
+        details.setApplicantLastName(applicant.getLastName());
+        details.setApplicantPhoneNumber(applicant.getPhoneNumber());
+        
+        // Applicant professional details
+        details.setApplicantCompany(applicant.getCompany());
+        details.setApplicantCompanyId(applicant.getCompanyId());
+        details.setApplicantDesignationId(applicant.getDesignationId());
+        details.setApplicantDesignation(applicant.getDesignation());
+        details.setApplicantDepartmentId(applicant.getDepartmentId());
+        details.setApplicantCityId(applicant.getCityId());
+        details.setApplicantCountryId(applicant.getCountryId());
+        details.setApplicantZipCode(applicant.getZipCode());
+        
+        // Applicant experience and salary details
+        details.setApplicantYearsOfExperience(applicant.getYearsOfExperience());
+        details.setApplicantMonthsOfExperience(applicant.getMonthsOfExperience());
+        details.setApplicantCurrentSalary(applicant.getCurrentSalary());
+        details.setApplicantCurrentSalaryCurrencyId(applicant.getCurrentSalaryCurrencyId());
+        details.setApplicantExpectedSalary(applicant.getExpectedSalary());
+        details.setApplicantExpectedSalaryCurrencyId(applicant.getExpectedSalaryCurrencyId());
+        details.setApplicantNoticePeriod(applicant.getNoticePeriod());
+        
+        // Applicant social profiles and resume
+        details.setPortfolioUrl(applicant.getPortfolioWebsite());
+        details.setLinkedInUrl(applicant.getLinkedInProfile());
+        details.setGithubUrl(applicant.getGithubProfile());
+        details.setApplicantResume(applicant.getResume());
+        
+        // Applicant skills and education
+        details.setApplicantSkillIds(new ArrayList<>(applicant.getSkillIds()));
+        details.setApplicantSkillNames(applicant.getSkillNames());
+        details.setApplicantEducationDetails(applicant.getEducation());
+        
+        // Applicant account details
+        details.setApplicantProvider(applicant.getProvider());
+        details.setApplicantProviderId(applicant.getProviderId());
+        details.setApplicantEmailVerified(applicant.isEmailVerified());
+        details.setApplicantEnabled(applicant.isEnabled());
+        details.setApplicantProfilePicture(applicant.getProfilePicture());
+        details.setApplicantProfileCompletionPercentage(applicant.getProfileCompletionPercentage());
+        details.setApplicantUpdatedAt(applicant.getUpdatedAt());
+        
+        // Application details
         details.setCoverLetter(application.getCoverLetter());
         details.setResumeUrl(application.getResumeUrl());
         details.setStatus(convertStatus(application.getStatus()));
-        details.setApplicantSkillIds(new ArrayList<>(applicant.getSkillIds()));
         details.setExperience(applicant.getYearsOfExperience() + " years " + applicant.getMonthsOfExperience() + " months");
         details.setEducation(applicant.getEducation().stream()
             .map(edu -> edu.getDegree() + " from " + edu.getInstitution())
             .collect(Collectors.joining(", ")));
-        details.setPortfolioUrl(applicant.getPortfolioWebsite());
-        details.setLinkedInUrl(applicant.getLinkedInProfile());
-        details.setGithubUrl(applicant.getGithubProfile());
         details.setCreatedAt(application.getCreatedAt());
         details.setUpdatedAt(application.getUpdatedAt());
         return details;
