@@ -51,14 +51,16 @@ public class UserResumeService {
         resume.setUserId(userId);
         resume.setFileName(file.getOriginalFilename());
         resume.setFileType(contentType);
+        resume.setContentType(contentType);
         resume.setFileSize(file.getSize());
         resume.setResumeData(file.getBytes());
 
         resume = userResumeRepository.save(resume);
         
-        // Update user's resume field with download link
+        // Update user's resume field with download link and content type
         String downloadUrl = baseUrl + contextPath + "/api/v1/resumes/download/" + resume.getUuid();
         user.setResume(downloadUrl);
+        user.setResumeContentType(contentType);
         userRepository.save(user);
         
         return resume;
@@ -91,6 +93,7 @@ public class UserResumeService {
             
         if (user.getResume() != null && user.getResume().contains(resume.getUuid())) {
             user.setResume(null);
+            user.setResumeContentType(null);
             userRepository.save(user);
         }
         

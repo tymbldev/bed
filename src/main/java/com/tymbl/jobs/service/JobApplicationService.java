@@ -8,6 +8,7 @@ import com.tymbl.jobs.dto.JobApplicationResponse;
 import com.tymbl.jobs.dto.JobApplicationResponseExtendedDetails;
 import com.tymbl.jobs.entity.ApplicationStatus;
 import com.tymbl.jobs.entity.JobApplication;
+import com.tymbl.common.util.UserEnrichmentUtil;
 import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
 import lombok.RequiredArgsConstructor;
@@ -30,22 +31,13 @@ public class JobApplicationService {
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
     private final CompanyService companyService;
+    private final UserEnrichmentUtil userEnrichmentUtil;
 
     /**
-     * Helper method to enrich user data with company name from dropdown
+     * Helper method to enrich user data with all names (company, designation, department, country, city)
      */
-    private User enrichUserWithCompanyName(User user) {
-        try {
-            if (user.getCompanyId() != null) {
-                // Fetch company name from CompanyService using companyId
-                String companyName = companyService.getCompanyById(user.getCompanyId()).getName();
-                user.setCompany(companyName);
-            }
-        } catch (Exception e) {
-            logger.warn("Could not fetch company name for companyId: {}. Error: {}", user.getCompanyId(), e.getMessage());
-            // Keep the existing company field as is if there's an error
-        }
-        return user;
+    private User enrichUserWithAllNames(User user) {
+        return userEnrichmentUtil.enrichUserWithAllNames(user);
     }
 
     @Transactional
@@ -153,8 +145,8 @@ public class JobApplicationService {
         User applicant = userRepository.findById(application.getApplicantId())
             .orElseThrow(() -> new RuntimeException("Applicant not found"));
 
-        // Enrich applicant data with company name from dropdown
-        applicant = enrichUserWithCompanyName(applicant);
+        // Enrich applicant data with all names (company, designation, department, country, city)
+        applicant = enrichUserWithAllNames(applicant);
 
         JobApplicationResponse response = new JobApplicationResponse();
         response.setId(application.getId());
@@ -169,8 +161,8 @@ public class JobApplicationService {
         // Populate referrer sudo identity
         if (application.getJobReferrerId() != null) {
             userRepository.findById(application.getJobReferrerId()).ifPresent(refUser -> {
-                // Enrich referrer data with company name from dropdown
-                refUser = enrichUserWithCompanyName(refUser);
+                // Enrich referrer data with all names (company, designation, department, country, city)
+                refUser = enrichUserWithAllNames(refUser);
                 
                 com.tymbl.jobs.dto.SudoIdentityDTO sudo = new com.tymbl.jobs.dto.SudoIdentityDTO();
                 sudo.setDesignation(refUser.getDesignation());
@@ -187,8 +179,8 @@ public class JobApplicationService {
         User applicant = userRepository.findById(application.getApplicantId())
             .orElseThrow(() -> new RuntimeException("Applicant not found"));
 
-        // Enrich applicant data with company name from dropdown
-        applicant = enrichUserWithCompanyName(applicant);
+        // Enrich applicant data with all names (company, designation, department, country, city)
+        applicant = enrichUserWithAllNames(applicant);
 
         JobApplicationResponseExtendedDetails details = new JobApplicationResponseExtendedDetails();
         details.setId(application.getId());
@@ -206,7 +198,7 @@ public class JobApplicationService {
         details.setJobSkillIds(new ArrayList<>(job.getSkillIds()));
 
         details.setCreatedAt(application.getCreatedAt());
-        
+
         // Applicant basic info
         details.setApplicantId(applicant.getId());
         details.setApplicantName(applicant.getFirstName() + " " + applicant.getLastName());
@@ -219,8 +211,11 @@ public class JobApplicationService {
         details.setApplicantDesignationId(applicant.getDesignationId());
         details.setApplicantDesignation(applicant.getDesignation());
         details.setApplicantDepartmentId(applicant.getDepartmentId());
+        details.setApplicantDepartmentName(applicant.getDepartmentName());
         details.setApplicantCityId(applicant.getCityId());
+        details.setApplicantCityName(applicant.getCityName());
         details.setApplicantCountryId(applicant.getCountryId());
+        details.setApplicantCountryName(applicant.getCountryName());
         details.setApplicantZipCode(applicant.getZipCode());
         
         // Applicant experience and salary details
@@ -237,6 +232,7 @@ public class JobApplicationService {
         details.setApplicantLinkedInUrl(applicant.getLinkedInProfile());
         details.setApplicantGithubUrl(applicant.getGithubProfile());
         details.setApplicantResume(applicant.getResume());
+        details.setApplicantResumeContentType(applicant.getResumeContentType());
         
         // Applicant skills and education
         details.setApplicantSkillIds(new ArrayList<>(applicant.getSkillIds()));

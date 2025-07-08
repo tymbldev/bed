@@ -17,6 +17,7 @@ import com.tymbl.exception.UnauthorizedException;
 import com.tymbl.jobs.dto.JobReferrerResponse;
 import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
+import com.tymbl.common.util.UserEnrichmentUtil;
 import com.tymbl.jobs.dto.JobDetailsWithReferrersResponse;
 import com.tymbl.jobs.dto.ReferrerFeedbackRequest;
 import com.tymbl.jobs.entity.ApplicationStatus;
@@ -48,6 +49,7 @@ public class JobService {
     private final JobApplicationRepository jobApplicationRepository;
     private final UserRepository userRepository;
     private final CompanyService companyService;
+    private final UserEnrichmentUtil userEnrichmentUtil;
 
     @Value("${referrer.sort.weight.designation:0.3}")
     private double designationWeight;
@@ -57,20 +59,10 @@ public class JobService {
     private double feedbackWeight;
 
     /**
-     * Helper method to enrich user data with company name from dropdown
+     * Helper method to enrich user data with all names (company, designation, department, country, city)
      */
-    private User enrichUserWithCompanyName(User user) {
-        try {
-            if (user.getCompanyId() != null) {
-                // Fetch company name from CompanyService using companyId
-                String companyName = companyService.getCompanyById(user.getCompanyId()).getName();
-                user.setCompany(companyName);
-            }
-        } catch (Exception e) {
-            logger.warn("Could not fetch company name for companyId: {}. Error: {}", user.getCompanyId(), e.getMessage());
-            // Keep the existing company field as is if there's an error
-        }
-        return user;
+    private User enrichUserWithAllNames(User user) {
+        return userEnrichmentUtil.enrichUserWithAllNames(user);
     }
 
     @Transactional
@@ -518,8 +510,8 @@ public class JobService {
         
         for (JobReferrer ref : referrers) {
             User user = ref.getUser();
-            // Enrich user data with company name from dropdown
-            user = enrichUserWithCompanyName(user);
+            // Enrich user data with all names (company, designation, department, country, city)
+            user = enrichUserWithAllNames(user);
             
             JobDetailsWithReferrersResponse.JobReferrerWithProfileResponse referrerResponse = new JobDetailsWithReferrersResponse.JobReferrerWithProfileResponse();
             

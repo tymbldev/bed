@@ -5,6 +5,7 @@ import com.tymbl.common.dto.ProfileCompletionResponse;
 import com.tymbl.common.dto.ProfileCompletionResponse.PendingField;
 import com.tymbl.common.entity.User;
 import com.tymbl.exception.EmailAlreadyExistsException;
+import com.tymbl.common.util.UserEnrichmentUtil;
 import com.tymbl.jobs.service.CompanyService;
 import com.tymbl.registration.dto.ProfileUpdateRequest;
 import com.tymbl.registration.dto.RegisterRequest;
@@ -40,23 +41,14 @@ public class UserController {
     private final RegistrationService registrationService;
     private final JwtService jwtService;
     private final CompanyService companyService;
+    private final UserEnrichmentUtil userEnrichmentUtil;
 
 
     /**
-     * Helper method to enrich user data with company name from dropdown
+     * Helper method to enrich user data with all names (company, designation, department, country, city)
      */
-    private User enrichUserWithCompanyName(User user) {
-        try {
-            if (user.getCompanyId() != null) {
-                // Fetch company name from CompanyService using companyId
-                String companyName = companyService.getCompanyById(user.getCompanyId()).getName();
-                user.setCompany(companyName);
-            }
-        } catch (Exception e) {
-            logger.warn("Could not fetch company name for companyId: {}. Error: {}", user.getCompanyId(), e.getMessage());
-            // Keep the existing company field as is if there's an error
-        }
-        return user;
+    private User enrichUserWithAllNames(User user) {
+        return userEnrichmentUtil.enrichUserWithAllNames(user);
     }
 
     /**
@@ -84,8 +76,8 @@ public class UserController {
             User updatedUser = registrationService.updateUserProfile(user.getId(), request);
             logger.info("Successfully updated profile for user: {}", user.getEmail());
             
-            // Enrich user data with company name from dropdown
-            updatedUser = enrichUserWithCompanyName(updatedUser);
+            // Enrich user data with all names (company, designation, department, country, city)
+            updatedUser = enrichUserWithAllNames(updatedUser);
             
             String newToken = jwtService.generateToken(updatedUser);
             Map<String, Object> response = new HashMap<>();
@@ -117,8 +109,8 @@ public class UserController {
             User user = registrationService.getUserByEmail(email);
             logger.info("Successfully retrieved profile for user: {}", user.getEmail());
             
-            // Enrich user data with company name from dropdown
-            user = enrichUserWithCompanyName(user);
+            // Enrich user data with all names (company, designation, department, country, city)
+            user = enrichUserWithAllNames(user);
             
             return ResponseEntity.ok(user);
         } catch (RuntimeException e) {

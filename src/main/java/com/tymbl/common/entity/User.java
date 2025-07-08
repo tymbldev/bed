@@ -151,6 +151,19 @@ public class User implements UserDetails {
     @Column(name = "resume")
     private String resume;
     
+    @Column(name = "resume_content_type")
+    private String resumeContentType;
+    
+    // Transient fields for enriched data
+    @javax.persistence.Transient
+    private String departmentName;
+    
+    @javax.persistence.Transient
+    private String countryName;
+    
+    @javax.persistence.Transient
+    private String cityName;
+    
     @ElementCollection
     @CollectionTable(name = "user_skills", joinColumns = @JoinColumn(name = "user_id"))
     @Column(name = "skill_id")

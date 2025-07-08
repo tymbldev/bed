@@ -80,6 +80,7 @@ public class UserResumeController {
             response.put("resumeId", resume.getId());
             response.put("fileName", resume.getFileName());
             response.put("uuid", resume.getUuid());
+            response.put("contentType", resume.getContentType());
             response.put("downloadUrl", userResumeService.getDownloadUrl(resume.getUuid()));
             logger.info("Successfully uploaded resume for user: {}", user.getEmail());
             return ResponseEntity.ok().body(response);
@@ -313,6 +314,7 @@ public class UserResumeController {
             response.put("resumeId", newResume.getId());
             response.put("fileName", newResume.getFileName());
             response.put("uuid", newResume.getUuid());
+            response.put("contentType", newResume.getContentType());
             response.put("downloadUrl", userResumeService.getDownloadUrl(newResume.getUuid()));
             logger.info("Successfully updated resume {} for user: {}", resumeId, user.getEmail());
             return ResponseEntity.ok().body(response);

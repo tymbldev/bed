@@ -41,8 +41,11 @@ public class JobApplicationResponseExtendedDetails {
     private Long applicantCompanyId;
     private Long applicantDesignationId;
     private String applicantDesignation;
+    private String applicantDepartmentName;
     private Long applicantDepartmentId;
+    private String applicantCityName;
     private Long applicantCityId;
+    private String applicantCountryName;
     private Long applicantCountryId;
     private String applicantZipCode;
     private Integer applicantYearsOfExperience;
@@ -53,6 +56,7 @@ public class JobApplicationResponseExtendedDetails {
     private Long applicantExpectedSalaryCurrencyId;
     private Integer applicantNoticePeriod;
     private String applicantResume;
+    private String applicantResumeContentType;
     private Set<String> applicantSkillNames;
     private Set<com.tymbl.common.entity.User.Education> applicantEducationDetails;
     private String applicantProvider;
