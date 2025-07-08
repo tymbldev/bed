@@ -120,7 +120,7 @@ public class UserResumeController {
             logger.info("Retrieving resumes for user: {}", user.getEmail());
             List<UserResume> resumes = userResumeService.getUserResumes(user.getId());
             logger.info("Successfully retrieved {} resumes for user: {}", resumes.size(), user.getEmail());
-            return ResponseEntity.ok(resumes);
+        return ResponseEntity.ok(resumes);
         } catch (RuntimeException e) {
             logger.error("Failed to get user resumes. Error: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -150,12 +150,12 @@ public class UserResumeController {
             User user = registrationService.getUserByEmail(email);
             logger.info("Retrieving latest resume for user: {}", user.getEmail());
             UserResume resume = userResumeService.getLatestResume(user.getId());
-            if (resume == null) {
+        if (resume == null) {
                 logger.info("No resume found for user: {}", user.getEmail());
-                return ResponseEntity.notFound().build();
-            }
+            return ResponseEntity.notFound().build();
+        }
             logger.info("Successfully retrieved latest resume for user: {}", user.getEmail());
-            return ResponseEntity.ok(resume);
+        return ResponseEntity.ok(resume);
         } catch (RuntimeException e) {
             logger.error("Failed to get latest resume. Error: {}", e.getMessage());
             return ResponseEntity.badRequest().build();
@@ -362,10 +362,10 @@ public class UserResumeController {
             UserResume userResume = userResumeService.getLatestResume(user.getId());
             if (userResume == null) {
                 logger.warn("No resume found for user: {}", user.getEmail());
-                Map<String, String> error = new HashMap<>();
+            Map<String, String> error = new HashMap<>();
                 error.put("error", "No resume found for user");
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
-            }
+        }
             
             // Delete the resume
             userResumeService.deleteResume(userResume.getId());

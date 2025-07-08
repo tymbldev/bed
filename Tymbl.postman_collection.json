@@ -2398,7 +2398,7 @@
               "code": 401,
               "name": "Unauthorized",
               "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
-            },
+          },
             {
               "code": 403,
               "name": "Forbidden",
