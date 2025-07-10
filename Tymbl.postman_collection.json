@@ -2764,6 +2764,138 @@
           ]
         }
       ]
+    },
+    {
+      "name": "Company Data Management",
+      "description": "APIs for loading and updating company data from text files.",
+      "item": [
+        {
+          "name": "Load Basic Company Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/company-data/load-basic",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "company-data",
+                "load-basic"
+              ]
+            },
+            "description": "Loads basic company data from companies_basic.txt file. Creates new companies if they don't exist, or updates existing companies with null/empty fields. Includes: name, description, website, logo_url, headquarters, industry, company_size, specialties, linkedin_url, careers_url."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Basic company data loaded successfully",
+              "body": "[\n  \"Created company: Infosys\",\n  \"Updated company: Tata Consultancy Services\",\n  \"Created company: Wipro\",\n  \"Created company: Zoho\",\n  \"Created company: Freshworks\"\n]"
+            },
+            {
+              "code": 400,
+              "name": "Error reading file",
+              "body": "[\n  \"Error reading file: companies_basic.txt not found\"\n]"
+            },
+            {
+              "code": 500,
+              "name": "Database error",
+              "body": "[\n  \"Error processing company data: Database connection failed\"\n]"
+            }
+          ]
+        },
+        {
+          "name": "Update Detailed Company Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/company-data/update-detailed",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "company-data",
+                "update-detailed"
+              ]
+            },
+            "description": "Updates detailed company information from companies_detailed.txt file. Only updates companies that already exist in the database (matched by company name) and only updates fields that are currently null or empty. Includes: aboutUs, vision, mission, culture."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Detailed company data updated successfully",
+              "body": "[\n  \"Updated detailed data for company: Infosys\",\n  \"Updated detailed data for company: Tata Consultancy Services\",\n  \"No updates needed for company: Wipro (all fields already populated)\",\n  \"Updated detailed data for company: Zoho\"\n]"
+            },
+            {
+              "code": 400,
+              "name": "Error reading file",
+              "body": "[\n  \"Error reading file: companies_detailed.txt not found\"\n]"
+            },
+            {
+              "code": 500,
+              "name": "Database error",
+              "body": "[\n  \"Error processing detailed company data: Database connection failed\"\n]"
+            }
+          ]
+        },
+        {
+          "name": "Cleanup Duplicate Companies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/admin/company-data/cleanup-duplicates",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "admin",
+                "company-data",
+                "cleanup-duplicates"
+              ]
+            },
+            "description": "Cleans up duplicate companies by name before loading new data. Removes duplicate entries while keeping the first occurrence of each company name."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Duplicate companies cleaned up successfully",
+              "body": "[\n  \"Removed 2 duplicate(s) for company: Infosys\",\n  \"Removed 1 duplicate(s) for company: Wipro\",\n  \"Total duplicates removed: 3\"\n]"
+            },
+            {
+              "code": 200,
+              "name": "No duplicates found",
+              "body": "[\n  \"No duplicate companies found\"\n]"
+            },
+            {
+              "code": 500,
+              "name": "Database error",
+              "body": "[\n  \"Error cleaning up duplicates: Database connection failed\"\n]"
+            }
+          ]
+        }
+      ]
     }
   ]
 }

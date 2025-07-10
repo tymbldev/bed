@@ -134,32 +134,111 @@ public class GlobalExceptionHandler {
     
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
+        Map<String, Object> response = new HashMap<>();
+        Map<String, String> fieldErrors = new HashMap<>();
+        Map<String, Object> detailedErrors = new HashMap<>();
         
         ex.getBindingResult().getAllErrors().forEach(error -> {
             String fieldName = ((FieldError) error).getField();
             String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
+            String rejectedValue = ((FieldError) error).getRejectedValue() != null ? 
+                ((FieldError) error).getRejectedValue().toString() : null;
             
-            logger.error("Validation error on field '{}': {}", fieldName, errorMessage);
+            // Simple field errors map
+            fieldErrors.put(fieldName, errorMessage);
+            
+            // Detailed error information
+            Map<String, Object> fieldDetail = new HashMap<>();
+            fieldDetail.put("message", errorMessage);
+            fieldDetail.put("rejectedValue", rejectedValue);
+            fieldDetail.put("code", error.getCode());
+            detailedErrors.put(fieldName, fieldDetail);
+            
+            logger.error("Validation error on field '{}': {} (rejected value: {})", 
+                fieldName, errorMessage, rejectedValue);
         });
         
-        logger.error("Request validation failed with {} errors: {}", errors.size(), errors);
-        return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);
+        response.put("error", "Validation failed");
+        response.put("fieldErrors", fieldErrors);
+        response.put("detailedErrors", detailedErrors);
+        response.put("totalErrors", fieldErrors.size());
+        
+        logger.error("Request validation failed with {} errors: {}", fieldErrors.size(), fieldErrors);
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
     
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex) {
-        String errorMessage = "Invalid request body format: " + ex.getMessage();
-        Throwable rootCause = ex.getRootCause();
-        if (rootCause != null) {
-            errorMessage += ". Root cause: " + rootCause.getMessage();
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Invalid request body format");
+        
+        // Extract detailed error information
+        String detailedMessage = ex.getMessage();
+        error.put("message", detailedMessage);
+        
+        // Try to extract field information from the error message
+        String fieldInfo = extractFieldInfo(detailedMessage);
+        if (fieldInfo != null) {
+            error.put("field", fieldInfo);
         }
         
-        logger.error("Request body parsing error: {}", errorMessage);
-        Map<String, String> error = new HashMap<>();
-        error.put("error", "Invalid request body format");
+        // Get root cause for additional context
+        Throwable rootCause = ex.getRootCause();
+        if (rootCause != null) {
+            error.put("rootCause", rootCause.getMessage());
+            
+            // Try to extract field info from root cause as well
+            String rootCauseFieldInfo = extractFieldInfo(rootCause.getMessage());
+            if (rootCauseFieldInfo != null && fieldInfo == null) {
+                error.put("field", rootCauseFieldInfo);
+            }
+        }
+        
+        logger.error("Request body parsing error: {}", detailedMessage);
         return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+    }
+    
+    /**
+     * Extracts field information from error messages
+     */
+    private String extractFieldInfo(String message) {
+        if (message == null) return null;
+        
+        // Common patterns for field extraction
+        String[] patterns = {
+            "Unrecognized field \"([^\"]+)\"",
+            "Field \"([^\"]+)\" is not recognized",
+            "Cannot deserialize value of type .* from String \"([^\"]+)\"",
+            "Unexpected character .* at line .* column .*",
+            "Missing required creator property '([^']+)'",
+            "Required property '([^']+)' is missing",
+            "Invalid value for ([^:]+):",
+            "Cannot construct instance of .* from String value '([^']+)'",
+            "Expected BEGIN_OBJECT but was ([^\\s]+)",
+            "Expected BEGIN_ARRAY but was ([^\\s]+)",
+            "Expected ([^\\s]+) but was ([^\\s]+)"
+        };
+        
+        for (String pattern : patterns) {
+            java.util.regex.Pattern p = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.CASE_INSENSITIVE);
+            java.util.regex.Matcher m = p.matcher(message);
+            if (m.find()) {
+                if (m.groupCount() >= 1) {
+                    return m.group(1);
+                } else {
+                    return "unknown";
+                }
+            }
+        }
+        
+        // If no specific pattern matches, try to extract any quoted field name
+        java.util.regex.Pattern fieldPattern = java.util.regex.Pattern.compile("\"([a-zA-Z_][a-zA-Z0-9_]*)\"");
+        java.util.regex.Matcher fieldMatcher = fieldPattern.matcher(message);
+        if (fieldMatcher.find()) {
+            return fieldMatcher.group(1);
+        }
+        
+        return null;
     }
 
     @ExceptionHandler(Exception.class)

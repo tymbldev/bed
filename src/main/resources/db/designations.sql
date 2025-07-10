@@ -10,23 +10,9 @@ ALTER TABLE designations AUTO_INCREMENT = 1;
 -- Enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
 
--- Insert initial designations with explicit hierarchy
+-- Engineering Roles (Level 1-4)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Software Engineer', 1, true),
-('Senior Software Engineer', 2, true),
-('Lead Software Engineer', 3, true),
-('Principal Software Engineer', 4, true),
-('Architect', 5, true),
-('Senior Architect', 6, true),
-('Technical Lead', 7, true),
-('Engineering Manager', 8, true),
-('Senior Engineering Manager', 9, true),
-('Director of Engineering', 10, true),
-('VP of Engineering', 11, true),
-('CTO', 12, true);
-
--- Engineering Roles (Level 1-2)
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Software Engineer Intern', 1, true),
 ('Junior Software Engineer', 1, true),
 ('Frontend Engineer', 1, true),
@@ -43,10 +29,12 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Embedded Systems Engineer', 2, true),
 ('Cloud Engineer', 2, true),
 ('Release Engineer', 2, true),
-('Site Reliability Engineer (SRE)', 2, true);
-
--- Senior Level Roles (Level 3-4)
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
+('Site Reliability Engineer (SRE)', 2, true),
+('Application Security Engineer', 2, true),
+('Security Analyst', 2, true),
+('Test Automation Engineer', 2, true),
+('Build Engineer', 2, true),
+('Senior Software Engineer', 2, true),
 ('Staff Engineer', 3, true),
 ('Distinguished Engineer', 4, true),
 ('Fellow', 4, true),
@@ -62,22 +50,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Blockchain Engineer', 3, true),
 ('Embedded AI Engineer', 3, true),
 ('Graphics Engineer', 3, true),
-('Firmware Engineer', 3, true);
-
-
-
--- Security Roles (Level 2-4)
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Application Security Engineer', 2, true),
-('Security Analyst', 2, true),
-('Cybersecurity Engineer', 3, true),
-('Penetration Tester', 3, true),
-('Cloud Security Engineer', 4, true);
-
--- Specialized Engineering Roles (Level 2-4)
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Test Automation Engineer', 2, true),
-('Build Engineer', 2, true),
+('Firmware Engineer', 3, true),
 ('Observability Engineer', 3, true),
 ('Hardware Engineer', 3, true),
 ('DSP Engineer', 3, true),
@@ -89,7 +62,28 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Simulation Engineer', 3, true),
 ('Autonomous Systems Engineer', 4, true),
 ('5G Engineer', 3, true),
-('Quantum Computing Engineer', 4, true);
+('Quantum Computing Engineer', 4, true),
+('Lead Software Engineer', 3, true),
+('Principal Software Engineer', 4, true),
+('Architect', 5, true),
+('Senior Architect', 6, true),
+('Technical Lead', 7, true),
+('Engineering Manager', 8, true),
+('Senior Engineering Manager', 9, true),
+('Director of Engineering', 10, true),
+('VP of Engineering', 11, true),
+('CTO', 12, true);
+
+-- Security Roles (Level 2-4)
+INSERT IGNORE INTO designations (name, level, enabled) VALUES
+('Cybersecurity Engineer', 3, true),
+('Penetration Tester', 3, true),
+('Cloud Security Engineer', 4, true),
+('Incident Response Engineer', 3, true),
+('Threat Intelligence Analyst', 3, true),
+('Red Team Engineer', 4, true),
+('Blue Team Engineer', 4, true),
+('Governance, Risk, and Compliance (GRC) Analyst', 3, true);
 
 -- Data & AI Roles (Level 3-5)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -108,14 +102,6 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Infrastructure Engineer', 3, true),
 ('Chaos Engineer', 4, true),
 ('Kubernetes Engineer', 3, true);
-
--- Additional Security Roles (Level 3-4)
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Incident Response Engineer', 3, true),
-('Threat Intelligence Analyst', 3, true),
-('Red Team Engineer', 4, true),
-('Blue Team Engineer', 4, true),
-('Governance, Risk, and Compliance (GRC) Analyst', 3, true);
 
 -- Specialized Software Roles (Level 3-5)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -145,10 +131,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Product Marketing Manager', 2, true),
 ('Technical Product Manager', 3, true),
 ('Product Owner', 2, true),
-('Product Analyst', 1, true);
-
--- Additional Product Roles (Level 1-4)
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
+('Product Analyst', 1, true),
 ('Junior Product Manager', 1, true),
 ('Lead Product Manager', 3, true),
 ('Principal Product Manager', 4, true),
@@ -168,7 +151,9 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('EdTech Product Manager', 3, true),
 ('Healthcare Product Manager', 3, true),
 ('Gaming Product Manager', 3, true),
-('User Experience (UX) Product Manager', 3, true);
+('User Experience (UX) Product Manager', 3, true),
+('Product Director', 8, true),
+('Product Operations Manager', 5, true);
 
 -- Executive and Head Roles (Level 8-12)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -193,7 +178,15 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Visual Designer', 2, true),
 ('UX Researcher', 2, true),
 ('Information Architect', 3, true),
-('Motion Designer', 2, true);
+('Motion Designer', 2, true),
+('Junior Graphic Designer', 1, true),
+('Senior Graphic Designer', 3, true),
+('Lead Graphic Designer', 4, true),
+('Art Director', 4, true),
+('Senior UX Designer', 4, true),
+('Senior UX/UI Designer', 4, true),
+('Senior UI Designer', 4, true),
+('Creative Director', 6, true);
 
 -- Data Science Roles (Level 1-12)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -209,14 +202,22 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Data Engineer', 2, true),
 ('AI Researcher', 3, true),
 ('NLP Engineer', 3, true),
-('Computer Vision Engineer', 3, true);
+('Data Science Manager', 5, true),
+('Data Engineering Lead', 5, true);
 
 -- Marketing Roles (Level 1-4)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Marketing Coordinator', 1, true),
 ('Marketing Specialist', 2, true),
 ('Marketing Manager', 3, true),
-('Senior Marketing Manager', 4, true);
+('Senior Marketing Manager', 4, true),
+('Marketing Associate', 1, true),
+('Marketing Executive', 2, true),
+('Digital Marketing Specialist', 2, true),
+('Marketing Director', 5, true),
+('VP of Marketing', 11, true),
+('Chief Marketing Officer', 12, true),
+('Brand Manager', 4, true);
 
 -- Sales Roles (Level 1-12)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -231,7 +232,11 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Chief Sales Officer', 12, true),
 ('Sales Operations Analyst', 2, true),
 ('Sales Engineer', 3, true),
-('Solutions Consultant', 3, true);
+('Solutions Consultant', 3, true),
+('Sales Associate', 1, true),
+('Sales Executive', 2, true),
+('Sales Director', 5, true),
+('Account Manager', 3, true);
 
 -- Finance Roles (Level 1-12)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -286,7 +291,10 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('VP of Legal', 11, true),
 ('General Counsel', 12, true),
 ('Compliance Manager', 4, true),
-('Privacy Officer', 4, true);
+('Privacy Officer', 4, true),
+('Legal Associate', 2, true),
+('Legal Manager', 4, true),
+('Legal Director', 5, true);
 
 -- Research Roles (Level 1-12)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -312,7 +320,13 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('VP of Customer Success', 11, true),
 ('Chief Customer Officer', 12, true),
 ('Customer Operations Manager', 4, true),
-('Customer Insights Analyst', 2, true);
+('Customer Insights Analyst', 2, true),
+('Technical Support Specialist', 2, true),
+('Customer Support Associate', 2, true),
+('Senior Customer Support Specialist', 3, true),
+('Customer Support Manager', 4, true),
+('Customer Support Lead', 4, true),
+('Head of Customer Support', 6, true);
 
 -- Content & Communications Roles (Level 1-12)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -325,10 +339,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('VP of Communications', 11, true),
 ('Chief Communications Officer', 12, true),
 ('Documentation Manager', 4, true),
-('Other', 1, true),
-('Brand Manager', 4, true);
-
--- Additional Designations Not Present in the Current List
+('Other', 1, true);
 
 -- Administrative Roles (Level 1-3)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
@@ -346,7 +357,6 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 -- Facilities Management Roles (Level 2-4)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Facilities Coordinator', 2, true),
-('Facilities Manager', 3, true),
 ('Director of Facilities', 4, true);
 
 -- Diversity & Inclusion Roles (Level 3-12)
@@ -356,8 +366,6 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 
 -- Creative and Design Roles (Level 2-4)
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Creative Director', 4, true),
-('Art Director', 3, true),
 ('Industrial Designer', 2, true);
 
 -- Public Relations Roles (Level 2-4)
@@ -383,6 +391,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Chief Legal Officer', 12, true),
 ('Chief Compliance Officer', 12, true);
 
+-- Additional Engineering Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('AI Systems Engineer', 3, true),
 ('Big Data Engineer', 3, true),
@@ -408,6 +417,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Telemetry Engineer', 3, true),
 ('Enterprise Architect', 5, true);
 
+-- Education Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Teaching Assistant', 1, true),
 ('School Teacher', 2, true),
@@ -427,13 +437,32 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Education Program Manager', 4, true),
 ('Curriculum Developer', 3, true),
 ('eLearning Developer', 3, true),
-('Online Course Instructor', 3, true);
+('Online Course Instructor', 3, true),
+('Associate Teacher', 1, true),
+('Classroom Aide', 1, true),
+('Subject Teacher', 2, true),
+('Grade Level Teacher', 2, true),
+('Lead Teacher', 3, true),
+('Master Teacher', 3, true),
+('Instructional Coordinator', 4, true),
+('Curriculum Specialist', 4, true),
+('Academic Coordinator', 4, true),
+('Vice Principal', 5, true),
+('Director of Education', 8, true),
+('Chief Academic Officer', 12, true),
+('Superintendent', 12, true),
+('Assistant Superintendent', 11, true),
+('Dean of Students', 6, true),
+('Dean of Academics', 6, true),
+('Teacher', 2, true),
+('Education Consultant', 4, true),
+('Research Scholar', 2, true),
+('Tutor', 1, true);
 
+-- Creative and Media Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Creative Director', 8, true),
 ('Copywriter', 2, true),
 ('Senior Copywriter', 3, true),
-('Art Director', 4, true),
 ('Animator', 2, true),
 ('3D Artist', 3, true),
 ('Video Editor', 2, true),
@@ -443,8 +472,15 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Voice Over Artist', 2, true),
 ('Journalist', 2, true),
 ('Editor-in-Chief', 8, true),
-('Columnist', 3, true);
+('Columnist', 3, true),
+('Illustrator', 2, true),
+('Motion Graphics Artist', 3, true),
+('Scriptwriter', 3, true),
+('Social Media Manager', 3, true),
+('Content Creator', 1, true),
+('Influencer Marketing Specialist', 3, true);
 
+-- Healthcare Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Medical Assistant', 1, true),
 ('Registered Nurse (RN)', 2, true),
@@ -456,8 +492,24 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Public Health Analyst', 3, true),
 ('Biomedical Engineer', 3, true),
 ('Pharmacist', 4, true),
-('Genetic Counselor', 4, true);
+('Genetic Counselor', 4, true),
+('Nurse', 2, true),
+('Registered Nurse', 3, true),
+('Head Nurse', 4, true),
+('General Physician', 4, true),
+('Specialist Doctor', 6, true),
+('Dentist', 5, true),
+('Veterinarian', 4, true),
+('Physiotherapist', 3, true),
+('Lab Technician', 2, true),
+('Hospital Administrator', 6, true),
+('Doctor', 3, true),
+('Senior Doctor', 4, true),
+('Medical Director', 8, true),
+('VP of Healthcare', 11, true),
+('Chief Healthcare Officer', 12, true);
 
+-- Logistics and Supply Chain Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Logistics Coordinator', 2, true),
 ('Warehouse Manager', 3, true),
@@ -467,76 +519,20 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Fleet Manager', 4, true),
 ('Import Export Manager', 4, true),
 ('Demand Planner', 3, true),
-('Supply Chain Analyst', 3, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Teacher', 2, true),
-('Primary School Teacher', 1, true),
-('High School Teacher', 2, true),
-('Lecturer', 3, true),
-('Assistant Professor', 4, true),
-('Associate Professor', 5, true),
-('Professor', 6, true),
-('Principal', 7, true),
-('Dean', 8, true),
-('Academic Coordinator', 3, true),
-('Curriculum Developer', 3, true),
-('Instructional Designer', 3, true),
-('Education Consultant', 4, true),
-('Research Scholar', 2, true),
-('Tutor', 1, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Medical Assistant', 1, true),
-('Nurse', 2, true),
-('Registered Nurse', 3, true),
-('Head Nurse', 4, true),
-('General Physician', 4, true),
-('Surgeon', 5, true),
-('Specialist Doctor', 6, true),
-('Radiologist', 5, true),
-('Dentist', 5, true),
-('Veterinarian', 4, true),
-('Physiotherapist', 3, true),
-('Pharmacist', 3, true),
-('Lab Technician', 2, true),
-('Hospital Administrator', 6, true);
-
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
+('Supply Chain Analyst', 3, true),
 ('Warehouse Associate', 1, true),
 ('Warehouse Supervisor', 3, true),
 ('Inventory Manager', 3, true),
-('Supply Chain Analyst', 2, true),
 ('Supply Chain Planner', 3, true),
-('Procurement Specialist', 3, true),
-('Logistics Coordinator', 2, true),
-('Logistics Manager', 4, true),
-('Fleet Manager', 4, true),
-('Transportation Manager', 4, true);
+('Logistics Manager', 4, true);
 
+-- Legal Operations Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Creative Director', 6, true),
-('Art Director', 5, true),
-('Illustrator', 2, true),
-('3D Artist', 3, true),
-('Animator', 3, true),
-('Video Editor', 2, true),
-('Motion Graphics Artist', 3, true),
-('Sound Designer', 3, true),
-('Copywriter', 2, true),
-('Scriptwriter', 3, true),
-('Social Media Manager', 3, true),
-('Content Creator', 1, true),
-('Influencer Marketing Specialist', 3, true);
-
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Paralegal', 2, true),
 ('Legal Intern', 1, true),
 ('Legal Operations Manager', 4, true),
 ('Legal Compliance Analyst', 3, true);
 
+-- NGO and Social Work Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Program Officer', 2, true),
 ('Program Manager', 4, true),
@@ -547,6 +543,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Fundraising Manager', 4, true),
 ('Grants Manager', 4, true);
 
+-- Skilled Trades and Technical Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Electrician', 2, true),
 ('Plumber', 2, true),
@@ -561,11 +558,10 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Housekeeping Staff', 1, true),
 ('Construction Worker', 1, true);
 
+-- Additional Technical Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Technical Program Manager', 4, true),
 ('Software Development Manager', 5, true),
-('Data Platform Engineer', 3, true),
-('MLOps Engineer', 3, true),
 ('Observability Platform Engineer', 4, true),
 ('AI Product Engineer', 3, true),
 ('Software Craftsman', 3, true),
@@ -573,6 +569,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Test Data Management Engineer', 3, true),
 ('Reliability Architect', 5, true);
 
+-- Customer Support and BPO Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Customer Support Executive', 1, true),
 ('Customer Service Representative', 1, true),
@@ -589,7 +586,6 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Senior Customer Support Executive', 2, true),
 ('Escalation Specialist', 2, true),
 ('Customer Experience Executive', 2, true),
-('Customer Success Associate', 2, true),
 ('Customer Relationship Executive', 2, true),
 ('Product Support Executive', 2, true),
 ('Helpdesk Executive', 1, true),
@@ -597,11 +593,9 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('L2 Support Engineer', 3, true),
 ('Support Analyst', 2, true),
 ('Senior Support Analyst', 3, true),
-('Customer Success Manager', 3, true),
 ('Customer Support Team Lead', 3, true),
 ('Technical Support Specialist', 3, true),
 ('Support Engineer', 3, true),
-('Customer Experience Manager', 4, true),
 ('Customer Success Lead', 4, true),
 ('Customer Support Supervisor', 4, true),
 ('Support Team Manager', 4, true),
@@ -624,6 +618,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Support Transformation Lead', 4, true),
 ('Support Strategy Analyst', 3, true);
 
+-- Sales and Business Development Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Sales Executive', 1, true),
 ('Inside Sales Executive', 1, true),
@@ -642,19 +637,17 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Territory Manager', 3, true),
 ('Key Account Manager', 3, true),
 ('Channel Sales Manager', 3, true),
-('Sales Manager', 3, true),
 ('Enterprise Sales Manager', 4, true),
 ('Regional Sales Manager', 4, true),
 ('National Sales Manager', 5, true),
 ('Head of Sales', 5, true),
 ('Director of Sales', 6, true),
-('VP of Sales', 6, true),
 ('Chief Sales Officer (CSO)', 7, true);
 
+-- Operations and Supply Chain Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Operations Executive', 1, true),
 ('Back Office Executive', 1, true),
-('Logistics Coordinator', 1, true),
 ('Order Processing Executive', 1, true),
 ('Inventory Executive', 1, true),
 ('Procurement Executive', 1, true),
@@ -665,67 +658,38 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Warehouse Executive', 2, true),
 ('Store Executive', 2, true),
 ('Vendor Management Executive', 2, true),
-('Operations Analyst', 2, true),
 ('Procurement Analyst', 2, true),
-('Supply Chain Analyst', 2, true),
-('Operations Manager', 3, true),
 ('Procurement Manager', 3, true),
-('Logistics Manager', 3, true),
-('Supply Chain Manager', 3, true),
-('Warehouse Manager', 3, true),
 ('City Operations Manager', 3, true),
 ('Cluster Operations Manager', 3, true),
 ('Hub Manager', 3, true),
-('Senior Operations Manager', 4, true),
 ('Head of Operations', 5, true),
-('Director of Operations', 6, true),
-('VP of Operations', 6, true),
 ('Chief Operating Officer (COO)', 7, true);
 
+-- HR and Recruitment Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('HR Executive', 1, true),
 ('Recruitment Executive', 1, true),
 ('Talent Acquisition Executive', 1, true),
 ('Payroll Executive', 1, true),
 ('HR Associate', 2, true),
-('HR Coordinator', 2, true),
 ('Recruiter', 2, true),
 ('Senior HR Executive', 2, true),
-('Talent Acquisition Specialist', 2, true),
 ('HR Analyst', 2, true),
 ('HR Generalist', 2, true),
 ('L&D Executive', 2, true),
 ('HR Business Partner (HRBP)', 3, true),
-('HR Manager', 3, true),
 ('Talent Acquisition Manager', 3, true),
 ('L&D Manager', 3, true),
-('Compensation & Benefits Manager', 3, true),
 ('Employee Relations Manager', 3, true),
 ('HR Operations Manager', 3, true),
 ('HRBP Manager', 3, true),
 ('Senior HR Manager', 4, true),
-('Head of HR', 5, true),
 ('Director - Human Resources', 6, true),
 ('VP - Human Resources', 6, true),
 ('Chief Human Resources Officer (CHRO)', 7, true);
 
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Product Analyst', 2, true),
-('Associate Product Manager (APM)', 2, true),
-('Product Manager', 3, true),
-('Technical Product Manager', 3, true),
-('Product Owner', 3, true),
-('Growth Product Manager', 3, true),
-('Data Product Manager', 3, true),
-('Senior Product Manager', 4, true),
-('Group Product Manager', 4, true),
-('Principal Product Manager', 5, true),
-('Lead Product Manager', 4, true),
-('Director of Product', 6, true),
-('Head of Product', 6, true),
-('VP of Product', 6, true),
-('Chief Product Officer (CPO)', 7, true);
-
+-- Engineering and Technical Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Mechanical Engineer', 2, true),
 ('Electrical Engineer', 2, true),
@@ -734,7 +698,6 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Industrial Engineer', 2, true),
 ('Manufacturing Engineer', 2, true),
 ('Environmental Engineer', 2, true),
-('Biomedical Engineer', 2, true),
 ('Aerospace Engineer', 2, true),
 ('Nuclear Engineer', 3, true),
 ('Marine Engineer', 2, true),
@@ -751,208 +714,13 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Engineering Aide', 1, true),
 ('Apprentice Engineer', 1, true),
 ('Junior Engineer', 1, true),
-('Staff Engineer', 3, true),
 ('Lead Engineer', 4, true),
 ('Senior Engineer', 4, true),
 ('Principal Engineer', 5, true),
 ('Executive Engineer', 6, true),
-('Chief Engineer', 6, true),
-('Director of Engineering', 8, true),
-('VP of Engineering', 11, true),
-('CTO', 12, true);
+('Chief Engineer', 6, true);
 
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Teaching Assistant', 1, true),
-('Associate Teacher', 1, true),
-('Classroom Aide', 1, true),
-('Subject Teacher', 2, true),
-('Grade Level Teacher', 2, true),
-('Special Education Teacher', 2, true),
-('Lead Teacher', 3, true),
-('Master Teacher', 3, true),
-('Instructional Coordinator', 4, true),
-('Curriculum Specialist', 4, true),
-('Academic Coordinator', 4, true),
-('Education Program Manager', 5, true),
-('Principal', 6, true),
-('Vice Principal', 5, true),
-('Director of Education', 8, true),
-('Chief Academic Officer', 12, true),
-('Superintendent', 12, true),
-('Assistant Superintendent', 11, true),
-('Dean of Students', 6, true),
-('Dean of Academics', 6, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Mechanical Engineer', 2, true),
-('Electrical Engineer', 2, true),
-('Civil Engineer', 2, true),
-('Chemical Engineer', 2, true),
-('Industrial Engineer', 2, true),
-('Manufacturing Engineer', 2, true),
-('Environmental Engineer', 2, true),
-('Biomedical Engineer', 2, true),
-('Aerospace Engineer', 2, true),
-('Nuclear Engineer', 3, true),
-('Marine Engineer', 2, true),
-('Petroleum Engineer', 3, true),
-('Structural Engineer', 3, true),
-('Geotechnical Engineer', 3, true),
-('Materials Engineer', 3, true),
-('Acoustics Engineer', 3, true),
-('Mechatronics Engineer', 3, true),
-('Reliability Engineer', 3, true),
-('Safety Engineer', 3, true),
-('Engineering Technician', 1, true),
-('Engineering Intern', 1, true),
-('Engineering Aide', 1, true),
-('Apprentice Engineer', 1, true),
-('Junior Engineer', 1, true),
-('Staff Engineer', 3, true),
-('Lead Engineer', 4, true),
-('Senior Engineer', 4, true),
-('Principal Engineer', 5, true),
-('Executive Engineer', 6, true),
-('Chief Engineer', 6, true),
-('Director of Engineering', 8, true),
-('VP of Engineering', 11, true),
-('CTO', 12, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Teaching Assistant', 1, true),
-('Associate Teacher', 1, true),
-('Classroom Aide', 1, true),
-('Subject Teacher', 2, true),
-('Grade Level Teacher', 2, true),
-('Special Education Teacher', 2, true),
-('Lead Teacher', 3, true),
-('Master Teacher', 3, true),
-('Instructional Coordinator', 4, true),
-('Curriculum Specialist', 4, true),
-('Academic Coordinator', 4, true),
-('Education Program Manager', 5, true),
-('Principal', 6, true),
-('Vice Principal', 5, true),
-('Director of Education', 8, true),
-('Chief Academic Officer', 12, true),
-('Superintendent', 12, true),
-('Assistant Superintendent', 11, true),
-('Dean of Students', 6, true),
-('Dean of Academics', 6, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Product Analyst', 2, true),
-('Junior Product Manager', 2, true),
-('Product Manager', 3, true),
-('Senior Product Manager', 4, true),
-('Lead Product Manager', 5, true),
-('Product Director', 8, true),
-('VP of Product', 11, true),
-('Chief Product Officer', 12, true),
-('Product Operations Manager', 5, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Junior Graphic Designer', 1, true),
-('Graphic Designer', 2, true),
-('Senior Graphic Designer', 3, true),
-('Lead Graphic Designer', 4, true),
-('Art Director', 4, true),
-('UX Designer', 3, true),
-('Senior UX Designer', 4, true),
-('UX/UI Designer', 3, true),
-('Senior UX/UI Designer', 4, true),
-('UI Designer', 3, true),
-('Senior UI Designer', 4, true),
-('Design Lead', 5, true),
-('Creative Director', 6, true),
-('VP of Design', 11, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Sales Associate', 1, true),
-('Sales Executive', 2, true),
-('Sales Manager', 3, true),
-('Senior Sales Manager', 4, true),
-('Sales Director', 5, true),
-('VP of Sales', 11, true),
-('Chief Sales Officer', 12, true),
-('Account Executive', 2, true),
-('Account Manager', 3, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Customer Support Representative', 1, true),
-('Technical Support Specialist', 2, true),
-('Customer Support Associate', 2, true),
-('Customer Success Manager', 3, true),
-('Senior Customer Support Specialist', 3, true),
-('Customer Support Manager', 4, true),
-('Customer Support Lead', 4, true),
-('Head of Customer Support', 6, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Marketing Associate', 1, true),
-('Marketing Executive', 2, true),
-('Digital Marketing Specialist', 2, true),
-('Senior Marketing Manager', 4, true),
-('Marketing Manager', 3, true),
-('Marketing Director', 5, true),
-('VP of Marketing', 11, true),
-('Chief Marketing Officer', 12, true),
-('Brand Manager', 3, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Data Analyst', 2, true),
-('Data Scientist', 3, true),
-('Senior Data Scientist', 4, true),
-('Lead Data Scientist', 5, true),
-('Data Science Manager', 5, true),
-('Data Engineering Lead', 5, true),
-('VP of Data Science', 11, true),
-('Chief Data Officer', 12, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Security Analyst', 2, true),
-('Security Engineer', 3, true),
-('Senior Security Engineer', 4, true),
-('Lead Security Engineer', 5, true),
-('Security Manager', 4, true),
-('Director of Security', 8, true),
-('VP of Security', 11, true),
-('Chief Information Security Officer', 12, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Legal Associate', 2, true),
-('Legal Counsel', 3, true),
-('Senior Legal Counsel', 4, true),
-('Legal Manager', 4, true),
-('Legal Director', 5, true),
-('VP of Legal', 11, true),
-('General Counsel', 12, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Medical Assistant', 1, true),
-('Nurse', 2, true),
-('Doctor', 3, true),
-('Senior Doctor', 4, true),
-('Healthcare Administrator', 5, true),
-('Medical Director', 8, true),
-('VP of Healthcare', 11, true),
-('Chief Healthcare Officer', 12, true);
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('M&A Associate', 2, true),
-('M&A Manager', 3, true),
-('Director of Corporate Development', 5, true),
-('VP of Corporate Development', 11, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
-('Consulting Analyst', 2, true),
-('Consulting Associate', 3, true),
-('Consultant', 4, true),
-('Senior Consultant', 5, true),
-('Consulting Manager', 5, true),
-('Consulting Director', 8, true),
-('VP of Consulting', 11, true),
-('Principal Consultant', 5, true);
-
+-- Consulting Roles
 INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Consulting Analyst', 2, true),
 ('Consulting Associate', 3, true),
@@ -988,9 +756,7 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Consulting Executive', 9, true),
 ('Global Consulting Lead', 12, true),
 ('Head of Consulting', 12, true),
-('Global Director of Consulting', 12, true);
-
-INSERT IGNORE INTO designations (name, level, enabled) VALUES
+('Global Director of Consulting', 12, true),
 ('Consulting Intern', 1, true),
 ('Consulting Assistant', 2, true),
 ('Junior Strategy Consultant', 3, true),
@@ -1024,6 +790,13 @@ INSERT IGNORE INTO designations (name, level, enabled) VALUES
 ('Global Strategy Consultant', 6, true),
 ('Senior Corporate Consultant', 5, true),
 ('Senior Financial Strategy Consultant', 5, true);
+
+-- Corporate Development Roles
+INSERT IGNORE INTO designations (name, level, enabled) VALUES
+('M&A Associate', 2, true),
+('M&A Manager', 3, true),
+('Director of Corporate Development', 5, true),
+('VP of Corporate Development', 11, true);
 
 
 

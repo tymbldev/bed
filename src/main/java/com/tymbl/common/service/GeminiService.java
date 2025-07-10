@@ -12,8 +12,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.Instant;
@@ -22,6 +24,7 @@ import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.TimeoutException;
 
 @Slf4j
 @Service
@@ -31,94 +34,11 @@ public class GeminiService {
     @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
     private String apiKey;
 
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent";
+    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final RestTemplate restTemplate = new RestTemplate();
+    @Qualifier("aiServiceRestTemplate")
+    private final RestTemplate restTemplate;
 
-    public Optional<Company> extractCompanyInfo(String documentText) {
-        try {
-            log.info("Starting company information extraction using Gemini AI");
-            
-            if (documentText == null || documentText.trim().isEmpty()) {
-                log.warn("Document text is null or empty");
-                return Optional.empty();
-            }
-            
-            String prompt = buildPrompt(documentText);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
-            
-            log.debug("Sending request to Gemini API with document text length: {}", documentText.length());
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            try {
-                ResponseEntity<String> response = restTemplate.exchange(
-                    GEMINI_API_URL + "?key=" + apiKey,
-                    HttpMethod.POST,
-                    request,
-                    String.class
-                );
-                
-                log.debug("Gemini API response status: {}", response.getStatusCodeValue());
-                
-                if (response.getStatusCodeValue() == 200) {
-                    log.info("Successfully received response from Gemini API");
-                    return parseGeminiResponse(response.getBody());
-                } else {
-                    log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                    return Optional.empty();
-                }
-            } catch (HttpClientErrorException e) {
-                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                    log.error("Rate limit exceeded for Gemini API. Pausing execution for 15 minutes.");
-                    log.error("Rate limit error details: {}", e.getResponseBodyAsString());
-                    
-                    try {
-                        log.info("Starting 15-minute pause due to rate limiting...");
-                        Thread.sleep(15 * 60 * 1000); // 15 minutes in milliseconds
-                        log.info("Resumed execution after 15-minute pause");
-                        
-                        // Retry the request once after the pause
-                        log.info("Retrying request for document extraction");
-                        ResponseEntity<String> retryResponse = restTemplate.exchange(
-                            GEMINI_API_URL + "?key=" + apiKey,
-                            HttpMethod.POST,
-                            request,
-                            String.class
-                        );
-                        
-                        if (retryResponse.getStatusCodeValue() == 200) {
-                            log.info("Successfully received response from Gemini API after retry");
-                            return parseGeminiResponse(retryResponse.getBody());
-                        } else {
-                            log.error("Gemini API error after retry: {} - {}", retryResponse.getStatusCodeValue(), retryResponse.getBody());
-                            return Optional.empty();
-                        }
-                    } catch (InterruptedException ie) {
-                        log.error("Thread interrupted during rate limit pause", ie);
-                        Thread.currentThread().interrupt();
-                        return Optional.empty();
-                    } catch (HttpClientErrorException retryException) {
-                        if (retryException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                            log.error("Rate limit still exceeded after 15-minute pause. Skipping document extraction.");
-                        } else {
-                            log.error("Unexpected error during retry for document extraction", retryException);
-                        }
-                        return Optional.empty();
-                    }
-                } else {
-                    log.error("HTTP error calling Gemini API", e);
-                    return Optional.empty();
-                }
-            }
-        } catch (Exception e) {
-            log.error("Error calling Gemini API", e);
-            return Optional.empty();
-        }
-    }
 
     public Optional<Company> generateCompanyInfo(String companyName, String linkedinUrl) {
         try {
@@ -158,49 +78,100 @@ public class GeminiService {
                 }
             } catch (HttpClientErrorException e) {
                 if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                    log.error("Rate limit exceeded for Gemini API. Pausing execution for 15 minutes. Company: {}", companyName);
+                    log.error("Rate limit exceeded for Gemini API. Company: {}", companyName);
                     log.error("Rate limit error details: {}", e.getResponseBodyAsString());
-                    
-                    try {
-                        log.info("Starting 15-minute pause due to rate limiting...");
-                        Thread.sleep(15 * 60 * 1000); // 15 minutes in milliseconds
-                        log.info("Resumed execution after 15-minute pause");
-                        
-                        // Retry the request once after the pause
-                        log.info("Retrying request for company: {}", companyName);
-                        ResponseEntity<String> retryResponse = restTemplate.exchange(
-                            GEMINI_API_URL + "?key=" + apiKey,
-                            HttpMethod.POST,
-                            request,
-                            String.class
-                        );
-                        
-                        if (retryResponse.getStatusCodeValue() == 200) {
-                            log.info("Successfully received response from Gemini API after retry for company: {}", companyName);
-                            return parseGeminiResponse(retryResponse.getBody());
-                        } else {
-                            log.error("Gemini API error after retry: {} - {}", retryResponse.getStatusCodeValue(), retryResponse.getBody());
-                            return Optional.empty();
-                        }
-                    } catch (InterruptedException ie) {
-                        log.error("Thread interrupted during rate limit pause", ie);
-                        Thread.currentThread().interrupt();
-                        return Optional.empty();
-                    } catch (HttpClientErrorException retryException) {
-                        if (retryException.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-                            log.error("Rate limit still exceeded after 15-minute pause. Skipping company: {}", companyName);
-                        } else {
-                            log.error("Unexpected error during retry for company: {}", companyName, retryException);
-                        }
-                        return Optional.empty();
-                    }
+                    throw new RuntimeException("Rate limit exceeded for Gemini API");
                 } else {
                     log.error("HTTP error calling Gemini API for company: {}", companyName, e);
+                    return Optional.empty();
+                }
+            } catch (ResourceAccessException e) {
+                if (e.getCause() instanceof java.net.SocketTimeoutException) {
+                    log.error("Request timeout for Gemini API. Company: {}", companyName, e);
+                    throw new RuntimeException("Request timeout for Gemini API", e);
+                } else {
+                    log.error("Connection error calling Gemini API for company: {}", companyName, e);
+                    return Optional.empty();
+                }
+            } catch (RuntimeException e) {
+                if (e.getMessage() != null && e.getMessage().contains("timeout")) {
+                    log.error("Request timeout for Gemini API. Company: {}", companyName, e);
+                    throw e;
+                } else {
+                    log.error("Runtime error calling Gemini API for company: {}", companyName, e);
                     return Optional.empty();
                 }
             }
         } catch (Exception e) {
             log.error("Error calling Gemini API for company: {}", companyName, e);
+            return Optional.empty();
+        }
+    }
+
+    public Optional<Company> extractCompanyInfoFromDocument(String documentText) {
+        try {
+            log.info("Starting company information extraction from document using Gemini AI");
+            
+            if (documentText == null || documentText.trim().isEmpty()) {
+                log.warn("Document text is null or empty");
+                return Optional.empty();
+            }
+            
+            String prompt = buildPrompt(documentText);
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+            
+            log.debug("Sending document extraction request to Gemini API");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            try {
+                ResponseEntity<String> response = restTemplate.exchange(
+                    GEMINI_API_URL + "?key=" + apiKey,
+                    HttpMethod.POST,
+                    request,
+                    String.class
+                );
+                
+                log.debug("Gemini API response status: {}", response.getStatusCodeValue());
+                
+                if (response.getStatusCodeValue() == 200) {
+                    log.info("Successfully received response from Gemini API for document extraction");
+                    return parseGeminiResponse(response.getBody());
+                } else {
+                    log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                    return Optional.empty();
+                }
+            } catch (HttpClientErrorException e) {
+                if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
+                    log.error("Rate limit exceeded for Gemini API during document extraction");
+                    log.error("Rate limit error details: {}", e.getResponseBodyAsString());
+                    throw new RuntimeException("Rate limit exceeded for Gemini API");
+                } else {
+                    log.error("HTTP error calling Gemini API for document extraction", e);
+                    return Optional.empty();
+                }
+            } catch (ResourceAccessException e) {
+                if (e.getCause() instanceof java.net.SocketTimeoutException) {
+                    log.error("Request timeout for Gemini API during document extraction", e);
+                    throw new RuntimeException("Request timeout for Gemini API", e);
+                } else {
+                    log.error("Connection error calling Gemini API for document extraction", e);
+                    return Optional.empty();
+                }
+            } catch (RuntimeException e) {
+                if (e.getMessage() != null && e.getMessage().contains("timeout")) {
+                    log.error("Request timeout for Gemini API during document extraction", e);
+                    throw e;
+                } else {
+                    log.error("Runtime error calling Gemini API for document extraction", e);
+                    return Optional.empty();
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error calling Gemini API for document extraction", e);
             return Optional.empty();
         }
     }
