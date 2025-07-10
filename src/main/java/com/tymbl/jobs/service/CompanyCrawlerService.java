@@ -47,7 +47,7 @@ public class CompanyCrawlerService {
                     try {
                         processCompanyInTransaction(company);
                         // Add delay to avoid rate limiting
-                       Thread.sleep(60000);
+                       //Thread.sleep(60000);
                     } catch (Exception e) {
                         log.error("Error processing company: " + company.getName(), e);
                     }
