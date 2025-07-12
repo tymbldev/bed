@@ -25,9 +25,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\"\n}"
@@ -35,9 +49,21 @@
             "description": "Authenticate user and return JWT token."
           },
           "response": [
-            { "code": 200, "name": "Authentication successful", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}" },
-            { "code": 401, "name": "Invalid credentials", "body": "{\n  \"error\": \"Invalid credentials\"\n}" },
-            { "code": 400, "name": "Invalid input", "body": "{\n  \"error\": \"Invalid input\"\n}" }
+            {
+              "code": 200,
+              "name": "Authentication successful",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
+            },
+            {
+              "code": 401,
+              "name": "Invalid credentials",
+              "body": "{\n  \"error\": \"Invalid credentials\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input",
+              "body": "{\n  \"error\": \"Invalid input\"\n}"
+            }
           ]
         },
         {
@@ -45,13 +71,42 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=abc123", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "verify-email" ], "query": [ { "key": "token", "value": "abc123" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/verify-email?token=abc123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "verify-email"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "abc123"
+                }
+              ]
+            },
             "description": "Verify user's email address using the token sent to their email."
           },
           "response": [
-            { "code": 200, "name": "Email verified successfully", "body": "Email verified successfully" },
-            { "code": 400, "name": "Invalid token or email already verified", "body": "{\n  \"error\": \"Invalid token or email already verified\"\n}" },
-            { "code": 404, "name": "Token not found", "body": "{\n  \"error\": \"Token not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Email verified successfully",
+              "body": "Email verified successfully"
+            },
+            {
+              "code": 400,
+              "name": "Invalid token or email already verified",
+              "body": "{\n  \"error\": \"Invalid token or email already verified\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Token not found",
+              "body": "{\n  \"error\": \"Token not found\"\n}"
+            }
           ]
         },
         {
@@ -59,12 +114,37 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "forgot-password" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/forgot-password?email=user@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "forgot-password"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com"
+                }
+              ]
+            },
             "description": "Request password reset. Sends a reset token to the user's email."
           },
           "response": [
-            { "code": 200, "name": "Password reset instructions sent", "body": "Password reset instructions sent to your email" },
-            { "code": 404, "name": "Email not found", "body": "{\n  \"error\": \"Email not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Password reset instructions sent",
+              "body": "Password reset instructions sent to your email"
+            },
+            {
+              "code": 404,
+              "name": "Email not found",
+              "body": "{\n  \"error\": \"Email not found\"\n}"
+            }
           ]
         },
         {
@@ -72,13 +152,46 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=abc123&newPassword=NewPass123", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "reset-password" ], "query": [ { "key": "token", "value": "abc123" }, { "key": "newPassword", "value": "NewPass123" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/reset-password?token=abc123&newPassword=NewPass123",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "reset-password"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "abc123"
+                },
+                {
+                  "key": "newPassword",
+                  "value": "NewPass123"
+                }
+              ]
+            },
             "description": "Reset password using token."
           },
           "response": [
-            { "code": 200, "name": "Password reset successfully", "body": "Password reset successfully" },
-            { "code": 400, "name": "Invalid or expired token", "body": "{\n  \"error\": \"Invalid or expired token\"\n}" },
-            { "code": 404, "name": "Token not found", "body": "{\n  \"error\": \"Token not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Password reset successfully",
+              "body": "Password reset successfully"
+            },
+            {
+              "code": 400,
+              "name": "Invalid or expired token",
+              "body": "{\n  \"error\": \"Invalid or expired token\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Token not found",
+              "body": "{\n  \"error\": \"Token not found\"\n}"
+            }
           ]
         },
         {
@@ -86,13 +199,42 @@
           "request": {
             "method": "POST",
             "header": [],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "resend-verification" ], "query": [ { "key": "email", "value": "user@example.com" } ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/resend-verification?email=user@example.com",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "resend-verification"
+              ],
+              "query": [
+                {
+                  "key": "email",
+                  "value": "user@example.com"
+                }
+              ]
+            },
             "description": "Resend email verification token to the user's email."
           },
           "response": [
-            { "code": 200, "name": "Verification email sent successfully", "body": "Verification email sent successfully" },
-            { "code": 400, "name": "Email already verified", "body": "{\n  \"error\": \"Email already verified\"\n}" },
-            { "code": 404, "name": "Email not found", "body": "{\n  \"error\": \"Email not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Verification email sent successfully",
+              "body": "Verification email sent successfully"
+            },
+            {
+              "code": 400,
+              "name": "Email already verified",
+              "body": "{\n  \"error\": \"Email already verified\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Email not found",
+              "body": "{\n  \"error\": \"Email not found\"\n}"
+            }
           ]
         },
         {
@@ -100,9 +242,24 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/login/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "login", "linkedin" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/login/linkedin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login",
+                "linkedin"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accessToken\": \"AQV...\"\n}"
@@ -110,8 +267,16 @@
             "description": "Authenticate user with LinkedIn and return JWT token."
           },
           "response": [
-            { "code": 200, "name": "Successfully authenticated with LinkedIn", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}" },
-            { "code": 400, "name": "Invalid LinkedIn access token", "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}" }
+            {
+              "code": 200,
+              "name": "Successfully authenticated with LinkedIn",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": true\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid LinkedIn access token",
+              "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
+            }
           ]
         },
         {
@@ -119,9 +284,23 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/auth/linkedin", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "auth", "linkedin" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/auth/linkedin",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "linkedin"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"accessToken\": \"AQV...\",\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}"
@@ -129,10 +308,26 @@
             "description": "Authenticate with LinkedIn using profile data."
           },
           "response": [
-            { "code": 200, "name": "User authenticated successfully with LinkedIn", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}" },
-            { "code": 400, "name": "Invalid input or email already registered", "body": "{\n  \"error\": \"Invalid input or email already registered\"\n}" },
-            { "code": 401, "name": "Invalid LinkedIn access token", "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}" },
-            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
+            {
+              "code": 200,
+              "name": "User authenticated successfully with LinkedIn",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or email already registered",
+              "body": "{\n  \"error\": \"Invalid input or email already registered\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Invalid LinkedIn access token",
+              "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
           ]
         },
         {
@@ -140,9 +335,22 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/registration", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "registration" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/registration",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}"
@@ -150,9 +358,21 @@
             "description": "Register a new user. Only email and password are mandatory."
           },
           "response": [
-            { "code": 200, "name": "User registered successfully", "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}" },
-            { "code": 400, "name": "Email already registered", "body": "{\n  \"error\": \"Email already registered\"\n}" },
-            { "code": 500, "name": "Server error", "body": "{\n  \"error\": \"Server error\"\n}" }
+            {
+              "code": 200,
+              "name": "User registered successfully",
+              "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
+            },
+            {
+              "code": 400,
+              "name": "Email already registered",
+              "body": "{\n  \"error\": \"Email already registered\"\n}"
+            },
+            {
+              "code": 500,
+              "name": "Server error",
+              "body": "{\n  \"error\": \"Server error\"\n}"
+            }
           ]
         }
       ]
@@ -334,7 +554,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"tags\": [\"java\", \"spring\"]\n}"
+              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 100000,\n  \"maxSalary\": 100000,\n  \"minExperience\": 2,\n  \"maxExperience\": 5,\n  \"jobType\": \"HYBRID\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"tags\": [\"java\", \"spring\"]\n}"
             },
             "description": "Create a new job posting. The job posting will be associated with the authenticated user. The job poster is automatically registered as a JobReferrer for this job."
           },
@@ -342,7 +562,7 @@
             {
               "code": 200,
               "name": "Job posting created successfully",
-              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n  \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
             },
             {
               "code": 400,
@@ -389,7 +609,7 @@
             },
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"Develop advanced software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"openingCount\": 2,\n  \"tags\": [\"java\", \"spring\", \"senior\"]\n}"
+              "raw": "{\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"Develop advanced software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"minSalary\": 120000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 2,\n  \"maxExperience\": 5,\n  \"jobType\": \"HYBRID\",\n  \"currencyId\": 1,\n  \"openingCount\": 2,\n  \"tags\": [\"java\", \"spring\", \"senior\"]\n}"
             },
             "description": "Update an existing job posting. Only the user who posted the job can update it. Company and designation cannot be updated after job is posted."
           },
@@ -397,7 +617,7 @@
             {
               "code": 200,
               "name": "Job posting updated successfully",
-              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"Develop advanced software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"salary\": 120000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T11:00:00\",\n  \"tags\": [\"java\", \"spring\", \"senior\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"Develop advanced software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"minSalary\": 120000,\n    \"maxSalary\": 120000,\n  \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T11:00:00\",\n  \"tags\": [\"java\", \"spring\", \"senior\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\"\n}"
             },
             {
               "code": 400,
@@ -501,7 +721,7 @@
             {
               "code": 200,
               "name": "Retrieved job postings successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"userRole\": \"POSTER\",\n    \"actualPostedBy\": 1\n  },\n  {\n    \"id\": 2,\n    \"title\": \"Data Analyst\",\n    \"description\": \"Analyze data and create reports\",\n    \"cityId\": 2,\n    \"countryId\": 1,\n    \"designationId\": 2,\n    \"designation\": \"Data Analyst\",\n    \"salary\": 80000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 2,\n    \"active\": true,\n    \"createdAt\": \"2024-01-02T10:00:00\",\n    \"updatedAt\": \"2024-01-02T10:00:00\",\n    \"tags\": [\"python\", \"sql\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\",\n    \"userRole\": \"REFERRER\",\n    \"actualPostedBy\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"userRole\": \"POSTER\",\n    \"actualPostedBy\": 1\n  },\n  {\n    \"id\": 2,\n    \"title\": \"Data Analyst\",\n    \"description\": \"Analyze data and create reports\",\n    \"cityId\": 2,\n    \"countryId\": 1,\n    \"designationId\": 2,\n    \"designation\": \"Data Analyst\",\n    \"minSalary\": 80000,\n    \"maxSalary\": 80000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 2,\n    \"active\": true,\n    \"createdAt\": \"2024-01-02T10:00:00\",\n    \"updatedAt\": \"2024-01-02T10:00:00\",\n    \"tags\": [\"python\", \"sql\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\",\n    \"userRole\": \"REFERRER\",\n    \"actualPostedBy\": 2\n  }\n]"
             },
             {
               "code": 401,
@@ -535,7 +755,7 @@
             {
               "code": 200,
               "name": "Retrieved jobs successfully",
-              "body": "[\n  {\n    \"id\": 3,\n    \"title\": \"Product Manager\",\n    \"description\": \"Manage product development\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 3,\n    \"designation\": \"Product Manager\",\n    \"salary\": 150000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 0,\n    \"active\": true,\n    \"createdAt\": \"2024-01-03T10:00:00\",\n    \"updatedAt\": \"2024-01-03T10:00:00\",\n    \"tags\": [\"product\", \"management\"],\n    \"isSuperAdminPosted\": true,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/3\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\"\n  }\n]"
+              "body": "[\n  {\n    \"id\": 3,\n    \"title\": \"Product Manager\",\n    \"description\": \"Manage product development\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 3,\n    \"designation\": \"Product Manager\",\n    \"minSalary\": 150000,\n    \"maxSalary\": 150000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 0,\n    \"active\": true,\n    \"createdAt\": \"2024-01-03T10:00:00\",\n    \"updatedAt\": \"2024-01-03T10:00:00\",\n    \"tags\": [\"product\", \"management\"],\n    \"isSuperAdminPosted\": true,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/3\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\"\n  }\n]"
             },
             {
               "code": 401,
@@ -594,7 +814,7 @@
             {
               "code": 200,
               "name": "Retrieved pending jobs successfully",
-              "body": "[\n  {\n    \"id\": 2,\n    \"title\": \"Data Analyst\",\n    \"description\": \"Analyze data and create reports\",\n    \"cityId\": 2,\n    \"countryId\": 1,\n    \"designationId\": 2,\n    \"designation\": \"Data Analyst\",\n    \"salary\": 80000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-02T10:00:00\",\n    \"updatedAt\": \"2024-01-02T10:00:00\",\n    \"tags\": [\"python\", \"sql\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  },\n  {\n    \"id\": 4,\n    \"title\": \"UX Designer\",\n    \"description\": \"Design user interfaces\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 4,\n    \"designation\": \"UX Designer\",\n    \"salary\": 90000,\n    \"currencyId\": 1,\n    \"companyId\": 2,\n    \"company\": \"Design Studio\",\n    \"postedBy\": 2,\n    \"active\": true,\n    \"createdAt\": \"2024-01-04T10:00:00\",\n    \"updatedAt\": \"2024-01-04T10:00:00\",\n    \"tags\": [\"ui\", \"ux\", \"figma\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  }\n]"
+              "body": "[\n  {\n    \"id\": 2,\n    \"title\": \"Data Analyst\",\n    \"description\": \"Analyze data and create reports\",\n    \"cityId\": 2,\n    \"countryId\": 1,\n    \"designationId\": 2,\n    \"designation\": \"Data Analyst\",\n    \"minSalary\": 80000,\n    \"maxSalary\": 80000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-02T10:00:00\",\n    \"updatedAt\": \"2024-01-02T10:00:00\",\n    \"tags\": [\"python\", \"sql\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  },\n  {\n    \"id\": 4,\n    \"title\": \"UX Designer\",\n    \"description\": \"Design user interfaces\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 4,\n    \"designation\": \"UX Designer\",\n    \"minSalary\": 90000,\n    \"maxSalary\": 90000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 2,\n    \"company\": \"Design Studio\",\n    \"postedBy\": 2,\n    \"active\": true,\n    \"createdAt\": \"2024-01-04T10:00:00\",\n    \"updatedAt\": \"2024-01-04T10:00:00\",\n    \"tags\": [\"ui\", \"ux\", \"figma\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": null,\n    \"platform\": null,\n    \"approved\": 0,\n    \"approvalStatus\": \"PENDING\"\n  }\n]"
             },
             {
               "code": 401,
@@ -832,7 +1052,7 @@
             {
               "code": 200,
               "name": "Job details with referrer profiles retrieved successfully",
-              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2,\n  \"referrers\": [\n    {\n      \"userId\": 12,\n      \"userName\": \"Alice Manager\",\n      \"email\": \"alice@techcorp.com\",\n      \"designation\": \"Manager\",\n      \"company\": \"Tech Corp\",\n      \"companyId\": 1,\n      \"yearsOfExperience\": \"5\",\n      \"monthsOfExperience\": \"6\",\n      \"education\": \"MBA from Harvard, BS from MIT\",\n      \"portfolioWebsite\": \"https://alice.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/alice\",\n      \"githubProfile\": \"https://github.com/alice\",\n      \"numApplicationsAccepted\": 5,\n      \"feedbackScore\": 4.5,\n      \"overallScore\": 4.1,\n      \"registeredAt\": \"2024-01-01T10:00:00\"\n    },\n    {\n      \"userId\": 15,\n      \"userName\": \"Bob Lead\",\n      \"email\": \"bob@techcorp.com\",\n      \"designation\": \"Lead Engineer\",\n      \"company\": \"Tech Corp\",\n      \"companyId\": 1,\n      \"yearsOfExperience\": \"3\",\n      \"monthsOfExperience\": \"2\",\n      \"education\": \"MS from Stanford, BS from UC Berkeley\",\n      \"portfolioWebsite\": \"https://bob.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/bob\",\n      \"githubProfile\": \"https://github.com/bob\",\n      \"numApplicationsAccepted\": 3,\n      \"feedbackScore\": 4.0,\n      \"overallScore\": 3.2,\n      \"registeredAt\": \"2024-01-02T10:00:00\"\n    }\n  ]\n}"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n  \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2,\n  \"referrers\": [\n    {\n      \"userId\": 12,\n      \"userName\": \"Alice Manager\",\n      \"email\": \"alice@techcorp.com\",\n      \"designation\": \"Manager\",\n      \"company\": \"Tech Corp\",\n      \"companyId\": 1,\n      \"yearsOfExperience\": \"5\",\n      \"monthsOfExperience\": \"6\",\n      \"education\": \"MBA from Harvard, BS from MIT\",\n      \"portfolioWebsite\": \"https://alice.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/alice\",\n      \"githubProfile\": \"https://github.com/alice\",\n      \"numApplicationsAccepted\": 5,\n      \"feedbackScore\": 4.5,\n      \"overallScore\": 4.1,\n      \"registeredAt\": \"2024-01-01T10:00:00\"\n    },\n    {\n      \"userId\": 15,\n      \"userName\": \"Bob Lead\",\n      \"email\": \"bob@techcorp.com\",\n      \"designation\": \"Lead Engineer\",\n      \"company\": \"Tech Corp\",\n      \"companyId\": 1,\n      \"yearsOfExperience\": \"3\",\n      \"monthsOfExperience\": \"2\",\n      \"education\": \"MS from Stanford, BS from UC Berkeley\",\n      \"portfolioWebsite\": \"https://bob.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/bob\",\n      \"githubProfile\": \"https://github.com/bob\",\n      \"numApplicationsAccepted\": 3,\n      \"feedbackScore\": 4.0,\n      \"overallScore\": 3.2,\n      \"registeredAt\": \"2024-01-02T10:00:00\"\n    }\n  ]\n}"
             },
             {
               "code": 401,
@@ -897,7 +1117,7 @@
             {
               "code": 200,
               "name": "Retrieved job postings successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  },\n  {\n    \"id\": 3,\n    \"title\": \"Product Manager\",\n    \"description\": \"Manage product development\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 3,\n    \"designation\": \"Product Manager\",\n    \"salary\": 150000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 0,\n    \"active\": true,\n    \"createdAt\": \"2024-01-03T10:00:00\",\n    \"updatedAt\": \"2024-01-03T10:00:00\",\n    \"tags\": [\"product\", \"management\"],\n    \"isSuperAdminPosted\": true,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/3\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 1\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  },\n  {\n    \"id\": 3,\n    \"title\": \"Product Manager\",\n    \"description\": \"Manage product development\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 3,\n    \"designation\": \"Product Manager\",\n    \"minSalary\": 150000,\n    \"maxSalary\": 150000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 0,\n    \"active\": true,\n    \"createdAt\": \"2024-01-03T10:00:00\",\n    \"updatedAt\": \"2024-01-03T10:00:00\",\n    \"tags\": [\"product\", \"management\"],\n    \"isSuperAdminPosted\": true,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/3\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 1\n  }\n]"
             }
           ]
         },
@@ -924,7 +1144,7 @@
             {
               "code": 200,
               "name": "Retrieved job posting successfully",
-              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"salary\": 100000,\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2\n}"
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"Develop software applications\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n  \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\"java\", \"spring\"],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 1,\n  \"uniqueUrl\": \"https://example.com/job/1\",\n  \"platform\": \"LinkedIn\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2\n}"
             },
             {
               "code": 404,
@@ -970,7 +1190,7 @@
             {
               "code": 200,
               "name": "Search completed successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 3\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 3\n  }\n]"
             }
           ]
         },
@@ -981,8 +1201,16 @@
             "header": [],
             "url": {
               "raw": "{{baseUrl}}/api/v1/jobsearch/1/referrers",
-              "host": ["{{baseUrl}}"],
-              "path": ["api", "v1", "jobsearch", "1", "referrers"]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "1",
+                "referrers"
+              ]
             },
             "description": "Get all users accepting applications for a job, sorted by overall score."
           },
@@ -1036,7 +1264,7 @@
             {
               "code": 200,
               "name": "Search completed successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java and Spring\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java and Spring\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             }
           ]
         },
@@ -1117,7 +1345,7 @@
             {
               "code": 200,
               "name": "Retrieved job postings successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java and Spring\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java and Spring\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             }
           ]
         },
@@ -1167,7 +1395,7 @@
             {
               "code": 200,
               "name": "Retrieved job postings successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications using Java\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             }
           ]
         },
@@ -1195,7 +1423,7 @@
             {
               "code": 200,
               "name": "Retrieved jobs successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             },
             {
               "code": 404,
@@ -1235,7 +1463,7 @@
             {
               "code": 200,
               "name": "Search completed successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             },
             {
               "code": 404,
@@ -1274,7 +1502,7 @@
             {
               "code": 200,
               "name": "Search completed successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             }
           ]
         },
@@ -1313,7 +1541,7 @@
             {
               "code": 200,
               "name": "Search completed successfully",
-              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"salary\": 100000,\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
+              "body": "[\n  {\n    \"id\": 1,\n    \"title\": \"Software Engineer\",\n    \"description\": \"Develop software applications\",\n    \"cityId\": 1,\n    \"countryId\": 1,\n    \"designationId\": 1,\n    \"designation\": \"Software Engineer\",\n    \"minSalary\": 100000,\n    \"maxSalary\": 100000,\n    \"minExperience\": 2,\n    \"maxExperience\": 5,\n    \"jobType\": \"HYBRID\",\n    \"currencyId\": 1,\n    \"companyId\": 1,\n    \"company\": \"Tech Corp\",\n    \"postedBy\": 1,\n    \"active\": true,\n    \"createdAt\": \"2024-01-01T10:00:00\",\n    \"updatedAt\": \"2024-01-01T10:00:00\",\n    \"tags\": [\"java\", \"spring\"],\n    \"isSuperAdminPosted\": false,\n    \"openingCount\": 1,\n    \"uniqueUrl\": \"https://example.com/job/1\",\n    \"platform\": \"LinkedIn\",\n    \"approved\": 1,\n    \"approvalStatus\": \"APPROVED\",\n    \"referrerCount\": 2\n  }\n]"
             }
           ]
         }
@@ -1539,10 +1767,26 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/my-applications", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "my-applications" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/my-applications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"jobId\": 123,\n  \"coverLetter\": \"I would like a referral for this job.\",\n  \"jobReferrerId\": 456\n}"
@@ -1550,12 +1794,36 @@
             "description": "Apply for a referral for a job via a selected referrer. The applicant is determined by the authenticated user. The resume URL is automatically fetched from the user's profile."
           },
           "response": [
-            { "code": 200, "name": "Application submitted successfully", "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 789,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 456,\n  \"referrerSudoIdentity\": {\n    \"designation\": \"Senior Engineer\",\n    \"company\": \"Acme Corp\"\n  }\n}" },
-            { "code": 400, "name": "Invalid input or already applied", "body": "{\n  \"error\": \"Invalid input or already applied\"\n}" },
-            { "code": 400, "name": "Resume URL not found in profile", "body": "{\n  \"error\": \"Resume URL is required in your profile before applying for jobs\"\n}" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" },
-            { "code": 403, "name": "Forbidden - Cannot apply to your own job posting", "body": "{\n  \"error\": \"Forbidden\"\n}" },
-            { "code": 404, "name": "Job not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Application submitted successfully",
+              "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 789,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 456,\n  \"referrerSudoIdentity\": {\n    \"designation\": \"Senior Engineer\",\n    \"company\": \"Acme Corp\"\n  }\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or already applied",
+              "body": "{\n  \"error\": \"Invalid input or already applied\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Resume URL not found in profile",
+              "body": "{\n  \"error\": \"Resume URL is required in your profile before applying for jobs\"\n}"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            },
+            {
+              "code": 403,
+              "name": "Forbidden - Cannot apply to your own job posting",
+              "body": "{\n  \"error\": \"Forbidden\"\n}"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         },
         {
@@ -1563,22 +1831,46 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/my-applications/switch-referrer?applicationId=1&newJobReferrerId=789",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "v1", "my-applications", "switch-referrer" ],
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "switch-referrer"
+              ],
               "query": [
-                { "key": "applicationId", "value": "1" },
-                { "key": "newJobReferrerId", "value": "789" }
+                {
+                  "key": "applicationId",
+                  "value": "1"
+                },
+                {
+                  "key": "newJobReferrerId",
+                  "value": "789"
+                }
               ]
             },
             "description": "Switch the referrer for an existing application if not yet accepted."
           },
           "response": [
-            { "code": 200, "name": "Referrer switched successfully", "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 789,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 789\n}" },
-            { "code": 400, "name": "Invalid input or not allowed", "body": "{\n  \"error\": \"Invalid input or not allowed\"\n}" }
+            {
+              "code": 200,
+              "name": "Referrer switched successfully",
+              "body": "{\n  \"id\": 1,\n  \"jobId\": 123,\n  \"jobTitle\": \"Software Engineer\",\n  \"applicantId\": 789,\n  \"applicantName\": \"John Doe\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-06-01T12:00:00Z\",\n  \"jobReferrerId\": 789\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or not allowed",
+              "body": "{\n  \"error\": \"Invalid input or not allowed\"\n}"
+            }
           ]
         },
         {
@@ -1586,18 +1878,35 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/my-applications",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "v1", "my-applications" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
             },
             "description": "Get all job applications submitted by the authenticated user."
           },
           "response": [
-            { "code": 200, "name": "Applications retrieved successfully", "body": "[\n  {\n    \"id\": 1,\n    \"jobId\": 123,\n    \"jobTitle\": \"Software Engineer\",\n    \"applicantId\": 456,\n    \"applicantName\": \"John Doe\",\n    \"status\": \"PENDING\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"jobReferrerId\": 789,\n    \"referrerSudoIdentity\": {\n      \"designation\": \"Senior Engineer\",\n      \"company\": \"Tech Corp\"\n    }\n  }\n]" },
-            { "code": 401, "name": "Unauthorized", "body": "{\n  \"error\": \"Unauthorized\"\n}" }
+            {
+              "code": 200,
+              "name": "Applications retrieved successfully",
+              "body": "[\n  {\n    \"id\": 1,\n    \"jobId\": 123,\n    \"jobTitle\": \"Software Engineer\",\n    \"applicantId\": 456,\n    \"applicantName\": \"John Doe\",\n    \"status\": \"PENDING\",\n    \"createdAt\": \"2024-06-01T12:00:00Z\",\n    \"jobReferrerId\": 789,\n    \"referrerSudoIdentity\": {\n      \"designation\": \"Senior Engineer\",\n      \"company\": \"Tech Corp\"\n    }\n  }\n]"
+            },
+            {
+              "code": 401,
+              "name": "Unauthorized",
+              "body": "{\n  \"error\": \"Unauthorized\"\n}"
+            }
           ]
         },
         {
@@ -1605,10 +1914,27 @@
           "request": {
             "method": "POST",
             "header": [
-              { "key": "Content-Type", "value": "application/json" },
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
-            "url": { "raw": "{{baseUrl}}/api/v1/my-applications/feedback", "host": [ "{{baseUrl}}" ], "path": [ "api", "v1", "my-applications", "feedback" ] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/my-applications/feedback",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "feedback"
+              ]
+            },
             "body": {
               "mode": "raw",
               "raw": "{\n  \"jobReferrerId\": 456,\n  \"rating\": 5,\n  \"feedback\": \"Great communication and helpful throughout the process.\"\n}"
@@ -1616,8 +1942,16 @@
             "description": "Submit feedback for a referrer after applying for a job."
           },
           "response": [
-            { "code": 200, "name": "Feedback submitted successfully", "body": "{\n  \"message\": \"Feedback submitted successfully\"\n}" },
-            { "code": 400, "name": "Invalid input or not allowed", "body": "{\n  \"error\": \"Invalid input or not allowed\"\n}" }
+            {
+              "code": 200,
+              "name": "Feedback submitted successfully",
+              "body": "{\n  \"message\": \"Feedback submitted successfully\"\n}"
+            },
+            {
+              "code": 400,
+              "name": "Invalid input or not allowed",
+              "body": "{\n  \"error\": \"Invalid input or not allowed\"\n}"
+            }
           ]
         },
         {
@@ -1625,18 +1959,37 @@
           "request": {
             "method": "GET",
             "header": [
-              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+              {
+                "key": "Authorization",
+                "value": "Bearer {{authToken}}"
+              }
             ],
             "url": {
               "raw": "{{baseUrl}}/api/v1/my-applications/referrers/123",
-              "host": [ "{{baseUrl}}" ],
-              "path": [ "api", "v1", "my-applications", "referrers", "123" ]
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "referrers",
+                "123"
+              ]
             },
             "description": "List all referrers for a job with sudo identity and stats."
           },
           "response": [
-            { "code": 200, "name": "Referrers listed successfully", "body": "[\n  {\"userId\": 456,\n    \"userName\": \"Someone at Company\",\n    \"designation\": \"Senior Engineer\",\n    \"numApplicationsAccepted\": 12,\n    \"feedbackScore\": 4.8,\n    \"overallScore\": 8.2\n  },\n  {\"userId\": 789,\n    \"userName\": \"Someone at Company\",\n    \"designation\": \"Manager\",\n    \"numApplicationsAccepted\": 20,\n    \"feedbackScore\": 4.9,\n    \"overallScore\": 9.1\n  }\n]" },
-            { "code": 404, "name": "Job not found", "body": "{\n  \"error\": \"Not found\"\n}" }
+            {
+              "code": 200,
+              "name": "Referrers listed successfully",
+              "body": "[\n  {\"userId\": 456,\n    \"userName\": \"Someone at Company\",\n    \"designation\": \"Senior Engineer\",\n    \"numApplicationsAccepted\": 12,\n    \"feedbackScore\": 4.8,\n    \"overallScore\": 8.2\n  },\n  {\"userId\": 789,\n    \"userName\": \"Someone at Company\",\n    \"designation\": \"Manager\",\n    \"numApplicationsAccepted\": 20,\n    \"feedbackScore\": 4.9,\n    \"overallScore\": 9.1\n  }\n]"
+            },
+            {
+              "code": 404,
+              "name": "Job not found",
+              "body": "{\n  \"error\": \"Not found\"\n}"
+            }
           ]
         }
       ]
@@ -2461,7 +2814,7 @@
               "code": 401,
               "name": "Unauthorized",
               "body": "{\n  \"error\": \"Invalid or missing JWT token\"\n}"
-          },
+            },
             {
               "code": 403,
               "name": "Forbidden",

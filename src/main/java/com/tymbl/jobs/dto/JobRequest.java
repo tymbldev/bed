@@ -1,5 +1,6 @@
 package com.tymbl.jobs.dto;
 
+import com.tymbl.common.entity.Job.JobType;
 import lombok.Data;
 
 import javax.validation.constraints.NotBlank;
@@ -27,8 +28,17 @@ public class JobRequest {
 
     private String designation;
 
-    @NotNull(message = "Salary is required")
-    private BigDecimal salary;
+    @NotNull(message = "Minimum salary is required")
+    private BigDecimal minSalary;
+
+    @NotNull(message = "Maximum salary is required")
+    private BigDecimal maxSalary;
+
+    private Integer minExperience;
+
+    private Integer maxExperience;
+
+    private JobType jobType;
 
     @NotNull(message = "Currency ID is required")
     private Long currencyId;

@@ -15,6 +15,23 @@ import java.util.Set;
 @Data
 @Table(name = "jobs")
 public class Job {
+    
+    public enum JobType {
+        REMOTE_ONLY("Remote Only"),
+        WFO("Work From Office"),
+        HYBRID("Hybrid");
+        
+        private final String displayName;
+        
+        JobType(String displayName) {
+            this.displayName = displayName;
+        }
+        
+        public String getDisplayName() {
+            return displayName;
+        }
+    }
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -37,8 +54,21 @@ public class Job {
     @Column(name = "designation")
     private String designation;
 
-    @Column(nullable = false)
-    private BigDecimal salary;
+    @Column(name = "min_salary", nullable = false)
+    private BigDecimal minSalary;
+
+    @Column(name = "max_salary", nullable = false)
+    private BigDecimal maxSalary;
+
+    @Column(name = "min_experience")
+    private Integer minExperience;
+
+    @Column(name = "max_experience")
+    private Integer maxExperience;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "job_type")
+    private JobType jobType;
 
     @Column(name = "currency_id", nullable = false)
     private Long currencyId;

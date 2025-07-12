@@ -11,6 +11,9 @@ import com.tymbl.jobs.entity.JobApplication;
 import com.tymbl.common.util.UserEnrichmentUtil;
 import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
+import com.tymbl.common.repository.JobReferrerRepository;
+import com.tymbl.common.service.NotificationService;
+import com.tymbl.common.entity.JobReferrer;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,8 +33,10 @@ public class JobApplicationService {
     private final JobApplicationRepository jobApplicationRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final JobReferrerRepository jobReferrerRepository;
     private final CompanyService companyService;
     private final UserEnrichmentUtil userEnrichmentUtil;
+    private final NotificationService notificationService;
 
     /**
      * Helper method to enrich user data with all names (company, designation, department, country, city)
@@ -82,6 +87,18 @@ public class JobApplicationService {
         application.setStatus(JobApplication.ApplicationStatus.PENDING);
 
         application = jobApplicationRepository.save(application);
+        
+        // Create notification for the referrer
+        try {
+            JobReferrer jobReferrer = jobReferrerRepository.findById(request.getJobReferrerId())
+                .orElse(null);
+            if (jobReferrer != null) {
+                notificationService.createReferralApplicationNotification(jobReferrer, application);
+            }
+        } catch (Exception e) {
+            logger.error("Error creating referral application notification", e);
+        }
+        
         return mapToBasicResponse(application);
     }
 
@@ -191,7 +208,11 @@ public class JobApplicationService {
         details.setJobCountryId(job.getCountryId());
         details.setJobDesignationId(job.getDesignationId());
         details.setJobDesignation(job.getDesignation());
-        details.setJobSalary(job.getSalary());
+        details.setJobMinSalary(job.getMinSalary());
+        details.setJobMaxSalary(job.getMaxSalary());
+        details.setJobMinExperience(job.getMinExperience());
+        details.setJobMaxExperience(job.getMaxExperience());
+        details.setJobJobType(job.getJobType());
         details.setJobCurrencyId(job.getCurrencyId());
         details.setJobCompanyId(job.getCompanyId());
         details.setJobCompany(job.getCompany());
@@ -340,6 +361,56 @@ public class JobApplicationService {
         // Update the application status
         application.setStatus(jobApplicationStatus);
         application = jobApplicationRepository.save(application);
+        
+        // Create notification for the applicant
+        try {
+            notificationService.createApplicationStatusNotification(application, status.toString());
+        } catch (Exception e) {
+            logger.error("Error creating application status notification", e);
+        }
+        
+        return mapToBasicResponse(application);
+    }
+    
+    /**
+     * Update application status and create notification
+     */
+    @Transactional
+    public JobApplicationResponse updateApplicationStatus(Long applicationId, ApplicationStatus status, User user) {
+        JobApplication application = jobApplicationRepository.findById(applicationId)
+            .orElseThrow(() -> new RuntimeException("Application not found"));
+        
+        // Verify that the user is the job poster or referrer
+        Job job = jobRepository.findById(application.getJobId())
+            .orElseThrow(() -> new RuntimeException("Job not found"));
+        
+        if (!job.getPostedById().equals(user.getId()) && !application.getJobReferrerId().equals(user.getId())) {
+            throw new RuntimeException("You are not authorized to update this application status");
+        }
+        
+        // Convert ApplicationStatus to JobApplication.ApplicationStatus
+        JobApplication.ApplicationStatus jobApplicationStatus;
+        switch (status) {
+            case SHORTLISTED:
+                jobApplicationStatus = JobApplication.ApplicationStatus.SHORTLISTED;
+                break;
+            case REJECTED:
+                jobApplicationStatus = JobApplication.ApplicationStatus.REJECTED;
+                break;
+            default:
+                throw new RuntimeException("Invalid status. Only SHORTLISTED or REJECTED allowed");
+        }
+        
+        // Update the application status
+        application.setStatus(jobApplicationStatus);
+        application = jobApplicationRepository.save(application);
+        
+        // Create notification for the applicant
+        try {
+            notificationService.createApplicationStatusNotification(application, status.toString());
+        } catch (Exception e) {
+            logger.error("Error creating application status notification", e);
+        }
         
         return mapToBasicResponse(application);
     }

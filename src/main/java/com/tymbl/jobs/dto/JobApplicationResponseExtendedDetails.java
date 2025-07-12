@@ -1,5 +1,6 @@
 package com.tymbl.jobs.dto;
 
+import com.tymbl.common.entity.Job.JobType;
 import com.tymbl.jobs.entity.ApplicationStatus;
 import lombok.Data;
 
@@ -18,7 +19,11 @@ public class JobApplicationResponseExtendedDetails {
     private Long jobCountryId;
     private Long jobDesignationId;
     private String jobDesignation;
-    private BigDecimal jobSalary;
+    private BigDecimal jobMinSalary;
+    private BigDecimal jobMaxSalary;
+    private Integer jobMinExperience;
+    private Integer jobMaxExperience;
+    private JobType jobJobType;
     private Long jobCurrencyId;
     private Long jobCompanyId;
     private String jobCompany;

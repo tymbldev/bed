@@ -108,7 +108,11 @@ public class CompanyService {
         jobResponse.setCountryId(job.getCountryId());
         jobResponse.setDesignationId(job.getDesignationId());
         jobResponse.setDesignation(job.getDesignation());
-        jobResponse.setSalary(job.getSalary());
+        jobResponse.setMinSalary(job.getMinSalary());
+        jobResponse.setMaxSalary(job.getMaxSalary());
+        jobResponse.setMinExperience(job.getMinExperience());
+        jobResponse.setMaxExperience(job.getMaxExperience());
+        jobResponse.setJobType(job.getJobType());
         jobResponse.setCurrencyId(job.getCurrencyId());
         jobResponse.setCompanyId(job.getCompanyId());
         jobResponse.setCompany(job.getCompany());

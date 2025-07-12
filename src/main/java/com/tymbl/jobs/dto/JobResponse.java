@@ -1,6 +1,7 @@
 package com.tymbl.jobs.dto;
 
 import com.tymbl.common.entity.JobApprovalStatus;
+import com.tymbl.common.entity.Job.JobType;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -17,7 +18,11 @@ public class JobResponse {
     private Long countryId;
     private Long designationId;
     private String designation;
-    private BigDecimal salary;
+    private BigDecimal minSalary;
+    private BigDecimal maxSalary;
+    private Integer minExperience;
+    private Integer maxExperience;
+    private JobType jobType;
     private Long currencyId;
     private Long companyId;
     private String company;

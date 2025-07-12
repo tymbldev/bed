@@ -7,6 +7,7 @@ import com.tymbl.common.entity.Currency;
 import com.tymbl.common.enums.Degree;
 import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.CurrencyService;
+import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,6 +55,7 @@ public class DropdownController {
 
     private final DropdownService dropdownService;
     private final CurrencyService currencyService;
+    private final GeminiService geminiService;
     private final CompanyService companyService;
 
     // Department endpoints
@@ -460,5 +462,129 @@ public class DropdownController {
             })
             .collect(Collectors.toList());
         return ResponseEntity.ok(companyMaps);
+    }
+
+    // AI-generated designations endpoint
+    @GetMapping("/designations/generate/{departmentId}")
+    @Operation(summary = "Generate designations for department using AI", description = "Uses Gemini AI to generate relevant designations for a specific department")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Designations generated successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"department\": \"Engineering\",\n" +
+                          "  \"designations\": [\n" +
+                          "    \"Software Engineer\",\n" +
+                          "    \"Senior Software Engineer\",\n" +
+                          "    \"Technical Lead\",\n" +
+                          "    \"Engineering Manager\",\n" +
+                          "    \"Principal Engineer\",\n" +
+                          "    \"Staff Engineer\",\n" +
+                          "    \"DevOps Engineer\",\n" +
+                          "    \"QA Engineer\",\n" +
+                          "    \"Frontend Engineer\",\n" +
+                          "    \"Backend Engineer\",\n" +
+                          "    \"Full Stack Engineer\",\n" +
+                          "    \"Mobile Engineer\",\n" +
+                          "    \"Data Engineer\",\n" +
+                          "    \"Machine Learning Engineer\",\n" +
+                          "    \"Site Reliability Engineer\"\n" +
+                          "  ]\n" +
+                          "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Department not found"),
+        @ApiResponse(responseCode = "500", description = "AI service error")
+    })
+    public ResponseEntity<Map<String, Object>> generateDesignationsForDepartment(@PathVariable Long departmentId) {
+        try {
+            Department department = dropdownService.getDepartmentById(departmentId);
+            List<String> designations = geminiService.generateDesignationsForDepartment(department.getName());
+            
+            Map<String, Object> response = new HashMap<>();
+            response.put("department", department.getName());
+            response.put("designations", designations);
+            
+            return ResponseEntity.ok(response);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @GetMapping("/designations/generate-all")
+    @Operation(summary = "Generate designations for all departments using AI", description = "Uses Gemini AI to generate relevant designations for all departments")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Designations generated successfully for all departments",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"department\": \"Engineering\",\n" +
+                          "    \"designations\": [\n" +
+                          "      \"Software Engineer\",\n" +
+                          "      \"Senior Software Engineer\",\n" +
+                          "      \"Technical Lead\"\n" +
+                          "    ]\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"department\": \"Product Management\",\n" +
+                          "    \"designations\": [\n" +
+                          "      \"Product Manager\",\n" +
+                          "      \"Senior Product Manager\",\n" +
+                          "      \"Product Director\"\n" +
+                          "    ]\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"department\": \"Human Resources\",\n" +
+                          "    \"designations\": [\n" +
+                          "      \"HR Manager\",\n" +
+                          "      \"Recruiter\",\n" +
+                          "      \"HR Director\"\n" +
+                          "    ]\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "AI service error")
+    })
+    public ResponseEntity<List<Map<String, Object>>> generateDesignationsForAllDepartments() {
+        try {
+            List<Department> departments = dropdownService.getAllDepartments();
+            List<Map<String, Object>> results = new java.util.ArrayList<>();
+            
+            for (Department department : departments) {
+                try {
+                    List<String> designations = geminiService.generateDesignationsForDepartment(department.getName());
+                    
+                    Map<String, Object> departmentResult = new HashMap<>();
+                    departmentResult.put("department", department.getName());
+                    departmentResult.put("designations", designations);
+                    
+                    results.add(departmentResult);
+                    
+                    // Add a small delay to avoid rate limiting
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    // Log error but continue with other departments
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("department", department.getName());
+                    errorResult.put("designations", Collections.emptyList());
+                    errorResult.put("error", "Failed to generate designations for this department");
+                    results.add(errorResult);
+                }
+            }
+            
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
     }
 } 

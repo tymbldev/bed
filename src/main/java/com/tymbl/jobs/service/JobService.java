@@ -97,7 +97,11 @@ public class JobService {
         job.setCountryId(request.getCountryId());
         job.setDesignationId(request.getDesignationId());
         job.setDesignation(request.getDesignation());
-        job.setSalary(request.getSalary());
+        job.setMinSalary(request.getMinSalary());
+        job.setMaxSalary(request.getMaxSalary());
+        job.setMinExperience(request.getMinExperience());
+        job.setMaxExperience(request.getMaxExperience());
+        job.setJobType(request.getJobType());
         job.setCurrencyId(request.getCurrencyId());
         job.setCompanyId(request.getCompanyId());
         job.setCompany(request.getCompany());
@@ -313,7 +317,11 @@ public class JobService {
         job.setDescription(request.getDescription());
         job.setCityId(request.getCityId());
         job.setCountryId(request.getCountryId());
-        job.setSalary(request.getSalary());
+        job.setMinSalary(request.getMinSalary());
+        job.setMaxSalary(request.getMaxSalary());
+        job.setMinExperience(request.getMinExperience());
+        job.setMaxExperience(request.getMaxExperience());
+        job.setJobType(request.getJobType());
         job.setCurrencyId(request.getCurrencyId());
         job.setOpeningCount(request.getOpeningCount() != null ? request.getOpeningCount() : job.getOpeningCount());
         
@@ -512,7 +520,11 @@ public class JobService {
         response.setCountryId(job.getCountryId());
         response.setDesignationId(job.getDesignationId());
         response.setDesignation(job.getDesignation());
-        response.setSalary(job.getSalary());
+        response.setMinSalary(job.getMinSalary());
+        response.setMaxSalary(job.getMaxSalary());
+        response.setMinExperience(job.getMinExperience());
+        response.setMaxExperience(job.getMaxExperience());
+        response.setJobType(job.getJobType());
         response.setCurrencyId(job.getCurrencyId());
         response.setCompanyId(job.getCompanyId());
         response.setCompany(job.getCompany());
@@ -571,7 +583,11 @@ public class JobService {
         response.setCountryId(job.getCountryId());
         response.setDesignationId(job.getDesignationId());
         response.setDesignation(job.getDesignation());
-        response.setSalary(job.getSalary());
+        response.setMinSalary(job.getMinSalary());
+        response.setMaxSalary(job.getMaxSalary());
+        response.setMinExperience(job.getMinExperience());
+        response.setMaxExperience(job.getMaxExperience());
+        response.setJobType(job.getJobType());
         response.setCurrencyId(job.getCurrencyId());
         response.setCompanyId(job.getCompanyId());
         response.setCompany(job.getCompany());

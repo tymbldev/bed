@@ -1,44 +1,40 @@
 package com.tymbl.interview.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
+import com.tymbl.interview.entity.InterviewTopic;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 
-import java.util.List;
+import java.time.LocalDateTime;
 
 @Data
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Schema(description = "Interview topic information for a specific company-designation-skill combination")
+@Builder
 public class InterviewTopicDTO {
     
-    @Schema(description = "Topic ID")
     private Long id;
+    private String designation;
+    private String topicName;
+    private String topicDescription;
+    private InterviewTopic.DifficultyLevel difficultyLevel;
+    private String category;
+    private Integer estimatedPrepTimeHours;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     
-    @Schema(description = "Topic title")
-    private String title;
-    
-    @Schema(description = "Topic description")
-    private String description;
-    
-    @Schema(description = "Topic content in HTML format")
-    private String content;
-    
-    @Schema(description = "Difficulty level")
-    private String difficultyLevel;
-    
-    @Schema(description = "Company name")
-    private String companyName;
-    
-    @Schema(description = "Designation title")
-    private String designationTitle;
-    
-    @Schema(description = "Skill name")
-    private String skillName;
-    
-    @Schema(description = "List of interview questions related to this topic")
-    private List<InterviewQuestionDTO> questions;
+    public static InterviewTopicDTO fromEntity(InterviewTopic entity) {
+        return InterviewTopicDTO.builder()
+                .id(entity.getId())
+                .designation(entity.getDesignation())
+                .topicName(entity.getTopicName())
+                .topicDescription(entity.getTopicDescription())
+                .difficultyLevel(entity.getDifficultyLevel())
+                .category(entity.getCategory())
+                .estimatedPrepTimeHours(entity.getEstimatedPrepTimeHours())
+                .createdAt(entity.getCreatedAt())
+                .updatedAt(entity.getUpdatedAt())
+                .build();
+    }
 } 
