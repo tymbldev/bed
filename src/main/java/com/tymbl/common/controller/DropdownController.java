@@ -2,6 +2,7 @@ package com.tymbl.common.controller;
 
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
+import com.tymbl.common.entity.Industry;
 import com.tymbl.common.entity.Location;
 import com.tymbl.common.entity.Currency;
 import com.tymbl.common.enums.Degree;
@@ -10,6 +11,7 @@ import com.tymbl.common.service.CurrencyService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyService;
+import com.tymbl.common.dto.IndustryStatisticsDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -50,7 +52,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 )
 @RequestMapping("/api/v1/dropdowns")
 @RequiredArgsConstructor
-@Tag(name = "Dropdowns", description = "APIs for managing dropdown data like departments, locations, designations, currencies, and companies")
+@Tag(name = "Dropdowns", description = "APIs for managing dropdown data like departments, locations, designations, industries, currencies, and companies")
 public class DropdownController {
 
     private final DropdownService dropdownService;
@@ -230,6 +232,102 @@ public class DropdownController {
     })
     public ResponseEntity<Designation> createDesignation(@Valid @RequestBody Designation designation) {
         return ResponseEntity.ok(dropdownService.createDesignation(designation));
+    }
+
+    // Industry endpoints
+    @GetMapping("/industries")
+    @Operation(summary = "Get all industries", description = "Returns a list of all industries for dropdown selection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of industries retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = Industry.class),
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"id\": 1,\n" +
+                          "    \"name\": \"Information Technology & Services\",\n" +
+                          "    \"description\": \"Technology and IT services industry\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"id\": 2,\n" +
+                          "    \"name\": \"Software Development\",\n" +
+                          "    \"description\": \"Software development and programming\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"id\": 3,\n" +
+                          "    \"name\": \"Financial Services\",\n" +
+                          "    \"description\": \"Banking, insurance, and financial services\"\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<Industry>> getAllIndustries() {
+        return ResponseEntity.ok(dropdownService.getAllIndustries());
+    }
+
+    @PostMapping("/industries")
+    @Operation(summary = "Create a new industry", description = "Creates a new industry for dropdown selection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Industry created successfully",
+            content = @Content(
+                schema = @Schema(implementation = Industry.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"name\": \"Information Technology & Services\",\n" +
+                          "  \"description\": \"Technology and IT services industry\"\n" +
+                          "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Invalid input")
+    })
+    public ResponseEntity<Industry> createIndustry(@Valid @RequestBody Industry industry) {
+        return ResponseEntity.ok(dropdownService.createIndustry(industry));
+    }
+
+    @GetMapping("/industries-map")
+    @Operation(summary = "Get all industries as a map", description = "Returns industries as a map of value/label pairs for dropdown selection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200", 
+            description = "Industries map retrieved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"value\": \"1\",\n" +
+                          "    \"label\": \"Information Technology & Services\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"value\": \"2\",\n" +
+                          "    \"label\": \"Software Development\"\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"value\": \"3\",\n" +
+                          "    \"label\": \"Financial Services\"\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<Map<String, String>>> getIndustriesAsMap() {
+        List<Map<String, String>> industryMaps = dropdownService.getAllIndustries().stream()
+            .map(industry -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("value", industry.getId().toString());
+                map.put("label", industry.getName());
+                return map;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(industryMaps);
     }
 
     @GetMapping("/designations-map")
@@ -502,7 +600,10 @@ public class DropdownController {
     public ResponseEntity<Map<String, Object>> generateDesignationsForDepartment(@PathVariable Long departmentId) {
         try {
             Department department = dropdownService.getDepartmentById(departmentId);
-            List<String> designations = geminiService.generateDesignationsForDepartment(department.getName());
+            List<String> designations = geminiService.generateDesignationsForDepartment(department.getName())
+                .stream()
+                .map(m -> (String) m.get("name"))
+                .collect(Collectors.toList());
             
             Map<String, Object> response = new HashMap<>();
             response.put("department", department.getName());
@@ -562,7 +663,10 @@ public class DropdownController {
             
             for (Department department : departments) {
                 try {
-                    List<String> designations = geminiService.generateDesignationsForDepartment(department.getName());
+                    List<String> designations = geminiService.generateDesignationsForDepartment(department.getName())
+                        .stream()
+                        .map(m -> (String) m.get("name"))
+                        .collect(Collectors.toList());
                     
                     Map<String, Object> departmentResult = new HashMap<>();
                     departmentResult.put("department", department.getName());
@@ -586,5 +690,64 @@ public class DropdownController {
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
+    }
+
+    @GetMapping("/industries/statistics")
+    @Operation(summary = "Get industry statistics with company counts and top companies", description = "Returns all industries with company counts and top 5 companies in each industry based on active job count")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Industry statistics retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = IndustryStatisticsDTO.class),
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"industryId\": 1,\n" +
+                          "    \"industryName\": \"Information Technology & Services\",\n" +
+                          "    \"industryDescription\": \"Technology and IT services industry\",\n" +
+                          "    \"companyCount\": 25,\n" +
+                          "    \"topCompanies\": [\n" +
+                          "      {\n" +
+                          "        \"companyId\": 1,\n" +
+                          "        \"companyName\": \"Google\",\n" +
+                          "        \"logoUrl\": \"https://example.com/google-logo.png\",\n" +
+                          "        \"website\": \"https://google.com\",\n" +
+                          "        \"headquarters\": \"Mountain View, CA\",\n" +
+                          "        \"activeJobCount\": 15\n" +
+                          "      },\n" +
+                          "      {\n" +
+                          "        \"companyId\": 2,\n" +
+                          "        \"companyName\": \"Microsoft\",\n" +
+                          "        \"logoUrl\": \"https://example.com/microsoft-logo.png\",\n" +
+                          "        \"website\": \"https://microsoft.com\",\n" +
+                          "        \"headquarters\": \"Redmond, WA\",\n" +
+                          "        \"activeJobCount\": 12\n" +
+                          "      }\n" +
+                          "    ]\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"industryId\": 2,\n" +
+                          "    \"industryName\": \"Financial Services\",\n" +
+                          "    \"industryDescription\": \"Banking, insurance, and financial services\",\n" +
+                          "    \"companyCount\": 15,\n" +
+                          "    \"topCompanies\": [\n" +
+                          "      {\n" +
+                          "        \"companyId\": 3,\n" +
+                          "        \"companyName\": \"Goldman Sachs\",\n" +
+                          "        \"logoUrl\": \"https://example.com/goldman-logo.png\",\n" +
+                          "        \"website\": \"https://goldmansachs.com\",\n" +
+                          "        \"headquarters\": \"New York, NY\",\n" +
+                          "        \"activeJobCount\": 8\n" +
+                          "      }\n" +
+                          "    ]\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<IndustryStatisticsDTO>> getIndustryStatistics() {
+        return ResponseEntity.ok(dropdownService.getIndustryStatistics());
     }
 } 

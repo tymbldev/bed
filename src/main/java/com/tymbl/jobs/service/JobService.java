@@ -37,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageImpl;
 import java.util.ArrayList;
+import com.tymbl.jobs.dto.JobSearchRequest;
+import com.tymbl.jobs.dto.JobSearchResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +54,7 @@ public class JobService {
     private final UserRepository userRepository;
     private final CompanyService companyService;
     private final UserEnrichmentUtil userEnrichmentUtil;
+    private final ElasticsearchJobService elasticsearchJobService;
 
     @Value("${referrer.sort.weight.designation:0.3}")
     private double designationWeight;
@@ -128,6 +131,15 @@ public class JobService {
         ref.setJob(job);
         ref.setUser(postedBy);
         jobReferrerRepository.save(ref);
+        
+        // Sync to Elasticsearch (non-blocking)
+        try {
+            elasticsearchJobService.syncJobToElasticsearch(job);
+        } catch (Exception e) {
+            logger.error("Failed to sync job {} to Elasticsearch: {}", job.getId(), e.getMessage());
+            // Don't fail the main transaction
+        }
+        
         return mapToResponse(job);
     }
 
@@ -222,8 +234,28 @@ public class JobService {
 
     @Transactional(readOnly = true)
     public Page<JobResponse> searchJobs(String keyword, Pageable pageable) {
-        return jobRepository.searchApprovedJobs(keyword, pageable)
+        return jobRepository.searchJobs(keyword, pageable)
             .map(this::mapToResponse);
+    }
+
+    /**
+     * Search jobs using Elasticsearch
+     */
+    public JobSearchResponse searchJobsWithElasticsearch(JobSearchRequest request, User currentUser) {
+        Long userDesignationId = null;
+        if (currentUser != null && currentUser.getDesignationId() != null) {
+            userDesignationId = currentUser.getDesignationId();
+        }
+        
+        return elasticsearchJobService.searchJobs(request, userDesignationId);
+    }
+
+    /**
+     * Reindex all jobs to Elasticsearch
+     */
+    public void reindexAllJobsToElasticsearch() {
+        List<Job> allJobs = jobRepository.findAll();
+        elasticsearchJobService.reindexAllJobs(allJobs);
     }
 
     @Transactional(readOnly = true)
@@ -335,6 +367,15 @@ public class JobService {
         }
 
         job = jobRepository.save(job);
+        
+        // Sync to Elasticsearch (non-blocking)
+        try {
+            elasticsearchJobService.syncJobToElasticsearch(job);
+        } catch (Exception e) {
+            logger.error("Failed to sync job {} to Elasticsearch: {}", job.getId(), e.getMessage());
+            // Don't fail the main transaction
+        }
+        
         return mapToResponse(job);
     }
 

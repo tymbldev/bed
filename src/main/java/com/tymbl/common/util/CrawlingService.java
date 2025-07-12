@@ -102,7 +102,6 @@ public class CrawlingService {
         summary.append("Description: ").append(company.getDescription()).append("\n");
         summary.append("Website: ").append(company.getWebsite()).append("\n");
         summary.append("Career Page URL: ").append(company.getCareerPageUrl()).append("\n");
-        summary.append("Industry: ").append(company.getIndustry()).append("\n");
         summary.append("Headquarters: ").append(company.getHeadquarters()).append("\n");
         summary.append("Company Size: ").append(company.getCompanySize()).append("\n");
         summary.append("Specialties: ").append(company.getSpecialties()).append("\n");

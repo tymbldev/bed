@@ -1,5 +1,6 @@
 package com.tymbl.jobs.controller;
 
+import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyCrawlerService;
 import com.tymbl.jobs.service.CompanyService;
@@ -7,9 +8,11 @@ import com.tymbl.jobs.dto.CompanyResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -164,5 +167,44 @@ public class CompanyCrawlerController {
             response.put("status", "ERROR");
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    @PostMapping("/detect-industries")
+    @Operation(summary = "Detect industries for all companies", description = "Detects primary and secondary industries for all companies using AI or manual detection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Industry detection completed successfully",
+            content = @Content(
+                schema = @Schema(implementation = CompanyIndustryResponse.class),
+                examples = @ExampleObject(
+                    value = "[\n" +
+                        "  {\n" +
+                        "    \"companyId\": 1,\n" +
+                        "    \"companyName\": \"Yatra\",\n" +
+                        "    \"primaryIndustry\": \"Travel & Hospitality Technology\",\n" +
+                        "    \"primaryIndustryId\": 15,\n" +
+                        "    \"secondaryIndustries\": [\"OTA\", \"Travel Tech\", \"Product Based Company\"],\n" +
+                        "    \"processed\": true,\n" +
+                        "    \"error\": null\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    \"companyId\": 2,\n" +
+                        "    \"companyName\": \"Google\",\n" +
+                        "    \"primaryIndustry\": \"Information Technology & Services\",\n" +
+                        "    \"primaryIndustryId\": 1,\n" +
+                        "    \"secondaryIndustries\": [\"Cloud Computing\", \"AI/ML\", \"Product Based Company\"],\n" +
+                        "    \"processed\": true,\n" +
+                        "    \"error\": null\n" +
+                        "  }\n" +
+                        "]"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<CompanyIndustryResponse>> detectIndustriesForCompanies(
+        @RequestParam(defaultValue = "false") boolean useGemini) {
+        return ResponseEntity.ok(companyService.detectIndustriesForCompanies(useGemini));
     }
 } 

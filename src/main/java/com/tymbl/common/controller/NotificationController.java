@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(origins = "*", allowedHeaders = "*")
@@ -216,7 +217,7 @@ public class NotificationController {
             
             List<NotificationDTO> notifications = notificationService.getUnreadNotifications(userId).stream()
                 .filter(n -> n.getType() == notificationType)
-                .toList();
+                .collect(Collectors.toList());
             
             return ResponseEntity.ok(notifications);
         } catch (IllegalArgumentException e) {

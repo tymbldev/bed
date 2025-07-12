@@ -4,12 +4,15 @@ import com.tymbl.common.entity.City;
 import com.tymbl.common.entity.Country;
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
+import com.tymbl.common.entity.Industry;
 import com.tymbl.common.entity.Location;
 import com.tymbl.common.repository.CityRepository;
 import com.tymbl.common.repository.CountryRepository;
 import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.common.repository.DesignationRepository;
+import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.repository.LocationRepository;
+import com.tymbl.common.dto.IndustryStatisticsDTO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -27,12 +31,14 @@ public class DropdownService {
     private final DesignationRepository designationRepository;
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
+    private final IndustryRepository industryRepository;
     
     // Cache maps for better performance
     private final Map<Long, String> designationCache = new HashMap<>();
     private final Map<Long, String> departmentCache = new HashMap<>();
     private final Map<Long, String> countryCache = new HashMap<>();
     private final Map<Long, String> cityCache = new HashMap<>();
+    private final Map<Long, String> industryCache = new HashMap<>();
 
     // Department methods
     @Transactional(readOnly = true)
@@ -116,6 +122,42 @@ public class DropdownService {
                 .orElseThrow(() -> new RuntimeException("City not found with ID: " + id));
     }
     
+    // Industry methods
+    @Transactional(readOnly = true)
+    public List<Industry> getAllIndustries() {
+        return industryRepository.findAll();
+    }
+
+    @Transactional
+    public Industry createIndustry(Industry industry) {
+        if (industryRepository.existsByName(industry.getName())) {
+            throw new RuntimeException("Industry with name '" + industry.getName() + "' already exists");
+        }
+        return industryRepository.save(industry);
+    }
+
+    @Transactional(readOnly = true)
+    public Industry getIndustryById(Long id) {
+        return industryRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Industry not found with ID: " + id));
+    }
+    
+    @Transactional(readOnly = true)
+    public Industry getIndustryByName(String name) {
+        return industryRepository.findByName(name)
+                .orElse(null);
+    }
+    
+    @Transactional(readOnly = true)
+    public Long getIndustryIdByName(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            return null;
+        }
+        
+        Industry industry = getIndustryByName(name);
+        return industry != null ? industry.getId() : null;
+    }
+    
     // Cached methods for enrichment
     @Transactional(readOnly = true)
     public String getDesignationNameById(Long id) {
@@ -173,11 +215,61 @@ public class DropdownService {
         });
     }
     
+    @Transactional(readOnly = true)
+    public String getIndustryNameById(Long id) {
+        if (id == null) return null;
+        
+        return industryCache.computeIfAbsent(id, industryId -> {
+            try {
+                Industry industry = industryRepository.findById(industryId).orElse(null);
+                return industry != null ? industry.getName() : null;
+            } catch (Exception e) {
+                return null;
+            }
+        });
+    }
+    
     // Method to clear cache (useful for testing or when data changes)
     public void clearCache() {
         designationCache.clear();
         departmentCache.clear();
         countryCache.clear();
         cityCache.clear();
+        industryCache.clear();
+    }
+    
+    // Industry statistics method
+    @Transactional(readOnly = true)
+    public List<IndustryStatisticsDTO> getIndustryStatistics() {
+        List<Object[]> industryStats = industryRepository.getIndustryStatistics();
+        
+        return industryStats.stream().map(stat -> {
+            Long industryId = (Long) stat[0];
+            String industryName = (String) stat[1];
+            String industryDescription = (String) stat[2];
+            Long companyCount = (Long) stat[3];
+            
+            // Get top companies for this industry
+            List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
+            List<IndustryStatisticsDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
+                .map(companyData -> IndustryStatisticsDTO.TopCompanyDTO.builder()
+                    .companyId((Long) companyData[0])
+                    .companyName((String) companyData[1])
+                    .logoUrl((String) companyData[2])
+                    .website((String) companyData[3])
+                    .headquarters((String) companyData[4])
+                    .activeJobCount((Long) companyData[5])
+                    .build())
+                .limit(5) // Limit to top 5 companies
+                .collect(Collectors.toList());
+            
+            return IndustryStatisticsDTO.builder()
+                .industryId(industryId)
+                .industryName(industryName)
+                .industryDescription(industryDescription)
+                .companyCount(companyCount)
+                .topCompanies(topCompanies)
+                .build();
+        }).collect(Collectors.toList());
     }
 } 

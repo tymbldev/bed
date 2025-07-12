@@ -1,0 +1,397 @@
+| IT Services and IT Consulting                                                                                                                                      |
+| Software as a Service (SaaS), Cloud Computing, Business Applications                                                                                               |
+| Software, Customer Relationship Management (CRM), Customer Experience (CX)                                                                                         |
+| Information Technology and Services                                                                                                                                |
+| Financial Services                                                                                                                                                 |
+| Software Development, API Development Tools                                                                                                                        |
+| Software Development                                                                                                                                               |
+| Computers and Electronics Manufacturing                                                                                                                            |
+| Entertainment Providers                                                                                                                                            |
+| Motor Vehicle Manufacturing                                                                                                                                        |
+| Computer Hardware Manufacturing                                                                                                                                    |
+| Semiconductor Manufacturing                                                                                                                                        |
+| Advertising Services                                                                                                                                               |
+| Banking                                                                                                                                                            |
+| Technology, Information and Internet                                                                                                                               |
+| Professional Services                                                                                                                                              |
+| Business Consulting and Services                                                                                                                                   |
+| Manufacturing                                                                                                                                                      |
+| Executive Offices                                                                                                                                                  |
+| Information Technology Services and Consulting                                                                                                                     |
+| Financial Services, Housing Finance                                                                                                                                |
+| Non-Banking Financial Company (NBFC), Financial Services                                                                                                           |
+| Blended Finance, Impact Investing, Sustainable Development Finance                                                                                                 |
+| Financial Services, Non-Banking Financial Company (NBFC)                                                                                                           |
+| Financial Services, SME Lending                                                                                                                                    |
+| Fintech, Neobanking                                                                                                                                                |
+| Banking and Financial Services                                                                                                                                     |
+| Financial Services, Consumer Lending, NBFC (Non-Banking Financial Company)                                                                                         |
+| Engineering Services, Information Technology and Services                                                                                                          |
+| Computer Software; Cloud Computing; Database Management Systems; Enterprise Resource Planning (ERP); Customer Relationship Management (CRM); Business Intelligence |
+| Software, Cloud Computing, IT Service Management (ITSM), Digital Workflow Automation                                                                               |
+| Electronic Design Automation (EDA), Semiconductor IP, Software Security and Quality                                                                                |
+| [Insert Specific Industry Sector, e.g., Software Development, Cloud Computing, etc.]                                                                               |
+| Financial Services (Real Estate Development, Securities Brokerage, Asset Management, Lending)                                                                      |
+| Financial Services, Non-Banking Financial Company (NBFC), Gold Loans                                                                                               |
+| Financial Services, Non-Banking Financial Company (NBFC), Gold Loan                                                                                                |
+| Financial Services, Real Estate Finance, Housing Finance                                                                                                           |
+| Financial Services, Wealth Management, Investment Banking                                                                                                          |
+| Financial Services, FinTech, Non-Banking Financial Company (NBFC)                                                                                                  |
+| Fintech, Supply Chain Finance                                                                                                                                      |
+| Fintech, Financial Services, Alternative Lending                                                                                                                   |
+| Fintech, Agricultural Finance, NBFC                                                                                                                                |
+| Microfinance                                                                                                                                                       |
+| Engineering and Project Management                                                                                                                                 |
+| Financial Technology (FinTech), Debt Financing                                                                                                                     |
+| Financial Services, Business Lending, Commercial Finance                                                                                                           |
+| Financial Technology (FinTech), Online Lending                                                                                                                     |
+| Management Consulting, Data Analytics, Marketing Consulting                                                                                                        |
+| Financial Technology (FinTech), Lending, Financial Services                                                                                                        |
+| Venture Capital and Private Equity                                                                                                                                 |
+| Software as a Service (SaaS), Subscription Management Software                                                                                                     |
+| Software Testing, Cloud Computing, DevOps                                                                                                                          |
+| Human Resources Software                                                                                                                                           |
+| Software, Marketing Technology (MarTech), Customer Relationship Management (CRM)                                                                                   |
+| Financial Technology (Fintech), Software as a Service (SaaS), Sales Acceleration                                                                                   |
+| Software, SaaS, Digital Adoption Platforms                                                                                                                         |
+| Healthcare Information Technology (HealthTech)                                                                                                                     |
+| Sales Enablement Software                                                                                                                                          |
+| Ecommerce Software, AI-powered Search and Discovery                                                                                                                |
+| Customer Relationship Management (CRM) Software; Loyalty Programs; Marketing Technology; SaaS                                                                      |
+| Software as a Service (SaaS),  Digital Marketing, Website Optimization, A/B Testing                                                                                |
+| Learning Management Systems (LMS), Corporate Training, EdTech                                                                                                      |
+| Fintech, Merchant Services, Payment Processing                                                                                                                     |
+| E-commerce Platform, Software as a Service (SaaS)                                                                                                                  |
+| Building Management Systems (BMS), Internet of Things (IoT), Software as a Service (SaaS), Proptech                                                                |
+| Artificial Intelligence (AI) Software and Services                                                                                                                 |
+| Human Capital Management (HCM) Software                                                                                                                            |
+| Software, Data Management, Cloud Computing, Cyber Security                                                                                                         |
+| Cloud Data Protection and Management Software                                                                                                                      |
+| Software, Sales and Marketing Automation, SaaS                                                                                                                     |
+| Software, Artificial Intelligence, Contract Lifecycle Management (CLM)                                                                                             |
+| Travel Technology, Online Travel Agency (OTA)                                                                                                                      |
+| Software, Cloud Communications, SaaS                                                                                                                               |
+| Logistics Technology, Supply Chain Management Software                                                                                                             |
+| Software, Artificial Intelligence, Video Editing Software                                                                                                          |
+| Software, Virtual Events Technology                                                                                                                                |
+| Software, SaaS, Workplace Communication                                                                                                                            |
+| Software as a Service (SaaS), Knowledge Management Software                                                                                                        |
+| Logistics and Transportation; Last-Mile Delivery                                                                                                                   |
+| Software Development, Web Application Development, Mobile App Development, E-commerce Solutions, Digital Marketing                                                 |
+| Artificial Intelligence, Conversational AI, Speech Analytics, SaaS                                                                                                 |
+| Software, Internet, Digital Marketing, Small Business Solutions                                                                                                    |
+| Human Resources Technology                                                                                                                                         |
+| Artificial Intelligence (AI), Communication Technology, Software as a Service (SaaS)                                                                               |
+| Aerospace and Defense; Space Technology                                                                                                                            |
+| Energy Management Software and Services                                                                                                                            |
+| Climate Technology (ClimateTech)                                                                                                                                   |
+| Artificial Intelligence, Software Development, Data Analytics, Machine Learning                                                                                    |
+| Information Technology and Services; Software Development                                                                                                          |
+| Financial Technology (FinTech)                                                                                                                                     |
+| Artificial Intelligence, Workflow Automation, Software Solutions                                                                                                   |
+| Software, Open Source, Blogging Platforms                                                                                                                          |
+| Energy Storage, Battery Manufacturing, Renewable Energy                                                                                                            |
+| [Specific Environmental Sector, e.g., Environmental Consulting, Waste Management, Water Treatment]                                                                 |
+| Live Streaming, Social Media, Entertainment Technology                                                                                                             |
+| Medical Technology, Artificial Intelligence, Healthcare IT                                                                                                         |
+| Water Management and Treatment                                                                                                                                     |
+| Agricultural Technology (AgTech), Precision Agriculture, Remote Sensing, Artificial Intelligence                                                                   |
+| Artificial Intelligence (AI), Conversational Marketing, SaaS (Software as a Service)                                                                               |
+| Renewable Energy                                                                                                                                                   |
+| Sustainable Packaging, E-commerce Logistics                                                                                                                        |
+| Automotive Technology                                                                                                                                              |
+| Robotics and Automation                                                                                                                                            |
+| Unmanned Aerial Vehicle (UAV) Technology and Services                                                                                                              |
+| [Insert Specific Industry, e.g., Software Development, Information Technology, etc.]                                                                               |
+| Artificial Intelligence, Data Analytics, Software Solutions                                                                                                        |
+| Software as a Service (SaaS), Video Production Technology, Artificial Intelligence (AI)                                                                            |
+| Fintech, Online Lending                                                                                                                                            |
+| Logistics and Transportation                                                                                                                                       |
+| Ride-hailing, Transportation, Technology                                                                                                                           |
+| B2B E-commerce, Industrial Supplies, Supply Chain Management                                                                                                       |
+| E-commerce Logistics, Supply Chain Management                                                                                                                      |
+| Food and Beverage, Direct-to-Consumer (D2C), Meat and Seafood                                                                                                      |
+| Mobile Application Development, Software as a Service (SaaS), Mobile App Marketing, App Store Optimization (ASO)                                                   |
+| Educational Technology (EdTech)                                                                                                                                    |
+| Data Acquisition and Management                                                                                                                                    |
+| Renewable Energy, Biofuels, Clean Technology                                                                                                                       |
+| Talent Acquisition, Recruitment Process Outsourcing (RPO), Executive Search                                                                                        |
+| Renewable Energy, Battery Management Systems, Energy Storage                                                                                                       |
+| [Specific Industry, e.g., Automation Technology, Robotics, Software Development]                                                                                   |
+| Electric Vehicle Manufacturing                                                                                                                                     |
+| Software, Artificial Intelligence, Customer Relationship Management (CRM)                                                                                          |
+| E-commerce, Fashion Jewellery, Direct-to-Consumer (D2C)                                                                                                            |
+| Travel Technology                                                                                                                                                  |
+| Agritech, E-commerce, Supply Chain Management                                                                                                                      |
+| Ecommerce Technology, SaaS                                                                                                                                         |
+| Artificial Intelligence, Data Analytics, SaaS                                                                                                                      |
+| Human Resources, Talent Acquisition, AI-powered Assessment                                                                                                         |
+| Information Technology, Data Analytics, Process Automation                                                                                                         |
+| Marketing Technology, Data Analytics, Customer Relationship Management (CRM)                                                                                       |
+| Software, Digital Asset Management, SaaS                                                                                                                           |
+| [Insert specific industry sector]                                                                                                                                  |
+| Artificial Intelligence, Software Development, Data Analytics                                                                                                      |
+| Software, Digital Asset Management (DAM)                                                                                                                           |
+| Artificial Intelligence, Customer Service Software, SaaS                                                                                                           |
+| Aerospace and Defense, Technology, Telecommunications                                                                                                              |
+| Footwear and Apparel                                                                                                                                               |
+| Artificial Intelligence                                                                                                                                            |
+| Data Observability, Software as a Service (SaaS), Artificial Intelligence (AI)                                                                                     |
+| Cybersecurity                                                                                                                                                      |
+| Renewable Energy, Wind Turbine Maintenance and Repair                                                                                                              |
+| E-commerce, Craft Supplies, Online Community                                                                                                                       |
+| EdTech (Educational Technology)                                                                                                                                    |
+| Logistics and Supply Chain Management                                                                                                                              |
+| E-commerce, Beauty and Personal Care Retail                                                                                                                        |
+| B2B E-commerce, Wholesale Trade, Supply Chain Management                                                                                                           |
+| E-commerce, Fashion Retail                                                                                                                                         |
+| Hyperlocal Services, Beauty and Wellness, On-demand Services                                                                                                       |
+| Fantasy Sports, Online Gaming, Technology                                                                                                                          |
+| Financial Technology (Fintech), Insurance                                                                                                                          |
+| Fintech, Digital Payments                                                                                                                                          |
+| E-commerce, Healthcare, Telemedicine, Pharmacy                                                                                                                     |
+| E-commerce, Healthcare, Technology                                                                                                                                 |
+| E-commerce, Online Pharmacy, Healthcare                                                                                                                            |
+| Healthcare Services, Pharmacy Retail, Telehealth                                                                                                                   |
+| E-commerce, Healthcare, Pharmaceutical                                                                                                                             |
+| [Specific Healthcare Sector, e.g., Medical Device Manufacturing, Healthcare Technology, Telehealth]                                                                |
+| Telehealth, Online Healthcare, Healthcare Technology                                                                                                               |
+| Healthcare Technology, Telemedicine, Health Information Technology                                                                                                 |
+| Health and Fitness, Wellness Technology                                                                                                                            |
+| Healthcare Staffing                                                                                                                                                |
+| Telehealth, Digital Healthcare, Healthcare Technology                                                                                                              |
+| Health Tech, Telemedicine                                                                                                                                          |
+| Healthcare, Surgical Services                                                                                                                                      |
+| Music Technology, Software as a Service (SaaS), Artificial Intelligence (AI)                                                                                       |
+| Artificial Intelligence, Medical Imaging, Healthcare Technology                                                                                                    |
+| Telehealth, Healthcare Technology                                                                                                                                  |
+| Healthcare Services                                                                                                                                                |
+| Automotive Technology, Fleet Management, AI Software                                                                                                               |
+| Fintech, Credit Scoring, Lending                                                                                                                                   |
+| Transportation and Logistics; On-Demand Services                                                                                                                   |
+| Healthcare and Wellness Technology                                                                                                                                 |
+| Travel and Hospitality Technology                                                                                                                                  |
+| Mobile Application Development                                                                                                                                     |
+| Management Consulting, Business Strategy, Digital Marketing                                                                                                        |
+| Aerospace Manufacturing and Launch Services                                                                                                                        |
+| Aerospace, Earth Observation, Satellite Technology, Data Analytics                                                                                                 |
+| Cloud Computing, Communication Platforms as a Service (CPaaS), Mobile Messaging                                                                                    |
+| Insurance, Insurtech                                                                                                                                               |
+| Financial Services, Proprietary Trading                                                                                                                            |
+| Financial Services, Market Making, Proprietary Trading                                                                                                             |
+| Financial Services, Electronic Trading, Market Making, High-Frequency Trading                                                                                      |
+| Alternative Investment Management                                                                                                                                  |
+| Oil and Gas; Energy                                                                                                                                                |
+| Oil and Gas, Renewable Energy                                                                                                                                      |
+| Oil and Gas; Energy; Petrochemicals                                                                                                                                |
+| Financial Services, Market Infrastructure, Data and Analytics                                                                                                      |
+| Information Technology and Services; Engineering; Manufacturing                                                                                                    |
+| Information Technology and Services; Automotive; Energy; Manufacturing                                                                                             |
+| Software, Procurement Technology, Supply Chain Management                                                                                                          |
+| Information Technology and Services; Software; Digital Process Automation                                                                                          |
+| Staffing and Recruitment, HR Technology, IT Services                                                                                                               |
+| Software Development, Database Technology, API Management                                                                                                          |
+| Software, Customer Relationship Management (CRM), Marketing Automation                                                                                             |
+| Software as a Service (SaaS), A/B Testing, Website Personalization                                                                                                 |
+| Software, Contract Lifecycle Management (CLM), Artificial Intelligence (AI), Machine Learning (ML)                                                                 |
+| Information Technology and Services; Staffing and Recruiting                                                                                                       |
+| Information Technology and Services; Logistics and Supply Chain                                                                                                    |
+| Software, Open Source, Observability                                                                                                                               |
+| Software - Data Integration and Management                                                                                                                         |
+| Content Creation, Software as a Service (SaaS), Marketing Technology                                                                                               |
+| Software, Information Technology and Services, Artificial Intelligence                                                                                             |
+| Online Travel Agency (OTA)                                                                                                                                         |
+| Online Travel Agencies (OTAs)                                                                                                                                      |
+| Travel and Tourism, Financial Services                                                                                                                             |
+| Travel and Tourism                                                                                                                                                 |
+| Online Travel Agency (OTA), Travel Technology                                                                                                                      |
+| Travel Technology, Social Media, Online Travel Agency (OTA)                                                                                                        |
+| Online Travel Agency (OTA), Adventure Tourism, Experiential Travel                                                                                                 |
+| Travel & Tourism                                                                                                                                                   |
+| Travel Technology, AI-powered Travel Planning                                                                                                                      |
+| Software Development, Enterprise Software, Collaboration Software                                                                                                  |
+| Software, Communication, Collaboration Software, Cloud Computing, SaaS (Software as a Service)                                                                     |
+| Software, Video Conferencing, Telecommunications                                                                                                                   |
+| Hospitality, Travel, Online Marketplace                                                                                                                            |
+| Transportation, Technology, Logistics                                                                                                                              |
+| Transportation Network Company (TNC), Ridesharing                                                                                                                  |
+| On-demand food delivery, logistics, technology                                                                                                                     |
+| Database Software, Cloud Computing, Software as a Service (SaaS)                                                                                                   |
+| Database Software, Cloud Computing, Big Data                                                                                                                       |
+| Software, Search and Analytics                                                                                                                                     |
+| Cloud Computing, Big Data Analytics, Machine Learning                                                                                                              |
+| Cloud Computing, Data Warehousing, Big Data Analytics                                                                                                              |
+| Data Analytics, Software, Big Data, Artificial Intelligence                                                                                                        |
+| Software, Data Analytics, Cybersecurity, IT Operations Management                                                                                                  |
+| Software, Cloud Computing, IT Services, Digital Workflow Automation                                                                                                |
+| Enterprise Resource Planning (ERP) Software, Human Capital Management (HCM) Software, Cloud Computing                                                              |
+| Software, Marketing Automation, Customer Relationship Management (CRM), Sales Automation                                                                           |
+| Marketing Automation Software                                                                                                                                      |
+| Software as a Service (SaaS), Graphic Design, Visual Communication                                                                                                 |
+| Software Development, SaaS, Design Software                                                                                                                        |
+| Software, Productivity Software, SaaS (Software as a Service)                                                                                                      |
+| Software, Cloud Computing, Low-code/No-code Platform                                                                                                               |
+| Software as a Service (SaaS), Project Management Software                                                                                                          |
+| Software, Project Management Software, Work Management Software, SaaS                                                                                              |
+| Software, Project Management, Collaboration Software                                                                                                               |
+| Software, SaaS (Software as a Service), Collaborative Workspaces, Online Whiteboarding                                                                             |
+| Software, Video Conferencing, Communication Software                                                                                                               |
+| Software as a Service (SaaS), Scheduling Software                                                                                                                  |
+| Conglomerate (Energy, Petrochemicals, Telecommunications, Retail, etc.)                                                                                            |
+| Automotive Manufacturing                                                                                                                                           |
+| Automotive Manufacturing, Motorcycles and Scooters                                                                                                                 |
+| Automotive Manufacturing (Motorcycles, Three-Wheelers)                                                                                                             |
+| Automotive Manufacturing (Two-Wheelers)                                                                                                                            |
+| Automotive Manufacturing - Commercial Vehicles                                                                                                                     |
+| Engineering, Construction, Manufacturing, Technology, Financial Services                                                                                           |
+| Power Generation and Transmission Equipment Manufacturing                                                                                                          |
+| Conglomerate (Consumer Goods, Real Estate, Agriculture, and others)                                                                                                |
+| Conglomerate, FMCG, Hotels, Paper & Packaging, Agri-business, IT Services                                                                                          |
+| Fast-Moving Consumer Goods (FMCG)                                                                                                                                  |
+| Food and Beverage Manufacturing                                                                                                                                    |
+| E-commerce, Online Retail                                                                                                                                          |
+| Financial Technology (FinTech), Digital Payments                                                                                                                   |
+| Hospitality and Travel                                                                                                                                             |
+| Online Education, EdTech                                                                                                                                           |
+| Online Education, EdTech, Corporate Training                                                                                                                       |
+| Online Education                                                                                                                                                   |
+| Education Technology (EdTech), Non-profit                                                                                                                          |
+| Educational Technology (EdTech), Language Learning                                                                                                                 |
+| Software, Artificial Intelligence, Education Technology (EdTech)                                                                                                   |
+| Software, Cloud Computing, Unified Communications                                                                                                                  |
+| Software, Communication Platforms, Social Networking                                                                                                               |
+| Internet Media and Broadcasting, Live Streaming Platform, Video Game Streaming                                                                                     |
+| Social Media, News Aggregation, Online Community Platform                                                                                                          |
+| Infrastructure Development, Energy, Hospitality                                                                                                                    |
+| Infrastructure Development, Road Construction, Highway Development                                                                                                 |
+| Insurance and Reinsurance                                                                                                                                          |
+| Information Technology and Services; Education; Online Education                                                                                                   |
+| Information Technology and Services; Human Resources                                                                                                               |
+| Software and Technology, specifically Educational Technology and Competitive Programming Platforms                                                                 |
+| Software as a Service (SaaS), EdTech, Online Education                                                                                                             |
+| Human Resources, Technology, Software                                                                                                                              |
+| Information Technology and Services; Software Development; Crowdsourcing; Freelance Platform                                                                       |
+| Technology, Data Science, Machine Learning, Artificial Intelligence                                                                                                |
+| Online Education, Data Science, Artificial Intelligence                                                                                                            |
+| Online Education, Data Science, Software as a Service (SaaS)                                                                                                       |
+| Online Education, Data Science Education                                                                                                                           |
+| Business Intelligence (BI) Software                                                                                                                                |
+| Business Intelligence Software, Data Analytics                                                                                                                     |
+| Business intelligence software, data visualization, analytics                                                                                                      |
+| Software, SaaS, Monitoring and Observability                                                                                                                       |
+| Software, Cloud Computing, Observability                                                                                                                           |
+| Financial Services, Development Finance, Agriculture Finance                                                                                                       |
+| Government agency, Export Finance                                                                                                                                  |
+| Life Insurance                                                                                                                                                     |
+| Professional Services (Accounting, Consulting, Tax)                                                                                                                |
+| Professional Services (Accounting, Auditing, Tax, Advisory)                                                                                                        |
+| Management Consulting                                                                                                                                              |
+| Management Consulting; Strategy Consulting; Economic Consulting                                                                                                    |
+| Information Technology and Services; Data Analytics; Artificial Intelligence; Machine Learning; Consulting                                                         |
+| Industrial Automation, Robotics                                                                                                                                    |
+| Industrial Automation, Robotics, Connectors, Textile Machinery                                                                                                     |
+| Manufacturing (Precision Components and Systems, Machine Tools, Robotics)                                                                                          |
+| Electrical Equipment Manufacturing, Electronics Manufacturing, Industrial Automation, HVAC, Transportation Systems                                                 |
+| Industrial Automation, Sensing and Control Technologies, Healthcare Equipment                                                                                      |
+| Industrial Automation, Measurement Instruments, Machine Vision                                                                                                     |
+| Industrial Automation, Pneumatic Components and Systems Manufacturing                                                                                              |
+| Automation Technology, Industrial Automation, Mechatronics                                                                                                         |
+| Industrial Automation, Aerospace, Fluid Power, Filtration                                                                                                          |
+| Power Management, Electrical Equipment, Hydraulics, Automotive Components, Aerospace                                                                               |
+| Industrial Automation, HVAC, Renewable Energy, Refrigeration and Food Retail, Power Electronics                                                                    |
+| Pump Manufacturing and Water Technology                                                                                                                            |
+| Industrial Machinery Manufacturing, Fluid Management Systems                                                                                                       |
+| Industrial Machinery Manufacturing, specifically pumps and valves                                                                                                  |
+| Fluid Engineering, Industrial Machinery Manufacturing, Process Technology                                                                                          |
+| Electrical Equipment Manufacturing, Industrial Automation, Renewable Energy                                                                                        |
+| Electrical Equipment Manufacturing                                                                                                                                 |
+| Manufacturing & Engineering                                                                                                                                        |
+| Lighting, Electrical Equipment, and Components                                                                                                                     |
+| Lighting Manufacturing and Solutions                                                                                                                               |
+| Consumer Durables and Electrical Equipment Manufacturing                                                                                                           |
+| Consumer Durables, Electrical Equipment Manufacturing                                                                                                              |
+| Electrical Equipment Manufacturing, Consumer Durables                                                                                                              |
+| Electrical and Communication Cable Manufacturing                                                                                                                   |
+| Infrastructure Engineering, Procurement, and Construction (EPC)                                                                                                    |
+| Power Transmission and Distribution, EPC (Engineering, Procurement, Construction)                                                                                  |
+| Automotive, Farm Equipment, Financial Services, Logistics                                                                                                          |
+| Automotive Manufacturing and Sales                                                                                                                                 |
+| Automotive (Import, Sales, and Service)                                                                                                                            |
+| Automotive Manufacturing and Retail                                                                                                                                |
+| Automotive Manufacturing and Sales; Luxury Automobiles                                                                                                             |
+| Luxury Automotive                                                                                                                                                  |
+| Automotive                                                                                                                                                         |
+| Automotive Manufacturing; Motorcycles and Scooters                                                                                                                 |
+| Automotive Manufacturing; Motorcycle and Scooter Manufacturing                                                                                                     |
+| Motorcycle Manufacturing                                                                                                                                           |
+| Motorcycle Manufacturing and Distribution                                                                                                                          |
+| Motorcycle Manufacturing and Retail                                                                                                                                |
+| Luxury Motorcycle Manufacturing and Sales                                                                                                                          |
+| Luxury Motorcycle Manufacturing and Retail                                                                                                                         |
+| Automotive, Motorcycle Manufacturing and Distribution                                                                                                              |
+| Automotive; Motorcycles and Scooters                                                                                                                               |
+| Motorcycle Manufacturing and Sales (Premium Segment)                                                                                                               |
+| Automotive; Two-Wheeler Manufacturing; Premium Scooters                                                                                                            |
+| Automotive Manufacturing, Two-Wheeler Manufacturing, Commercial Vehicle Manufacturing                                                                              |
+| Electric Vehicle Manufacturing, Automotive                                                                                                                         |
+| Automotive Manufacturing; Motorcycles                                                                                                                              |
+| Automotive Manufacturing, Electric Vehicles                                                                                                                        |
+| Financial Technology (FinTech), Software                                                                                                                           |
+| Enterprise Software, Human Capital Management (HCM), Aviation Software, Manufacturing ERP                                                                          |
+| Information Technology and Services; Digital Transformation; Cloud Computing; Cybersecurity; Data Analytics                                                        |
+| Business Process Management (BPM), Information Technology (IT) Services, Customer Experience Management                                                            |
+| Management Consulting, Technology Consulting, Data Analytics                                                                                                       |
+| Information Technology and Services; Management Consulting                                                                                                         |
+| Information Technology and Services; Telecommunications                                                                                                            |
+| Information Technology and Services; Software Development; Digital Transformation Consulting                                                                       |
+| Information Technology and Services; Business Process Outsourcing (BPO); Knowledge Process Outsourcing (KPO)                                                       |
+| Information Technology and Services; Digital Transformation; Consulting; Cloud Computing; Data Analytics; Cybersecurity; AI                                        |
+| Decision Sciences, Analytics, Consulting                                                                                                                           |
+| Healthcare Information Technology (Health IT)                                                                                                                      |
+| Engineering and Consulting Services                                                                                                                                |
+| Information Technology and Services; Telecommunications Software                                                                                                   |
+| Information Technology and Services; Digital Engineering; Product Development                                                                                      |
+| Online Education, Technology Training                                                                                                                              |
+| Software, Business Process Automation, Robotic Process Automation (RPA)                                                                                            |
+| Information Technology (IT) Services and Consulting                                                                                                                |
+| Telecommunications, Information Technology, Cloud Computing                                                                                                        |
+| Supply Chain Management Software                                                                                                                                   |
+| Telecommunications                                                                                                                                                 |
+| Information Technology, Telecommunications, Business Communication Solutions                                                                                       |
+| Business Process Outsourcing (BPO), Customer Experience (CX) Management, Information Technology (IT) Services                                                      |
+| Scientific Research, Technology, Networking                                                                                                                        |
+| Information Technology and Services; Software; Network Security                                                                                                    |
+| Research and Development, [Mention Specific Sub-Industry, e.g.,  Artificial Intelligence, Biotechnology]                                                           |
+| Digital Marketing                                                                                                                                                  |
+| Software as a Service (SaaS), Beauty and Wellness Technology                                                                                                       |
+| Biotechnology, Artificial Intelligence, Precision Medicine                                                                                                         |
+| Oil & Gas                                                                                                                                                          |
+| Technology                                                                                                                                                         |
+| Retail                                                                                                                                                             |
+| AI/Conversational AI                                                                                                                                               |
+| Adtech                                                                                                                                                             |
+| Mobile Technology, AI, Lock Screen Experiences, Advertising Technology                                                                                             |
+| Artificial Intelligence, Customer Relationship Management (CRM), Software as a Service (SaaS)                                                                      |
+| Artificial Intelligence, Software, Customer Service                                                                                                                |
+| [Specific Industry Sector]                                                                                                                                         |
+| Artificial Intelligence, Customer Relationship Management (CRM), Data Analytics                                                                                    |
+| Healthcare Technology, Artificial Intelligence, SaaS                                                                                                               |
+| E-commerce, Healthcare, Online Pharmacy, Telemedicine                                                                                                              |
+| Software, Navigation and Location-Based Services (LBS)                                                                                                             |
+| Financial Technology (FinTech), Payment Processing                                                                                                                 |
+| Fintech, Open Banking                                                                                                                                              |
+| Financial Technology (Fintech), Tax Software, Tax Preparation                                                                                                      |
+| Fintech, Insurtech                                                                                                                                                 |
+| Insurance; Employee Benefits; Financial Services                                                                                                                   |
+| Fintech, Insurance                                                                                                                                                 |
+| FinTech, Investment Management                                                                                                                                     |
+| Financial Technology (FinTech), Investment Management, Wealth Management                                                                                           |
+| Financial Planning and Wealth Management                                                                                                                           |
+| Financial Technology (FinTech), Wealth Management                                                                                                                  |
+| Financial Technology (FinTech), Peer-to-Peer Lending                                                                                                               |
+| Healthcare Technology                                                                                                                                              |
+| Fintech, Financial Services                                                                                                                                        |
+| Financial Technology (FinTech), Data Analytics                                                                                                                     |
+| Fintech                                                                                                                                                            |
+| AI/ML                                                                                                                                                              |
+| Logistics/Tech

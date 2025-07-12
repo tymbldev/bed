@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Data
@@ -38,8 +39,11 @@ public class Company {
     @Column(name = "headquarters")
     private String headquarters;
 
-    @Column(name = "industry")
-    private String industry;
+    @Column(name = "primary_industry_id")
+    private Long primaryIndustryId;
+
+    @Column(name = "secondary_industries", columnDefinition = "TEXT")
+    private String secondaryIndustries; // Comma-separated list of industry names
 
     @Column(name = "company_size")
     private String companySize;

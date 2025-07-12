@@ -148,7 +148,6 @@ public class CompanyDataService {
             String website = fields[3];
             String logoUrl = fields[4];
             String headquarters = fields[5];
-            String industry = fields[6];
             String companySize = fields[7];
             String specialties = fields[8];
             String linkedinUrl = fields[9];
@@ -161,7 +160,7 @@ public class CompanyDataService {
                 // Update existing company by name
                 Company company = existingCompanyByName.get();
                 updateCompanyBasicFields(company, name, description, website, logoUrl, headquarters, 
-                                       industry, companySize, specialties, linkedinUrl, careersUrl);
+                                       companySize, specialties, linkedinUrl, careersUrl);
                 companyRepository.save(company);
                 return "Updated existing company by name: " + name;
             } else {
@@ -172,7 +171,7 @@ public class CompanyDataService {
                     // Update existing company by ID
                     Company company = existingCompanyById.get();
                     updateCompanyBasicFields(company, name, description, website, logoUrl, headquarters, 
-                                           industry, companySize, specialties, linkedinUrl, careersUrl);
+                                           companySize, specialties, linkedinUrl, careersUrl);
                     companyRepository.save(company);
                     return "Updated company by ID: " + name;
                 } else {
@@ -184,7 +183,6 @@ public class CompanyDataService {
                     company.setWebsite(website);
                     company.setLogoUrl(logoUrl);
                     company.setHeadquarters(headquarters);
-                    company.setIndustry(industry);
                     company.setCompanySize(companySize);
                     company.setSpecialties(specialties);
                     company.setLinkedinUrl(linkedinUrl);
@@ -258,7 +256,7 @@ public class CompanyDataService {
     }
 
     private void updateCompanyBasicFields(Company company, String name, String description, String website, 
-                                        String logoUrl, String headquarters, String industry, String companySize, 
+                                        String logoUrl, String headquarters, String companySize, 
                                         String specialties, String linkedinUrl, String careersUrl) {
         
         // Update only if current field is null or empty
@@ -280,10 +278,6 @@ public class CompanyDataService {
         
         if (company.getHeadquarters() == null || company.getHeadquarters().trim().isEmpty()) {
             company.setHeadquarters(headquarters);
-        }
-        
-        if (company.getIndustry() == null || company.getIndustry().trim().isEmpty()) {
-            company.setIndustry(industry);
         }
         
         if (company.getCompanySize() == null || company.getCompanySize().trim().isEmpty()) {

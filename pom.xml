@@ -179,6 +179,32 @@
             <artifactId>jsoup</artifactId>
             <version>1.15.4</version>
         </dependency>
+        
+        <!-- Elasticsearch -->
+        <dependency>
+            <groupId>org.elasticsearch.client</groupId>
+            <artifactId>elasticsearch-rest-high-level-client</artifactId>
+            <version>7.17.9</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch</artifactId>
+            <version>7.17.9</version>
+        </dependency>
+        
+        <dependency>
+            <groupId>org.elasticsearch</groupId>
+            <artifactId>elasticsearch-x-content</artifactId>
+            <version>7.17.9</version>
+        </dependency>
+        
+        <!-- Apache HTTP Client for Elasticsearch -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.14</version>
+        </dependency>
     </dependencies>
     
     <build>

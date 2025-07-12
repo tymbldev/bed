@@ -144,9 +144,6 @@ public class CompanyCrawlerService {
         if (generated.getHeadquarters() != null && !generated.getHeadquarters().trim().isEmpty()) {
             existing.setHeadquarters(generated.getHeadquarters());
         }
-        if (generated.getIndustry() != null && !generated.getIndustry().trim().isEmpty()) {
-            existing.setIndustry(generated.getIndustry());
-        }
         if (generated.getSpecialties() != null && !generated.getSpecialties().trim().isEmpty()) {
             existing.setSpecialties(generated.getSpecialties());
         }
