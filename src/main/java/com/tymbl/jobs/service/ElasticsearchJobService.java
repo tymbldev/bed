@@ -77,6 +77,8 @@ public class ElasticsearchJobService {
                 BoolQueryBuilder keywordQuery = QueryBuilders.boolQuery();
                 for (String keyword : request.getKeywords()) {
                     keywordQuery.should(QueryBuilders.matchQuery("searchableText", keyword));
+                    keywordQuery.should(QueryBuilders.matchQuery("companyName", keyword));
+                    keywordQuery.should(QueryBuilders.matchQuery("designationName", keyword));
                 }
                 boolQuery.must(keywordQuery);
             }
@@ -89,6 +91,16 @@ public class ElasticsearchJobService {
             // Country filter
             if (request.getCountryId() != null) {
                 boolQuery.filter(QueryBuilders.termQuery("countryId", request.getCountryId()));
+            }
+            
+            // Company filter
+            if (request.getCompanyId() != null) {
+                boolQuery.filter(QueryBuilders.termQuery("companyId", request.getCompanyId()));
+            }
+            
+            // Designation filter
+            if (request.getDesignationId() != null) {
+                boolQuery.filter(QueryBuilders.termQuery("designationId", request.getDesignationId()));
             }
             
             // Experience range filter
@@ -185,7 +197,6 @@ public class ElasticsearchJobService {
         document.put("cityId", job.getCityId());
         document.put("countryId", job.getCountryId());
         document.put("designationId", job.getDesignationId());
-        document.put("designation", job.getDesignation());
         document.put("minSalary", job.getMinSalary());
         document.put("maxSalary", job.getMaxSalary());
         document.put("minExperience", job.getMinExperience());
@@ -193,7 +204,6 @@ public class ElasticsearchJobService {
         document.put("jobType", job.getJobType() != null ? job.getJobType().name() : null);
         document.put("currencyId", job.getCurrencyId());
         document.put("companyId", job.getCompanyId());
-        document.put("company", job.getCompany());
         document.put("postedById", job.getPostedById());
         document.put("active", job.isActive());
         document.put("createdAt", job.getCreatedAt());
@@ -203,12 +213,25 @@ public class ElasticsearchJobService {
         document.put("uniqueUrl", job.getUniqueUrl());
         document.put("platform", job.getPlatform());
         
+        // Fetch and add company and designation names
+        String companyName = null;
+        if (job.getCompanyId() != null) {
+            companyName = dropdownService.getCompanyNameById(job.getCompanyId());
+        }
+        document.put("companyName", companyName);
+        
+        String designationName = null;
+        if (job.getDesignationId() != null) {
+            designationName = dropdownService.getDesignationNameById(job.getDesignationId());
+        }
+        document.put("designationName", designationName);
+        
         // Build searchableText (all text fields except description)
         StringBuilder searchableText = new StringBuilder();
         
         if (job.getTitle() != null) searchableText.append(job.getTitle()).append(" ");
-        if (job.getDesignation() != null) searchableText.append(job.getDesignation()).append(" ");
-        if (job.getCompany() != null) searchableText.append(job.getCompany()).append(" ");
+        if (designationName != null) searchableText.append(designationName).append(" ");
+        if (companyName != null) searchableText.append(companyName).append(" ");
         if (job.getTags() != null) searchableText.append(String.join(" ", job.getTags())).append(" ");
         if (job.getPlatform() != null) searchableText.append(job.getPlatform()).append(" ");
         if (job.getJobType() != null) searchableText.append(job.getJobType().name()).append(" ");

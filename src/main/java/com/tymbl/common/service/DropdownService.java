@@ -1,5 +1,6 @@
 package com.tymbl.common.service;
 
+import com.tymbl.common.dto.IndustryWiseCompaniesDTO;
 import com.tymbl.common.entity.City;
 import com.tymbl.common.entity.Country;
 import com.tymbl.common.entity.Department;
@@ -12,34 +13,43 @@ import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.repository.LocationRepository;
-import com.tymbl.common.dto.IndustryStatisticsDTO;
+import com.tymbl.jobs.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class DropdownService {
-
     private final DepartmentRepository departmentRepository;
     private final LocationRepository locationRepository;
     private final DesignationRepository designationRepository;
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
     private final IndustryRepository industryRepository;
+    private final CompanyRepository companyRepository;
     
-    // Cache maps for better performance
+    @PersistenceContext
+    private EntityManager entityManager;
+    
+    // Caches for performance
     private final Map<Long, String> designationCache = new HashMap<>();
     private final Map<Long, String> departmentCache = new HashMap<>();
     private final Map<Long, String> countryCache = new HashMap<>();
     private final Map<Long, String> cityCache = new HashMap<>();
     private final Map<Long, String> industryCache = new HashMap<>();
-
+    private final Map<Long, String> companyCache = new HashMap<>();
+    
     // Department methods
     @Transactional(readOnly = true)
     public List<Department> getAllDepartments() {
@@ -59,16 +69,18 @@ public class DropdownService {
         return departmentRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Department not found with ID: " + id));
     }
-
+    
     // Location methods
     @Transactional(readOnly = true)
     public List<Location> getAllLocations() {
-        List<Location> locations =  locationRepository.findAll();
-        return locations;
+        return locationRepository.findAll();
     }
 
     @Transactional
     public Location createLocation(Location location) {
+        if (locationRepository.existsByDisplayName(location.getDisplayName())) {
+            throw new RuntimeException("Location with display name '" + location.getDisplayName() + "' already exists");
+        }
         return locationRepository.save(location);
     }
 
@@ -229,6 +241,20 @@ public class DropdownService {
         });
     }
     
+    @Transactional(readOnly = true)
+    public String getCompanyNameById(Long id) {
+        if (id == null) return null;
+        
+        return companyCache.computeIfAbsent(id, companyId -> {
+            try {
+                com.tymbl.jobs.entity.Company company = companyRepository.findById(companyId).orElse(null);
+                return company != null ? company.getName() : null;
+            } catch (Exception e) {
+                return null;
+            }
+        });
+    }
+    
     // Method to clear cache (useful for testing or when data changes)
     public void clearCache() {
         designationCache.clear();
@@ -236,11 +262,12 @@ public class DropdownService {
         countryCache.clear();
         cityCache.clear();
         industryCache.clear();
+        companyCache.clear();
     }
     
     // Industry statistics method
     @Transactional(readOnly = true)
-    public List<IndustryStatisticsDTO> getIndustryStatistics() {
+    public List<IndustryWiseCompaniesDTO> getIndustryStatistics() {
         List<Object[]> industryStats = industryRepository.getIndustryStatistics();
         
         return industryStats.stream().map(stat -> {
@@ -251,8 +278,8 @@ public class DropdownService {
             
             // Get top companies for this industry
             List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
-            List<IndustryStatisticsDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
-                .map(companyData -> IndustryStatisticsDTO.TopCompanyDTO.builder()
+            List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
+                .map(companyData -> IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
                     .companyId((Long) companyData[0])
                     .companyName((String) companyData[1])
                     .logoUrl((String) companyData[2])
@@ -263,7 +290,7 @@ public class DropdownService {
                 .limit(5) // Limit to top 5 companies
                 .collect(Collectors.toList());
             
-            return IndustryStatisticsDTO.builder()
+            return IndustryWiseCompaniesDTO.builder()
                 .industryId(industryId)
                 .industryName(industryName)
                 .industryDescription(industryDescription)
@@ -271,5 +298,49 @@ public class DropdownService {
                 .topCompanies(topCompanies)
                 .build();
         }).collect(Collectors.toList());
+    }
+
+    /**
+     * Autosuggest for company names, designation names, and tags
+     */
+    @Transactional(readOnly = true)
+    public List<Map<String, String>> autosuggest(String query) {
+        if (query == null || query.trim().length() < 3) return Collections.emptyList();
+        String q = query.trim().toLowerCase();
+        List<Map<String, String>> result = new java.util.ArrayList<>();
+
+        // Companies
+        companyRepository.findAll().stream()
+            .filter(c -> c.getName() != null && c.getName().toLowerCase().contains(q))
+            .forEach(c -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("keyword", c.getName());
+                map.put("type", "company");
+                result.add(map);
+            });
+
+        // Designations
+        designationRepository.findAll().stream()
+            .filter(d -> d.getName() != null && d.getName().toLowerCase().contains(q))
+            .forEach(d -> {
+                Map<String, String> map = new HashMap<>();
+                map.put("keyword", d.getName());
+                map.put("type", "designation");
+                result.add(map);
+            });
+
+        // Tags (from all jobs, distinct)
+        List<String> tags = entityManager
+            .createQuery("SELECT DISTINCT t FROM Job j JOIN j.tags t WHERE LOWER(t) LIKE :q", String.class)
+            .setParameter("q", "%" + q + "%")
+            .getResultList();
+        tags.forEach(tag -> {
+            Map<String, String> map = new HashMap<>();
+            map.put("keyword", tag);
+            map.put("type", "tag");
+            result.add(map);
+        });
+
+        return result;
     }
 } 

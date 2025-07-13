@@ -36,14 +36,18 @@ import java.util.Map;
         RequestMethod.PATCH
     }
 )
-@RequestMapping("/api/v1/crawler")
+@RequestMapping("/api/v1/ai")
 @RequiredArgsConstructor
 @Slf4j
-@Tag(name = "Company Crawler", description = "APIs for crawling company information and jobs from LinkedIn")
-public class CompanyCrawlerController {
+@Tag(name = "AI Utilities", description = "APIs for AI-powered data generation and enrichment utilities")
+public class AIController {
 
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
+
+    // ============================================================================
+    // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
+    // ============================================================================
 
     @PostMapping("/companies/crawl")
     @Operation(summary = "Crawl all companies", description = "Triggers the crawling process for all companies from the companies.txt file")
@@ -169,6 +173,10 @@ public class CompanyCrawlerController {
         }
     }
 
+    // ============================================================================
+    // AI-POWERED DATA GENERATION ENDPOINTS
+    // ============================================================================
+
     @PostMapping("/detect-industries")
     @Operation(summary = "Detect industries for all companies", description = "Detects primary and secondary industries for all companies using AI or manual detection")
     @ApiResponses(value = {
@@ -205,6 +213,29 @@ public class CompanyCrawlerController {
     })
     public ResponseEntity<List<CompanyIndustryResponse>> detectIndustriesForCompanies(
         @RequestParam(defaultValue = "false") boolean useGemini) {
-        return ResponseEntity.ok(companyService.detectIndustriesForCompanies(useGemini));
+        try {
+            log.info("Industry detection triggered for all companies. Use Gemini: {}", useGemini);
+            List<CompanyIndustryResponse> results = companyService.detectIndustriesForCompanies(useGemini);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            log.error("Error during industry detection process", e);
+            return ResponseEntity.internalServerError().build();
+        }
     }
+
+    // ============================================================================
+    // FUTURE AI UTILITY ENDPOINTS (Placeholder comments)
+    // ============================================================================
+    
+    // TODO: Add endpoints for:
+    // - Generate job descriptions using AI
+    // - Enrich company profiles with AI-generated content
+    // - Generate interview questions for specific companies/roles
+    // - AI-powered job matching and recommendations
+    // - Generate company culture and values descriptions
+    // - AI-powered salary range suggestions
+    // - Generate job requirements and qualifications
+    // - AI-powered company similarity analysis
+    // - Generate industry trend analysis
+    // - AI-powered candidate skill assessment questions
 } 

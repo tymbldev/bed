@@ -15,4 +15,5 @@ public interface LocationRepository extends JpaRepository<Location, Long> {
     List<Location> findByCountry(Country country);
     List<Location> findByIsRemote(boolean isRemote);
     Optional<Location> findByCityAndCountryAndZipCode(City city, Country country, String zipCode);
+    boolean existsByDisplayName(String displayName);
 } 

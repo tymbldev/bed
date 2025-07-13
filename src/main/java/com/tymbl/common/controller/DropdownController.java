@@ -11,7 +11,6 @@ import com.tymbl.common.service.CurrencyService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyService;
-import com.tymbl.common.dto.IndustryStatisticsDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -36,6 +35,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @CrossOrigin(
@@ -692,62 +692,12 @@ public class DropdownController {
         }
     }
 
-    @GetMapping("/industries/statistics")
-    @Operation(summary = "Get industry statistics with company counts and top companies", description = "Returns all industries with company counts and top 5 companies in each industry based on active job count")
+    @GetMapping("/autosuggest")
+    @Operation(summary = "Autosuggest for company, designation, and tag", description = "Suggests company names, designation names, or tags matching the query (min 3 chars). Returns a list of {keyword, type}.")
     @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Industry statistics retrieved successfully",
-            content = @Content(
-                schema = @Schema(implementation = IndustryStatisticsDTO.class),
-                examples = @ExampleObject(
-                    value = "[\n" +
-                          "  {\n" +
-                          "    \"industryId\": 1,\n" +
-                          "    \"industryName\": \"Information Technology & Services\",\n" +
-                          "    \"industryDescription\": \"Technology and IT services industry\",\n" +
-                          "    \"companyCount\": 25,\n" +
-                          "    \"topCompanies\": [\n" +
-                          "      {\n" +
-                          "        \"companyId\": 1,\n" +
-                          "        \"companyName\": \"Google\",\n" +
-                          "        \"logoUrl\": \"https://example.com/google-logo.png\",\n" +
-                          "        \"website\": \"https://google.com\",\n" +
-                          "        \"headquarters\": \"Mountain View, CA\",\n" +
-                          "        \"activeJobCount\": 15\n" +
-                          "      },\n" +
-                          "      {\n" +
-                          "        \"companyId\": 2,\n" +
-                          "        \"companyName\": \"Microsoft\",\n" +
-                          "        \"logoUrl\": \"https://example.com/microsoft-logo.png\",\n" +
-                          "        \"website\": \"https://microsoft.com\",\n" +
-                          "        \"headquarters\": \"Redmond, WA\",\n" +
-                          "        \"activeJobCount\": 12\n" +
-                          "      }\n" +
-                          "    ]\n" +
-                          "  },\n" +
-                          "  {\n" +
-                          "    \"industryId\": 2,\n" +
-                          "    \"industryName\": \"Financial Services\",\n" +
-                          "    \"industryDescription\": \"Banking, insurance, and financial services\",\n" +
-                          "    \"companyCount\": 15,\n" +
-                          "    \"topCompanies\": [\n" +
-                          "      {\n" +
-                          "        \"companyId\": 3,\n" +
-                          "        \"companyName\": \"Goldman Sachs\",\n" +
-                          "        \"logoUrl\": \"https://example.com/goldman-logo.png\",\n" +
-                          "        \"website\": \"https://goldmansachs.com\",\n" +
-                          "        \"headquarters\": \"New York, NY\",\n" +
-                          "        \"activeJobCount\": 8\n" +
-                          "      }\n" +
-                          "    ]\n" +
-                          "  }\n" +
-                          "]"
-                )
-            )
-        )
+        @ApiResponse(responseCode = "200", description = "Suggestions found")
     })
-    public ResponseEntity<List<IndustryStatisticsDTO>> getIndustryStatistics() {
-        return ResponseEntity.ok(dropdownService.getIndustryStatistics());
+    public ResponseEntity<List<Map<String, String>>> autosuggest(@RequestParam("query") String query) {
+        return ResponseEntity.ok(dropdownService.autosuggest(query));
     }
 } 

@@ -11,7 +11,7 @@ import java.util.List;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class IndustryStatisticsDTO {
+public class IndustryWiseCompaniesDTO {
     private Long industryId;
     private String industryName;
     private String industryDescription;

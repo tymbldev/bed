@@ -1,5 +1,7 @@
 package com.tymbl.jobs.controller;
 
+import com.tymbl.common.dto.IndustryWiseCompaniesDTO;
+import com.tymbl.common.service.DropdownService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.dto.CompanyRequest;
 import com.tymbl.jobs.dto.CompanyResponse;
@@ -44,6 +46,7 @@ import java.util.Map;
 public class CompanyController {
 
     private final CompanyService companyService;
+    private final DropdownService dropdownService;
 
     @PostMapping
     @Operation(summary = "Create or update a company", description = "Creates a new company or updates an existing one")
@@ -117,6 +120,65 @@ public class CompanyController {
         } catch (CompanyNotFoundException e) {
             throw e;
         }
+    }
+
+    @GetMapping("/industry-wise-companies")
+    @Operation(summary = "Get industry-wise companies with statistics", description = "Returns all industries with company counts and top 5 companies in each industry based on active job count")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Industry-wise companies retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = IndustryWiseCompaniesDTO.class),
+                examples = @ExampleObject(
+                    value = "[\n" +
+                          "  {\n" +
+                          "    \"industryId\": 1,\n" +
+                          "    \"industryName\": \"Information Technology & Services\",\n" +
+                          "    \"industryDescription\": \"Technology and IT services industry\",\n" +
+                          "    \"companyCount\": 25,\n" +
+                          "    \"topCompanies\": [\n" +
+                          "      {\n" +
+                          "        \"companyId\": 1,\n" +
+                          "        \"companyName\": \"Google\",\n" +
+                          "        \"logoUrl\": \"https://example.com/google-logo.png\",\n" +
+                          "        \"website\": \"https://google.com\",\n" +
+                          "        \"headquarters\": \"Mountain View, CA\",\n" +
+                          "        \"activeJobCount\": 15\n" +
+                          "      },\n" +
+                          "      {\n" +
+                          "        \"companyId\": 2,\n" +
+                          "        \"companyName\": \"Microsoft\",\n" +
+                          "        \"logoUrl\": \"https://example.com/microsoft-logo.png\",\n" +
+                          "        \"website\": \"https://microsoft.com\",\n" +
+                          "        \"headquarters\": \"Redmond, WA\",\n" +
+                          "        \"activeJobCount\": 12\n" +
+                          "      }\n" +
+                          "    ]\n" +
+                          "  },\n" +
+                          "  {\n" +
+                          "    \"industryId\": 2,\n" +
+                          "    \"industryName\": \"Financial Services\",\n" +
+                          "    \"industryDescription\": \"Banking, insurance, and financial services\",\n" +
+                          "    \"companyCount\": 15,\n" +
+                          "    \"topCompanies\": [\n" +
+                          "      {\n" +
+                          "        \"companyId\": 3,\n" +
+                          "        \"companyName\": \"Goldman Sachs\",\n" +
+                          "        \"logoUrl\": \"https://example.com/goldman-logo.png\",\n" +
+                          "        \"website\": \"https://goldmansachs.com\",\n" +
+                          "        \"headquarters\": \"New York, NY\",\n" +
+                          "        \"activeJobCount\": 8\n" +
+                          "      }\n" +
+                          "    ]\n" +
+                          "  }\n" +
+                          "]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<List<IndustryWiseCompaniesDTO>> getIndustryWiseCompanies() {
+        return ResponseEntity.ok(dropdownService.getIndustryStatistics());
     }
 
     @ExceptionHandler(CompanyNotFoundException.class)
