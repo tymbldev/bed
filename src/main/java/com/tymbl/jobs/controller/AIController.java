@@ -5,6 +5,7 @@ import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyCrawlerService;
 import com.tymbl.jobs.service.CompanyService;
 import com.tymbl.jobs.dto.CompanyResponse;
+import com.tymbl.interview.service.ComprehensiveQuestionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -44,6 +45,7 @@ public class AIController {
 
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
+    private final ComprehensiveQuestionService comprehensiveQuestionService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -220,6 +222,86 @@ public class AIController {
         } catch (Exception e) {
             log.error("Error during industry detection process", e);
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/interview-questions/generate-comprehensive")
+    @Operation(summary = "Generate comprehensive interview questions for all skills", description = "Generates detailed interview questions for all skills in the system using AI")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Comprehensive interview questions generated successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_skills_processed\": 15,\n" +
+                        "  \"total_questions_generated\": 450,\n" +
+                        "  \"message\": \"Comprehensive question generation completed\",\n" +
+                        "  \"skill_results\": [\n" +
+                        "    {\n" +
+                        "      \"skill_name\": \"Java\",\n" +
+                        "      \"skill_id\": 1,\n" +
+                        "      \"questions_generated\": 30,\n" +
+                        "      \"mappings_created\": 90,\n" +
+                        "      \"status\": \"success\"\n" +
+                        "    }\n" +
+                        "  ]\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateComprehensiveInterviewQuestions() {
+        try {
+            log.info("Comprehensive interview question generation triggered");
+            Map<String, Object> result = comprehensiveQuestionService.generateQuestionsForAllSkills();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error during comprehensive interview question generation", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error during question generation: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/interview-questions/generate-for-skill/{skillName}")
+    @Operation(summary = "Generate comprehensive interview questions for specific skill", description = "Generates detailed interview questions for a specific skill using AI")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Comprehensive interview questions generated successfully for the skill",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"skill_name\": \"Java\",\n" +
+                        "  \"skill_id\": 1,\n" +
+                        "  \"questions_generated\": 30,\n" +
+                        "  \"mappings_created\": 90,\n" +
+                        "  \"status\": \"success\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Skill not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateComprehensiveInterviewQuestionsForSkill(
+            @PathVariable String skillName) {
+        try {
+            log.info("Comprehensive interview question generation triggered for skill: {}", skillName);
+            Map<String, Object> result = comprehensiveQuestionService.generateQuestionsForSpecificSkill(skillName);
+            
+            if (result.containsKey("error")) {
+                return ResponseEntity.badRequest().body(result);
+            }
+            
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error during comprehensive interview question generation for skill: {}", skillName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error during question generation: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 

@@ -1,10 +1,15 @@
 package com.tymbl.interview.controller;
 
+import com.tymbl.interview.dto.DesignationSkillDTO;
 import com.tymbl.interview.dto.InterviewQuestionDTO;
-import com.tymbl.interview.dto.InterviewTopicDTO;
 import com.tymbl.interview.service.InterviewPreparationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,33 +48,42 @@ public class InterviewPreparationController {
 
     @GetMapping("/designations/{designation}/topics")
     @Operation(summary = "Get topics by designation", description = "Retrieve all topics for a specific designation")
-    public ResponseEntity<List<InterviewTopicDTO>> getTopicsByDesignation(
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Topics retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Designation not found")
+    })
+    public ResponseEntity<List<DesignationSkillDTO>> getTopicsByDesignation(
             @Parameter(description = "Designation name", example = "Software Engineer")
             @PathVariable String designation) {
         log.info("Fetching topics for designation: {}", designation);
-        List<InterviewTopicDTO> topics = interviewPreparationService.getTopicsByDesignation(designation);
+        List<DesignationSkillDTO> topics = interviewPreparationService.getTopicsByDesignation(designation);
         return ResponseEntity.ok(topics);
     }
 
     @GetMapping("/designations/{designation}/topics/filter")
-    @Operation(summary = "Get filtered topics", description = "Retrieve topics with optional difficulty and category filters")
-    public ResponseEntity<List<InterviewTopicDTO>> getTopicsByDesignationAndFilters(
+    @Operation(summary = "Get topics by designation with filters", description = "Retrieve topics for a designation with optional difficulty and category filters")
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Topics retrieved successfully"),
+        @ApiResponse(responseCode = "404", description = "Designation not found")
+    })
+    public ResponseEntity<List<DesignationSkillDTO>> getTopicsByDesignationWithFilters(
             @Parameter(description = "Designation name", example = "Software Engineer")
             @PathVariable String designation,
             @Parameter(description = "Difficulty level", example = "INTERMEDIATE")
             @RequestParam(required = false) String difficultyLevel,
-            @Parameter(description = "Category", example = "TECHNICAL")
+            @Parameter(description = "Category", example = "Data Structures")
             @RequestParam(required = false) String category) {
-        log.info("Fetching filtered topics for designation: {} with difficulty: {} and category: {}", designation, difficultyLevel, category);
+        log.info("Fetching topics for designation: {} with filters - difficulty: {}, category: {}", 
+                designation, difficultyLevel, category);
         
-        List<InterviewTopicDTO> topics;
+        List<DesignationSkillDTO> topics;
         if (difficultyLevel != null && category != null) {
             // For now, just filter by difficulty since we don't have a combined method
             topics = interviewPreparationService.getTopicsByDesignationAndDifficulty(designation, 
-                com.tymbl.interview.entity.InterviewTopic.DifficultyLevel.valueOf(difficultyLevel.toUpperCase()));
+                com.tymbl.interview.entity.DesignationSkill.DifficultyLevel.valueOf(difficultyLevel.toUpperCase()));
         } else if (difficultyLevel != null) {
             topics = interviewPreparationService.getTopicsByDesignationAndDifficulty(designation, 
-                com.tymbl.interview.entity.InterviewTopic.DifficultyLevel.valueOf(difficultyLevel.toUpperCase()));
+                com.tymbl.interview.entity.DesignationSkill.DifficultyLevel.valueOf(difficultyLevel.toUpperCase()));
         } else if (category != null) {
             topics = interviewPreparationService.getTopicsByDesignationAndCategory(designation, category);
         } else {

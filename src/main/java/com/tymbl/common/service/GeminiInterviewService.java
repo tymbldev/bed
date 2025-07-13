@@ -147,6 +147,64 @@ public class GeminiInterviewService {
         }
     }
 
+    public List<Map<String, Object>> generateComprehensiveInterviewQuestions(String skillName, int numQuestions) {
+        try {
+            log.info("Generating comprehensive interview questions for skill: {}", skillName);
+            String prompt = buildComprehensiveQuestionPrompt(skillName, numQuestions);
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+            
+            if (response.getStatusCodeValue() == 200) {
+                return parseComprehensiveQuestionsResponse(response.getBody());
+            } else {
+                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                return new ArrayList<>();
+            }
+        } catch (Exception e) {
+            log.error("Error generating comprehensive questions for skill: {}", skillName, e);
+            return new ArrayList<>();
+        }
+    }
+
+    public List<Map<String, Object>> generateDetailedQuestionContent(String skillName, String questionSummary) {
+        try {
+            log.info("Generating detailed content for question: {}", questionSummary);
+            String prompt = buildDetailedContentPrompt(skillName, questionSummary);
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+            
+            if (response.getStatusCodeValue() == 200) {
+                return parseDetailedContentResponse(response.getBody());
+            } else {
+                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                return new ArrayList<>();
+            }
+        } catch (Exception e) {
+            log.error("Error generating detailed content for question: {}", questionSummary, e);
+            return new ArrayList<>();
+        }
+    }
+
     // Helper methods
     private String buildTopicGenerationPrompt(String designationName) {
         return "Generate top 10 interview topics for the designation: " + designationName + 
@@ -167,6 +225,63 @@ public class GeminiInterviewService {
     private String buildDesignationGenerationPrompt(String departmentName) {
         return "Generate common job designations for the department: " + departmentName + 
                ". Return as JSON array of objects with 'name' and 'description' fields.";
+    }
+
+    private String buildComprehensiveQuestionPrompt(String skillName, int numQuestions) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate ").append(numQuestions).append(" comprehensive interview questions for the skill: ").append(skillName).append("\n\n");
+        prompt.append("REQUIREMENTS:\n");
+        prompt.append("1. Questions should be detailed and cover different aspects of ").append(skillName).append("\n");
+        prompt.append("2. Include theoretical, practical, and problem-solving questions\n");
+        prompt.append("3. Vary difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED)\n");
+        prompt.append("4. Include different question types (THEORETICAL, PRACTICAL, BEHAVIORAL, PROBLEM_SOLVING, SYSTEM_DESIGN)\n");
+        prompt.append("5. For DSA questions, include code examples\n");
+        prompt.append("6. Each question should be engaging and detailed\n\n");
+        
+        prompt.append("OUTPUT FORMAT (JSON array):\n");
+        prompt.append("[\n");
+        prompt.append("  {\n");
+        prompt.append("    \"question\": \"Detailed question text\",\n");
+        prompt.append("    \"difficulty_level\": \"BEGINNER|INTERMEDIATE|ADVANCED\",\n");
+        prompt.append("    \"question_type\": \"THEORETICAL|PRACTICAL|BEHAVIORAL|PROBLEM_SOLVING|SYSTEM_DESIGN\",\n");
+        prompt.append("    \"tags\": \"tag1,tag2,tag3\",\n");
+        prompt.append("    \"summary_answer\": \"Brief summary answer\",\n");
+        prompt.append("    \"applicable_designations\": [\"Software Engineer\", \"Data Scientist\", \"DevOps Engineer\"]\n");
+        prompt.append("  }\n");
+        prompt.append("]\n\n");
+        
+        prompt.append("Make the questions comprehensive, engaging, and suitable for technical interviews. ");
+        prompt.append("Focus on real-world scenarios and practical applications of ").append(skillName).append(".");
+        
+        return prompt.toString();
+    }
+
+    private String buildDetailedContentPrompt(String skillName, String questionSummary) {
+        StringBuilder prompt = new StringBuilder();
+        prompt.append("Generate detailed, comprehensive content for this interview question:\n\n");
+        prompt.append("SKILL: ").append(skillName).append("\n");
+        prompt.append("QUESTION: ").append(questionSummary).append("\n\n");
+        
+        prompt.append("REQUIREMENTS:\n");
+        prompt.append("1. Provide a detailed, step-by-step answer in HTML format\n");
+        prompt.append("2. Include code examples where applicable (especially for DSA)\n");
+        prompt.append("3. Use proper HTML formatting with <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> tags\n");
+        prompt.append("4. Include practical examples and real-world scenarios\n");
+        prompt.append("5. Explain concepts thoroughly with examples\n");
+        prompt.append("6. Make it engaging and easy to understand\n");
+        prompt.append("7. Include best practices and common pitfalls\n\n");
+        
+        prompt.append("OUTPUT FORMAT (JSON):\n");
+        prompt.append("{\n");
+        prompt.append("  \"detailed_answer\": \"<h2>Detailed Answer</h2><p>Comprehensive explanation in HTML...</p>\",\n");
+        prompt.append("  \"code_examples\": \"<h3>Code Examples</h3><pre><code>// Code examples here</code></pre>\",\n");
+        prompt.append("  \"html_content\": \"<div>Complete HTML formatted answer</div>\",\n");
+        prompt.append("  \"tags\": \"updated,tags,based,on,content\"\n");
+        prompt.append("}\n\n");
+        
+        prompt.append("Make the content comprehensive, well-structured, and engaging for users.");
+        
+        return prompt.toString();
     }
 
     private Map<String, Object> buildRequestBody(String prompt) {
@@ -249,6 +364,52 @@ public class GeminiInterviewService {
         }
     }
 
+    private List<Map<String, Object>> parseComprehensiveQuestionsResponse(String responseBody) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        String jsonText = extractJsonFromText(generatedText);
+                        JsonNode questionsData = objectMapper.readTree(jsonText);
+                        return mapJsonToComprehensiveQuestionsList(questionsData);
+                    }
+                }
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            log.error("Error parsing comprehensive questions response", e);
+            return new ArrayList<>();
+        }
+    }
+
+    private List<Map<String, Object>> parseDetailedContentResponse(String responseBody) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        String jsonText = extractJsonFromText(generatedText);
+                        JsonNode contentData = objectMapper.readTree(jsonText);
+                        return mapJsonToDetailedContentList(contentData);
+                    }
+                }
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            log.error("Error parsing detailed content response", e);
+            return new ArrayList<>();
+        }
+    }
+
     private String extractJsonFromText(String text) {
         text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
         text = text.trim();
@@ -300,6 +461,59 @@ public class GeminiInterviewService {
             }
         }
         return designations;
+    }
+
+    private List<Map<String, Object>> mapJsonToDetailedContent(JsonNode detailedContent) {
+        List<Map<String, Object>> content = new ArrayList<>();
+        if (detailedContent.isArray()) {
+            for (JsonNode itemNode : detailedContent) {
+                Map<String, Object> item = new HashMap<>();
+                item.put("explanation", getStringValue(itemNode, "explanation"));
+                item.put("example", getStringValue(itemNode, "example"));
+                content.add(item);
+            }
+        }
+        return content;
+    }
+
+    private List<Map<String, Object>> mapJsonToComprehensiveQuestionsList(JsonNode questionsData) {
+        List<Map<String, Object>> questions = new ArrayList<>();
+        if (questionsData.isArray()) {
+            for (JsonNode questionNode : questionsData) {
+                Map<String, Object> question = new HashMap<>();
+                question.put("question", getStringValue(questionNode, "question"));
+                question.put("difficulty_level", getStringValue(questionNode, "difficulty_level"));
+                question.put("question_type", getStringValue(questionNode, "question_type"));
+                question.put("tags", getStringValue(questionNode, "tags"));
+                question.put("summary_answer", getStringValue(questionNode, "summary_answer"));
+                
+                // Parse applicable designations
+                List<String> designations = new ArrayList<>();
+                JsonNode designationsArray = questionNode.get("applicable_designations");
+                if (designationsArray != null && designationsArray.isArray()) {
+                    for (JsonNode designationNode : designationsArray) {
+                        if (designationNode.isTextual()) {
+                            designations.add(designationNode.asText());
+                        }
+                    }
+                }
+                question.put("applicable_designations", designations);
+                
+                questions.add(question);
+            }
+        }
+        return questions;
+    }
+
+    private List<Map<String, Object>> mapJsonToDetailedContentList(JsonNode contentData) {
+        List<Map<String, Object>> content = new ArrayList<>();
+        Map<String, Object> contentMap = new HashMap<>();
+        contentMap.put("detailed_answer", getStringValue(contentData, "detailed_answer"));
+        contentMap.put("code_examples", getStringValue(contentData, "code_examples"));
+        contentMap.put("html_content", getStringValue(contentData, "html_content"));
+        contentMap.put("tags", getStringValue(contentData, "tags"));
+        content.add(contentMap);
+        return content;
     }
 
     private String getStringValue(JsonNode node, String fieldName) {

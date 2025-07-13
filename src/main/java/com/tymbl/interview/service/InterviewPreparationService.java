@@ -2,7 +2,7 @@ package com.tymbl.interview.service;
 
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.interview.dto.InterviewQuestionDTO;
-import com.tymbl.interview.dto.InterviewTopicDTO;
+import com.tymbl.interview.dto.DesignationSkillDTO;
 import com.tymbl.interview.dto.QuestionGenerationRequestDTO;
 import com.tymbl.interview.entity.*;
 import com.tymbl.interview.repository.*;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class InterviewPreparationService {
 
-    private final InterviewTopicRepository interviewTopicRepository;
+    private final DesignationSkillRepository designationSkillRepository;
     private final GeneralInterviewQuestionRepository generalInterviewQuestionRepository;
     private final CompanyInterviewQuestionRepository companyInterviewQuestionRepository;
     private final QuestionGenerationQueueRepository questionGenerationQueueRepository;
@@ -33,38 +33,38 @@ public class InterviewPreparationService {
     private final GeminiService geminiService;
 
     // Topic Management
-    public List<InterviewTopicDTO> getTopicsByDesignation(String designation) {
+    public List<DesignationSkillDTO> getTopicsByDesignation(String designation) {
         log.info("Fetching topics for designation: {}", designation);
-        return interviewTopicRepository.findByDesignation(designation)
+        return designationSkillRepository.findByDesignation(designation)
                 .stream()
-                .map(InterviewTopicDTO::fromEntity)
+                .map(DesignationSkillDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    public List<InterviewTopicDTO> getTopicsByDesignationAndDifficulty(String designation, InterviewTopic.DifficultyLevel difficultyLevel) {
+    public List<DesignationSkillDTO> getTopicsByDesignationAndDifficulty(String designation, DesignationSkill.DifficultyLevel difficultyLevel) {
         log.info("Fetching topics for designation: {} with difficulty: {}", designation, difficultyLevel);
-        return interviewTopicRepository.findByDesignationAndDifficultyLevel(designation, difficultyLevel)
+        return designationSkillRepository.findByDesignationAndDifficultyLevel(designation, difficultyLevel)
                 .stream()
-                .map(InterviewTopicDTO::fromEntity)
+                .map(DesignationSkillDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
-    public List<InterviewTopicDTO> getTopicsByDesignationAndCategory(String designation, String category) {
+    public List<DesignationSkillDTO> getTopicsByDesignationAndCategory(String designation, String category) {
         log.info("Fetching topics for designation: {} with category: {}", designation, category);
-        return interviewTopicRepository.findByDesignationAndCategory(designation, category)
+        return designationSkillRepository.findByDesignationAndCategory(designation, category)
                 .stream()
-                .map(InterviewTopicDTO::fromEntity)
+                .map(DesignationSkillDTO::fromEntity)
                 .collect(Collectors.toList());
     }
 
     public List<String> getAllDesignations() {
         log.info("Fetching all available designations");
-        return interviewTopicRepository.findAllDesignations();
+        return designationSkillRepository.findAllDesignations();
     }
 
     public List<String> getCategoriesByDesignation(String designation) {
         log.info("Fetching categories for designation: {}", designation);
-        return interviewTopicRepository.findCategoriesByDesignation(designation);
+        return designationSkillRepository.findCategoriesByDesignation(designation);
     }
 
     // General Questions Management
@@ -214,9 +214,9 @@ public class InterviewPreparationService {
         
         List<String> topicsToGenerate = queueEntry.getTopicName() != null ? 
                 Arrays.asList(queueEntry.getTopicName()) : 
-                interviewTopicRepository.findByDesignation(queueEntry.getDesignation())
+                designationSkillRepository.findByDesignation(queueEntry.getDesignation())
                         .stream()
-                        .map(InterviewTopic::getTopicName)
+                        .map(DesignationSkill::getSkillName)
                         .collect(Collectors.toList());
         
         for (String topicName : topicsToGenerate) {
@@ -237,9 +237,9 @@ public class InterviewPreparationService {
         
         List<String> topicsToGenerate = queueEntry.getTopicName() != null ? 
                 Arrays.asList(queueEntry.getTopicName()) : 
-                interviewTopicRepository.findByDesignation(queueEntry.getDesignation())
+                designationSkillRepository.findByDesignation(queueEntry.getDesignation())
                         .stream()
-                        .map(InterviewTopic::getTopicName)
+                        .map(DesignationSkill::getSkillName)
                         .collect(Collectors.toList());
         
         for (String topicName : topicsToGenerate) {
@@ -311,7 +311,7 @@ public class InterviewPreparationService {
         Map<String, Object> stats = new HashMap<>();
         
         // Topic statistics
-        List<InterviewTopic> topics = interviewTopicRepository.findByDesignation(designation);
+        List<DesignationSkill> topics = designationSkillRepository.findByDesignation(designation);
         stats.put("total_topics", topics.size());
         stats.put("topics_by_difficulty", topics.stream()
                 .collect(Collectors.groupingBy(topic -> topic.getDifficultyLevel().name(), Collectors.counting())));
@@ -374,7 +374,7 @@ public class InterviewPreparationService {
             
             // Add a small delay to avoid rate limiting
             try {
-                Thread.sleep(1000);
+                Thread.sleep(1);
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 break;
@@ -387,30 +387,30 @@ public class InterviewPreparationService {
 
     // Method to save generated topics to database
     @Transactional
-    public List<InterviewTopicDTO> saveGeneratedTopics(String designationName, List<Map<String, Object>> topics) {
+    public List<DesignationSkillDTO> saveGeneratedTopics(String designationName, List<Map<String, Object>> topics) {
         log.info("Saving {} generated topics for designation: {}", topics.size(), designationName);
         
-        List<InterviewTopicDTO> savedTopics = new ArrayList<>();
+        List<DesignationSkillDTO> savedTopics = new ArrayList<>();
         LocalDateTime now = LocalDateTime.now();
         
         for (Map<String, Object> topicData : topics) {
             try {
-                InterviewTopic topic = InterviewTopic.builder()
+                DesignationSkill topic = DesignationSkill.builder()
                         .designation(designationName)
-                        .topicName((String) topicData.get("topic_name"))
-                        .topicDescription((String) topicData.get("topic_description"))
-                        .difficultyLevel(InterviewTopic.DifficultyLevel.valueOf((String) topicData.get("difficulty_level")))
+                        .skillName((String) topicData.get("skill_name"))
+                        .skillDescription((String) topicData.get("skill_description"))
+                        .difficultyLevel(DesignationSkill.DifficultyLevel.valueOf(((String) topicData.get("difficulty_level")).toUpperCase()))
                         .category((String) topicData.get("category"))
                         .estimatedPrepTimeHours((Integer) topicData.get("estimated_prep_time_hours"))
                         .createdAt(now)
                         .updatedAt(now)
                         .build();
                 
-                InterviewTopic savedTopic = interviewTopicRepository.save(topic);
-                savedTopics.add(InterviewTopicDTO.fromEntity(savedTopic));
+                DesignationSkill savedTopic = designationSkillRepository.save(topic);
+                savedTopics.add(DesignationSkillDTO.fromEntity(savedTopic));
                 
             } catch (Exception e) {
-                log.error("Error saving topic for designation {}: {}", designationName, topicData.get("topic_name"), e);
+                log.error("Error saving topic: {}", topicData, e);
             }
         }
         

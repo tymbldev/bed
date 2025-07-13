@@ -1,6 +1,6 @@
 package com.tymbl.interview.controller;
 
-import com.tymbl.interview.dto.InterviewTopicDTO;
+import com.tymbl.interview.dto.DesignationSkillDTO;
 import com.tymbl.interview.dto.QuestionGenerationRequestDTO;
 import com.tymbl.interview.entity.QuestionGenerationQueue;
 import com.tymbl.interview.service.InterviewPreparationService;
@@ -59,7 +59,7 @@ public class InterviewGenerationController {
             return ResponseEntity.badRequest().body(errorResponse);
         }
         
-        List<InterviewTopicDTO> savedTopics = interviewPreparationService.saveGeneratedTopics(designation, generatedTopics);
+        List<DesignationSkillDTO> savedTopics = interviewPreparationService.saveGeneratedTopics(designation, generatedTopics);
         
         Map<String, Object> response = new HashMap<>();
         response.put("designation", designation);
@@ -101,7 +101,7 @@ public class InterviewGenerationController {
             List<Map<String, Object>> topics = entry.getValue();
             
             if (!topics.isEmpty()) {
-                List<InterviewTopicDTO> savedTopics = interviewPreparationService.saveGeneratedTopics(designation, topics);
+                List<DesignationSkillDTO> savedTopics = interviewPreparationService.saveGeneratedTopics(designation, topics);
                 Map<String, Object> designationResult = new HashMap<>();
                 designationResult.put("generated_count", topics.size());
                 designationResult.put("saved_count", savedTopics.size());

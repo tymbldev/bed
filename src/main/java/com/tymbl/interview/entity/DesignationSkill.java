@@ -9,12 +9,12 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "interview_topics")
+@Table(name = "designation_skills")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class InterviewTopic {
+public class DesignationSkill {
     
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -23,11 +23,11 @@ public class InterviewTopic {
     @Column(name = "designation", nullable = false)
     private String designation;
     
-    @Column(name = "topic_name", nullable = false)
-    private String topicName;
+    @Column(name = "skill_name", nullable = false)
+    private String skillName;
     
-    @Column(name = "topic_description", columnDefinition = "TEXT")
-    private String topicDescription;
+    @Column(name = "skill_description", columnDefinition = "TEXT")
+    private String skillDescription;
     
     @Enumerated(EnumType.STRING)
     @Column(name = "difficulty_level")
@@ -46,6 +46,19 @@ public class InterviewTopic {
     private LocalDateTime updatedAt;
     
     public enum DifficultyLevel {
-        BEGINNER, INTERMEDIATE, ADVANCED
+        BEGINNER,
+        INTERMEDIATE,
+        ADVANCED
+    }
+    
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+    
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
     }
 } 

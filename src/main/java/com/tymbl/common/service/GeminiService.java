@@ -35,6 +35,15 @@ public class GeminiService {
         return geminiInterviewService.generateCompanySpecificQuestions(companyName, designation, topicName, difficultyLevel, numQuestions);
     }
     
+    // Comprehensive interview question generation
+    public List<Map<String, Object>> generateComprehensiveInterviewQuestions(String skillName, int numQuestions) {
+        return geminiInterviewService.generateComprehensiveInterviewQuestions(skillName, numQuestions);
+    }
+    
+    public List<Map<String, Object>> generateDetailedQuestionContent(String skillName, String questionSummary) {
+        return geminiInterviewService.generateDetailedQuestionContent(skillName, questionSummary);
+    }
+    
     // Designation-related methods (if needed)
     public List<Map<String, Object>> generateDesignationsForDepartment(String departmentName) {
         return geminiInterviewService.generateDesignationsForDepartment(departmentName);
