@@ -372,7 +372,7 @@ public class ElasticsearchJobService {
         }
         
         // Set default values for fields not in Elasticsearch
-        response.setIsSuperAdminPosted(false);
+        response.setSuperAdminPosted(false);
         response.setApproved(JobApprovalStatus.APPROVED.getValue());
         response.setReferrerCount(0);
         response.setUserRole("VIEWER");
