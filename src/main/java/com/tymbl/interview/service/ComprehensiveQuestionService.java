@@ -16,6 +16,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -42,34 +45,52 @@ public class ComprehensiveQuestionService {
         List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
         log.info("Found {} enabled skills to process", skills.size());
         
-        for (Skill skill : skills) {
-            try {
-                log.info("Processing skill: {} (ID: {})", skill.getName(), skill.getId());
-                Map<String, Object> skillResult = generateQuestionsForSkill(skill);
-                skillResults.add(skillResult);
-                
-                int questionsGenerated = (Integer) skillResult.get("questions_generated");
-                totalQuestionsGenerated += questionsGenerated;
-                totalSkillsProcessed++;
-                
-                // Add delay to avoid rate limiting
-               // Thread.sleep(2000);
-                
-            } catch (Exception e) {
-                log.error("Error processing skill: {}", skill.getName(), e);
-                Map<String, Object> errorResult = new HashMap<>();
-                errorResult.put("skill_name", skill.getName());
-                errorResult.put("skill_id", skill.getId());
-                errorResult.put("error", e.getMessage());
-                errorResult.put("questions_generated", 0);
-                skillResults.add(errorResult);
+        // Create a fixed thread pool with 10 threads for parallel processing
+        ExecutorService executor = Executors.newFixedThreadPool(10);
+        
+        try {
+            // Process skills in parallel using CompletableFuture
+            List<CompletableFuture<Map<String, Object>>> futures = skills.stream()
+                    .map(skill -> CompletableFuture.supplyAsync(() -> {
+                        try {
+                            log.info("Processing skill: {} (ID: {})", skill.getName(), skill.getId());
+                            return generateQuestionsForSkill(skill);
+                        } catch (Exception e) {
+                            log.error("Error processing skill: {}", skill.getName(), e);
+                            Map<String, Object> errorResult = new HashMap<>();
+                            errorResult.put("skill_name", skill.getName());
+                            errorResult.put("skill_id", skill.getId());
+                            errorResult.put("error", e.getMessage());
+                            errorResult.put("questions_generated", 0);
+                            return errorResult;
+                        }
+                    }, executor))
+                    .collect(Collectors.toList());
+            
+            // Wait for all futures to complete and collect results
+            for (CompletableFuture<Map<String, Object>> future : futures) {
+                try {
+                    Map<String, Object> skillResult = future.get();
+                    skillResults.add(skillResult);
+                    
+                    int questionsGenerated = (Integer) skillResult.get("questions_generated");
+                    totalQuestionsGenerated += questionsGenerated;
+                    totalSkillsProcessed++;
+                    
+                } catch (Exception e) {
+                    log.error("Error waiting for skill processing to complete", e);
+                }
             }
+            
+        } finally {
+            // Shutdown the executor
+            executor.shutdown();
         }
         
         result.put("total_skills_processed", totalSkillsProcessed);
         result.put("total_questions_generated", totalQuestionsGenerated);
         result.put("skill_results", skillResults);
-        result.put("message", "Comprehensive question generation completed");
+        result.put("message", "Comprehensive question generation completed with parallel processing");
         
         log.info("Completed comprehensive question generation. Total questions: {}", totalQuestionsGenerated);
         return result;

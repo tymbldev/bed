@@ -434,9 +434,28 @@ public class GeminiInterviewService {
                     JsonNode parts = content.get("parts");
                     if (parts != null && parts.isArray() && parts.size() > 0) {
                         String generatedText = parts.get(0).get("text").asText();
+                        log.debug("Raw generated text: {}", generatedText);
+                        
                         String jsonText = extractJsonFromText(generatedText);
-                        JsonNode contentData = objectMapper.readTree(jsonText);
-                        return mapJsonToDetailedContentList(contentData);
+                        log.debug("Extracted JSON text: {}", jsonText);
+                        
+                        try {
+                            JsonNode contentData = objectMapper.readTree(jsonText);
+                            return mapJsonToDetailedContentList(contentData);
+                        } catch (Exception jsonParseException) {
+                            log.warn("Failed to parse extracted JSON, trying to create fallback content", jsonParseException);
+                            
+                            // Create fallback content from the raw text
+                            Map<String, Object> fallbackContent = new HashMap<>();
+                            fallbackContent.put("detailed_answer", generatedText);
+                            fallbackContent.put("code_examples", "");
+                            fallbackContent.put("html_content", generatedText);
+                            fallbackContent.put("tags", "");
+                            
+                            List<Map<String, Object>> fallbackList = new ArrayList<>();
+                            fallbackList.add(fallbackContent);
+                            return fallbackList;
+                        }
                     }
                 }
             }
@@ -481,17 +500,93 @@ public class GeminiInterviewService {
     }
 
     private String extractJsonFromText(String text) {
-        text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
-        text = text.trim();
-        int jsonStart = text.indexOf('[');
-        if (jsonStart > 0) {
-            text = text.substring(jsonStart);
+        try {
+            // First, try to clean up the text - only remove markdown code blocks
+            text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
+            text = text.trim();
+            
+            // Look for JSON array or object patterns
+            int jsonStart = -1;
+            int jsonEnd = -1;
+            
+            // Try to find JSON array
+            jsonStart = text.indexOf('[');
+            if (jsonStart >= 0) {
+                jsonEnd = findMatchingBracket(text, jsonStart, '[', ']');
+            }
+            
+            // If no array found, try to find JSON object
+            if (jsonStart == -1 || jsonEnd == -1) {
+                jsonStart = text.indexOf('{');
+                if (jsonStart >= 0) {
+                    jsonEnd = findMatchingBracket(text, jsonStart, '{', '}');
+                }
+            }
+            
+            // If we found valid JSON boundaries
+            if (jsonStart >= 0 && jsonEnd > jsonStart) {
+                String jsonText = text.substring(jsonStart, jsonEnd + 1);
+                
+                // Validate that it's actually JSON by trying to parse it
+                try {
+                    objectMapper.readTree(jsonText);
+                    return jsonText;
+                } catch (Exception e) {
+                    log.warn("Extracted text is not valid JSON, trying alternative extraction");
+                }
+            }
+            
+            // Enhanced fallback: try to extract JSON using more sophisticated patterns
+            // This handles cases where HTML content might interfere with simple regex
+            String[] jsonPatterns = {
+                // Pattern for complete JSON objects with nested structures
+                "\\{[^{}]*(?:\\{[^{}]*\\}[^{}]*)*\\}",
+                // Pattern for JSON arrays
+                "\\[[^\\[\\]]*(?:\\[[^\\[\\]]*\\][^\\[\\]]*)*\\]",
+                // Pattern for simple JSON objects (fallback)
+                "\\{[^}]*\\}"
+            };
+            
+            for (String pattern : jsonPatterns) {
+                java.util.regex.Pattern regexPattern = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.DOTALL);
+                java.util.regex.Matcher matcher = regexPattern.matcher(text);
+                
+                while (matcher.find()) {
+                    String candidate = matcher.group();
+                    try {
+                        // Try to parse as JSON
+                        objectMapper.readTree(candidate);
+                        return candidate;
+                    } catch (Exception e) {
+                        // Continue to next match
+                    }
+                }
+            }
+            
+            // If all else fails, return the original text and let the caller handle it
+            log.warn("Could not extract valid JSON from text, returning original");
+            return text;
+            
+        } catch (Exception e) {
+            log.error("Error extracting JSON from text", e);
+            return text;
         }
-        int jsonEnd = text.lastIndexOf(']');
-        if (jsonEnd >= 0) {
-            text = text.substring(0, jsonEnd + 1);
+    }
+    
+    private int findMatchingBracket(String text, int startIndex, char openBracket, char closeBracket) {
+        int count = 0;
+        for (int i = startIndex; i < text.length(); i++) {
+            char c = text.charAt(i);
+            if (c == openBracket) {
+                count++;
+            } else if (c == closeBracket) {
+                count--;
+                if (count == 0) {
+                    return i;
+                }
+            }
         }
-        return text;
+        return -1;
     }
 
     private List<Map<String, Object>> mapJsonToTopicsList(JsonNode topicsData) {
@@ -578,16 +673,44 @@ public class GeminiInterviewService {
     private List<Map<String, Object>> mapJsonToDetailedContentList(JsonNode contentData) {
         List<Map<String, Object>> content = new ArrayList<>();
         Map<String, Object> contentMap = new HashMap<>();
-        contentMap.put("detailed_answer", getStringValue(contentData, "detailed_answer"));
-        contentMap.put("code_examples", getStringValue(contentData, "code_examples"));
-        contentMap.put("html_content", getStringValue(contentData, "html_content"));
-        contentMap.put("tags", getStringValue(contentData, "tags"));
+        
+        try {
+            // Handle both object and array responses
+            if (contentData.isObject()) {
+                contentMap.put("detailed_answer", getStringValue(contentData, "detailed_answer"));
+                contentMap.put("code_examples", getStringValue(contentData, "code_examples"));
+                contentMap.put("html_content", getStringValue(contentData, "html_content"));
+                contentMap.put("tags", getStringValue(contentData, "tags"));
+            } else if (contentData.isArray() && contentData.size() > 0) {
+                // If it's an array, take the first element
+                JsonNode firstElement = contentData.get(0);
+                contentMap.put("detailed_answer", getStringValue(firstElement, "detailed_answer"));
+                contentMap.put("code_examples", getStringValue(firstElement, "code_examples"));
+                contentMap.put("html_content", getStringValue(firstElement, "html_content"));
+                contentMap.put("tags", getStringValue(firstElement, "tags"));
+            } else {
+                // Fallback: treat the entire content as detailed_answer
+                contentMap.put("detailed_answer", contentData.asText(""));
+                contentMap.put("code_examples", "");
+                contentMap.put("html_content", contentData.asText(""));
+                contentMap.put("tags", "");
+            }
+        } catch (Exception e) {
+            log.warn("Error mapping detailed content, using fallback", e);
+            contentMap.put("detailed_answer", contentData.asText(""));
+            contentMap.put("code_examples", "");
+            contentMap.put("html_content", contentData.asText(""));
+            contentMap.put("tags", "");
+        }
+        
         content.add(contentMap);
         return content;
     }
 
     private String getStringValue(JsonNode node, String fieldName) {
         if (node.has(fieldName) && !node.get(fieldName).isNull()) {
+            // Use asText() to preserve HTML content exactly as received
+            // This ensures HTML tags and special characters are not escaped or modified
             return node.get(fieldName).asText("");
         }
         return "";
