@@ -7,21 +7,23 @@ import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.elasticsearch.action.index.IndexRequest;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.xcontent.XContentType;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.index.query.functionscore.FunctionScoreQueryBuilder;
-import org.elasticsearch.index.query.functionscore.ScoreFunctionBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
-import org.elasticsearch.search.sort.SortOrder;
 import org.springframework.stereotype.Service;
+
+import co.elastic.clients.elasticsearch.ElasticsearchClient;
+import co.elastic.clients.elasticsearch.core.IndexRequest;
+import co.elastic.clients.elasticsearch.core.IndexResponse;
+import co.elastic.clients.elasticsearch.core.SearchRequest;
+import co.elastic.clients.elasticsearch.core.SearchResponse;
+import co.elastic.clients.elasticsearch.core.search.Hit;
+import co.elastic.clients.json.JsonData;
+import co.elastic.clients.elasticsearch._types.query_dsl.BoolQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.MatchQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.TermQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.RangeQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.FunctionScoreQuery;
+import co.elastic.clients.elasticsearch._types.query_dsl.Query;
+import co.elastic.clients.elasticsearch._types.SortOrder;
+import co.elastic.clients.elasticsearch._types.FieldValue;
 
 import java.io.IOException;
 import java.util.*;
@@ -32,12 +34,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ElasticsearchJobService {
 
-    private final RestHighLevelClient elasticsearchClient;
+    private final ElasticsearchClient elasticsearchClient;
     private final DropdownService dropdownService;
     private final ObjectMapper objectMapper;
     
     private static final String INDEX_NAME = "jobs";
-    private static final String TYPE_NAME = "_doc";
 
     /**
      * Sync a job to Elasticsearch (save or update)
@@ -47,13 +48,16 @@ public class ElasticsearchJobService {
         try {
             Map<String, Object> jobDocument = buildJobDocument(job);
             
-            IndexRequest indexRequest = new IndexRequest(INDEX_NAME, TYPE_NAME, job.getId().toString())
-                .source(jobDocument, XContentType.JSON);
+            IndexRequest<Map<String, Object>> indexRequest = IndexRequest.of(i -> i
+                .index(INDEX_NAME)
+                .id(job.getId().toString())
+                .document(jobDocument)
+            );
             
-            IndexResponse response = elasticsearchClient.index(indexRequest, RequestOptions.DEFAULT);
+            IndexResponse response = elasticsearchClient.index(indexRequest);
             
             log.info("Successfully synced job {} to Elasticsearch with result: {}", 
-                job.getId(), response.getResult().name());
+                job.getId(), response.result().name());
                 
         } catch (Exception e) {
             log.error("Failed to sync job {} to Elasticsearch. Error: {}", job.getId(), e.getMessage(), e);
@@ -66,88 +70,92 @@ public class ElasticsearchJobService {
      */
     public JobSearchResponse searchJobs(JobSearchRequest request, Long userDesignationId) {
         try {
-            SearchRequest searchRequest = new SearchRequest(INDEX_NAME);
-            SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
+            // Extract all request fields to final variables for lambda usage
+            final Long cityId = request.getCityId();
+            final Long countryId = request.getCountryId();
+            final Long companyId = request.getCompanyId();
+            final Long designationId = request.getDesignationId();
+            final Integer minExperience = request.getMinExperience();
+            final Integer maxExperience = request.getMaxExperience();
+            final Integer page = request.getPage();
+            final Integer size = request.getSize();
+            final Long finalUserDesignationId = userDesignationId;
             
             // Build the main query
-            BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
+            BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
             
             // Keyword search in searchableText
             if (request.getKeywords() != null && !request.getKeywords().isEmpty()) {
-                BoolQueryBuilder keywordQuery = QueryBuilders.boolQuery();
-                for (String keyword : request.getKeywords()) {
-                    keywordQuery.should(QueryBuilders.matchQuery("searchableText", keyword));
-                    keywordQuery.should(QueryBuilders.matchQuery("companyName", keyword));
-                    keywordQuery.should(QueryBuilders.matchQuery("designationName", keyword));
+                BoolQuery.Builder keywordQueryBuilder = new BoolQuery.Builder();
+                final List<String> keywords = request.getKeywords();
+                for (String keyword : keywords) {
+                    keywordQueryBuilder.should(Query.of(q -> q.match(m -> m.field("searchableText").query(keyword))));
+                    keywordQueryBuilder.should(Query.of(q -> q.match(m -> m.field("companyName").query(keyword))));
+                    keywordQueryBuilder.should(Query.of(q -> q.match(m -> m.field("designationName").query(keyword))));
                 }
-                boolQuery.must(keywordQuery);
+                boolQueryBuilder.must(keywordQueryBuilder.build()._toQuery());
             }
             
             // City filter
-            if (request.getCityId() != null) {
-                boolQuery.filter(QueryBuilders.termQuery("cityId", request.getCityId()));
+            if (cityId != null) {
+                boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("cityId").value(cityId))));
             }
             
             // Country filter
-            if (request.getCountryId() != null) {
-                boolQuery.filter(QueryBuilders.termQuery("countryId", request.getCountryId()));
+            if (countryId != null) {
+                boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("countryId").value(countryId))));
             }
             
             // Company filter
-            if (request.getCompanyId() != null) {
-                boolQuery.filter(QueryBuilders.termQuery("companyId", request.getCompanyId()));
+            if (companyId != null) {
+                boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("companyId").value(companyId))));
             }
             
             // Designation filter
-            if (request.getDesignationId() != null) {
-                boolQuery.filter(QueryBuilders.termQuery("designationId", request.getDesignationId()));
+            if (designationId != null) {
+                boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("designationId").value(designationId))));
             }
             
             // Experience range filter
-            if (request.getMinExperience() != null || request.getMaxExperience() != null) {
-                BoolQueryBuilder experienceQuery = QueryBuilders.boolQuery();
+            if (minExperience != null || maxExperience != null) {
+                BoolQuery.Builder experienceQueryBuilder = new BoolQuery.Builder();
                 
-                if (request.getMinExperience() != null) {
-                    experienceQuery.must(QueryBuilders.rangeQuery("maxExperience").gte(request.getMinExperience()));
+                if (minExperience != null) {
+                    experienceQueryBuilder.must(Query.of(q -> q.range(r -> r.field("maxExperience").gte(JsonData.of(minExperience)))));
                 }
                 
-                if (request.getMaxExperience() != null) {
-                    experienceQuery.must(QueryBuilders.rangeQuery("minExperience").lte(request.getMaxExperience()));
+                if (maxExperience != null) {
+                    experienceQueryBuilder.must(Query.of(q -> q.range(r -> r.field("minExperience").lte(JsonData.of(maxExperience)))));
                 }
                 
-                boolQuery.filter(experienceQuery);
+                boolQueryBuilder.filter(experienceQueryBuilder.build()._toQuery());
             }
             
             // Only show active jobs
-            boolQuery.filter(QueryBuilders.termQuery("active", true));
+            boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("active").value(true))));
             
+            final Query baseQuery = boolQueryBuilder.build()._toQuery();
             // Apply boosting if user is logged in and has a designation
-            if (userDesignationId != null) {
-                FunctionScoreQueryBuilder functionScoreQuery = QueryBuilders.functionScoreQuery(
-                    boolQuery,
-                    new FunctionScoreQueryBuilder.FilterFunctionBuilder[] {
-                        new FunctionScoreQueryBuilder.FilterFunctionBuilder(
-                            QueryBuilders.termQuery("designationId", userDesignationId),
-                            ScoreFunctionBuilders.fieldValueFactorFunction("designationId").factor(2.0f)
-                        )
-                    }
-                );
-                searchSourceBuilder.query(functionScoreQuery);
-            } else {
-                searchSourceBuilder.query(boolQuery);
-            }
+            final Query finalQuery = finalUserDesignationId != null ? 
+                FunctionScoreQuery.of(fs -> fs
+                    .query(baseQuery)
+                    .functions(f -> f
+                        .filter(Query.of(q -> q.term(t -> t.field("designationId").value(finalUserDesignationId))))
+                        .weight(2.0)
+                    )
+                )._toQuery() : baseQuery;
             
-            // Sort by score (relevance) then by creation date
-            searchSourceBuilder.sort("_score", SortOrder.DESC);
-            searchSourceBuilder.sort("createdAt", SortOrder.DESC);
+            // Build search request
+            SearchRequest searchRequest = SearchRequest.of(s -> s
+                .index(INDEX_NAME)
+                .query(finalQuery)
+                .sort(sort -> sort.field(f -> f.field("_score").order(SortOrder.Desc)))
+                .sort(sort -> sort.field(f -> f.field("createdAt").order(SortOrder.Desc)))
+                .from(page * size)
+                .size(size)
+            );
             
-            // Pagination
-            searchSourceBuilder.from(request.getPage() * request.getSize());
-            searchSourceBuilder.size(request.getSize());
-            
-            searchRequest.source(searchSourceBuilder);
-            
-            SearchResponse response = elasticsearchClient.search(searchRequest, RequestOptions.DEFAULT);
+            SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
             
             return parseSearchResponse(response);
             
@@ -206,8 +214,15 @@ public class ElasticsearchJobService {
         document.put("companyId", job.getCompanyId());
         document.put("postedById", job.getPostedById());
         document.put("active", job.isActive());
-        document.put("createdAt", job.getCreatedAt());
-        document.put("updatedAt", job.getUpdatedAt());
+        
+        // Convert LocalDateTime to Date to avoid Jackson serialization issues
+        if (job.getCreatedAt() != null) {
+            document.put("createdAt", java.sql.Timestamp.valueOf(job.getCreatedAt()));
+        }
+        if (job.getUpdatedAt() != null) {
+            document.put("updatedAt", java.sql.Timestamp.valueOf(job.getUpdatedAt()));
+        }
+        
         document.put("tags", job.getTags());
         document.put("openingCount", job.getOpeningCount());
         document.put("uniqueUrl", job.getUniqueUrl());
@@ -255,18 +270,18 @@ public class ElasticsearchJobService {
     /**
      * Parse Elasticsearch search response
      */
-    private JobSearchResponse parseSearchResponse(SearchResponse response) {
+    private JobSearchResponse parseSearchResponse(SearchResponse<Map> response) {
         List<Map<String, Object>> jobs = new ArrayList<>();
         
-        for (SearchHit hit : response.getHits().getHits()) {
-            Map<String, Object> jobData = hit.getSourceAsMap();
-            jobData.put("score", hit.getScore());
+        for (Hit<Map> hit : response.hits().hits()) {
+            Map<String, Object> jobData = new HashMap<>(hit.source());
+            jobData.put("score", hit.score());
             jobs.add(jobData);
         }
         
         return JobSearchResponse.builder()
             .jobs(jobs)
-            .total(response.getHits().getTotalHits().value)
+            .total(response.hits().total().value())
             .page(0) // Will be set by controller
             .size(jobs.size())
             .build();

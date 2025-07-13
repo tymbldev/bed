@@ -4254,10 +4254,10 @@
                     "search"
                   ]
                 },
-                "description": "Auto-generated endpoint from JobSearchController",
+                "description": "Unified search endpoint that searches jobs using Elasticsearch. \nSupports keyword search, location filtering, experience filtering, company, designation, and pagination.\n\nRequest Body Fields:\n- keywords: List of search keywords (optional)\n- cityId: Filter by city ID (optional)\n- countryId: Filter by country ID (optional)\n- companyId: Filter by company ID (optional)\n- designationId: Filter by designation ID (optional)\n- minExperience: Minimum experience in years (optional)\n- maxExperience: Maximum experience in years (optional)\n- page: Page number (default: 0)\n- size: Page size (default: 20)\n\nResponse includes:\n- jobs: Array of job objects with full details\n- total: Total number of matching jobs\n- page: Current page number\n- size: Page size\n- totalPages: Total number of pages",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"example\": \"data\"\n}",
+                  "raw": "{\n  \"keywords\": [\"java\", \"spring\"],\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"companyId\": 1,\n  \"designationId\": 1,\n  \"minExperience\": 2,\n  \"maxExperience\": 5,\n  \"page\": 0,\n  \"size\": 20\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -4269,27 +4269,22 @@
                 {
                   "code": 200,
                   "name": "Success",
-                  "body": "{\n  \"message\": \"Success\"\n}"
+                  "body": "{\n  \"jobs\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Software Engineer\",\n      \"description\": \"We are looking for a Senior Software Engineer...\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designationName\": \"Senior Software Engineer\",\n      \"minSalary\": 100000,\n      \"maxSalary\": 150000,\n      \"minExperience\": 3,\n      \"maxExperience\": 7,\n      \"jobType\": \"HYBRID\",\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"companyName\": \"Google\",\n      \"postedById\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-15T10:00:00Z\",\n      \"updatedAt\": \"2024-01-15T10:00:00Z\",\n      \"tags\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n      \"openingCount\": 1,\n      \"uniqueUrl\": \"google-senior-software-engineer-2024\",\n      \"platform\": \"LinkedIn\",\n      \"score\": 1.5\n    }\n  ],\n  \"total\": 1,\n  \"page\": 0,\n  \"size\": 20,\n  \"totalPages\": 1\n}"
                 },
                 {
                   "code": 400,
                   "name": "Bad Request",
-                  "body": "{\n  \"error\": \"Bad Request\"\n}"
+                  "body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Invalid search parameters\"\n}"
                 },
                 {
                   "code": 401,
                   "name": "Unauthorized",
-                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
-                },
-                {
-                  "code": 404,
-                  "name": "Not Found",
-                  "body": "{\n  \"error\": \"Not Found\"\n}"
+                  "body": "{\n  \"error\": \"Unauthorized\",\n  \"message\": \"Authentication required\"\n}"
                 },
                 {
                   "code": 500,
                   "name": "Server Error",
-                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                  "body": "{\n  \"error\": \"Internal Server Error\",\n  \"message\": \"An error occurred during search\"\n}"
                 }
               ]
             }
