@@ -23,6 +23,11 @@ public class CompanyDataService {
     @Autowired
     private CompanyRepository companyRepository;
 
+    public CompanyDataService() {
+        // Simple constructor to ensure the service can be instantiated
+        System.out.println("CompanyDataService constructor called");
+    }
+
     /**
      * Clean up duplicate companies by name before loading new data
      */

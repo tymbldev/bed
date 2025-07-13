@@ -25,16 +25,17 @@ public interface DesignationSkillRepository extends JpaRepository<DesignationSki
     
     @Query("SELECT d.id, d.designation, d.skillName, d.skillDescription, COUNT(DISTINCT c.id) as companyCount " +
            "FROM DesignationSkill d " +
-           "LEFT JOIN com.tymbl.jobs.entity.Company c ON c.designationId = d.id " +
+           "LEFT JOIN com.tymbl.common.entity.Job j ON j.designationId = d.id " +
+           "LEFT JOIN com.tymbl.jobs.entity.Company c ON c.id = j.companyId " +
            "GROUP BY d.id, d.designation, d.skillName, d.skillDescription " +
            "ORDER BY companyCount DESC")
     List<Object[]> getDesignationStatistics();
     
     @Query("SELECT c.id, c.name, c.logoUrl, c.website, c.headquarters, COUNT(j.id) as activeJobCount " +
            "FROM com.tymbl.jobs.entity.Company c " +
-           "LEFT JOIN com.tymbl.common.entity.Job j ON j.companyId = c.id AND j.active = true " +
-           "WHERE c.designationId = :designationId " +
+           "LEFT JOIN com.tymbl.common.entity.Job j ON j.companyId = c.id AND j.active = true AND j.designationId = :designationId " +
            "GROUP BY c.id, c.name, c.logoUrl, c.website, c.headquarters " +
+           "HAVING COUNT(j.id) > 0 " +
            "ORDER BY activeJobCount DESC")
     List<Object[]> getTopCompaniesByDesignation(@Param("designationId") Long designationId);
 } 
