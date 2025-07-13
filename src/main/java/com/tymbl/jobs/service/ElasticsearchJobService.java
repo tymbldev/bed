@@ -2,7 +2,10 @@ package com.tymbl.jobs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.Job;
+import com.tymbl.common.entity.Job.JobType;
+import com.tymbl.common.entity.JobApprovalStatus;
 import com.tymbl.common.service.DropdownService;
+import com.tymbl.jobs.dto.JobResponse;
 import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,8 @@ import co.elastic.clients.elasticsearch._types.SortOrder;
 import co.elastic.clients.elasticsearch._types.FieldValue;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -271,12 +276,12 @@ public class ElasticsearchJobService {
      * Parse Elasticsearch search response
      */
     private JobSearchResponse parseSearchResponse(SearchResponse<Map> response) {
-        List<Map<String, Object>> jobs = new ArrayList<>();
+        List<JobResponse> jobs = new ArrayList<>();
         
         for (Hit<Map> hit : response.hits().hits()) {
             Map<String, Object> jobData = new HashMap<>(hit.source());
             jobData.put("score", hit.score());
-            jobs.add(jobData);
+            jobs.add(convertMapToJobResponse(jobData));
         }
         
         return JobSearchResponse.builder()
@@ -285,5 +290,94 @@ public class ElasticsearchJobService {
             .page(0) // Will be set by controller
             .size(jobs.size())
             .build();
+    }
+
+    /**
+     * Convert Map from Elasticsearch to JobResponse
+     */
+    private JobResponse convertMapToJobResponse(Map<String, Object> jobData) {
+        JobResponse response = new JobResponse();
+        
+        // Basic fields
+        if (jobData.get("id") != null) {
+            response.setId(Long.valueOf(jobData.get("id").toString()));
+        }
+        if (jobData.get("title") != null) {
+            response.setTitle(jobData.get("title").toString());
+        }
+        if (jobData.get("description") != null) {
+            response.setDescription(jobData.get("description").toString());
+        }
+        if (jobData.get("cityId") != null) {
+            response.setCityId(Long.valueOf(jobData.get("cityId").toString()));
+        }
+        if (jobData.get("countryId") != null) {
+            response.setCountryId(Long.valueOf(jobData.get("countryId").toString()));
+        }
+        if (jobData.get("designationId") != null) {
+            response.setDesignationId(Long.valueOf(jobData.get("designationId").toString()));
+        }
+        if (jobData.get("designationName") != null) {
+            response.setDesignation(jobData.get("designationName").toString());
+        }
+        if (jobData.get("minSalary") != null) {
+            response.setMinSalary(new BigDecimal(jobData.get("minSalary").toString()));
+        }
+        if (jobData.get("maxSalary") != null) {
+            response.setMaxSalary(new BigDecimal(jobData.get("maxSalary").toString()));
+        }
+        if (jobData.get("minExperience") != null) {
+            response.setMinExperience(Integer.valueOf(jobData.get("minExperience").toString()));
+        }
+        if (jobData.get("maxExperience") != null) {
+            response.setMaxExperience(Integer.valueOf(jobData.get("maxExperience").toString()));
+        }
+        if (jobData.get("jobType") != null) {
+            response.setJobType(JobType.valueOf(jobData.get("jobType").toString()));
+        }
+        if (jobData.get("currencyId") != null) {
+            response.setCurrencyId(Long.valueOf(jobData.get("currencyId").toString()));
+        }
+        if (jobData.get("companyId") != null) {
+            response.setCompanyId(Long.valueOf(jobData.get("companyId").toString()));
+        }
+        if (jobData.get("companyName") != null) {
+            response.setCompany(jobData.get("companyName").toString());
+        }
+        if (jobData.get("postedById") != null) {
+            response.setPostedBy(Long.valueOf(jobData.get("postedById").toString()));
+        }
+        if (jobData.get("active") != null) {
+            response.setActive(Boolean.valueOf(jobData.get("active").toString()));
+        }
+        if (jobData.get("createdAt") != null) {
+            response.setCreatedAt(LocalDateTime.parse(jobData.get("createdAt").toString()));
+        }
+        if (jobData.get("updatedAt") != null) {
+            response.setUpdatedAt(LocalDateTime.parse(jobData.get("updatedAt").toString()));
+        }
+        if (jobData.get("tags") != null) {
+            @SuppressWarnings("unchecked")
+            Set<String> tags = new HashSet<>((List<String>) jobData.get("tags"));
+            response.setTags(tags);
+        }
+        if (jobData.get("openingCount") != null) {
+            response.setOpeningCount(Integer.valueOf(jobData.get("openingCount").toString()));
+        }
+        if (jobData.get("uniqueUrl") != null) {
+            response.setUniqueUrl(jobData.get("uniqueUrl").toString());
+        }
+        if (jobData.get("platform") != null) {
+            response.setPlatform(jobData.get("platform").toString());
+        }
+        
+        // Set default values for fields not in Elasticsearch
+        response.setIsSuperAdminPosted(false);
+        response.setApproved(JobApprovalStatus.APPROVED.getValue());
+        response.setReferrerCount(0);
+        response.setUserRole("VIEWER");
+        response.setActualPostedBy(response.getPostedBy());
+        
+        return response;
     }
 } 

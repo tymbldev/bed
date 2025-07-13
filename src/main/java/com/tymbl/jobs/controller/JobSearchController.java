@@ -60,13 +60,32 @@ public class JobSearchController {
                           "    {\n" +
                           "      \"id\": 1,\n" +
                           "      \"title\": \"Software Engineer\",\n" +
+                          "      \"description\": \"We are looking for a talented software engineer...\",\n" +
                           "      \"company\": \"Google\",\n" +
+                          "      \"designation\": \"Software Engineer\",\n" +
                           "      \"minSalary\": 100000,\n" +
                           "      \"maxSalary\": 150000,\n" +
                           "      \"minExperience\": 2,\n" +
                           "      \"maxExperience\": 5,\n" +
                           "      \"jobType\": \"HYBRID\",\n" +
-                          "      \"score\": 1.5\n" +
+                          "      \"cityId\": 1,\n" +
+                          "      \"countryId\": 1,\n" +
+                          "      \"companyId\": 1,\n" +
+                          "      \"designationId\": 1,\n" +
+                          "      \"currencyId\": 1,\n" +
+                          "      \"postedBy\": 1,\n" +
+                          "      \"active\": true,\n" +
+                          "      \"createdAt\": \"2024-01-01T10:00:00\",\n" +
+                          "      \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
+                          "      \"tags\": [\"Java\", \"Spring\", \"Microservices\"],\n" +
+                          "      \"openingCount\": 5,\n" +
+                          "      \"uniqueUrl\": \"https://careers.google.com/jobs/123\",\n" +
+                          "      \"platform\": \"Google Careers\",\n" +
+                          "      \"approved\": 1,\n" +
+                          "      \"referrerCount\": 2,\n" +
+                          "      \"userRole\": \"VIEWER\",\n" +
+                          "      \"actualPostedBy\": 1,\n" +
+                          "      \"isSuperAdminPosted\": false\n" +
                           "    }\n" +
                           "  ],\n" +
                           "  \"total\": 1,\n" +

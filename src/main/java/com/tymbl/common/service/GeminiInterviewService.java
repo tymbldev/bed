@@ -205,6 +205,35 @@ public class GeminiInterviewService {
         }
     }
 
+    public List<Map<String, Object>> generateComprehensiveTechSkills() {
+        try {
+            log.info("Generating comprehensive list of tech skills using Gemini");
+            String prompt = buildComprehensiveTechSkillsPrompt();
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+
+            if (response.getStatusCodeValue() == 200) {
+                return parseSkillsResponse(response.getBody());
+            } else {
+                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                return new ArrayList<>();
+            }
+        } catch (Exception e) {
+            log.error("Error generating tech skills", e);
+            return new ArrayList<>();
+        }
+    }
+
     // Helper methods
     private String buildTopicGenerationPrompt(String designationName) {
         return "Generate top 10 interview topics for the designation: " + designationName + 
@@ -282,6 +311,14 @@ public class GeminiInterviewService {
         prompt.append("Make the content comprehensive, well-structured, and engaging for users.");
         
         return prompt.toString();
+    }
+
+    private String buildComprehensiveTechSkillsPrompt() {
+        return "Generate a comprehensive, up-to-date, and diverse list of technology skills relevant for the tech industry. " +
+               "Include programming languages, frameworks, libraries, cloud platforms, devops tools, AI/ML, data engineering, security, frontend, backend, mobile, testing, and emerging technologies. " +
+               "For each skill, provide: 'name', 'category' (e.g. Programming Language, Framework, Cloud, DevOps, AI/ML, Data, Security, Frontend, Backend, Mobile, Testing, Emerging Tech), and a one-line 'description'. " +
+               "Output as a JSON array of objects. Example: [{\"name\": \"Python\", \"category\": \"Programming Language\", \"description\": \"A versatile high-level programming language used for web, data, and AI.\"}, ...]. " +
+               "Include at least 50 skills, covering both popular and niche areas. Use correct spelling and avoid duplicates.";
     }
 
     private Map<String, Object> buildRequestBody(String prompt) {
@@ -406,6 +443,39 @@ public class GeminiInterviewService {
             return new ArrayList<>();
         } catch (Exception e) {
             log.error("Error parsing detailed content response", e);
+            return new ArrayList<>();
+        }
+    }
+
+    private List<Map<String, Object>> parseSkillsResponse(String responseBody) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        String jsonText = extractJsonFromText(generatedText);
+                        JsonNode skillsData = objectMapper.readTree(jsonText);
+                        List<Map<String, Object>> skills = new ArrayList<>();
+                        if (skillsData.isArray()) {
+                            for (JsonNode skillNode : skillsData) {
+                                Map<String, Object> skill = new HashMap<>();
+                                skill.put("name", getStringValue(skillNode, "name"));
+                                skill.put("category", getStringValue(skillNode, "category"));
+                                skill.put("description", getStringValue(skillNode, "description"));
+                                skills.add(skill);
+                            }
+                        }
+                        return skills;
+                    }
+                }
+            }
+            return new ArrayList<>();
+        } catch (Exception e) {
+            log.error("Error parsing skills response", e);
             return new ArrayList<>();
         }
     }

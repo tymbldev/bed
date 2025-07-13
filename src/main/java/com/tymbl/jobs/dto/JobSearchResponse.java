@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
 
 import java.util.List;
-import java.util.Map;
 
 @Data
 @Builder
@@ -14,7 +13,7 @@ import java.util.Map;
 @AllArgsConstructor
 public class JobSearchResponse {
     
-    private List<Map<String, Object>> jobs;
+    private List<JobResponse> jobs;
     
     private Long total;
     

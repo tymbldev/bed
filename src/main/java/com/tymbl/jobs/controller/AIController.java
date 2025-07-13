@@ -6,6 +6,9 @@ import com.tymbl.jobs.service.CompanyCrawlerService;
 import com.tymbl.jobs.service.CompanyService;
 import com.tymbl.jobs.dto.CompanyResponse;
 import com.tymbl.interview.service.ComprehensiveQuestionService;
+import com.tymbl.common.entity.Skill;
+import com.tymbl.common.repository.SkillRepository;
+import com.tymbl.common.service.GeminiService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -23,6 +26,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.ArrayList;
 
 @RestController
 @CrossOrigin(
@@ -46,6 +50,8 @@ public class AIController {
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
     private final ComprehensiveQuestionService comprehensiveQuestionService;
+    private final SkillRepository skillRepository;
+    private final GeminiService geminiService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -302,6 +308,61 @@ public class AIController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Error during question generation: " + e.getMessage());
             return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/skills/generate-and-save")
+    @Operation(summary = "Generate and save more tech skills using AI", description = "Uses Gemini to generate a comprehensive list of tech skills and saves new ones to the Skill table.")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Skills generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"new_skills_added\": 10,\n" +
+                        "  \"total_skills_generated\": 50,\n" +
+                        "  \"added_skills\": [\n" +
+                        "    {\"name\": \"Rust\", \"category\": \"Programming Language\", \"description\": \"A fast, safe systems programming language.\"}\n" +
+                        "  ]\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateAndSaveTechSkills() {
+        try {
+            log.info("Generating and saving more tech skills using Gemini");
+            List<Map<String, Object>> skills = geminiService.generateComprehensiveTechSkills();
+            int newSkills = 0;
+            List<Skill> addedSkills = new ArrayList<>();
+            for (Map<String, Object> skillData : skills) {
+                String name = (String) skillData.get("name");
+                if (name == null || name.trim().isEmpty()) continue;
+                if (!skillRepository.existsByNameIgnoreCase(name.trim())) {
+                    Skill skill = new Skill();
+                    skill.setName(name.trim());
+                    skill.setCategory((String) skillData.get("category"));
+                    skill.setDescription((String) skillData.get("description"));
+                    skill.setEnabled(true);
+                    skill.setUsageCount(0L);
+                    skillRepository.save(skill);
+                    addedSkills.add(skill);
+                    newSkills++;
+                }
+            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("new_skills_added", newSkills);
+            result.put("total_skills_generated", skills.size());
+            result.put("added_skills", addedSkills);
+            result.put("message", "Skills generated and saved successfully");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating and saving tech skills", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
         }
     }
 
