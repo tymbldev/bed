@@ -24,6 +24,12 @@ public class InterviewQuestion {
     @Column(name = "skill_name", nullable = false)
     private String skillName;
 
+    @Column(name = "topic_id")
+    private Long topicId;
+
+    @Column(name = "topic_name")
+    private String topicName;
+
     @Column(nullable = false, columnDefinition = "TEXT")
     private String question;
 
@@ -47,6 +53,18 @@ public class InterviewQuestion {
 
     @Column(name = "code_examples", columnDefinition = "LONGTEXT")
     private String codeExamples;
+
+    @Column(name = "java_code", columnDefinition = "LONGTEXT")
+    private String javaCode;
+
+    @Column(name = "python_code", columnDefinition = "LONGTEXT")
+    private String pythonCode;
+
+    @Column(name = "cpp_code", columnDefinition = "LONGTEXT")
+    private String cppCode;
+
+    @Column(name = "coding")
+    private Boolean coding;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

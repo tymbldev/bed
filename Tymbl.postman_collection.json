@@ -5205,6 +5205,92 @@
               ]
             }
           ]
+        },
+        {
+          "name": "AI Utilities",
+          "description": "Endpoints for AI-powered skill/topic/question generation",
+          "item": [
+            {
+              "name": "POST /api/v1/ai/skills/{skillName}/topics/generate-and-save",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/generate-and-save",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "generate-and-save" ],
+                  "variable": [ { "key": "skillName", "value": "Java" } ]
+                },
+                "description": "Generate and save topics for a technical skill using Gemini."
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"skill_name\": \"Java\",\n  \"topics_added\": 8,\n  \"topics\": [{\"topic\": \"Collections\", \"description\": \"Data structures in Java\"}],\n  \"message\": \"Topics generated and saved successfully\"\n}"
+                },
+                { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
+                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+              ]
+            },
+            {
+              "name": "POST /api/v1/ai/skills/{skillName}/topics/{topicName}/questions/generate-and-save",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/{{topicName}}/questions/generate-and-save?numQuestions=10",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "{{topicName}}", "questions", "generate-and-save" ],
+                  "query": [ { "key": "numQuestions", "value": "10" } ],
+                  "variable": [ { "key": "skillName", "value": "Java" }, { "key": "topicName", "value": "Collections" } ]
+                },
+                "description": "Generate and save interview questions for a skill and topic using Gemini."
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"skill_name\": \"Java\",\n  \"topic_name\": \"Collections\",\n  \"questions_added\": 10,\n  \"questions\": [{\"question\": \"Explain Java Collections Framework\", \"answer\": \"<div>...</div>\"}],\n  \"message\": \"Questions generated and (optionally) saved successfully\"\n}"
+                },
+                { "code": 404, "name": "Skill or topic not found", "body": "{\n  \"error\": \"Skill or topic not found\"\n}" },
+                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+              ]
+            },
+            {
+              "name": "POST /api/v1/ai/skills/{skillName}/topics/questions/generate-and-save",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Content-Type", "value": "application/json" },
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/questions/generate-and-save?numQuestions=10",
+                  "host": [ "{{baseUrl}}" ],
+                  "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "questions", "generate-and-save" ],
+                  "query": [ { "key": "numQuestions", "value": "10" } ],
+                  "variable": [ { "key": "skillName", "value": "Java" } ]
+                },
+                "description": "Generate and save interview questions for all topics of a skill using Gemini. Loops through all topics and uses the same logic as the single-topic endpoint."
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"skill_name\": \"Java\",\n  \"results\": [\n    {\"topic_name\": \"Collections\", \"questions_added\": 10, \"questions\": [...]},\n    {\"topic_name\": \"Multithreading\", \"questions_added\": 8, \"questions\": [...]}\n  ],\n  \"message\": \"Questions generated and (optionally) saved for all topics\"\n}"
+                },
+                { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
+                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+              ]
+            }
+          ]
         }
       ]
     },

@@ -314,3 +314,13 @@ CREATE TABLE IF NOT EXISTS referrer_feedback (
     FOREIGN KEY (applicant_id) REFERENCES users(id)
 );
 
+-- Skill Topics Table
+CREATE TABLE IF NOT EXISTS skill_topics (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    skill_id BIGINT NOT NULL,
+    topic VARCHAR(255) NOT NULL,
+    description TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT fk_skill_topic_skill FOREIGN KEY (skill_id) REFERENCES skills(id) ON DELETE CASCADE
+);
+

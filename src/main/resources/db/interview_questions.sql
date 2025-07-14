@@ -11,6 +11,14 @@ ALTER TABLE interview_questions AUTO_INCREMENT = 1;
 -- Enable foreign key checks
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- Add migration SQL to add topic_id and topic_name columns to interview_questions table. topic_id is BIGINT, topic_name is VARCHAR(255).
+ALTER TABLE interview_questions ADD COLUMN topic_id BIGINT;
+ALTER TABLE interview_questions ADD COLUMN topic_name VARCHAR(255);
+ALTER TABLE interview_questions ADD COLUMN java_code LONGTEXT;
+ALTER TABLE interview_questions ADD COLUMN python_code LONGTEXT;
+ALTER TABLE interview_questions ADD COLUMN cpp_code LONGTEXT;
+ALTER TABLE interview_questions ADD COLUMN coding BOOLEAN;
+
 -- Questions for "Java Collections Framework" topic (topic_id = 1)
 INSERT IGNORE INTO interview_questions (topic_id, question, answer, difficulty_level) VALUES
 (1, 'What is the difference between ArrayList and LinkedList?', 

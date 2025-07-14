@@ -234,6 +234,119 @@ public class GeminiInterviewService {
         }
     }
 
+    public List<Map<String, Object>> generateTopicsForSkill(String skillName) {
+        try {
+            log.info("Generating topics for skill: {}", skillName);
+            String prompt = "Generate a list of 8-12 important topics for the technical skill '" + skillName + "'. " +
+                    "Exclude any interpersonal or soft skills such as Leadership, Communication, Teamwork, Collaboration, Problem Solving, Critical Thinking, Creativity, Adaptability, Work Ethic, Time Management, Conflict Resolution, Empathy, Emotional Intelligence, Negotiation, Decision Making, Motivation, Responsibility, Interpersonal Skills, Presentation Skills, Active Listening, etc. " +
+                    "Focus only on technical topics relevant to the skill.\n" +
+                    "\n" +
+                    "INSTRUCTIONS:\n" +
+                    "- Do NOT include any soft skills, people skills, or behavioral skills.\n" +
+                    "- Only include topics that are technical, conceptual, or practical aspects of the skill.\n" +
+                    "- Example of what NOT to include: Leadership, Communication, Teamwork, Empathy, Time Management, etc.\n" +
+                    "- Example of what TO include for Java: Collections, Multithreading, Java 8 Features, Exception Handling, Streams API, JVM Internals, etc.\n" +
+                    "\n" +
+                    "Return as a JSON array of objects with 'topic' and 'description' fields. Example: [{\"topic\":\"Collections\",\"description\":\"Data structures in Java\"}, ...]";
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+
+            if (response.getStatusCodeValue() == 200) {
+                JsonNode responseNode = objectMapper.readTree(response.getBody());
+                JsonNode candidates = responseNode.get("candidates");
+                if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                    JsonNode content = candidates.get(0).get("content");
+                    if (content != null) {
+                        JsonNode parts = content.get("parts");
+                        if (parts != null && parts.isArray() && parts.size() > 0) {
+                            String generatedText = parts.get(0).get("text").asText();
+                            String jsonText = extractJsonFromText(generatedText);
+                            JsonNode topicsData = objectMapper.readTree(jsonText);
+                            List<Map<String, Object>> topics = new ArrayList<>();
+                            if (topicsData.isArray()) {
+                                for (JsonNode topicNode : topicsData) {
+                                    String topic = getStringValue(topicNode, "topic");
+                                    if (topic != null && !topic.trim().isEmpty()) {
+                                        Map<String, Object> topicMap = new HashMap<>();
+                                        topicMap.put("topic", topic);
+                                        topicMap.put("description", getStringValue(topicNode, "description"));
+                                        topics.add(topicMap);
+                                    }
+                                }
+                            }
+                            return topics;
+                        }
+                    }
+                }
+            } else {
+                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+            }
+        } catch (Exception e) {
+            log.error("Error generating topics for skill: {}", skillName, e);
+        }
+        return new ArrayList<>();
+    }
+
+    public List<Map<String, Object>> generateQuestionsForSkillAndTopic(String skillName, String topicName, int numQuestions) {
+        try {
+            log.info("Generating interview questions for skill: {} and topic: {}", skillName, topicName);
+            StringBuilder prompt = new StringBuilder();
+            prompt.append("Generate ").append(numQuestions).append(" comprehensive, detailed interview questions for the skill '")
+                  .append(skillName).append("' on the topic '").append(topicName).append("'.\n\n");
+            prompt.append("REQUIREMENTS:\n");
+            prompt.append("1. Each question should be well-elaborated and cover different aspects of the topic.\n");
+            prompt.append("2. Provide a detailed answer for each question in HTML format (use <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> tags as needed).\n");
+            prompt.append("3. Include code examples where applicable.\n");
+            prompt.append("4. Vary difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED).\n");
+            prompt.append("5. Include different question types (THEORETICAL, PRACTICAL, PROBLEM_SOLVING, SYSTEM_DESIGN).\n");
+            prompt.append("6. Each question should be engaging and suitable for technical interviews.\n\n");
+            prompt.append("OUTPUT FORMAT (JSON array):\n");
+            prompt.append("[\n");
+            prompt.append("  {\n");
+            prompt.append("    \"question\": \"Detailed question text\",\n");
+            prompt.append("    \"answer\": \"<div>HTML formatted answer</div>\",\n");
+            prompt.append("    \"difficulty_level\": \"BEGINNER|INTERMEDIATE|ADVANCED\",\n");
+            prompt.append("    \"question_type\": \"THEORETICAL|PRACTICAL|PROBLEM_SOLVING|SYSTEM_DESIGN\",\n");
+            prompt.append("    \"tags\": \"tag1,tag2,tag3\"\n");
+            prompt.append("  }\n");
+            prompt.append("]\n\n");
+            prompt.append("Make the questions and answers comprehensive, engaging, and suitable for technical interviews. Focus on real-world scenarios and practical applications of the topic within the skill.\n");
+
+            Map<String, Object> requestBody = buildRequestBody(prompt.toString());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+
+            if (response.getStatusCodeValue() == 200) {
+                String responseBody = response.getBody();
+                // Use the same parsing logic as for other question generation
+                return parseQuestionsResponse(responseBody);
+            } else {
+                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+            }
+        } catch (Exception e) {
+            log.error("Error generating questions for skill and topic: {} / {}", skillName, topicName, e);
+        }
+        return new ArrayList<>();
+    }
+
     // Helper methods
     private String buildTopicGenerationPrompt(String designationName) {
         return "Generate top 10 interview topics for the designation: " + designationName + 

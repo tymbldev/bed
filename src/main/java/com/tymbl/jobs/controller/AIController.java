@@ -9,6 +9,10 @@ import com.tymbl.interview.service.ComprehensiveQuestionService;
 import com.tymbl.common.entity.Skill;
 import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.common.service.GeminiService;
+import com.tymbl.common.entity.SkillTopic;
+import com.tymbl.common.repository.SkillTopicRepository;
+import com.tymbl.interview.entity.InterviewQuestion;
+import com.tymbl.interview.repository.InterviewQuestionRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -52,6 +56,8 @@ public class AIController {
     private final ComprehensiveQuestionService comprehensiveQuestionService;
     private final SkillRepository skillRepository;
     private final GeminiService geminiService;
+    private final SkillTopicRepository skillTopicRepository;
+    private final InterviewQuestionRepository interviewQuestionRepository;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -364,6 +370,319 @@ public class AIController {
             error.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(error);
         }
+    }
+
+    @PostMapping("/skills/{skillName}/topics/generate-and-save")
+    @Operation(summary = "Generate and save topics for a technical skill", description = "Uses Gemini to generate topics for a given technical skill and saves them to the SkillTopic table. Excludes interpersonal/soft skills.")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Topics generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"skill_name\": \"Java\",\n" +
+                        "  \"topics_added\": 8,\n" +
+                        "  \"topics\": [\n" +
+                        "    {\"topic\": \"Collections\", \"description\": \"Data structures in Java\"}\n" +
+                        "  ]\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Skill not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForSkill(@PathVariable String skillName) {
+        try {
+            Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
+            if (skill == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Skill not found: " + skillName);
+                return ResponseEntity.status(404).body(error);
+            }
+            List<Map<String, Object>> topics = geminiService.generateTopicsForSkill(skill.getName());
+            List<SkillTopic> savedTopics = new ArrayList<>();
+            for (Map<String, Object> topicData : topics) {
+                String topic = (String) topicData.get("topic");
+                if (topic == null || topic.trim().isEmpty()) continue;
+                // Avoid duplicates for the same skill
+                boolean exists = false;
+                for (SkillTopic st : savedTopics) {
+                    if (st.getTopic().equalsIgnoreCase(topic.trim())) {
+                        exists = true;
+                        break;
+                    }
+                }
+                if (!exists) {
+                    SkillTopic skillTopic = new SkillTopic();
+                    skillTopic.setSkill(skill);
+                    skillTopic.setTopic(topic.trim());
+                    skillTopic.setDescription((String) topicData.get("description"));
+                    savedTopics.add(skillTopic);
+                }
+            }
+            // Save all topics in batch
+            skillTopicRepository.deleteBySkill(skill); // Remove old topics for this skill
+            skillTopicRepository.saveAll(savedTopics);
+            Map<String, Object> result = new HashMap<>();
+            result.put("skill_name", skill.getName());
+            result.put("topics_added", savedTopics.size());
+            result.put("topics", topics);
+            result.put("message", "Topics generated and saved successfully");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating and saving topics for skill", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+
+    @PostMapping("/skills/{skillName}/topics/{topicName}/questions/generate-and-save")
+    @Operation(summary = "Generate and save interview questions for a skill and topic", description = "Uses Gemini to generate summary and detailed, HTML-rich interview questions for a given skill and topic, and saves them to the InterviewQuestion table. Coding questions get code in Java, Python, and C++.")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Questions generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"skill_name\": \"Java\",\n" +
+                        "  \"topic_name\": \"Collections\",\n" +
+                        "  \"questions_added\": 10,\n" +
+                        "  \"questions\": [\n" +
+                        "    {\"question\": \"Explain Java Collections Framework\", \"answer\": \"<div>...</div>\", \"coding\": true, \"javaCode\": \"...\", \"pythonCode\": \"...\", \"cppCode\": \"...\"}\n" +
+                        "  ]\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Skill or topic not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateAndSaveQuestionsForSkillAndTopic(
+            @PathVariable String skillName,
+            @PathVariable String topicName,
+            @RequestParam(defaultValue = "10") int numQuestions) {
+        try {
+            Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
+            if (skill == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Skill not found: " + skillName);
+                return ResponseEntity.status(404).body(error);
+            }
+            SkillTopic skillTopic = skillTopicRepository.findBySkill(skill).stream()
+                .filter(t -> t.getTopic().equalsIgnoreCase(topicName.trim()))
+                .findFirst().orElse(null);
+            if (skillTopic == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Topic not found for skill: " + topicName);
+                return ResponseEntity.status(404).body(error);
+            }
+            // Step 1: Generate summary questions for skill+topic
+            List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
+            List<InterviewQuestion> savedQuestions = new ArrayList<>();
+            List<Map<String, Object>> responseQuestions = new ArrayList<>();
+            for (Map<String, Object> q : summaryQuestions) {
+                String questionText = (String) q.get("question");
+                if (questionText == null || questionText.trim().isEmpty()) continue;
+                // Step 2: Generate detailed answer
+                List<Map<String, Object>> detailedContentList = geminiService.generateDetailedQuestionContent(skill.getName(), questionText);
+                Map<String, Object> detailedContent = detailedContentList.isEmpty() ? new HashMap<>() : detailedContentList.get(0);
+                String answer = (String) detailedContent.getOrDefault("detailed_answer", "");
+                String htmlContent = (String) detailedContent.getOrDefault("html_content", answer);
+                String codeExamples = (String) detailedContent.getOrDefault("code_examples", "");
+                // Detect if coding question
+                boolean isCoding = false;
+                String questionType = (String) q.get("question_type");
+                String tags = (String) q.get("tags");
+                if ((questionType != null && questionType.toLowerCase().contains("coding")) ||
+                    (tags != null && tags.toLowerCase().contains("coding")) ||
+                    (questionText.toLowerCase().contains("code") || questionText.toLowerCase().contains("implement") || questionText.toLowerCase().contains("write a function"))) {
+                    isCoding = true;
+                }
+                String javaCode = null, pythonCode = null, cppCode = null;
+                if (isCoding) {
+                    // Step 3: Generate code in Java, Python, C++
+                    javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
+                    pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
+                    cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
+                }
+                InterviewQuestion iq = InterviewQuestion.builder()
+                    .skillId(skill.getId())
+                    .skillName(skill.getName())
+                    .topicId(skillTopic.getId())
+                    .topicName(skillTopic.getTopic())
+                    .question(questionText)
+                    .answer(answer)
+                    .difficultyLevel((String) q.get("difficulty_level"))
+                    .questionType(questionType)
+                    .tags(tags)
+                    .htmlContent(htmlContent)
+                    .codeExamples(codeExamples)
+                    .javaCode(javaCode)
+                    .pythonCode(pythonCode)
+                    .cppCode(cppCode)
+                    .coding(isCoding)
+                    .build();
+                savedQuestions.add(iq);
+                Map<String, Object> respQ = new HashMap<>(q);
+                respQ.put("answer", answer);
+                respQ.put("htmlContent", htmlContent);
+                respQ.put("codeExamples", codeExamples);
+                respQ.put("coding", isCoding);
+                respQ.put("javaCode", javaCode);
+                respQ.put("pythonCode", pythonCode);
+                respQ.put("cppCode", cppCode);
+                responseQuestions.add(respQ);
+            }
+            // interviewQuestionRepository.saveAll(savedQuestions); // Uncomment to persist
+            Map<String, Object> result = new HashMap<>();
+            result.put("skill_name", skill.getName());
+            result.put("topic_name", skillTopic.getTopic());
+            result.put("questions_added", savedQuestions.size());
+            result.put("questions", responseQuestions);
+            result.put("message", "Questions generated and (optionally) saved successfully");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating and saving questions for skill and topic", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+
+    @PostMapping("/skills/{skillName}/topics/questions/generate-and-save")
+    @Operation(summary = "Generate and save interview questions for all topics of a skill", description = "Loops through all topics for a skill and generates (and saves) questions for each topic using Gemini. Uses the same logic as the single-topic endpoint.")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Questions generated and saved for all topics successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"skill_name\": \"Java\",\n" +
+                        "  \"results\": [\n" +
+                        "    {\"topic_name\": \"Collections\", \"questions_added\": 10, \"questions\": [...]},\n" +
+                        "    {\"topic_name\": \"Multithreading\", \"questions_added\": 8, \"questions\": [...]}\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Questions generated and (optionally) saved for all topics\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Skill not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateAndSaveQuestionsForAllTopicsOfSkill(
+            @PathVariable String skillName,
+            @RequestParam(defaultValue = "10") int numQuestions) {
+        try {
+            Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
+            if (skill == null) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Skill not found: " + skillName);
+                return ResponseEntity.status(404).body(error);
+            }
+            List<SkillTopic> topics = skillTopicRepository.findBySkill(skill);
+            List<Map<String, Object>> results = new ArrayList<>();
+            for (SkillTopic topic : topics) {
+                // Reuse the logic from generateAndSaveQuestionsForSkillAndTopic
+                Map<String, Object> topicResult = generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions);
+                results.add(topicResult);
+            }
+            Map<String, Object> result = new HashMap<>();
+            result.put("skill_name", skill.getName());
+            result.put("results", results);
+            result.put("message", "Questions generated and (optionally) saved for all topics");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating and saving questions for all topics of skill", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
+    }
+
+    // Internal helper to reuse the logic for a single topic
+    private Map<String, Object> generateQuestionsForSkillAndTopicInternal(Skill skill, SkillTopic skillTopic, int numQuestions) {
+        List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
+        List<InterviewQuestion> savedQuestions = new ArrayList<>();
+        List<Map<String, Object>> responseQuestions = new ArrayList<>();
+        for (Map<String, Object> q : summaryQuestions) {
+            String questionText = (String) q.get("question");
+            if (questionText == null || questionText.trim().isEmpty()) continue;
+            List<Map<String, Object>> detailedContentList = geminiService.generateDetailedQuestionContent(skill.getName(), questionText);
+            Map<String, Object> detailedContent = detailedContentList.isEmpty() ? new HashMap<>() : detailedContentList.get(0);
+            String answer = (String) detailedContent.getOrDefault("detailed_answer", "");
+            String htmlContent = (String) detailedContent.getOrDefault("html_content", answer);
+            String codeExamples = (String) detailedContent.getOrDefault("code_examples", "");
+            boolean isCoding = false;
+            String questionType = (String) q.get("question_type");
+            String tags = (String) q.get("tags");
+            if ((questionType != null && questionType.toLowerCase().contains("coding")) ||
+                (tags != null && tags.toLowerCase().contains("coding")) ||
+                (questionText.toLowerCase().contains("code") || questionText.toLowerCase().contains("implement") || questionText.toLowerCase().contains("write a function"))) {
+                isCoding = true;
+            }
+            String javaCode = null, pythonCode = null, cppCode = null;
+            if (isCoding) {
+                javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
+                pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
+                cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
+            }
+            InterviewQuestion iq = InterviewQuestion.builder()
+                .skillId(skill.getId())
+                .skillName(skill.getName())
+                .topicId(skillTopic.getId())
+                .topicName(skillTopic.getTopic())
+                .question(questionText)
+                .answer(answer)
+                .difficultyLevel((String) q.get("difficulty_level"))
+                .questionType(questionType)
+                .tags(tags)
+                .htmlContent(htmlContent)
+                .codeExamples(codeExamples)
+                .javaCode(javaCode)
+                .pythonCode(pythonCode)
+                .cppCode(cppCode)
+                .coding(isCoding)
+                .build();
+            savedQuestions.add(iq);
+            Map<String, Object> respQ = new HashMap<>(q);
+            respQ.put("answer", answer);
+            respQ.put("htmlContent", htmlContent);
+            respQ.put("codeExamples", codeExamples);
+            respQ.put("coding", isCoding);
+            respQ.put("javaCode", javaCode);
+            respQ.put("pythonCode", pythonCode);
+            respQ.put("cppCode", cppCode);
+            responseQuestions.add(respQ);
+        }
+        // interviewQuestionRepository.saveAll(savedQuestions); // Uncomment to persist
+        Map<String, Object> topicResult = new HashMap<>();
+        topicResult.put("topic_name", skillTopic.getTopic());
+        topicResult.put("questions_added", savedQuestions.size());
+        topicResult.put("questions", responseQuestions);
+        return topicResult;
+    }
+
+    // Helper for code generation
+    private String generateCodeWithGemini(String skillName, String questionText, String language) {
+        try {
+            String prompt = "Write a working, well-commented solution in " + language + " for the following coding interview question. Only return the code, no explanation.\n\n" +
+                    "SKILL: " + skillName + "\nQUESTION: " + questionText;
+            List<Map<String, Object>> codeResp = geminiService.generateDetailedQuestionContent(skillName, prompt);
+            if (!codeResp.isEmpty()) {
+                String code = (String) codeResp.get(0).getOrDefault("detailed_answer", "");
+                if (code.isEmpty()) code = (String) codeResp.get(0).getOrDefault("html_content", "");
+                return code;
+            }
+        } catch (Exception e) {
+            log.warn("Error generating code for {} in {}: {}", questionText, language, e.getMessage());
+        }
+        return null;
     }
 
     // ============================================================================

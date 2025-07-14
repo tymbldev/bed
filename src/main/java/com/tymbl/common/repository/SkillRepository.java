@@ -7,6 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import javax.persistence.QueryHint;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface SkillRepository extends JpaRepository<Skill, Long> {
@@ -20,4 +21,6 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
     List<Skill> findByCategory(String category);
     
     List<Skill> findByNameContainingIgnoreCase(String name);
+
+    Optional<Skill> findByNameIgnoreCase(String name);
 } 

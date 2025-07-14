@@ -48,6 +48,14 @@ public class GeminiService {
         return geminiInterviewService.generateComprehensiveTechSkills();
     }
     
+    public List<Map<String, Object>> generateTopicsForSkill(String skillName) {
+        return geminiInterviewService.generateTopicsForSkill(skillName);
+    }
+    
+    public List<Map<String, Object>> generateQuestionsForSkillAndTopic(String skillName, String topicName, int numQuestions) {
+        return geminiInterviewService.generateQuestionsForSkillAndTopic(skillName, topicName, numQuestions);
+    }
+    
     // Designation-related methods (if needed)
     public List<Map<String, Object>> generateDesignationsForDepartment(String departmentName) {
         return geminiInterviewService.generateDesignationsForDepartment(departmentName);
