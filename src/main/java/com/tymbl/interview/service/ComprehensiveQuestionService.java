@@ -106,7 +106,7 @@ public class ComprehensiveQuestionService {
         
         try {
             // Step 1: Generate 30 summary questions
-            List<Map<String, Object>> summaryQuestions = geminiService.generateComprehensiveInterviewQuestions(skill.getName(), 30);
+            List<Map<String, Object>> summaryQuestions = geminiService.generateComprehensiveInterviewQuestions(skill.getName(), 100);
             
             if (summaryQuestions.isEmpty()) {
                 log.warn("No summary questions generated for skill: {}", skill.getName());
