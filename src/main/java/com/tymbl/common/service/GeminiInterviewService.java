@@ -33,8 +33,9 @@ public class GeminiInterviewService {
 
     public List<Map<String, Object>> generateTopicsForDesignation(String designationName) {
         try {
-            log.info("Generating topics for designation: {}", designationName);
+            log.info("[Gemini] Generating topics for designation: {}", designationName);
             String prompt = buildTopicGenerationPrompt(designationName);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
             HttpHeaders headers = new HttpHeaders();
@@ -47,23 +48,28 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             
             if (response.getStatusCodeValue() == 200) {
-                return parseTopicsResponse(response.getBody());
+                List<Map<String, Object>> topics = parseTopicsResponse(response.getBody());
+                log.info("[Gemini] Parsed {} topics for designation: {}", topics.size(), designationName);
+                return topics;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating topics for designation: {}", designationName, e);
+            log.error("[Gemini] Error generating topics for designation: {}", designationName, e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateGeneralInterviewQuestions(String designation, String topicName, String difficultyLevel, int numQuestions) {
         try {
-            log.info("Generating general interview questions for designation: {}, topic: {}, difficulty: {}", designation, topicName, difficultyLevel);
+            log.info("[Gemini] Generating general interview questions for designation: {}, topic: {}, difficulty: {}", designation, topicName, difficultyLevel);
             String prompt = buildGeneralQuestionPrompt(designation, topicName, difficultyLevel, numQuestions);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
             HttpHeaders headers = new HttpHeaders();
@@ -76,23 +82,28 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             
             if (response.getStatusCodeValue() == 200) {
-                return parseQuestionsResponse(response.getBody());
+                List<Map<String, Object>> questions = parseQuestionsResponse(response.getBody());
+                log.info("[Gemini] Parsed {} general interview questions for designation: {}, topic: {}", questions.size(), designation, topicName);
+                return questions;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating general interview questions", e);
+            log.error("[Gemini] Error generating general interview questions for designation: {}, topic: {}", designation, topicName, e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateCompanySpecificQuestions(String companyName, String designation, String topicName, String difficultyLevel, int numQuestions) {
         try {
-            log.info("Generating company-specific questions for company: {}, designation: {}, topic: {}", companyName, designation, topicName);
+            log.info("[Gemini] Generating company-specific questions for company: {}, designation: {}, topic: {}", companyName, designation, topicName);
             String prompt = buildCompanySpecificQuestionPrompt(companyName, designation, topicName, difficultyLevel, numQuestions);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
             HttpHeaders headers = new HttpHeaders();
@@ -105,23 +116,28 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             
             if (response.getStatusCodeValue() == 200) {
-                return parseQuestionsResponse(response.getBody());
+                List<Map<String, Object>> questions = parseQuestionsResponse(response.getBody());
+                log.info("[Gemini] Parsed {} company-specific questions for company: {}, designation: {}, topic: {}", questions.size(), companyName, designation, topicName);
+                return questions;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating company-specific questions", e);
+            log.error("[Gemini] Error generating company-specific questions for company: {}, designation: {}, topic: {}", companyName, designation, topicName, e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateDesignationsForDepartment(String departmentName) {
         try {
-            log.info("Generating designations for department: {}", departmentName);
+            log.info("[Gemini] Generating designations for department: {}", departmentName);
             String prompt = buildDesignationGenerationPrompt(departmentName);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
             HttpHeaders headers = new HttpHeaders();
@@ -134,23 +150,28 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             
             if (response.getStatusCodeValue() == 200) {
-                return parseDesignationsResponse(response.getBody());
+                List<Map<String, Object>> designations = parseDesignationsResponse(response.getBody());
+                log.info("[Gemini] Parsed {} designations for department: {}", designations.size(), departmentName);
+                return designations;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating designations for department: {}", departmentName, e);
+            log.error("[Gemini] Error generating designations for department: {}", departmentName, e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateComprehensiveInterviewQuestions(String skillName, int numQuestions) {
         try {
-            log.info("Generating comprehensive interview questions for skill: {}", skillName);
+            log.info("[Gemini] Generating comprehensive interview questions for skill: {}", skillName);
             String prompt = buildComprehensiveQuestionPrompt(skillName, numQuestions);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
             HttpHeaders headers = new HttpHeaders();
@@ -163,23 +184,28 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             
             if (response.getStatusCodeValue() == 200) {
-                return parseComprehensiveQuestionsResponse(response.getBody());
+                List<Map<String, Object>> questions = parseComprehensiveQuestionsResponse(response.getBody());
+                log.info("[Gemini] Parsed {} comprehensive interview questions for skill: {}", questions.size(), skillName);
+                return questions;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating comprehensive questions for skill: {}", skillName, e);
+            log.error("[Gemini] Error generating comprehensive questions for skill: {}", skillName, e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateDetailedQuestionContent(String skillName, String questionSummary) {
         try {
-            log.info("Generating detailed content for question: {}", questionSummary);
+            log.info("[Gemini] Generating detailed content for question. Skill: {}", skillName);
             String prompt = buildDetailedContentPrompt(skillName, questionSummary);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
             HttpHeaders headers = new HttpHeaders();
@@ -192,23 +218,28 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             
             if (response.getStatusCodeValue() == 200) {
-                return parseDetailedContentResponse(response.getBody());
+                List<Map<String, Object>> content = parseDetailedContentResponse(response.getBody());
+                log.info("[Gemini] Parsed {} detailed content items for skill: {}", content.size(), skillName);
+                return content;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating detailed content for question: {}", questionSummary, e);
+            log.error("[Gemini] Error generating detailed content for skill: {}", skillName, e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateComprehensiveTechSkills() {
         try {
-            log.info("Generating comprehensive list of tech skills using Gemini");
+            log.info("[Gemini] Generating comprehensive list of tech skills using Gemini");
             String prompt = buildComprehensiveTechSkillsPrompt();
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
 
             HttpHeaders headers = new HttpHeaders();
@@ -221,22 +252,26 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
 
             if (response.getStatusCodeValue() == 200) {
-                return parseSkillsResponse(response.getBody());
+                List<Map<String, Object>> skills = parseSkillsResponse(response.getBody());
+                log.info("[Gemini] Parsed {} tech skills", skills.size());
+                return skills;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
                 return new ArrayList<>();
             }
         } catch (Exception e) {
-            log.error("Error generating tech skills", e);
+            log.error("[Gemini] Error generating tech skills", e);
             return new ArrayList<>();
         }
     }
 
     public List<Map<String, Object>> generateTopicsForSkill(String skillName) {
         try {
-            log.info("Generating topics for skill: {}", skillName);
+            log.info("[Gemini] Generating topics for skill: {}", skillName);
             String prompt = "Generate a list of 8-12 important topics for the technical skill '" + skillName + "'. " +
                     "Exclude any interpersonal or soft skills such as Leadership, Communication, Teamwork, Collaboration, Problem Solving, Critical Thinking, Creativity, Adaptability, Work Ethic, Time Management, Conflict Resolution, Empathy, Emotional Intelligence, Negotiation, Decision Making, Motivation, Responsibility, Interpersonal Skills, Presentation Skills, Active Listening, etc. " +
                     "Focus only on technical topics relevant to the skill.\n" +
@@ -248,6 +283,7 @@ public class GeminiInterviewService {
                     "- Example of what TO include for Java: Collections, Multithreading, Java 8 Features, Exception Handling, Streams API, JVM Internals, etc.\n" +
                     "\n" +
                     "Return as a JSON array of objects with 'topic' and 'description' fields. Example: [{\"topic\":\"Collections\",\"description\":\"Data structures in Java\"}, ...]";
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
 
             HttpHeaders headers = new HttpHeaders();
@@ -260,6 +296,8 @@ public class GeminiInterviewService {
                 request,
                 String.class
             );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
 
             if (response.getStatusCodeValue() == 200) {
                 JsonNode responseNode = objectMapper.readTree(response.getBody());
@@ -284,22 +322,23 @@ public class GeminiInterviewService {
                                     }
                                 }
                             }
+                            log.info("[Gemini] Parsed {} topics for skill: {}", topics.size(), skillName);
                             return topics;
                         }
                     }
                 }
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
             }
         } catch (Exception e) {
-            log.error("Error generating topics for skill: {}", skillName, e);
+            log.error("[Gemini] Error generating topics for skill: {}", skillName, e);
         }
         return new ArrayList<>();
     }
 
     public List<Map<String, Object>> generateQuestionsForSkillAndTopic(String skillName, String topicName, int numQuestions) {
         try {
-            log.info("Generating interview questions for skill: {} and topic: {}", skillName, topicName);
+            log.info("[Gemini] Generating interview questions for skill: {} and topic: {}", skillName, topicName);
             StringBuilder prompt = new StringBuilder();
             prompt.append("Generate ").append(numQuestions).append(" comprehensive, detailed interview questions for the skill '")
                   .append(skillName).append("' on the topic '").append(topicName).append("'.\n\n");
@@ -321,28 +360,30 @@ public class GeminiInterviewService {
             prompt.append("  }\n");
             prompt.append("]\n\n");
             prompt.append("Make the questions and answers comprehensive, engaging, and suitable for technical interviews. Focus on real-world scenarios and practical applications of the topic within the skill.\n");
-
-            Map<String, Object> requestBody = buildRequestBody(prompt.toString());
+            String promptStr = prompt.toString();
+            log.info("[Gemini] Prompt (first 200 chars): {}", promptStr.length() > 200 ? promptStr.substring(0, 200) + "..." : promptStr);
+            Map<String, Object> requestBody = buildRequestBody(promptStr);
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
             ResponseEntity<String> response = restTemplate.exchange(
                 GEMINI_API_URL + "?key=" + apiKey,
                 HttpMethod.POST,
                 request,
                 String.class
             );
-
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             if (response.getStatusCodeValue() == 200) {
                 String responseBody = response.getBody();
-                // Use the same parsing logic as for other question generation
-                return parseQuestionsResponse(responseBody);
+                List<Map<String, Object>> questions = parseQuestionsResponse(responseBody);
+                log.info("[Gemini] Parsed {} interview questions for skill: {} and topic: {}", questions.size(), skillName, topicName);
+                return questions;
             } else {
-                log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
             }
         } catch (Exception e) {
-            log.error("Error generating questions for skill and topic: {} / {}", skillName, topicName, e);
+            log.error("[Gemini] Error generating questions for skill and topic: {} / {}", skillName, topicName, e);
         }
         return new ArrayList<>();
     }
@@ -470,23 +511,36 @@ public class GeminiInterviewService {
 
     private List<Map<String, Object>> parseQuestionsResponse(String responseBody) {
         try {
+            log.info("[Gemini] Parsing questions response. Raw response length: {}", responseBody != null ? responseBody.length() : 0);
             JsonNode responseNode = objectMapper.readTree(responseBody);
             JsonNode candidates = responseNode.get("candidates");
             if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                log.info("[Gemini] Found {} candidates in response", candidates.size());
                 JsonNode content = candidates.get(0).get("content");
                 if (content != null) {
                     JsonNode parts = content.get("parts");
                     if (parts != null && parts.isArray() && parts.size() > 0) {
+                        log.info("[Gemini] Found {} parts in content", parts.size());
                         String generatedText = parts.get(0).get("text").asText();
+                        log.info("[Gemini] Extracted generated text (first 200 chars): {}", generatedText != null && generatedText.length() > 200 ? generatedText.substring(0, 200) + "..." : generatedText);
                         String jsonText = extractJsonFromText(generatedText);
+                        log.info("[Gemini] Extracted JSON text (first 200 chars): {}", jsonText != null && jsonText.length() > 200 ? jsonText.substring(0, 200) + "..." : jsonText);
                         JsonNode questionsData = objectMapper.readTree(jsonText);
-                        return mapJsonToQuestionsList(questionsData);
+                        List<Map<String, Object>> questions = mapJsonToQuestionsList(questionsData);
+                        log.info("[Gemini] Parsed {} questions from response", questions.size());
+                        return questions;
+                    } else {
+                        log.warn("[Gemini] No parts found in content node while parsing questions response");
                     }
+                } else {
+                    log.warn("[Gemini] No content node found in first candidate while parsing questions response");
                 }
+            } else {
+                log.warn("[Gemini] No candidates found in questions response");
             }
             return new ArrayList<>();
         } catch (Exception e) {
-            log.error("Error parsing questions response", e);
+            log.error("[Gemini] Error parsing questions response. Response body (first 500 chars): {}", responseBody != null && responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody, e);
             return new ArrayList<>();
         }
     }
@@ -547,10 +601,10 @@ public class GeminiInterviewService {
                     JsonNode parts = content.get("parts");
                     if (parts != null && parts.isArray() && parts.size() > 0) {
                         String generatedText = parts.get(0).get("text").asText();
-                        log.debug("Raw generated text: {}", generatedText);
+                        log.info("Raw generated text: {}", generatedText);
                         
                         String jsonText = extractJsonFromText(generatedText);
-                        log.debug("Extracted JSON text: {}", jsonText);
+                        log.info("Extracted JSON text: {}", jsonText);
                         
                         try {
                             JsonNode contentData = objectMapper.readTree(jsonText);

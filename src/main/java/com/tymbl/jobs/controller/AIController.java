@@ -546,19 +546,17 @@ public class AIController {
 
     // Internal helper to reuse the logic for a single topic
     private Map<String, Object> generateQuestionsForSkillAndTopicInternal(Skill skill, SkillTopic skillTopic, int numQuestions) {
-        log.info("[AI] Starting question generation for skill='{}', topic='{}', numQuestions={}", skill.getName(), skillTopic.getTopic(), numQuestions);
+        log.info("[AI] Starting question generation for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
         List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
         log.info("[AI] Generated {} summary questions for skill='{}', topic='{}'", summaryQuestions.size(), skill.getName(), skillTopic.getTopic());
         List<InterviewQuestion> savedQuestions = new ArrayList<>();
-        int idx = 0;
         for (Map<String, Object> q : summaryQuestions) {
-            idx++;
             String questionText = (String) q.get("question");
             if (questionText == null || questionText.trim().isEmpty()) {
-                log.warn("[AI] Skipping empty question at index {} for skill='{}', topic='{}'", idx, skill.getName(), skillTopic.getTopic());
+                log.warn("[AI] Skipping empty question for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
                 continue;
             }
-            log.info("[AI] [{}] Generating detailed content for question: {}", idx, questionText);
+            log.info("[AI] Generating detailed content for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
             List<Map<String, Object>> detailedContentList = geminiService.generateDetailedQuestionContent(skill.getName(), questionText);
             Map<String, Object> detailedContent = detailedContentList.isEmpty() ? new HashMap<>() : detailedContentList.get(0);
             String answer = (String) detailedContent.getOrDefault("detailed_answer", "");
@@ -574,13 +572,10 @@ public class AIController {
             }
             String javaCode = null, pythonCode = null, cppCode = null;
             if (isCoding) {
-                log.info("[AI] [{}] Detected coding question. Generating code in Java, Python, and C++...", idx);
+                log.info("[AI] Detected coding question. Generating code for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
                 javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
-                log.info("[AI] [{}] Java code generated: {}", idx, javaCode != null && javaCode.length() > 100 ? javaCode.substring(0, 100) + "..." : javaCode);
                 pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
-                log.info("[AI] [{}] Python code generated: {}", idx, pythonCode != null && pythonCode.length() > 100 ? pythonCode.substring(0, 100) + "..." : pythonCode);
                 cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
-                log.info("[AI] [{}] C++ code generated: {}", idx, cppCode != null && cppCode.length() > 100 ? cppCode.substring(0, 100) + "..." : cppCode);
             }
             InterviewQuestion iq = InterviewQuestion.builder()
                 .skillId(skill.getId())
@@ -600,10 +595,9 @@ public class AIController {
                 .coding(isCoding)
                 .build();
             savedQuestions.add(iq);
-            log.info("[AI] [{}] Finished processing question.", idx);
+            log.info("[AI] Finished processing question for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
         }
         log.info("[AI] Finished generating questions for skill='{}', topic='{}'. Total questions added: {}", skill.getName(), skillTopic.getTopic(), savedQuestions.size());
-        // interviewQuestionRepository.saveAll(savedQuestions); // Uncomment to persist
         Map<String, Object> topicSummary = new HashMap<>();
         topicSummary.put("topic_name", skillTopic.getTopic());
         topicSummary.put("questions_added", savedQuestions.size());
