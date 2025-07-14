@@ -4288,6 +4288,45 @@
                   "body": "{\n  \"error\": \"Internal Server Error\",\n  \"message\": \"An error occurred during search\"\n}"
                 }
               ]
+            },
+            {
+              "name": "GET /api/v1/jobsearch/{jobId}/referrers",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/jobsearch/{jobId}/referrers",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobsearch",
+                    "{jobId}",
+                    "referrers"
+                  ],
+                  "variable": [
+                    {
+                      "key": "jobId",
+                      "value": "{{jobId}}"
+                    }
+                  ]
+                },
+                "description": "Returns a list of all referrers for the specified job, sorted by overall score."
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "[\n  {\n    \"userId\": 123,\n    \"userName\": \"Alice Smith\",\n    \"designation\": \"Senior Engineer\",\n    \"numApplicationsAccepted\": 5,\n    \"feedbackScore\": 4.5,\n    \"overallScore\": 7.2\n  },\n  {\n    \"userId\": 456,\n    \"userName\": \"Bob Lee\",\n    \"designation\": \"Manager\",\n    \"numApplicationsAccepted\": 2,\n    \"feedbackScore\": 4.0,\n    \"overallScore\": 6.1\n  }\n]"
+                }
+              ]
             }
           ]
         },
