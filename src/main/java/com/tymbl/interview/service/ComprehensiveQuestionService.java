@@ -118,7 +118,7 @@ public class ComprehensiveQuestionService {
             log.info("Generated {} summary questions for skill: {}", summaryQuestions.size(), skill.getName());
             
             // Step 2: Generate detailed content for each summary question
-            List<InterviewQuestion> savedQuestions = new ArrayList<>();
+            int questionsGenerated = 0;
             List<DesignationSkillQuestionMapping> savedMappings = new ArrayList<>();
             
             for (Map<String, Object> summaryQuestion : summaryQuestions) {
@@ -146,8 +146,8 @@ public class ComprehensiveQuestionService {
                                 .updatedAt(LocalDateTime.now())
                                 .build();
                         
-                        InterviewQuestion savedQuestion = interviewQuestionRepository.save(question);
-                        savedQuestions.add(savedQuestion);
+                        InterviewQuestion savedQuestion = interviewQuestionRepository.save(question); // Save one by one
+                        questionsGenerated++;
                         
                         // Create designation mappings
                         @SuppressWarnings("unchecked")
@@ -185,11 +185,11 @@ public class ComprehensiveQuestionService {
                 mappingRepository.saveAll(savedMappings);
             }
             
-            result.put("questions_generated", savedQuestions.size());
+            result.put("questions_generated", questionsGenerated);
             result.put("mappings_created", savedMappings.size());
             result.put("status", "success");
             
-            log.info("Successfully generated {} questions for skill: {}", savedQuestions.size(), skill.getName());
+            log.info("Successfully generated {} questions for skill: {}", questionsGenerated, skill.getName());
             
         } catch (Exception e) {
             log.error("Error generating questions for skill: {}", skill.getName(), e);

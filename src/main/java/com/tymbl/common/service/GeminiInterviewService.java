@@ -699,7 +699,7 @@ public class GeminiInterviewService {
                     objectMapper.readTree(jsonText);
                     return jsonText;
                 } catch (Exception e) {
-                    log.warn("Extracted text is not valid JSON, trying alternative extraction");
+                    log.warn("Extracted text is not valid JSON, trying alternative extraction" );
                 }
             }
             
