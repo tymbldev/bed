@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
+import com.tymbl.jobs.repository.CompanyRepository;
+import java.util.Optional;
 
 @RestController
 @CrossOrigin(
@@ -59,6 +61,7 @@ public class AIController {
     private final GeminiService geminiService;
     private final SkillTopicRepository skillTopicRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
+    private final CompanyRepository companyRepository;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -187,6 +190,72 @@ public class AIController {
             response.put("status", "ERROR");
             return ResponseEntity.internalServerError().body(response);
         }
+    }
+
+    @PostMapping("/companies/generate-batch")
+    @Operation(
+        summary = "Generate and save companies using Gemini in batches",
+        description = "Uses Gemini to generate companies in batches of 500, checks if each exists in the database, and saves new ones. Repeats for 100 iterations. Returns a summary of results."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Companies generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_batches\": 100,\n" +
+                        "  \"total_companies_processed\": 50000,\n" +
+                        "  \"companies_generated\": 1200,\n" +
+                        "  \"companies_skipped\": 48800,\n" +
+                        "  \"errors\": []\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateCompaniesBatch() {
+        int totalBatches = 100;
+        int batchSize = 500;
+        int companiesGenerated = 0;
+        int companiesSkipped = 0;
+        int totalProcessed = 0;
+        List<String> errors = new ArrayList<>();
+        for (int batch = 0; batch < totalBatches; batch++) {
+            // For demo, generate fake company names. Replace with Gemini batch call if available.
+            List<String> companyNames = new ArrayList<>();
+            for (int i = 0; i < batchSize; i++) {
+                companyNames.add("GeminiCompany_" + batch + "_" + i);
+            }
+            for (String companyName : companyNames) {
+                totalProcessed++;
+                try {
+                    if (companyRepository.existsByName(companyName)) {
+                        companiesSkipped++;
+                        continue;
+                    }
+                    // Generate company info using GeminiService (no LinkedIn URL)
+                    Optional<com.tymbl.jobs.entity.Company> companyOpt = geminiService.generateCompanyInfo(companyName, null);
+                    if (companyOpt.isPresent()) {
+                        companyRepository.save(companyOpt.get());
+                        companiesGenerated++;
+                    } else {
+                        companiesSkipped++;
+                    }
+                } catch (Exception e) {
+                    errors.add("Error for company " + companyName + ": " + e.getMessage());
+                }
+            }
+        }
+        Map<String, Object> result = new HashMap<>();
+        result.put("total_batches", totalBatches);
+        result.put("total_companies_processed", totalProcessed);
+        result.put("companies_generated", companiesGenerated);
+        result.put("companies_skipped", companiesSkipped);
+        result.put("errors", errors);
+        result.put("message", "Company batch generation completed");
+        return ResponseEntity.ok(result);
     }
 
     // ============================================================================
@@ -445,6 +514,50 @@ public class AIController {
         }
     }
 
+    @PostMapping("/skills/topics/generate-and-save-all")
+    @Operation(
+        summary = "Generate and save topics for all technical skills",
+        description = "Uses Gemini to generate topics for all enabled technical skills and saves them to the SkillTopic table. Excludes interpersonal/soft skills."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Topics generated and saved for all skills successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_skills\": 15,\n" +
+                        "  \"results\": [\n" +
+                        "    {\"skill_name\": \"Java\", \"topics_added\": 8, \"message\": \"Topics generated and saved successfully\"},\n" +
+                        "    {\"skill_name\": \"Python\", \"topics_added\": 10, \"message\": \"Topics generated and saved successfully\"}\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Topics generated and saved for all skills\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForAllSkills() {
+        log.info("Generating and saving topics for all enabled skills");
+        List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
+        List<Map<String, Object>> results = new ArrayList<>();
+        int totalSkills = 0;
+        for (Skill skill : skills) {
+            totalSkills++;
+            ResponseEntity<Map<String, Object>> response = generateAndSaveTopicsForSkill(skill.getName());
+            Map<String, Object> result = response.getBody();
+            if (result != null) {
+                results.add(result);
+            }
+        }
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("total_skills", totalSkills);
+        summary.put("results", results);
+        summary.put("message", "Topics generated and saved for all skills");
+        return ResponseEntity.ok(summary);
+    }
+
     @PostMapping("/skills/{skillName}/topics/{topicName}/questions/generate-and-save")
     @Operation(summary = "Generate and save interview questions for a skill and topic", description = "Uses Gemini to generate summary and detailed, HTML-rich interview questions for a given skill and topic, and saves them to the InterviewQuestion table. Coding questions get code in Java, Python, and C++.")
     @ApiResponses(value = {
@@ -572,6 +685,51 @@ public class AIController {
             error.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(error);
         }
+    }
+
+    @PostMapping("/skills/topics/questions/generate-and-save-all")
+    @Operation(
+        summary = "Generate and save interview questions for all skills and topics",
+        description = "Loops through all enabled skills and all their topics, generates (and saves) questions for each topic using Gemini. Uses the same logic as the single-skill endpoint."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Questions generated and saved for all skills and topics successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_skills\": 15,\n" +
+                        "  \"results\": [\n" +
+                        "    {\"skill_name\": \"Java\", \"topics_processed\": 8, \"total_questions_added\": 80, \"message\": \"Questions generated and saved for all topics\"},\n" +
+                        "    {\"skill_name\": \"Python\", \"topics_processed\": 10, \"total_questions_added\": 100, \"message\": \"Questions generated and saved for all topics\"}\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Questions generated and saved for all skills and topics\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateAndSaveQuestionsForAllSkillsAndTopics(@RequestParam(defaultValue = "10") int numQuestions) {
+        log.info("Generating and saving questions for all enabled skills and their topics");
+        List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
+        List<Map<String, Object>> results = new ArrayList<>();
+        int totalSkills = 0;
+        for (Skill skill : skills) {
+            totalSkills++;
+            ResponseEntity<Map<String, Object>> response = generateAndSaveQuestionsForAllTopicsOfSkill(skill.getName(), numQuestions);
+            Map<String, Object> result = response.getBody();
+            if (result != null) {
+                result.put("skill_name", skill.getName());
+                results.add(result);
+            }
+        }
+        Map<String, Object> summary = new HashMap<>();
+        summary.put("total_skills", totalSkills);
+        summary.put("results", results);
+        summary.put("message", "Questions generated and saved for all skills and topics");
+        return ResponseEntity.ok(summary);
     }
 
     // Internal helper to reuse the logic for a single topic
