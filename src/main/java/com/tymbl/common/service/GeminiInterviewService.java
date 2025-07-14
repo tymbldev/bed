@@ -524,10 +524,11 @@ public class GeminiInterviewService {
                         String generatedText = parts.get(0).get("text").asText();
                         log.info("[Gemini] Extracted generated text (first 200 chars): {}", generatedText != null && generatedText.length() > 200 ? generatedText.substring(0, 200) + "..." : generatedText);
                         String jsonText = extractJsonFromText(generatedText);
-                        log.info("[Gemini] Extracted JSON text (first 200 chars): {}", jsonText != null && jsonText.length() > 200 ? jsonText.substring(0, 200) + "..." : jsonText);
+                        log.info("[Gemini] Extracted JSON text: {}", jsonText);
                         JsonNode questionsData = objectMapper.readTree(jsonText);
+                        log.info("[Gemini] Extracted questionsData map JSON text: {}", jsonText);
                         List<Map<String, Object>> questions = mapJsonToQuestionsList(questionsData);
-                        log.info("[Gemini] Parsed {} questions from response", questions.size());
+                        log.info("[Gemini] Parsed {} questions from response {}", questions);
                         return questions;
                     } else {
                         log.warn("[Gemini] No parts found in content node while parsing questions response");
@@ -726,6 +727,7 @@ public class GeminiInterviewService {
                         log.info("Text came to extractJsonFromText at objectmapper loop is {}  ",candidate);
                         // Try to parse as JSON
                         objectMapper.readTree(candidate);
+                        log.info("Text returing from to extractJsonFromText at objectmapper loop is {}  ",candidate);
                         return candidate;
                     } catch (Exception e) {
                     }
