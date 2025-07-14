@@ -350,11 +350,32 @@ public class ElasticsearchJobService {
         if (jobData.get("active") != null) {
             response.setActive(Boolean.valueOf(jobData.get("active").toString()));
         }
-        if (jobData.get("createdAt") != null) {
-            response.setCreatedAt(LocalDateTime.parse(jobData.get("createdAt").toString()));
-        }
-        if (jobData.get("updatedAt") != null) {
-            response.setUpdatedAt(LocalDateTime.parse(jobData.get("updatedAt").toString()));
+        // Robustly parse createdAt and updatedAt with a single try-catch block
+        try {
+            if (jobData.get("createdAt") != null) {
+                Object createdAtObj = jobData.get("createdAt");
+                if (createdAtObj instanceof Number || createdAtObj.toString().matches("\\d+")) {
+                    long millis = Long.parseLong(createdAtObj.toString());
+                    response.setCreatedAt(java.time.Instant.ofEpochMilli(millis)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime());
+                } else {
+                    response.setCreatedAt(LocalDateTime.parse(createdAtObj.toString()));
+                }
+            }
+            if (jobData.get("updatedAt") != null) {
+                Object updatedAtObj = jobData.get("updatedAt");
+                if (updatedAtObj instanceof Number || updatedAtObj.toString().matches("\\d+")) {
+                    long millis = Long.parseLong(updatedAtObj.toString());
+                    response.setUpdatedAt(java.time.Instant.ofEpochMilli(millis)
+                        .atZone(java.time.ZoneId.systemDefault())
+                        .toLocalDateTime());
+                } else {
+                    response.setUpdatedAt(LocalDateTime.parse(updatedAtObj.toString()));
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to parse createdAt/updatedAt in ElasticsearchJobService.convertMapToJobResponse: {}", e.getMessage(), e);
         }
         if (jobData.get("tags") != null) {
             @SuppressWarnings("unchecked")

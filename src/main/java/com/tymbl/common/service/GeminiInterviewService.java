@@ -338,7 +338,7 @@ public class GeminiInterviewService {
 
     public List<Map<String, Object>> generateQuestionsForSkillAndTopic(String skillName, String topicName, int numQuestions) {
         try {
-            log.info("[Gemini] Generating interview questions for skill: {} and topic: {}", skillName, topicName);
+            log.info("[Gemini] Generating interview questions for skill: {} and topic: {} (custom separator mode)", skillName, topicName);
             StringBuilder prompt = new StringBuilder();
             prompt.append("Generate ").append(numQuestions).append(" comprehensive, detailed interview questions for the skill '")
                   .append(skillName).append("' on the topic '").append(topicName).append("'.\n\n");
@@ -349,17 +349,11 @@ public class GeminiInterviewService {
             prompt.append("4. Vary difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED).\n");
             prompt.append("5. Include different question types (THEORETICAL, PRACTICAL, PROBLEM_SOLVING, SYSTEM_DESIGN).\n");
             prompt.append("6. Each question should be engaging and suitable for technical interviews.\n\n");
-            prompt.append("OUTPUT FORMAT (JSON array):\n");
-            prompt.append("[\n");
-            prompt.append("  {\n");
-            prompt.append("    \"question\": \"Detailed question text\",\n");
-            prompt.append("    \"answer\": \"<div>HTML formatted answer</div>\",\n");
-            prompt.append("    \"difficulty_level\": \"BEGINNER|INTERMEDIATE|ADVANCED\",\n");
-            prompt.append("    \"question_type\": \"THEORETICAL|PRACTICAL|PROBLEM_SOLVING|SYSTEM_DESIGN\",\n");
-            prompt.append("    \"tags\": \"tag1,tag2,tag3\"\n");
-            prompt.append("  }\n");
-            prompt.append("]\n\n");
-            prompt.append("Make the questions and answers comprehensive, engaging, and suitable for technical interviews. Focus on real-world scenarios and practical applications of the topic within the skill.\n");
+            prompt.append("OUTPUT FORMAT (one question per line, fields separated by |||||):\n");
+            prompt.append("question_text|||||answer_html|||||difficulty_level|||||question_type|||||tags\n");
+            prompt.append("Example:\n");
+            prompt.append("What is a Java interface?|||||<div>In Java, an interface is ...</div>|||||BEGINNER|||||THEORETICAL|||||java,interface,oop\n");
+            prompt.append("Do NOT return JSON or markdown. Only output the questions in the specified format, one per line.\n");
             String promptStr = prompt.toString();
             log.info("[Gemini] Prompt (first 200 chars): {}", promptStr.length() > 200 ? promptStr.substring(0, 200) + "..." : promptStr);
             Map<String, Object> requestBody = buildRequestBody(promptStr);
@@ -376,14 +370,14 @@ public class GeminiInterviewService {
             log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
             if (response.getStatusCodeValue() == 200) {
                 String responseBody = response.getBody();
-                List<Map<String, Object>> questions = parseQuestionsResponse(responseBody);
-                log.info("[Gemini] Parsed {} interview questions for skill: {} and topic: {}", questions.size(), skillName, topicName);
+                List<Map<String, Object>> questions = parseQuestionsResponseCustomSeparator(responseBody);
+                log.info("[Gemini] Parsed {} interview questions for skill: {} and topic: {} (custom separator mode)", questions.size(), skillName, topicName);
                 return questions;
             } else {
                 log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
             }
         } catch (Exception e) {
-            log.error("[Gemini] Error generating questions for skill and topic: {} / {}", skillName, topicName, e);
+            log.error("[Gemini] Error generating questions for skill and topic: {} / {} (custom separator mode)", skillName, topicName, e);
         }
         return new ArrayList<>();
     }
@@ -395,14 +389,14 @@ public class GeminiInterviewService {
     }
 
     private String buildGeneralQuestionPrompt(String designation, String topicName, String difficultyLevel, int numQuestions) {
-        return "Generate " + numQuestions + " " + difficultyLevel + " level interview questions for " + designation + 
-               " on topic: " + topicName + ". Return as JSON array of objects with 'question' and 'answer' fields.";
+        return "Generate " + numQuestions + " " + difficultyLevel + " level interview questions for " + designation +
+               " on topic: " + topicName + ". Output all questions as a single string, each question's fields separated by ||||| (five pipes), and each question block separated by tymblQuestion. Do NOT return JSON or markdown. Only output the questions in the specified format. Example: What is a Java interface?|||||<div>In Java, an interface is ...</div>|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||<div>Polymorphism is ...</div>|||||INTERMEDIATE|||||THEORETICAL|||||java,oop";
     }
 
     private String buildCompanySpecificQuestionPrompt(String companyName, String designation, String topicName, String difficultyLevel, int numQuestions) {
-        return "Generate " + numQuestions + " " + difficultyLevel + " level company-specific interview questions for " + 
-               companyName + " for " + designation + " role on topic: " + topicName + 
-               ". Return as JSON array of objects with 'question' and 'answer' fields.";
+        return "Generate " + numQuestions + " " + difficultyLevel + " level company-specific interview questions for " +
+               companyName + " for " + designation + " role on topic: " + topicName +
+               ". Output all questions as a single string, each question's fields separated by ||||| (five pipes), and each question block separated by tymblQuestion. Do NOT return JSON or markdown. Only output the questions in the specified format. Example: What is a Java interface?|||||<div>In Java, an interface is ...</div>|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||<div>Polymorphism is ...</div>|||||INTERMEDIATE|||||THEORETICAL|||||java,oop";
     }
 
     private String buildDesignationGenerationPrompt(String departmentName) {
@@ -420,22 +414,11 @@ public class GeminiInterviewService {
         prompt.append("4. Include different question types (THEORETICAL, PRACTICAL, BEHAVIORAL, PROBLEM_SOLVING, SYSTEM_DESIGN)\n");
         prompt.append("5. For DSA questions, include code examples\n");
         prompt.append("6. Each question should be engaging and detailed\n\n");
-        
-        prompt.append("OUTPUT FORMAT (JSON array):\n");
-        prompt.append("[\n");
-        prompt.append("  {\n");
-        prompt.append("    \"question\": \"Detailed question text\",\n");
-        prompt.append("    \"difficulty_level\": \"BEGINNER|INTERMEDIATE|ADVANCED\",\n");
-        prompt.append("    \"question_type\": \"THEORETICAL|PRACTICAL|BEHAVIORAL|PROBLEM_SOLVING|SYSTEM_DESIGN\",\n");
-        prompt.append("    \"tags\": \"tag1,tag2,tag3\",\n");
-        prompt.append("    \"summary_answer\": \"Brief summary answer\",\n");
-        prompt.append("    \"applicable_designations\": [\"Software Engineer\", \"Data Scientist\", \"DevOps Engineer\"]\n");
-        prompt.append("  }\n");
-        prompt.append("]\n\n");
-        
+        prompt.append("OUTPUT FORMAT: Output all questions as a single string, each question's fields separated by ||||| (five pipes), and each question block separated by tymblQuestion.\n");
+        prompt.append("Example: What is a Java interface?|||||<div>In Java, an interface is ...</div>|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||<div>Polymorphism is ...</div>|||||INTERMEDIATE|||||THEORETICAL|||||java,oop\n");
+        prompt.append("Do NOT return JSON or markdown. Only output the questions in the specified format.\n");
         prompt.append("Make the questions comprehensive, engaging, and suitable for technical interviews. ");
         prompt.append("Focus on real-world scenarios and practical applications of ").append(skillName).append(".");
-        
         return prompt.toString();
     }
 
@@ -510,40 +493,11 @@ public class GeminiInterviewService {
     }
 
     private List<Map<String, Object>> parseQuestionsResponse(String responseBody) {
-        try {
-            log.info("[Gemini] Parsing questions response. Raw response length: {}", responseBody != null ? responseBody.length() : 0);
-            JsonNode responseNode = objectMapper.readTree(responseBody);
-            JsonNode candidates = responseNode.get("candidates");
-            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
-                log.info("[Gemini] Found {} candidates in response", candidates.size());
-                JsonNode content = candidates.get(0).get("content");
-                if (content != null) {
-                    JsonNode parts = content.get("parts");
-                    if (parts != null && parts.isArray() && parts.size() > 0) {
-                        log.info("[Gemini] Found {} parts in content", parts.size());
-                        String generatedText = parts.get(0).get("text").asText();
-                        log.info("[Gemini] Extracted generated text (first 200 chars): {}", generatedText != null && generatedText.length() > 200 ? generatedText.substring(0, 200) + "..." : generatedText);
-                        String jsonText = extractJsonFromText(generatedText);
-                        log.info("[Gemini] Extracted JSON text: {}", jsonText);
-                        JsonNode questionsData = objectMapper.readTree(jsonText);
-                        log.info("[Gemini] Extracted questionsData map JSON text: {}", jsonText);
-                        List<Map<String, Object>> questions = mapJsonToQuestionsList(questionsData);
-                        log.info("[Gemini] Parsed {} questions from response {}", questions);
-                        return questions;
-                    } else {
-                        log.warn("[Gemini] No parts found in content node while parsing questions response");
-                    }
-                } else {
-                    log.warn("[Gemini] No content node found in first candidate while parsing questions response");
-                }
-            } else {
-                log.warn("[Gemini] No candidates found in questions response");
-            }
-            return new ArrayList<>();
-        } catch (Exception e) {
-            log.error("[Gemini] Error parsing questions response. Response body (first 500 chars): {}", responseBody != null && responseBody.length() > 500 ? responseBody.substring(0, 500) + "..." : responseBody, e);
-            return new ArrayList<>();
-        }
+        return parseQuestionsResponseCustomSeparator(responseBody);
+    }
+
+    private List<Map<String, Object>> parseComprehensiveQuestionsResponse(String responseBody) {
+        return parseQuestionsResponseCustomSeparator(responseBody);
     }
 
     private List<Map<String, Object>> parseDesignationsResponse(String responseBody) {
@@ -565,29 +519,6 @@ public class GeminiInterviewService {
             return new ArrayList<>();
         } catch (Exception e) {
             log.error("Error parsing designations response", e);
-            return new ArrayList<>();
-        }
-    }
-
-    private List<Map<String, Object>> parseComprehensiveQuestionsResponse(String responseBody) {
-        try {
-            JsonNode responseNode = objectMapper.readTree(responseBody);
-            JsonNode candidates = responseNode.get("candidates");
-            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
-                JsonNode content = candidates.get(0).get("content");
-                if (content != null) {
-                    JsonNode parts = content.get("parts");
-                    if (parts != null && parts.isArray() && parts.size() > 0) {
-                        String generatedText = parts.get(0).get("text").asText();
-                        String jsonText = extractJsonFromText(generatedText);
-                        JsonNode questionsData = objectMapper.readTree(jsonText);
-                        return mapJsonToComprehensiveQuestionsList(questionsData);
-                    }
-                }
-            }
-            return new ArrayList<>();
-        } catch (Exception e) {
-            log.error("Error parsing comprehensive questions response", e);
             return new ArrayList<>();
         }
     }
@@ -669,79 +600,40 @@ public class GeminiInterviewService {
 
     private String extractJsonFromText(String text) {
         try {
-            log.info("Text came to extractJsonFromText is {}  ",text);
-            // First, try to clean up the text - only remove markdown code blocks
-            text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
-            text = text.trim();
-            
-            // Look for JSON array or object patterns
-            int jsonStart = -1;
-            int jsonEnd = -1;
-            
-            // Try to find JSON array
-            jsonStart = text.indexOf('[');
-            if (jsonStart >= 0) {
-                jsonEnd = findMatchingBracket(text, jsonStart, '[', ']');
-            }
-            
-            // If no array found, try to find JSON object
-            if (jsonStart == -1 || jsonEnd == -1) {
-                jsonStart = text.indexOf('{');
-                if (jsonStart >= 0) {
-                    jsonEnd = findMatchingBracket(text, jsonStart, '{', '}');
+            log.info("Text came to extractJsonFromText is {}", text);
+            // Remove markdown code block markers and trim
+            text = text.replaceAll("(?s)```json.*?```", "").replaceAll("(?s)```.*?```", "").trim();
+
+            // Prefer extracting a JSON array if present
+            int arrayStart = text.indexOf('[');
+            if (arrayStart >= 0) {
+                int arrayEnd = findMatchingBracket(text, arrayStart, '[', ']');
+                if (arrayEnd > arrayStart) {
+                    String jsonArray = text.substring(arrayStart, arrayEnd + 1).trim();
+                    log.info("[extractJsonFromText] Extracted JSON array: {}", jsonArray.length() > 300 ? jsonArray.substring(0, 300) + "..." : jsonArray);
+                    return jsonArray;
                 }
             }
-            
-            // If we found valid JSON boundaries
-            if (jsonStart >= 0 && jsonEnd > jsonStart) {
-                String jsonText = text.substring(jsonStart, jsonEnd + 1);
-                
-                // Validate that it's actually JSON by trying to parse it
-                log.info("Text came to extractJsonFromText at objectmapper is {}  ",text);
-                try {
-                    objectMapper.readTree(jsonText);
-                    return jsonText;
-                } catch (Exception e) {
-                    log.warn("Extracted text is not valid JSON, trying alternative extraction" );
+
+            // If no array, try to extract a JSON object
+            int objStart = text.indexOf('{');
+            if (objStart >= 0) {
+                int objEnd = findMatchingBracket(text, objStart, '{', '}');
+                if (objEnd > objStart) {
+                    String jsonObject = text.substring(objStart, objEnd + 1).trim();
+                    log.info("[extractJsonFromText] Extracted JSON object: {}", jsonObject.length() > 300 ? jsonObject.substring(0, 300) + "..." : jsonObject);
+                    return jsonObject;
                 }
             }
-            
-            // Enhanced fallback: try to extract JSON using more sophisticated patterns
-            // This handles cases where HTML content might interfere with simple regex
-            String[] jsonPatterns = {
-                // Pattern for complete JSON objects with nested structures
-                "\\{[^{}]*(?:\\{[^{}]*\\}[^{}]*)*\\}",
-                // Pattern for JSON arrays
-                "\\[[^\\[\\]]*(?:\\[[^\\[\\]]*\\][^\\[\\]]*)*\\]",
-                // Pattern for simple JSON objects (fallback)
-                "\\{[^}]*\\}"
-            };
-            
-            for (String pattern : jsonPatterns) {
-                java.util.regex.Pattern regexPattern = java.util.regex.Pattern.compile(pattern, java.util.regex.Pattern.DOTALL);
-                java.util.regex.Matcher matcher = regexPattern.matcher(text);
-                
-                while (matcher.find()) {
-                    String candidate = matcher.group();
-                    try {
-                        log.info("Text came to extractJsonFromText at objectmapper loop is {}  ",candidate);
-                        // Try to parse as JSON
-                        objectMapper.readTree(candidate);
-                        log.info("Text returing from to extractJsonFromText at objectmapper loop is {}  ",candidate);
-                        return candidate;
-                    } catch (Exception e) {
-                    }
-                }
-            }
-            
-            // If all else fails, return the original text and let the caller handle it
-            log.warn("Could not extract valid JSON from text, returning original {}  ",text);
-            return text;
+
+            log.info("[extractJsonFromText] No valid JSON array or object found in text");
+            return null;
         } catch (Exception e) {
-            log.error("Error extracting JSON from text", e);
-            return text;
+            log.error("Error extracting JSON from text: {}", e.getMessage(), e);
+            return null;
         }
     }
+    // NOTE: We use bracket counting instead of regex for JSON extraction because regex cannot handle nested or multiline JSON reliably.
     
     private int findMatchingBracket(String text, int startIndex, char openBracket, char closeBracket) {
         int count = 0;
@@ -889,5 +781,49 @@ public class GeminiInterviewService {
             return node.get(fieldName).asText("");
         }
         return "";
+    }
+
+    // New parser for custom separator format
+    private List<Map<String, Object>> parseQuestionsResponseCustomSeparator(String responseBody) {
+        List<Map<String, Object>> questions = new ArrayList<>();
+        try {
+            log.info("[Gemini] Parsing questions response (custom separator mode, tymblQuestion). Raw response length: {}", responseBody != null ? responseBody.length() : 0);
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        log.info("[Gemini] Extracted generated text (first 200 chars): {}", generatedText != null && generatedText.length() > 200 ? generatedText.substring(0, 200) + "..." : generatedText);
+                        String[] blocks = generatedText.split("tymblQuestion");
+                        for (String block : blocks) {
+                            String trimmed = block.trim();
+                            if (trimmed.isEmpty()) continue;
+                            String[] fields = trimmed.split("\\|\\|\\|\\|");
+                            if (fields.length < 5) {
+                                log.warn("[Gemini] Malformed question block (expected 5 fields): {}", trimmed);
+                                continue;
+                            }
+                            Map<String, Object> q = new HashMap<>();
+                            q.put("question", fields[0].trim());
+                            q.put("answer", fields[1].trim());
+                            q.put("difficulty_level", fields[2].trim());
+                            q.put("question_type", fields[3].trim());
+                            q.put("tags", fields[4].trim());
+                            questions.add(q);
+                        }
+                        log.info("[Gemini] Parsed {} questions from custom separator response (tymblQuestion)", questions.size());
+                        return questions;
+                    }
+                }
+            }
+            log.warn("[Gemini] No valid candidates/content/parts found in custom separator response (tymblQuestion)");
+            return questions;
+        } catch (Exception e) {
+            log.error("[Gemini] Error parsing questions response (custom separator mode, tymblQuestion)", e);
+            return questions;
+        }
     }
 } 

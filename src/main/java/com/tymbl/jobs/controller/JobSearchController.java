@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import com.tymbl.jobs.dto.JobReferrerResponse;
 
 @RestController
 @RequestMapping("/api/v1/jobsearch")
@@ -106,5 +107,28 @@ public class JobSearchController {
         response.setSize(request.getSize());
         
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{jobId}/referrers")
+    @Operation(
+        summary = "Get all referrers for a job",
+        description = "Returns a list of all referrers for the specified job, sorted by overall score."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of referrers for the job",
+            content = @Content(
+                schema = @Schema(implementation = JobReferrerResponse.class),
+                examples = @ExampleObject(
+                    value = "[\n  {\n    \"userId\": 123,\n    \"userName\": \"Alice Smith\",\n    \"designation\": \"Senior Engineer\",\n    \"numApplicationsAccepted\": 5,\n    \"feedbackScore\": 4.5,\n    \"overallScore\": 7.2\n  },\n  {\n    \"userId\": 456,\n    \"userName\": \"Bob Lee\",\n    \"designation\": \"Manager\",\n    \"numApplicationsAccepted\": 2,\n    \"feedbackScore\": 4.0,\n    \"overallScore\": 6.1\n  }\n]"
+                )
+            )
+        )
+    })
+    public ResponseEntity<java.util.List<JobReferrerResponse>> getReferrersForJob(
+            @Parameter(description = "Job ID", required = true)
+            @PathVariable Long jobId) {
+        return ResponseEntity.ok(jobService.getReferrersForJob(jobId));
     }
 } 
