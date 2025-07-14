@@ -781,6 +781,11 @@ public class GeminiInterviewService {
                 question.put("answer", getStringValue(questionNode, "answer"));
                 questions.add(question);
             }
+        } else if (questionsData.isObject()) {
+            Map<String, Object> question = new HashMap<>();
+            question.put("question", getStringValue(questionsData, "question"));
+            question.put("answer", getStringValue(questionsData, "answer"));
+            questions.add(question);
         }
         return questions;
     }
