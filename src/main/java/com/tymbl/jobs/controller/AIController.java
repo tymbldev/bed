@@ -611,12 +611,13 @@ public class AIController {
                 isCoding = true;
             }
             String javaCode = null, pythonCode = null, cppCode = null;
-            if (isCoding) {
+            if (isCoding && skill.getName().equalsIgnoreCase("dsa")) {
                 log.info("[AI] Detected coding question. Generating code for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
                 javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
                 pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
                 cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
             }
+            log.info("[AI] Going to save question for for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
             InterviewQuestion iq = InterviewQuestion.builder()
                 .skillId(skill.getId())
                 .skillName(skill.getName())
