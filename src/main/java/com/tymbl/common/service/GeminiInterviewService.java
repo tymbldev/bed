@@ -338,22 +338,21 @@ public class GeminiInterviewService {
 
     public List<Map<String, Object>> generateQuestionsForSkillAndTopic(String skillName, String topicName, int numQuestions) {
         try {
-            log.info("[Gemini] Generating interview questions for skill: {} and topic: {} (custom separator mode)", skillName, topicName);
+            log.info("[Gemini] Generating summary interview question headings for skill: {} and topic: {} (custom separator mode)", skillName, topicName);
             StringBuilder prompt = new StringBuilder();
-            prompt.append("Generate ").append(numQuestions).append(" comprehensive, detailed interview questions for the skill '")
+            prompt.append("Generate ").append(numQuestions).append(" short summary interview question headings for the skill '")
                   .append(skillName).append("' on the topic '").append(topicName).append("'.\n\n");
             prompt.append("REQUIREMENTS:\n");
-            prompt.append("1. Each question should be well-elaborated and cover different aspects of the topic.\n");
-            prompt.append("2. Provide a detailed answer for each question in HTML format (use <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> tags as needed).\n");
-            prompt.append("3. Include code examples where applicable.\n");
-            prompt.append("4. Vary difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED).\n");
-            prompt.append("5. Include different question types (THEORETICAL, PRACTICAL, PROBLEM_SOLVING, SYSTEM_DESIGN).\n");
-            prompt.append("6. Each question should be engaging and suitable for technical interviews.\n\n");
-            prompt.append("OUTPUT FORMAT (one question per line, fields separated by |||||):\n");
-            prompt.append("question_text|||||answer_html|||||difficulty_level|||||question_type|||||tags\n");
-            prompt.append("Example:\n");
-            prompt.append("What is a Java interface?|||||<div>In Java, an interface is ...</div>|||||BEGINNER|||||THEORETICAL|||||java,interface,oop\n");
-            prompt.append("Do NOT return JSON or markdown. Only output the questions in the specified format, one per line.\n");
+            prompt.append("1. Each question should be a short, clear heading (1-2 lines) suitable for use as a prompt to generate detailed content later.\n");
+            prompt.append("2. Do NOT include answers, explanations, or code examples.\n");
+            prompt.append("3. Vary difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED)\n");
+            prompt.append("4. Include different question types (THEORETICAL, PRACTICAL, BEHAVIORAL, PROBLEM_SOLVING, SYSTEM_DESIGN)\n");
+            prompt.append("5. Each question should be engaging and suitable for technical interviews.\n\n");
+            prompt.append("OUTPUT FORMAT: Output all questions as a single string, each question's fields separated by ||||| (five pipes), and each question block separated by tymblQuestion.\n");
+            prompt.append("Fields (in order): question, difficulty_level, question_type, tags.\n");
+            prompt.append("Example: What is a Java interface?|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||INTERMEDIATE|||||THEORETICAL|||||java,oop\n");
+            prompt.append("Do NOT return JSON or markdown. Only output the questions in the specified format.\n");
+            prompt.append("These headings will be used as input to a separate prompt for detailed content generation.");
             String promptStr = prompt.toString();
             log.info("[Gemini] Prompt (first 200 chars): {}", promptStr.length() > 200 ? promptStr.substring(0, 200) + "..." : promptStr);
             Map<String, Object> requestBody = buildRequestBody(promptStr);
@@ -371,13 +370,13 @@ public class GeminiInterviewService {
             if (response.getStatusCodeValue() == 200) {
                 String responseBody = response.getBody();
                 List<Map<String, Object>> questions = parseQuestionsResponseCustomSeparator(responseBody);
-                log.info("[Gemini] Parsed {} interview questions for skill: {} and topic: {} (custom separator mode)", questions.size(), skillName, topicName);
+                log.info("[Gemini] Parsed {} summary question headings for skill: {} and topic: {} (custom separator mode)", questions.size(), skillName, topicName);
                 return questions;
             } else {
                 log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
             }
         } catch (Exception e) {
-            log.error("[Gemini] Error generating questions for skill and topic: {} / {} (custom separator mode)", skillName, topicName, e);
+            log.error("[Gemini] Error generating summary question headings for skill and topic: {} / {} (custom separator mode)", skillName, topicName, e);
         }
         return new ArrayList<>();
     }
@@ -406,47 +405,39 @@ public class GeminiInterviewService {
 
     private String buildComprehensiveQuestionPrompt(String skillName, int numQuestions) {
         StringBuilder prompt = new StringBuilder();
-        prompt.append("Generate ").append(numQuestions).append(" comprehensive interview questions for the skill: ").append(skillName).append("\n\n");
+        prompt.append("Generate ").append(numQuestions).append(" summary interview questions for the skill: ").append(skillName).append("\n\n");
         prompt.append("REQUIREMENTS:\n");
-        prompt.append("1. Questions should be detailed and cover different aspects of ").append(skillName).append("\n");
-        prompt.append("2. Include theoretical, practical, and problem-solving questions\n");
+        prompt.append("1. Each question should be a short, clear summary (1-2 lines) suitable for use as a prompt to generate detailed content later.\n");
+        prompt.append("2. Do NOT include answers or explanations.\n");
         prompt.append("3. Vary difficulty levels (BEGINNER, INTERMEDIATE, ADVANCED)\n");
         prompt.append("4. Include different question types (THEORETICAL, PRACTICAL, BEHAVIORAL, PROBLEM_SOLVING, SYSTEM_DESIGN)\n");
-        prompt.append("5. For DSA questions, include code examples\n");
-        prompt.append("6. Each question should be engaging and detailed\n\n");
+        prompt.append("5. Each question should be engaging and suitable for technical interviews.\n\n");
         prompt.append("OUTPUT FORMAT: Output all questions as a single string, each question's fields separated by ||||| (five pipes), and each question block separated by tymblQuestion.\n");
-        prompt.append("Example: What is a Java interface?|||||<div>In Java, an interface is ...</div>|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||<div>Polymorphism is ...</div>|||||INTERMEDIATE|||||THEORETICAL|||||java,oop\n");
+        prompt.append("Fields (in order): question, difficulty_level, question_type, tags.\n");
+        prompt.append("Example: What is a Java interface?|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||INTERMEDIATE|||||THEORETICAL|||||java,oop\n");
         prompt.append("Do NOT return JSON or markdown. Only output the questions in the specified format.\n");
-        prompt.append("Make the questions comprehensive, engaging, and suitable for technical interviews. ");
+        prompt.append("Make the questions concise, engaging, and suitable for technical interviews. ");
         prompt.append("Focus on real-world scenarios and practical applications of ").append(skillName).append(".");
         return prompt.toString();
     }
 
     private String buildDetailedContentPrompt(String skillName, String questionSummary) {
         StringBuilder prompt = new StringBuilder();
-        prompt.append("Generate detailed, comprehensive content for this interview question:\n\n");
+        prompt.append("Given the following short interview question heading, generate a detailed, well-phrased interview question and a comprehensive answer.\n\n");
         prompt.append("SKILL: ").append(skillName).append("\n");
-        prompt.append("QUESTION: ").append(questionSummary).append("\n\n");
-        
+        prompt.append("QUESTION HEADING: ").append(questionSummary).append("\n\n");
         prompt.append("REQUIREMENTS:\n");
-        prompt.append("1. Provide a detailed, step-by-step answer in HTML format\n");
-        prompt.append("2. Include code examples where applicable (especially for DSA)\n");
-        prompt.append("3. Use proper HTML formatting with <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> tags\n");
-        prompt.append("4. Include practical examples and real-world scenarios\n");
-        prompt.append("5. Explain concepts thoroughly with examples\n");
-        prompt.append("6. Make it engaging and easy to understand\n");
-        prompt.append("7. Include best practices and common pitfalls\n\n");
-        
-        prompt.append("OUTPUT FORMAT (JSON):\n");
-        prompt.append("{\n");
-        prompt.append("  \"detailed_answer\": \"<h2>Detailed Answer</h2><p>Comprehensive explanation in HTML...</p>\",\n");
-        prompt.append("  \"code_examples\": \"<h3>Code Examples</h3><pre><code>// Code examples here</code></pre>\",\n");
-        prompt.append("  \"html_content\": \"<div>Complete HTML formatted answer</div>\",\n");
-        prompt.append("  \"tags\": \"updated,tags,based,on,content\"\n");
-        prompt.append("}\n\n");
-        
-        prompt.append("Make the content comprehensive, well-structured, and engaging for users.");
-        
+        prompt.append("1. Expand the heading into a full, detailed interview question suitable for a technical interview. The question should be clear, specific, and context-rich.\n");
+        prompt.append("2. Provide a step-by-step, detailed answer in HTML format using <h2>, <h3>, <p>, <ul>, <li>, <code>, <pre> tags.\n");
+        prompt.append("3. Include code examples where applicable (especially for DSA).\n");
+        prompt.append("4. Include practical examples and real-world scenarios.\n");
+        prompt.append("5. Explain concepts thoroughly with examples.\n");
+        prompt.append("6. Make it engaging and easy to understand.\n");
+        prompt.append("7. Include best practices and common pitfalls.\n\n");
+        prompt.append("OUTPUT FORMAT: Output all fields as a single string, separated by exactly ||||| (five pipes).\n");
+        prompt.append("Fields (in order): detailed_question, detailed_answer, code_examples, html_content, tags.\n");
+        prompt.append("Example: <h2>Detailed Question</h2><p>Write a program to reverse a singly linked list. Explain your approach and provide an example.</p>|||||<h2>Detailed Answer</h2><p>To reverse a linked list...</p>|||||<h3>Code Examples</h3><pre><code>// Code here</code></pre>|||||<div>Complete HTML formatted answer</div>|||||linked list,reverse,algorithm\n");
+        prompt.append("Do NOT return JSON, markdown, or any extra text. Only output the fields in the specified format, separated by pipes.");
         return prompt.toString();
     }
 
@@ -524,7 +515,9 @@ public class GeminiInterviewService {
     }
 
     private List<Map<String, Object>> parseDetailedContentResponse(String responseBody) {
+        List<Map<String, Object>> contentList = new ArrayList<>();
         try {
+            log.info("[Gemini] Parsing detailed content response (pipe separator, single block, 5 fields). Raw response length: {}", responseBody != null ? responseBody.length() : 0);
             JsonNode responseNode = objectMapper.readTree(responseBody);
             JsonNode candidates = responseNode.get("candidates");
             if (candidates != null && candidates.isArray() && candidates.size() > 0) {
@@ -533,35 +526,29 @@ public class GeminiInterviewService {
                     JsonNode parts = content.get("parts");
                     if (parts != null && parts.isArray() && parts.size() > 0) {
                         String generatedText = parts.get(0).get("text").asText();
-                        log.info("Raw generated text: {}", generatedText);
-                        
-                        String jsonText = extractJsonFromText(generatedText);
-                        log.info("Extracted JSON text: {}", jsonText);
-                        
-                        try {
-                            JsonNode contentData = objectMapper.readTree(jsonText);
-                            return mapJsonToDetailedContentList(contentData);
-                        } catch (Exception jsonParseException) {
-                            log.warn("Failed to parse extracted JSON, trying to create fallback content", jsonParseException);
-                            
-                            // Create fallback content from the raw text
-                            Map<String, Object> fallbackContent = new HashMap<>();
-                            fallbackContent.put("detailed_answer", generatedText);
-                            fallbackContent.put("code_examples", "");
-                            fallbackContent.put("html_content", generatedText);
-                            fallbackContent.put("tags", "");
-                            
-                            List<Map<String, Object>> fallbackList = new ArrayList<>();
-                            fallbackList.add(fallbackContent);
-                            return fallbackList;
+                        log.info("[Gemini] Extracted generated text (first 200 chars): {}", generatedText != null && generatedText.length() > 200 ? generatedText.substring(0, 200) + "..." : generatedText);
+                        String[] fields = generatedText.split("\\|\\|\\|\\|\\|");
+                        if (fields.length < 5) {
+                            log.warn("[Gemini] Malformed detailed content (expected 5 fields): {}", generatedText);
+                        } else {
+                            Map<String, Object> contentMap = new HashMap<>();
+                            contentMap.put("detailed_question", fields[0].trim());
+                            contentMap.put("detailed_answer", fields[1].trim());
+                            contentMap.put("code_examples", fields[2].trim());
+                            contentMap.put("html_content", fields[3].trim());
+                            contentMap.put("tags", fields[4].trim());
+                            contentList.add(contentMap);
                         }
+                        log.info("[Gemini] Parsed detailed content from pipe separator response (5 fields)");
+                        return contentList;
                     }
                 }
             }
-            return new ArrayList<>();
+            log.warn("[Gemini] No valid candidates/content/parts found in detailed content response (pipe separator, 5 fields)");
+            return contentList;
         } catch (Exception e) {
-            log.error("Error parsing detailed content response", e);
-            return new ArrayList<>();
+            log.error("[Gemini] Error parsing detailed content response (pipe separator, 5 fields)", e);
+            return contentList;
         }
     }
 
@@ -802,19 +789,18 @@ public class GeminiInterviewService {
                             String trimmed = block.trim();
                             if (trimmed.isEmpty()) continue;
                             String[] fields = trimmed.split("\\|\\|\\|\\|");
-                            if (fields.length < 5) {
-                                log.warn("[Gemini] Malformed question block (expected 5 fields): {}", trimmed);
+                            if (fields.length < 4) {
+                                log.warn("[Gemini] Malformed question block (expected 4 fields): {}", trimmed);
                                 continue;
                             }
                             Map<String, Object> q = new HashMap<>();
                             q.put("question", fields[0].trim());
-                            q.put("answer", fields[1].trim());
-                            q.put("difficulty_level", fields[2].trim());
-                            q.put("question_type", fields[3].trim());
-                            q.put("tags", fields[4].trim());
+                            q.put("difficulty_level", fields[1].trim());
+                            q.put("question_type", fields[2].trim());
+                            q.put("tags", fields[3].trim());
                             questions.add(q);
                         }
-                        log.info("[Gemini] Parsed {} questions from custom separator response (tymblQuestion)", questions.size());
+                        log.info("[Gemini] Parsed {} summary questions from custom separator response (tymblQuestion)", questions.size());
                         return questions;
                     }
                 }
