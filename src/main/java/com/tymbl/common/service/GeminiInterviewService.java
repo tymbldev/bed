@@ -668,6 +668,7 @@ public class GeminiInterviewService {
 
     private String extractJsonFromText(String text) {
         try {
+            log.info("Text came to extractJsonFromText is {}  ",text);
             // First, try to clean up the text - only remove markdown code blocks
             text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
             text = text.trim();
@@ -695,6 +696,7 @@ public class GeminiInterviewService {
                 String jsonText = text.substring(jsonStart, jsonEnd + 1);
                 
                 // Validate that it's actually JSON by trying to parse it
+                log.info("Text came to extractJsonFromText at objectmapper is {}  ",text);
                 try {
                     objectMapper.readTree(jsonText);
                     return jsonText;
@@ -721,19 +723,18 @@ public class GeminiInterviewService {
                 while (matcher.find()) {
                     String candidate = matcher.group();
                     try {
+                        log.info("Text came to extractJsonFromText at objectmapper loop is {}  ",candidate);
                         // Try to parse as JSON
                         objectMapper.readTree(candidate);
                         return candidate;
                     } catch (Exception e) {
-                        // Continue to next match
                     }
                 }
             }
             
             // If all else fails, return the original text and let the caller handle it
-            log.warn("Could not extract valid JSON from text, returning original");
+            log.warn("Could not extract valid JSON from text, returning original {}  ",text);
             return text;
-            
         } catch (Exception e) {
             log.error("Error extracting JSON from text", e);
             return text;
