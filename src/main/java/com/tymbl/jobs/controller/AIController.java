@@ -341,8 +341,7 @@ public class AIController {
         try {
             log.info("Generating and saving more tech skills using Gemini");
             List<Map<String, Object>> skills = geminiService.generateComprehensiveTechSkills();
-            int newSkills = 0;
-            List<Skill> addedSkills = new ArrayList<>();
+            int newSkillsAdded = 0;
             for (Map<String, Object> skillData : skills) {
                 String name = (String) skillData.get("name");
                 if (name == null || name.trim().isEmpty()) continue;
@@ -354,14 +353,12 @@ public class AIController {
                     skill.setEnabled(true);
                     skill.setUsageCount(0L);
                     skillRepository.save(skill);
-                    addedSkills.add(skill);
-                    newSkills++;
+                    newSkillsAdded++;
                 }
             }
             Map<String, Object> result = new HashMap<>();
-            result.put("new_skills_added", newSkills);
+            result.put("new_skills_added", newSkillsAdded);
             result.put("total_skills_generated", skills.size());
-            result.put("added_skills", addedSkills);
             result.put("message", "Skills generated and saved successfully");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -406,7 +403,6 @@ public class AIController {
             for (Map<String, Object> topicData : topics) {
                 String topic = (String) topicData.get("topic");
                 if (topic == null || topic.trim().isEmpty()) continue;
-                // Avoid duplicates for the same skill
                 boolean exists = false;
                 for (SkillTopic st : savedTopics) {
                     if (st.getTopic().equalsIgnoreCase(topic.trim())) {
@@ -422,13 +418,11 @@ public class AIController {
                     savedTopics.add(skillTopic);
                 }
             }
-            // Save all topics in batch
-            skillTopicRepository.deleteBySkill(skill); // Remove old topics for this skill
+            skillTopicRepository.deleteBySkill(skill);
             skillTopicRepository.saveAll(savedTopics);
             Map<String, Object> result = new HashMap<>();
             result.put("skill_name", skill.getName());
             result.put("topics_added", savedTopics.size());
-            result.put("topics", topics);
             result.put("message", "Topics generated and saved successfully");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -480,69 +474,11 @@ public class AIController {
                 error.put("error", "Topic not found for skill: " + topicName);
                 return ResponseEntity.status(404).body(error);
             }
-            // Step 1: Generate summary questions for skill+topic
-            List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
-            List<InterviewQuestion> savedQuestions = new ArrayList<>();
-            List<Map<String, Object>> responseQuestions = new ArrayList<>();
-            for (Map<String, Object> q : summaryQuestions) {
-                String questionText = (String) q.get("question");
-                if (questionText == null || questionText.trim().isEmpty()) continue;
-                // Step 2: Generate detailed answer
-                List<Map<String, Object>> detailedContentList = geminiService.generateDetailedQuestionContent(skill.getName(), questionText);
-                Map<String, Object> detailedContent = detailedContentList.isEmpty() ? new HashMap<>() : detailedContentList.get(0);
-                String answer = (String) detailedContent.getOrDefault("detailed_answer", "");
-                String htmlContent = (String) detailedContent.getOrDefault("html_content", answer);
-                String codeExamples = (String) detailedContent.getOrDefault("code_examples", "");
-                // Detect if coding question
-                boolean isCoding = false;
-                String questionType = (String) q.get("question_type");
-                String tags = (String) q.get("tags");
-                if ((questionType != null && questionType.toLowerCase().contains("coding")) ||
-                    (tags != null && tags.toLowerCase().contains("coding")) ||
-                    (questionText.toLowerCase().contains("code") || questionText.toLowerCase().contains("implement") || questionText.toLowerCase().contains("write a function"))) {
-                    isCoding = true;
-                }
-                String javaCode = null, pythonCode = null, cppCode = null;
-                if (isCoding) {
-                    // Step 3: Generate code in Java, Python, C++
-                    javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
-                    pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
-                    cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
-                }
-                InterviewQuestion iq = InterviewQuestion.builder()
-                    .skillId(skill.getId())
-                    .skillName(skill.getName())
-                    .topicId(skillTopic.getId())
-                    .topicName(skillTopic.getTopic())
-                    .question(questionText)
-                    .answer(answer)
-                    .difficultyLevel((String) q.get("difficulty_level"))
-                    .questionType(questionType)
-                    .tags(tags)
-                    .htmlContent(htmlContent)
-                    .codeExamples(codeExamples)
-                    .javaCode(javaCode)
-                    .pythonCode(pythonCode)
-                    .cppCode(cppCode)
-                    .coding(isCoding)
-                    .build();
-                savedQuestions.add(iq);
-                Map<String, Object> respQ = new HashMap<>(q);
-                respQ.put("answer", answer);
-                respQ.put("htmlContent", htmlContent);
-                respQ.put("codeExamples", codeExamples);
-                respQ.put("coding", isCoding);
-                respQ.put("javaCode", javaCode);
-                respQ.put("pythonCode", pythonCode);
-                respQ.put("cppCode", cppCode);
-                responseQuestions.add(respQ);
-            }
-            // interviewQuestionRepository.saveAll(savedQuestions); // Uncomment to persist
+            Map<String, Object> topicSummary = generateQuestionsForSkillAndTopicInternal(skill, skillTopic, numQuestions);
             Map<String, Object> result = new HashMap<>();
             result.put("skill_name", skill.getName());
             result.put("topic_name", skillTopic.getTopic());
-            result.put("questions_added", savedQuestions.size());
-            result.put("questions", responseQuestions);
+            result.put("questions_added", topicSummary.get("questions_added"));
             result.put("message", "Questions generated and (optionally) saved successfully");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -587,14 +523,17 @@ public class AIController {
             }
             List<SkillTopic> topics = skillTopicRepository.findBySkill(skill);
             List<Map<String, Object>> results = new ArrayList<>();
+            int totalQuestions = 0;
             for (SkillTopic topic : topics) {
-                // Reuse the logic from generateAndSaveQuestionsForSkillAndTopic
-                Map<String, Object> topicResult = generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions);
-                results.add(topicResult);
+                Map<String, Object> topicSummary = generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions);
+                results.add(topicSummary);
+                totalQuestions += (int) topicSummary.getOrDefault("questions_added", 0);
             }
             Map<String, Object> result = new HashMap<>();
             result.put("skill_name", skill.getName());
-            result.put("results", results);
+            result.put("topics_processed", results.size());
+            result.put("total_questions_added", totalQuestions);
+            result.put("topic_summaries", results);
             result.put("message", "Questions generated and (optionally) saved for all topics");
             return ResponseEntity.ok(result);
         } catch (Exception e) {
@@ -607,12 +546,19 @@ public class AIController {
 
     // Internal helper to reuse the logic for a single topic
     private Map<String, Object> generateQuestionsForSkillAndTopicInternal(Skill skill, SkillTopic skillTopic, int numQuestions) {
+        log.info("[AI] Starting question generation for skill='{}', topic='{}', numQuestions={}", skill.getName(), skillTopic.getTopic(), numQuestions);
         List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
+        log.info("[AI] Generated {} summary questions for skill='{}', topic='{}'", summaryQuestions.size(), skill.getName(), skillTopic.getTopic());
         List<InterviewQuestion> savedQuestions = new ArrayList<>();
-        List<Map<String, Object>> responseQuestions = new ArrayList<>();
+        int idx = 0;
         for (Map<String, Object> q : summaryQuestions) {
+            idx++;
             String questionText = (String) q.get("question");
-            if (questionText == null || questionText.trim().isEmpty()) continue;
+            if (questionText == null || questionText.trim().isEmpty()) {
+                log.warn("[AI] Skipping empty question at index {} for skill='{}', topic='{}'", idx, skill.getName(), skillTopic.getTopic());
+                continue;
+            }
+            log.info("[AI] [{}] Generating detailed content for question: {}", idx, questionText);
             List<Map<String, Object>> detailedContentList = geminiService.generateDetailedQuestionContent(skill.getName(), questionText);
             Map<String, Object> detailedContent = detailedContentList.isEmpty() ? new HashMap<>() : detailedContentList.get(0);
             String answer = (String) detailedContent.getOrDefault("detailed_answer", "");
@@ -628,9 +574,13 @@ public class AIController {
             }
             String javaCode = null, pythonCode = null, cppCode = null;
             if (isCoding) {
+                log.info("[AI] [{}] Detected coding question. Generating code in Java, Python, and C++...", idx);
                 javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
+                log.info("[AI] [{}] Java code generated: {}", idx, javaCode != null && javaCode.length() > 100 ? javaCode.substring(0, 100) + "..." : javaCode);
                 pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
+                log.info("[AI] [{}] Python code generated: {}", idx, pythonCode != null && pythonCode.length() > 100 ? pythonCode.substring(0, 100) + "..." : pythonCode);
                 cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
+                log.info("[AI] [{}] C++ code generated: {}", idx, cppCode != null && cppCode.length() > 100 ? cppCode.substring(0, 100) + "..." : cppCode);
             }
             InterviewQuestion iq = InterviewQuestion.builder()
                 .skillId(skill.getId())
@@ -650,22 +600,14 @@ public class AIController {
                 .coding(isCoding)
                 .build();
             savedQuestions.add(iq);
-            Map<String, Object> respQ = new HashMap<>(q);
-            respQ.put("answer", answer);
-            respQ.put("htmlContent", htmlContent);
-            respQ.put("codeExamples", codeExamples);
-            respQ.put("coding", isCoding);
-            respQ.put("javaCode", javaCode);
-            respQ.put("pythonCode", pythonCode);
-            respQ.put("cppCode", cppCode);
-            responseQuestions.add(respQ);
+            log.info("[AI] [{}] Finished processing question.", idx);
         }
+        log.info("[AI] Finished generating questions for skill='{}', topic='{}'. Total questions added: {}", skill.getName(), skillTopic.getTopic(), savedQuestions.size());
         // interviewQuestionRepository.saveAll(savedQuestions); // Uncomment to persist
-        Map<String, Object> topicResult = new HashMap<>();
-        topicResult.put("topic_name", skillTopic.getTopic());
-        topicResult.put("questions_added", savedQuestions.size());
-        topicResult.put("questions", responseQuestions);
-        return topicResult;
+        Map<String, Object> topicSummary = new HashMap<>();
+        topicSummary.put("topic_name", skillTopic.getTopic());
+        topicSummary.put("questions_added", savedQuestions.size());
+        return topicSummary;
     }
 
     // Helper for code generation

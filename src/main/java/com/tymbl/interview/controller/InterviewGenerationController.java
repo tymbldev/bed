@@ -38,7 +38,6 @@ public class InterviewGenerationController {
         Map<String, Object> response = new HashMap<>();
         response.put("designation", designation);
         response.put("topics_count", topics.size());
-        response.put("topics", topics);
         response.put("message", "Topics generated successfully using GenAI");
         
         return ResponseEntity.ok(response);
@@ -65,7 +64,6 @@ public class InterviewGenerationController {
         response.put("designation", designation);
         response.put("generated_topics_count", generatedTopics.size());
         response.put("saved_topics_count", savedTopics.size());
-        response.put("saved_topics", savedTopics);
         response.put("message", "Topics generated and saved successfully");
         
         return ResponseEntity.ok(response);
@@ -75,15 +73,11 @@ public class InterviewGenerationController {
     @Operation(summary = "Generate topics for all designations", description = "Generate topics for all designations in the database using GenAI")
     public ResponseEntity<Map<String, Object>> generateTopicsForAllDesignations() {
         log.info("Generating topics for all designations");
-        
         Map<String, List<Map<String, Object>>> allTopics = interviewPreparationService.generateTopicsForAllDesignations();
-        
         Map<String, Object> response = new HashMap<>();
         response.put("total_designations", allTopics.size());
         response.put("designations", allTopics.keySet());
-        response.put("topics_by_designation", allTopics);
         response.put("message", "Topics generated for all designations successfully");
-        
         return ResponseEntity.ok(response);
     }
 
@@ -91,38 +85,28 @@ public class InterviewGenerationController {
     @Operation(summary = "Generate and save topics for all designations", description = "Generate topics for all designations and save them to the database")
     public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForAllDesignations() {
         log.info("Generating and saving topics for all designations");
-        
         Map<String, List<Map<String, Object>>> allGeneratedTopics = interviewPreparationService.generateTopicsForAllDesignations();
         Map<String, Object> results = new HashMap<>();
         int totalSaved = 0;
-        
         for (Map.Entry<String, List<Map<String, Object>>> entry : allGeneratedTopics.entrySet()) {
             String designation = entry.getKey();
             List<Map<String, Object>> topics = entry.getValue();
-            
+            int savedCount = 0;
             if (!topics.isEmpty()) {
                 List<DesignationSkillDTO> savedTopics = interviewPreparationService.saveGeneratedTopics(designation, topics);
-                Map<String, Object> designationResult = new HashMap<>();
-                designationResult.put("generated_count", topics.size());
-                designationResult.put("saved_count", savedTopics.size());
-                designationResult.put("saved_topics", savedTopics);
-                results.put(designation, designationResult);
-                totalSaved += savedTopics.size();
-            } else {
-                Map<String, Object> designationResult = new HashMap<>();
-                designationResult.put("generated_count", 0);
-                designationResult.put("saved_count", 0);
-                designationResult.put("error", "No topics generated");
-                results.put(designation, designationResult);
+                savedCount = savedTopics.size();
             }
+            Map<String, Object> designationResult = new HashMap<>();
+            designationResult.put("generated_count", topics.size());
+            designationResult.put("saved_count", savedCount);
+            results.put(designation, designationResult);
+            totalSaved += savedCount;
         }
-        
         Map<String, Object> response = new HashMap<>();
         response.put("total_designations", allGeneratedTopics.size());
         response.put("total_topics_saved", totalSaved);
         response.put("results_by_designation", results);
         response.put("message", "Topics generated and saved for all designations");
-        
         return ResponseEntity.ok(response);
     }
 

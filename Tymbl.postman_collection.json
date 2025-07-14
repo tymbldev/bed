@@ -5251,13 +5251,13 @@
                   "query": [ { "key": "numQuestions", "value": "10" } ],
                   "variable": [ { "key": "skillName", "value": "Java" }, { "key": "topicName", "value": "Collections" } ]
                 },
-                "description": "Generate and save interview questions for a skill and topic using Gemini."
+                "description": "Generate and save interview questions for a skill and topic using Gemini. Generates summary and detailed questions, and for coding questions, generates code in Java, Python, and C++."
               },
               "response": [
                 {
                   "code": 200,
                   "name": "Success",
-                  "body": "{\n  \"skill_name\": \"Java\",\n  \"topic_name\": \"Collections\",\n  \"questions_added\": 10,\n  \"questions\": [{\"question\": \"Explain Java Collections Framework\", \"answer\": \"<div>...</div>\"}],\n  \"message\": \"Questions generated and (optionally) saved successfully\"\n}"
+                  "body": "{\n  \"skill_name\": \"Java\",\n  \"topic_name\": \"Collections\",\n  \"questions_added\": 10,\n  \"questions\": [{\"question\": \"Explain Java Collections Framework\", \"answer\": \"<div>...</div>\", \"coding\": true, \"javaCode\": \"...\", \"pythonCode\": \"...\", \"cppCode\": \"...\"}],\n  \"message\": \"Questions generated and (optionally) saved successfully\"\n}"
                 },
                 { "code": 404, "name": "Skill or topic not found", "body": "{\n  \"error\": \"Skill or topic not found\"\n}" },
                 { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
