@@ -20,4 +20,7 @@ public interface InterviewQuestionRepository extends JpaRepository<InterviewQues
     
     @Query("SELECT COUNT(i) FROM InterviewQuestion i WHERE i.skillId = :skillId")
     Long countBySkillId(@Param("skillId") Long skillId);
+
+    @Query("SELECT COUNT(i) FROM InterviewQuestion i WHERE i.skillId = :skillId AND i.topicId = :topicId")
+    Long countBySkillIdAndTopicId(@Param("skillId") Long skillId, @Param("topicId") Long topicId);
 } 

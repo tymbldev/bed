@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
 
 @RestController
 @CrossOrigin(
@@ -541,11 +542,22 @@ public class AIController {
             List<SkillTopic> topics = skillTopicRepository.findBySkill(skill);
             List<Map<String, Object>> results = new ArrayList<>();
             int totalQuestions = 0;
+            // Multithreading: process up to 10 topics in parallel
+            ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(10);
+            List<java.util.concurrent.Future<Map<String, Object>>> futures = new ArrayList<>();
             for (SkillTopic topic : topics) {
-                Map<String, Object> topicSummary = generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions);
-                results.add(topicSummary);
-                totalQuestions += (int) topicSummary.getOrDefault("questions_added", 0);
+                futures.add(executor.submit(() -> generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions)));
             }
+            for (java.util.concurrent.Future<Map<String, Object>> future : futures) {
+                try {
+                    Map<String, Object> topicSummary = future.get();
+                    results.add(topicSummary);
+                    totalQuestions += (int) topicSummary.getOrDefault("questions_added", 0);
+                } catch (Exception e) {
+                    log.error("Error processing topic in parallel", e);
+                }
+            }
+            executor.shutdown();
             log.info("Questions generated and (optionally) saved for all topics of skill: {}. Total questions added: {}", skillName, totalQuestions);
             Map<String, Object> result = new HashMap<>();
             result.put("skill_name", skill.getName());
@@ -564,6 +576,16 @@ public class AIController {
 
     // Internal helper to reuse the logic for a single topic
     private Map<String, Object> generateQuestionsForSkillAndTopicInternal(Skill skill, SkillTopic skillTopic, int numQuestions) {
+        Long existingCount = interviewQuestionRepository.countBySkillIdAndTopicId(skill.getId(), skillTopic.getId());
+        if (existingCount != null && existingCount >= 20) {
+            log.info("[AI] Skipping question generation for skill='{}', topic='{}' as {} questions already exist", skill.getName(), skillTopic.getTopic(), existingCount);
+            Map<String, Object> topicSummary = new HashMap<>();
+            topicSummary.put("topic_name", skillTopic.getTopic());
+            topicSummary.put("questions_added", 0);
+            topicSummary.put("skipped", true);
+            topicSummary.put("message", "Skipped: already has " + existingCount + " questions");
+            return topicSummary;
+        }
         log.info("[AI] Starting question generation for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
         List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
         log.info("[AI] Generated {} summary questions for skill='{}', topic='{}'", summaryQuestions.size(), skill.getName(), skillTopic.getTopic());
