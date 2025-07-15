@@ -394,24 +394,41 @@ public class GeminiCompanyService {
     private Optional<Company> mapJsonToCompany(JsonNode companyData) {
         try {
             Company company = new Company();
-            company.setName(getStringValue(companyData, "name"));
-            company.setDescription(getStringValue(companyData, "description"));
-            company.setLogoUrl(getStringValue(companyData, "logo_url"));
-            company.setWebsite(getStringValue(companyData, "website"));
-            company.setCareerPageUrl(getStringValue(companyData, "career_page_url"));
-            company.setAboutUs(getStringValue(companyData, "about_us"));
-            company.setCulture(getStringValue(companyData, "culture"));
-            company.setMission(getStringValue(companyData, "mission"));
-            company.setVision(getStringValue(companyData, "vision"));
-            company.setCompanySize(getStringValue(companyData, "company_size"));
-            company.setHeadquarters(getStringValue(companyData, "headquarters"));
-            company.setLinkedinUrl(getStringValue(companyData, "linkedin_url"));
-            company.setSpecialties(getStringValue(companyData, "specialties"));
+            String name = getStringValue(companyData, "name");
+            if (!containsWebSearchPlaceholder(name)) company.setName(name);
+            String description = getStringValue(companyData, "description");
+            if (!containsWebSearchPlaceholder(description)) company.setDescription(description);
+            String logoUrl = getStringValue(companyData, "logo_url");
+            if (!containsWebSearchPlaceholder(logoUrl)) company.setLogoUrl(logoUrl);
+            String website = getStringValue(companyData, "website");
+            if (!containsWebSearchPlaceholder(website)) company.setWebsite(website);
+            String careerPageUrl = getStringValue(companyData, "career_page_url");
+            if (!containsWebSearchPlaceholder(careerPageUrl)) company.setCareerPageUrl(careerPageUrl);
+            String aboutUs = getStringValue(companyData, "about_us");
+            if (!containsWebSearchPlaceholder(aboutUs)) company.setAboutUs(aboutUs);
+            String culture = getStringValue(companyData, "culture");
+            if (!containsWebSearchPlaceholder(culture)) company.setCulture(culture);
+            String mission = getStringValue(companyData, "mission");
+            if (!containsWebSearchPlaceholder(mission)) company.setMission(mission);
+            String vision = getStringValue(companyData, "vision");
+            if (!containsWebSearchPlaceholder(vision)) company.setVision(vision);
+            String companySize = getStringValue(companyData, "company_size");
+            if (!containsWebSearchPlaceholder(companySize)) company.setCompanySize(companySize);
+            String headquarters = getStringValue(companyData, "headquarters");
+            if (!containsWebSearchPlaceholder(headquarters)) company.setHeadquarters(headquarters);
+            String linkedinUrl = getStringValue(companyData, "linkedin_url");
+            if (!containsWebSearchPlaceholder(linkedinUrl)) company.setLinkedinUrl(linkedinUrl);
+            String specialties = getStringValue(companyData, "specialties");
+            if (!containsWebSearchPlaceholder(specialties)) company.setSpecialties(specialties);
             return Optional.of(company);
         } catch (Exception e) {
             log.error("Error mapping JSON to Company", e);
             return Optional.empty();
         }
+    }
+
+    private boolean containsWebSearchPlaceholder(String value) {
+        return value != null && value.contains("This information requires a web search");
     }
 
     private Map<String, Object> mapJsonToIndustries(JsonNode industryData) {
