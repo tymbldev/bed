@@ -32,22 +32,16 @@ class AIServiceCircuitBreakerTest {
     void testGeminiFailureDisablesGemini() {
         // Given
         String companyName = "Test Company";
-        String linkedinUrl = "https://linkedin.com/company/test";
-        
         // Mock Gemini to throw exception
-        when(geminiService.generateCompanyInfo(companyName, linkedinUrl))
+        when(geminiService.generateCompanyInfo(companyName))
             .thenThrow(new RuntimeException("Gemini API error"));
-        
         // When - First call should fail Gemini and disable it
-        Optional<com.tymbl.jobs.entity.Company> result1 = aiService.generateCompanyInfo(companyName, linkedinUrl);
-        
+        Optional<com.tymbl.jobs.entity.Company> result1 = aiService.generateCompanyInfo(companyName);
         // Then - Should get empty result and Gemini should be disabled
         assertFalse(result1.isPresent());
         assertEquals("Gemini: DISABLED, Crawling: DISABLED", aiService.getAIServiceStatus());
-        
         // When - Second call should skip Gemini
-        Optional<com.tymbl.jobs.entity.Company> result2 = aiService.generateCompanyInfo(companyName, linkedinUrl);
-        
+        Optional<com.tymbl.jobs.entity.Company> result2 = aiService.generateCompanyInfo(companyName);
         // Then - Should still get empty result
         assertFalse(result2.isPresent());
     }
@@ -69,25 +63,18 @@ class AIServiceCircuitBreakerTest {
     void testCrawlingDisabledSkipsAllServices() {
         // Given
         String companyName = "Test Company";
-        String linkedinUrl = "https://linkedin.com/company/test";
-        
         // First, trigger the circuit breaker to disable crawling
-        when(geminiService.generateCompanyInfo(companyName, linkedinUrl))
+        when(geminiService.generateCompanyInfo(companyName))
             .thenThrow(new RuntimeException("Gemini API error"));
-        
         // This should disable Gemini and crawling
-        aiService.generateCompanyInfo(companyName, linkedinUrl);
-        
+        aiService.generateCompanyInfo(companyName);
         // Verify crawling is disabled
         assertEquals("Gemini: DISABLED, Crawling: DISABLED", aiService.getAIServiceStatus());
-        
         // Mock Gemini to return success (but it shouldn't be called)
-        when(geminiService.generateCompanyInfo(anyString(), anyString()))
+        when(geminiService.generateCompanyInfo(anyString()))
             .thenReturn(Optional.of(new com.tymbl.jobs.entity.Company()));
-        
         // When - Call with crawling disabled
-        Optional<com.tymbl.jobs.entity.Company> result = aiService.generateCompanyInfo(companyName, linkedinUrl);
-        
+        Optional<com.tymbl.jobs.entity.Company> result = aiService.generateCompanyInfo(companyName);
         // Then - Should get empty result immediately
         assertFalse(result.isPresent());
     }
