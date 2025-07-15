@@ -58,7 +58,7 @@ public class CrawlingService {
                 return Optional.of(new CrawlResult(company, "Generated using AI Service"));
             }
         } catch (Exception e) {
-            log.error("Error generating company information for URL: " + linkedinUrl, e);
+            log.error("Error generating company information for company: {}", companyName, e);
             return Optional.empty();
         }
     }
