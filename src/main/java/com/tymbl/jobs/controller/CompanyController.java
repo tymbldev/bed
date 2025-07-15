@@ -62,7 +62,21 @@ public class CompanyController {
                           "  \"name\": \"Example Corp\",\n" +
                           "  \"description\": \"A technology company\",\n" +
                           "  \"website\": \"https://example.com\",\n" +
-                          "  \"logoUrl\": \"https://example.com/logo.png\"\n" +
+                          "  \"logoUrl\": \"https://example.com/logo.png\",\n" +
+                          "  \"createdAt\": \"2024-01-01T10:00:00\",\n" +
+                          "  \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
+                          "  \"aboutUs\": \"About Example Corp\",\n" +
+                          "  \"vision\": \"To innovate\",\n" +
+                          "  \"mission\": \"Empower developers\",\n" +
+                          "  \"culture\": \"Open and inclusive\",\n" +
+                          "  \"jobs\": [],\n" +
+                          "  \"careerPageUrl\": \"https://example.com/careers\",\n" +
+                          "  \"linkedinUrl\": \"https://linkedin.com/company/example-corp\",\n" +
+                          "  \"headquarters\": \"San Francisco, CA\",\n" +
+                          "  \"primaryIndustryId\": 10,\n" +
+                          "  \"secondaryIndustries\": \"Software,Cloud\",\n" +
+                          "  \"companySize\": \"1000+\",\n" +
+                          "  \"specialties\": \"AI,ML,Cloud\"\n" +
                           "}"
                 )
             )
@@ -109,7 +123,30 @@ public class CompanyController {
             responseCode = "200",
             description = "Company retrieved successfully",
             content = @Content(
-                schema = @Schema(implementation = CompanyResponse.class)
+                schema = @Schema(implementation = CompanyResponse.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"name\": \"Example Corp\",\n" +
+                          "  \"description\": \"A technology company\",\n" +
+                          "  \"website\": \"https://example.com\",\n" +
+                          "  \"logoUrl\": \"https://example.com/logo.png\",\n" +
+                          "  \"createdAt\": \"2024-01-01T10:00:00\",\n" +
+                          "  \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
+                          "  \"aboutUs\": \"About Example Corp\",\n" +
+                          "  \"vision\": \"To innovate\",\n" +
+                          "  \"mission\": \"Empower developers\",\n" +
+                          "  \"culture\": \"Open and inclusive\",\n" +
+                          "  \"jobs\": [],\n" +
+                          "  \"careerPageUrl\": \"https://example.com/careers\",\n" +
+                          "  \"linkedinUrl\": \"https://linkedin.com/company/example-corp\",\n" +
+                          "  \"headquarters\": \"San Francisco, CA\",\n" +
+                          "  \"primaryIndustryId\": 10,\n" +
+                          "  \"secondaryIndustries\": \"Software,Cloud\",\n" +
+                          "  \"companySize\": \"1000+\",\n" +
+                          "  \"specialties\": \"AI,ML,Cloud\"\n" +
+                          "}"
+                )
             )
         ),
         @ApiResponse(responseCode = "404", description = "Company not found")
