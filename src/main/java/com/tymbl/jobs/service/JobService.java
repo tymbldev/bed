@@ -39,7 +39,7 @@ import org.springframework.data.domain.PageImpl;
 import java.util.ArrayList;
 import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
-import com.tymbl.common.repository.CompanyRepository;
+import com.tymbl.jobs.repository.CompanyRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -269,7 +269,7 @@ public class JobService {
                         .logoUrl(company.getLogoUrl())
                         .website(company.getWebsite())
                         .headquarters(company.getHeadquarters())
-                        .activeJobCount((long) jobRepository.countByCompanyIdAndActiveTrue(companyId))
+                        .activeJobCount(jobRepository.countByCompanyIdAndActiveTrue(companyId))
                         .secondaryIndustry(company.getSecondaryIndustries())
                         .companySize(company.getCompanySize())
                         .specialties(company.getSpecialties())

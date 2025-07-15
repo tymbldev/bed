@@ -101,4 +101,6 @@ public interface JobRepository extends JpaRepository<Job, Long> {
     
     // Find jobs by IDs that are active
     List<Job> findByIdInAndActiveTrue(List<Long> jobIds);
+
+    long countByCompanyIdAndActiveTrue(Long companyId);
 } 

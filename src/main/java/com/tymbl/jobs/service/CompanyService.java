@@ -112,9 +112,6 @@ public class CompanyService {
         if (response.getCompanySize() == null) response.setCompanySize("");
         if (response.getSpecialties() == null) response.setSpecialties("");
         if (response.getCareerPageUrl() == null) response.setCareerPageUrl("");
-        response.setCrawled(company.isCrawled());
-        response.setLastCrawledAt(company.getLastCrawledAt());
-        response.setCrawledData(company.getCrawledData());
         if (jobs != null) {
             response.setJobs(jobs.stream().map(this::mapJobToResponse).collect(Collectors.toList()));
         }
