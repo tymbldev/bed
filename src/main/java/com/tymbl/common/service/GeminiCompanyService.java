@@ -166,15 +166,15 @@ public class GeminiCompanyService {
     public List<Map<String, String>> generateCompanyListForIndustry(String industryName, List<String> excludeNames) {
         try {
             StringBuilder prompt = new StringBuilder();
-            prompt.append("Give a random list of 500 real companies in the '")
+            prompt.append("Give a random list of 500 real INDIAN companies in the '")
                   .append(industryName)
-                  .append("' industry. For each, provide company name and website. ");
+                  .append("' industry. Only include companies that are based in India or are Indian in origin. For each, provide company name and website. ");
             if (excludeNames != null && !excludeNames.isEmpty()) {
                 prompt.append("Ignore these companies (do not include them in your response): ");
                 prompt.append(String.join(", ", excludeNames));
                 prompt.append(". ");
             }
-            prompt.append("Return ONLY a JSON array of 500 objects with 'name' and 'website' fields. Do NOT include any explanation, disclaimer, markdown, or text—just the JSON array. Example: [{\"name\":\"Google\",\"website\":\"https://google.com\"}]");
+            prompt.append("Return ONLY a JSON array of 500 objects with 'name' and 'website' fields. Do NOT include any explanation, disclaimer, markdown, or text—just the JSON array. Example: [{\"name\":\"Infosys\",\"website\":\"https://www.infosys.com\"}]");
 
             Map<String, Object> requestBody = buildRequestBody(prompt.toString());
             HttpHeaders headers = new HttpHeaders();
