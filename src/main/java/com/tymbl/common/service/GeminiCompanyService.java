@@ -206,6 +206,9 @@ public class GeminiCompanyService {
     private String buildCompanyGenerationPrompt(String companyName) {
         return "Generate detailed company information for: " + companyName + ". For each of the following fields, provide a detailed, well-written, and comprehensive response (not a short summary): " +
                 "description, about_us, mission, vision, culture, specialties, company_size, headquarters, career_page_url, website, logo_url, linkedin_url. " +
+                "For the fields website, logo_url, linkedin_url, and career_page_url: The value must be a valid URL (starting with http/https and domain structure). If not present, return null. Do NOT return explanations, search instructions, or noisy text—only a valid URL or null. " +
+                "IMPORTANT: For ALL fields, if the information is not available or requires research, return the value as blank or null (do NOT use placeholders, example text, or instructions like '[Insert ...]'). " +
+                "Accuracy in response format is critical. Do not include explanations, instructions, or any text other than the required value for each field. " +
                 "Each field should be as detailed and informative as possible, suitable for a company profile page. Do NOT provide short summaries. Return the result as a JSON object with these fields as keys.";
     }
 
@@ -400,9 +403,11 @@ public class GeminiCompanyService {
             String description = getStringValue(companyData, "description");
             if (!containsWebSearchPlaceholder(description)) company.setDescription(description); else aiError = true;
             String logoUrl = getStringValue(companyData, "logo_url");
-            if (!containsWebSearchPlaceholder(logoUrl)) company.setLogoUrl(logoUrl); else aiError = true;
+            if (!containsWebSearchPlaceholder(logoUrl) && isValidUrl(logoUrl)) company.setLogoUrl(logoUrl);
+            else { company.setLogoUrl(""); aiError = true; }
             String website = getStringValue(companyData, "website");
-            if (!containsWebSearchPlaceholder(website)) company.setWebsite(website); else aiError = true;
+            if (!containsWebSearchPlaceholder(website) && isValidUrl(website)) company.setWebsite(website);
+            else { company.setWebsite(""); aiError = true; }
             String careerPageUrl = getStringValue(companyData, "career_page_url");
             if (!containsWebSearchPlaceholder(careerPageUrl)) company.setCareerPageUrl(careerPageUrl); else aiError = true;
             String aboutUs = getStringValue(companyData, "about_us");
@@ -418,7 +423,8 @@ public class GeminiCompanyService {
             String headquarters = getStringValue(companyData, "headquarters");
             if (!containsWebSearchPlaceholder(headquarters)) company.setHeadquarters(headquarters); else aiError = true;
             String linkedinUrl = getStringValue(companyData, "linkedin_url");
-            if (!containsWebSearchPlaceholder(linkedinUrl)) company.setLinkedinUrl(linkedinUrl); else aiError = true;
+            if (!containsWebSearchPlaceholder(linkedinUrl) && isValidUrl(linkedinUrl)) company.setLinkedinUrl(linkedinUrl);
+            else { company.setLinkedinUrl(""); aiError = true; }
             String specialties = getStringValue(companyData, "specialties");
             if (!containsWebSearchPlaceholder(specialties)) company.setSpecialties(specialties); else aiError = true;
             company.setAiError(aiError);
@@ -431,6 +437,16 @@ public class GeminiCompanyService {
 
     private boolean containsWebSearchPlaceholder(String value) {
         return value != null && value.contains("This information requires a web search");
+    }
+
+    private boolean isValidUrl(String url) {
+        if (url == null || url.trim().isEmpty()) return false;
+        try {
+            new java.net.URL(url);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
     private Map<String, Object> mapJsonToIndustries(JsonNode industryData) {
