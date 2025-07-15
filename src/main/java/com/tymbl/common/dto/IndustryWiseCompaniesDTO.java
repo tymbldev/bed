@@ -16,6 +16,7 @@ public class IndustryWiseCompaniesDTO {
     private String industryName;
     private String industryDescription;
     private Long companyCount;
+    private Long totalJobCount;
     private List<TopCompanyDTO> topCompanies;
     
     @Data

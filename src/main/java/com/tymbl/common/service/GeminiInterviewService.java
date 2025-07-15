@@ -352,6 +352,7 @@ public class GeminiInterviewService {
             prompt.append("Fields (in order): question, difficulty_level, question_type, tags.\n");
             prompt.append("Example: What is a Java interface?|||||BEGINNER|||||THEORETICAL|||||java,interface,ooptymblQuestionWhat is polymorphism?|||||INTERMEDIATE|||||THEORETICAL|||||java,oop\n");
             prompt.append("Do NOT return JSON or markdown. Only output the questions in the specified format.\n");
+            prompt.append("IMPORTANT: Do NOT add any remarks, comments, PS, notes, explanations, or any extra text before, after, or inside the output. Only output the questions in the strict format specified above.\n");
             prompt.append("These headings will be used as input to a separate prompt for detailed content generation.");
             String promptStr = prompt.toString();
             log.info("[Gemini] Prompt (first 200 chars): {}", promptStr.length() > 200 ? promptStr.substring(0, 200) + "..." : promptStr);
@@ -433,11 +434,12 @@ public class GeminiInterviewService {
         prompt.append("4. Include practical examples and real-world scenarios.\n");
         prompt.append("5. Explain concepts thoroughly with examples.\n");
         prompt.append("6. Make it engaging and easy to understand.\n");
-        prompt.append("7. Include best practices and common pitfalls.\n\n");
+        prompt.append("7. Include best practices and common pitfalls.\n");
+        prompt.append("8. IMPORTANT : If any field (e.g., detailed_answer) is not present, return it as blank (empty string). Do NOT skip any field. Always output all fields in order, even if some are empty.\n\n");
         prompt.append("OUTPUT FORMAT: Output all fields as a single string, separated by exactly ||||| (five pipes).\n");
         prompt.append("Fields (in order): detailed_question, detailed_answer, code_examples, html_content, tags.\n");
         prompt.append("Example: <h2>Detailed Question</h2><p>Write a program to reverse a singly linked list. Explain your approach and provide an example.</p>|||||<h2>Detailed Answer</h2><p>To reverse a linked list...</p>|||||<h3>Code Examples</h3><pre><code>// Code here</code></pre>|||||<div>Complete HTML formatted answer</div>|||||linked list,reverse,algorithm\n");
-        prompt.append("Do NOT return JSON, markdown, or any extra text. Only output the fields in the specified format, separated by pipes.");
+        prompt.append("IMPORTANT : Do NOT return JSON, markdown, or any extra text. Only output the fields in the specified format, separated by pipes.");
         return prompt.toString();
     }
 

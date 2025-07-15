@@ -36,6 +36,7 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import com.tymbl.common.dto.IndustryWiseCompaniesDTO;
 
 @RestController
 @CrossOrigin(
@@ -560,6 +561,23 @@ public class DropdownController {
             })
             .collect(Collectors.toList());
         return ResponseEntity.ok(companyMaps);
+    }
+
+    @GetMapping("/companies/by-industry/{industryId}")
+    @Operation(summary = "Get companies by industry", description = "Returns a list of companies for the given industryId with detailed attributes")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "List of companies for the industry",
+            content = @Content(
+                schema = @Schema(implementation = IndustryWiseCompaniesDTO.TopCompanyDTO.class)
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Industry not found")
+    })
+    public ResponseEntity<List<IndustryWiseCompaniesDTO.TopCompanyDTO>> getCompaniesByIndustry(@PathVariable Long industryId) {
+        List<IndustryWiseCompaniesDTO.TopCompanyDTO> companies = dropdownService.getCompaniesByIndustry(industryId);
+        return ResponseEntity.ok(companies);
     }
 
     // AI-generated designations endpoint

@@ -269,14 +269,19 @@ public class DropdownService {
     @Transactional(readOnly = true)
     public List<IndustryWiseCompaniesDTO> getIndustryStatistics() {
         List<Object[]> industryStats = industryRepository.getIndustryStatistics();
-        
+        List<Object[]> jobCounts = industryRepository.getActiveJobCountsForAllIndustries();
+        Map<Long, Long> industryJobCountMap = new java.util.HashMap<>();
+        for (Object[] row : jobCounts) {
+            Long industryId = row[0] == null ? null : ((Number) row[0]).longValue();
+            Long jobCount = row[1] == null ? 0L : ((Number) row[1]).longValue();
+            if (industryId != null) {
+                industryJobCountMap.put(industryId, jobCount);
+            }
+        }
         return industryStats.stream().map(stat -> {
             Long industryId = (Long) stat[0];
             String industryName = (String) stat[1];
-            String industryDescription = (String) stat[2];
-            Long companyCount = (Long) stat[3];
-            
-            // Get top companies for this industry
+            Long companyCount = (Long) stat[2];
             List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
             List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
                 .map(companyData -> {
@@ -288,7 +293,6 @@ public class DropdownService {
                         .website((String) companyData[3])
                         .headquarters((String) companyData[4])
                         .activeJobCount((Long) companyData[5]);
-                    // Fetch additional fields from Company entity
                     com.tymbl.jobs.entity.Company company = companyRepository.findById(companyId).orElse(null);
                     if (company != null) {
                         builder.secondaryIndustry(company.getSecondaryIndustries());
@@ -298,17 +302,42 @@ public class DropdownService {
                     }
                     return builder.build();
                 })
-                .limit(5) // Limit to top 5 companies
+                .limit(5)
                 .collect(java.util.stream.Collectors.toList());
-            
+            Long totalJobCount = industryJobCountMap.getOrDefault(industryId, 0L);
             return IndustryWiseCompaniesDTO.builder()
-                .industryId(industryId)
-                .industryName(industryName)
-                .industryDescription(industryDescription)
-                .companyCount(companyCount)
-                .topCompanies(topCompanies)
-                .build();
+                    .industryId(industryId)
+                    .industryName(industryName)
+                    .companyCount(companyCount)
+                    .totalJobCount(totalJobCount)
+                    .topCompanies(topCompanies)
+                    .build();
         }).collect(java.util.stream.Collectors.toList());
+    }
+
+    @Transactional(readOnly = true)
+    public List<IndustryWiseCompaniesDTO.TopCompanyDTO> getCompaniesByIndustry(Long industryId) {
+        List<Object[]> companiesData = industryRepository.getTopCompaniesByIndustry(industryId);
+        return companiesData.stream()
+            .map(companyData -> {
+                Long companyId = (Long) companyData[0];
+                IndustryWiseCompaniesDTO.TopCompanyDTO.TopCompanyDTOBuilder builder = IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
+                    .companyId(companyId)
+                    .companyName((String) companyData[1])
+                    .logoUrl((String) companyData[2])
+                    .website((String) companyData[3])
+                    .headquarters((String) companyData[4])
+                    .activeJobCount((Long) companyData[5]);
+                com.tymbl.jobs.entity.Company company = companyRepository.findById(companyId).orElse(null);
+                if (company != null) {
+                    builder.secondaryIndustry(company.getSecondaryIndustries());
+                    builder.companySize(company.getCompanySize());
+                    builder.specialties(company.getSpecialties());
+                    builder.careerPageUrl(company.getCareerPageUrl());
+                }
+                return builder.build();
+            })
+            .collect(java.util.stream.Collectors.toList());
     }
 
     /**

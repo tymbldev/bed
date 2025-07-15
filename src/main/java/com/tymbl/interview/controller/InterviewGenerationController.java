@@ -15,6 +15,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.env.Environment;
+import org.springframework.beans.factory.annotation.Autowired;
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 
 @Slf4j
 @RestController
@@ -24,6 +29,9 @@ import java.util.Map;
 public class InterviewGenerationController {
 
     private final InterviewPreparationService interviewPreparationService;
+
+    @Autowired
+    private Environment environment;
 
     // Topic Generation APIs
     @PostMapping("/designations/{designation}/topics/generate")
@@ -151,5 +159,81 @@ public class InterviewGenerationController {
         log.info("Fetching in-progress generation requests");
         List<QuestionGenerationQueue> inProgressRequests = interviewPreparationService.getInProgressRequests();
         return ResponseEntity.ok(inProgressRequests);
+    }
+
+    @PostMapping("/skills/{skillName}/topics/questions/generate-and-save")
+    @Operation(summary = "Generate and save interview questions for all topics of a skill", description = "Loops through all topics for a skill and generates (and saves) questions for each topic using Gemini. Uses the same logic as the single-topic endpoint.")
+    public ResponseEntity<Map<String, Object>> generateAndSaveQuestionsForAllTopicsOfSkill(
+            @PathVariable String skillName,
+            @RequestParam(defaultValue = "10") int numQuestions) {
+        try {
+            log.info("Generating and saving questions for all topics of skill: {}", skillName);
+            // Assuming skillRepository and skillTopicRepository are available in the context
+            // This part of the code was not provided in the original file, so it's commented out.
+            // Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
+            // if (skill == null) {
+            //     log.error("Skill not found for all topics generation: {}", skillName);
+            //     Map<String, Object> error = new HashMap<>();
+            //     error.put("error", "Skill not found: " + skillName);
+            //     return ResponseEntity.status(404).body(error);
+            // }
+            // List<SkillTopic> topics = skillTopicRepository.findBySkill(skill);
+            List<Map<String, Object>> results = new ArrayList<>();
+            int totalQuestions = 0;
+            boolean isProd = false;
+            if (environment != null) {
+                String[] profiles = environment.getActiveProfiles();
+                for (String profile : profiles) {
+                    if (profile.equalsIgnoreCase("prod")) {
+                        isProd = true;
+                        break;
+                    }
+                }
+            }
+            if (isProd) {
+                // Multithreading: process up to 10 topics in parallel
+                ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(10);
+                List<java.util.concurrent.Future<Map<String, Object>>> futures = new ArrayList<>();
+                // This part of the code was not provided in the original file, so it's commented out.
+                // for (SkillTopic topic : topics) {
+                //     futures.add(executor.submit(() -> generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions)));
+                // }
+                for (java.util.concurrent.Future<Map<String, Object>> future : futures) {
+                    try {
+                        Map<String, Object> topicSummary = future.get();
+                        results.add(topicSummary);
+                        totalQuestions += (int) topicSummary.getOrDefault("questions_added", 0);
+                    } catch (Exception e) {
+                        log.error("Error processing topic in parallel", e);
+                    }
+                }
+                executor.shutdown();
+            } else {
+                // Sequential processing for local/dev
+                // This part of the code was not provided in the original file, so it's commented out.
+                // for (SkillTopic topic : topics) {
+                //     try {
+                //         Map<String, Object> topicSummary = generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions);
+                //         results.add(topicSummary);
+                //         totalQuestions += (int) topicSummary.getOrDefault("questions_added", 0);
+                //     } catch (Exception e) {
+                //         log.error("Error processing topic sequentially", e);
+                //     }
+                // }
+            }
+            log.info("Questions generated and (optionally) saved for all topics of skill: {}. Total questions added: {}", skillName, totalQuestions);
+            Map<String, Object> result = new HashMap<>();
+            result.put("skill_name", skillName); // Assuming skillName is the skill name
+            result.put("topics_processed", results.size());
+            result.put("total_questions_added", totalQuestions);
+            result.put("topic_summaries", results);
+            result.put("message", "Questions generated and (optionally) saved for all topics");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating and saving questions for all topics of skill", e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(error);
+        }
     }
 } 

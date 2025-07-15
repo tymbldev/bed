@@ -28,4 +28,22 @@ public interface IndustryRepository extends JpaRepository<Industry, Long> {
            "GROUP BY c.id, c.name, c.logoUrl, c.website, c.headquarters " +
            "ORDER BY activeJobCount DESC")
     List<Object[]> getTopCompaniesByIndustry(@Param("industryId") Long industryId);
+
+    // Remove the broken join query
+    // Add a method to fetch all industry IDs
+    @Query("SELECT i.id FROM Industry i")
+    List<Long> getAllIndustryIds();
+
+    // Add a native query to count jobs for a given industryId
+    @Query(value = "SELECT COUNT(j.id) FROM jobs_job j JOIN jobs_company c ON j.company_id = c.id WHERE c.primary_industry_id = :industryId AND j.active = true", nativeQuery = true)
+    Long countActiveJobsByIndustryId(@Param("industryId") Long industryId);
+
+    @Query(
+      value = "SELECT c.primary_industry_id AS industryId, COUNT(j.id) AS jobCount " +
+              "FROM jobs_company c " +
+              "LEFT JOIN jobs_job j ON j.company_id = c.id AND j.active = true " +
+              "GROUP BY c.primary_industry_id",
+      nativeQuery = true
+    )
+    List<Object[]> getActiveJobCountsForAllIndustries();
 } 

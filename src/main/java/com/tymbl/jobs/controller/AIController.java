@@ -72,6 +72,100 @@ public class AIController {
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
     // ============================================================================
 
+    @PostMapping("/companies/generate-batch")
+    @Operation(
+        summary = "Generate and save companies industry-wise using Gemini",
+        description = "For each industry, uses Gemini to generate a comprehensive list of companies (name, website), excluding those already present in the DB. Only name, website, and primaryIndustryId are saved. Returns a summary per industry."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Companies generated and saved successfully industry-wise",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  'industry_results': [{\n" +
+                        "    'industry': 'FinTech',\n" +
+                        "    'generated': 10,\n" +
+                        "    'skipped': 5,\n" +
+                        "    'errors': []\n" +
+                        "  }],\n" +
+                        "  'total_generated': 10,\n" +
+                        "  'total_skipped': 5,\n" +
+                        "  'message': 'Company generation completed'\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateCompaniesBatch() {
+        List<Map<String, Object>> industryResults = new ArrayList<>();
+        int totalGenerated = 0;
+        int totalSkipped = 0;
+        List<String> globalErrors = new ArrayList<>();
+        try {
+            List<com.tymbl.common.entity.Industry> industries = industryRepository.findAll();
+            for (com.tymbl.common.entity.Industry industry : industries) {
+                String industryName = industry.getName();
+                Long industryId = industry.getId();
+                List<Company> existingCompanies = companyRepository.findByPrimaryIndustryId(industryId);
+                Set<String> existingNames = existingCompanies.stream()
+                    .map(c -> c.getName().trim().toLowerCase())
+                    .collect(Collectors.toSet());
+                Set<String> existingWebsites = existingCompanies.stream()
+                    .map(c -> normalizeWebsite(c.getWebsite()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, new ArrayList<>(existingNames));
+                int generated = 0, skipped = 0;
+                List<String> errors = new ArrayList<>();
+                for (Map<String, String> companyMap : generatedCompanies) {
+                    String name = companyMap.getOrDefault("name", "").trim();
+                    String website = normalizeWebsite(companyMap.get("website"));
+                    if (name.isEmpty() || website == null || website.isEmpty()) {
+                        skipped++;
+                        continue;
+                    }
+                    if (existingNames.contains(name.toLowerCase()) || existingWebsites.contains(website)) {
+                        skipped++;
+                        continue;
+                    }
+                    // Save new company
+                    Company company = new Company();
+                    company.setName(name);
+                    company.setWebsite(website);
+                    company.setPrimaryIndustryId(industryId);
+                    try {
+                        companyRepository.save(company);
+                        existingNames.add(name.toLowerCase());
+                        existingWebsites.add(website);
+                        generated++;
+                    } catch (Exception e) {
+                        errors.add("Failed to save: " + name + " (" + website + ") - " + e.getMessage());
+                        skipped++;
+                    }
+                }
+                totalSkipped += skipped;
+                Map<String, Object> result = new HashMap<>();
+                result.put("industry", industryName);
+                result.put("generated", generated);
+                result.put("skipped", skipped);
+                result.put("errors", errors);
+                industryResults.add(result);
+            }
+        } catch (Exception e) {
+            globalErrors.add("Fatal error: " + e.getMessage());
+        }
+        Map<String, Object> response = new HashMap<>();
+        response.put("industry_results", industryResults);
+        response.put("total_generated", totalGenerated);
+        response.put("total_skipped", totalSkipped);
+        response.put("errors", globalErrors);
+        response.put("message", "Company generation completed");
+        return ResponseEntity.ok(response);
+    }
+
     @PostMapping("/companies/crawl")
     @Operation(summary = "Crawl all companies", description = "Triggers the crawling process for all companies from the companies.txt file")
     @ApiResponses(value = {
@@ -197,99 +291,7 @@ public class AIController {
         }
     }
 
-    @PostMapping("/companies/generate-batch")
-    @Operation(
-        summary = "Generate and save companies industry-wise using Gemini",
-        description = "For each industry, uses Gemini to generate a comprehensive list of companies (name, website), excluding those already present in the DB. Only name, website, and primaryIndustryId are saved. Returns a summary per industry."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Companies generated and saved successfully industry-wise",
-            content = @Content(
-                examples = @ExampleObject(
-                    value = "{\n" +
-                        "  'industry_results': [{\n" +
-                        "    'industry': 'FinTech',\n" +
-                        "    'generated': 10,\n" +
-                        "    'skipped': 5,\n" +
-                        "    'errors': []\n" +
-                        "  }],\n" +
-                        "  'total_generated': 10,\n" +
-                        "  'total_skipped': 5,\n" +
-                        "  'message': 'Company generation completed'\n" +
-                        "}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<Map<String, Object>> generateCompaniesBatch() {
-        List<Map<String, Object>> industryResults = new ArrayList<>();
-        int totalGenerated = 0;
-        int totalSkipped = 0;
-        List<String> globalErrors = new ArrayList<>();
-        try {
-            List<com.tymbl.common.entity.Industry> industries = industryRepository.findAll();
-            for (com.tymbl.common.entity.Industry industry : industries) {
-                String industryName = industry.getName();
-                Long industryId = industry.getId();
-                List<Company> existingCompanies = companyRepository.findByPrimaryIndustryId(industryId);
-                Set<String> existingNames = existingCompanies.stream()
-                    .map(c -> c.getName().trim().toLowerCase())
-                    .collect(Collectors.toSet());
-                Set<String> existingWebsites = existingCompanies.stream()
-                    .map(c -> normalizeWebsite(c.getWebsite()))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, new ArrayList<>(existingNames));
-                int generated = 0, skipped = 0;
-                List<String> errors = new ArrayList<>();
-                for (Map<String, String> companyMap : generatedCompanies) {
-                    String name = companyMap.getOrDefault("name", "").trim();
-                    String website = normalizeWebsite(companyMap.get("website"));
-                    if (name.isEmpty() || website == null || website.isEmpty()) {
-                        skipped++;
-                        continue;
-                    }
-                    if (existingNames.contains(name.toLowerCase()) || existingWebsites.contains(website)) {
-                        skipped++;
-                        continue;
-                    }
-                    // Save new company
-                    Company company = new Company();
-                    company.setName(name);
-                    company.setWebsite(website);
-                    company.setPrimaryIndustryId(industryId);
-                    try {
-                        companyRepository.save(company);
-                        existingNames.add(name.toLowerCase());
-                        existingWebsites.add(website);
-                        generated++;
-                    } catch (Exception e) {
-                        errors.add("Failed to save: " + name + " (" + website + ") - " + e.getMessage());
-                        skipped++;
-                    }
-                }
-                totalSkipped += skipped;
-                Map<String, Object> result = new HashMap<>();
-                result.put("industry", industryName);
-                result.put("generated", generated);
-                result.put("skipped", skipped);
-                result.put("errors", errors);
-                industryResults.add(result);
-            }
-        } catch (Exception e) {
-            globalErrors.add("Fatal error: " + e.getMessage());
-        }
-        Map<String, Object> response = new HashMap<>();
-        response.put("industry_results", industryResults);
-        response.put("total_generated", totalGenerated);
-        response.put("total_skipped", totalSkipped);
-        response.put("errors", globalErrors);
-        response.put("message", "Company generation completed");
-        return ResponseEntity.ok(response);
-    }
+
 
     // ============================================================================
     // AI-POWERED DATA GENERATION ENDPOINTS

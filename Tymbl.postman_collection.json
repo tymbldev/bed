@@ -2821,6 +2821,52 @@
                   "body": "{\n  \"error\": \"Server Error\"\n}"
                 }
               ]
+            },
+            {
+              "name": "GET /api/v1/dropdowns/companies/by-industry/:industryId",
+              "request": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/dropdowns/companies/by-industry/:industryId",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "dropdowns",
+                    "companies",
+                    "by-industry",
+                    ":industryId"
+                  ],
+                  "variable": [
+                    {
+                      "key": "industryId",
+                      "value": "1"
+                    }
+                  ]
+                },
+                "description": "Get all companies for a specific industry by industryId. Returns a list of companies with detailed attributes."
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "[
+  {\n    \"companyId\": 1,\n    \"companyName\": \"Google\",\n    \"logoUrl\": \"https://logo.com/google.png\",\n    \"website\": \"https://google.com\",\n    \"headquarters\": \"Mountain View, CA\",\n    \"activeJobCount\": 12,\n    \"secondaryIndustry\": \"Cloud, AI\",\n    \"companySize\": \"10000+\",\n    \"specialties\": \"Search, Cloud, AI\",\n    \"careerPageUrl\": \"https://careers.google.com\"\n  },\n  {\n    \"companyId\": 2,\n    \"companyName\": \"Microsoft\",\n    \"logoUrl\": \"https://logo.com/microsoft.png\",\n    \"website\": \"https://microsoft.com\",\n    \"headquarters\": \"Redmond, WA\",\n    \"activeJobCount\": 8,\n    \"secondaryIndustry\": \"Cloud, Productivity\",\n    \"companySize\": \"10000+\",\n    \"specialties\": \"Software, Cloud, Productivity\",\n    \"careerPageUrl\": \"https://careers.microsoft.com\"\n  }\n]"
+                },
+                {
+                  "code": 404,
+                  "name": "Not Found",
+                  "body": "{\n  \"error\": \"Industry not found\"\n}"
+                }
+              ]
             }
           ]
         },
