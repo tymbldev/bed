@@ -107,6 +107,11 @@ public class CompanyService {
         response.setSecondaryIndustries(company.getSecondaryIndustries());
         response.setCompanySize(company.getCompanySize());
         response.setSpecialties(company.getSpecialties());
+        // Ensure all fields are always set
+        if (response.getSecondaryIndustries() == null) response.setSecondaryIndustries("");
+        if (response.getCompanySize() == null) response.setCompanySize("");
+        if (response.getSpecialties() == null) response.setSpecialties("");
+        if (response.getCareerPageUrl() == null) response.setCareerPageUrl("");
         response.setCrawled(company.isCrawled());
         response.setLastCrawledAt(company.getLastCrawledAt());
         response.setCrawledData(company.getCrawledData());

@@ -279,16 +279,27 @@ public class DropdownService {
             // Get top companies for this industry
             List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
             List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
-                .map(companyData -> IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
-                    .companyId((Long) companyData[0])
-                    .companyName((String) companyData[1])
-                    .logoUrl((String) companyData[2])
-                    .website((String) companyData[3])
-                    .headquarters((String) companyData[4])
-                    .activeJobCount((Long) companyData[5])
-                    .build())
+                .map(companyData -> {
+                    Long companyId = (Long) companyData[0];
+                    IndustryWiseCompaniesDTO.TopCompanyDTO.TopCompanyDTOBuilder builder = IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
+                        .companyId(companyId)
+                        .companyName((String) companyData[1])
+                        .logoUrl((String) companyData[2])
+                        .website((String) companyData[3])
+                        .headquarters((String) companyData[4])
+                        .activeJobCount((Long) companyData[5]);
+                    // Fetch additional fields from Company entity
+                    com.tymbl.jobs.entity.Company company = companyRepository.findById(companyId).orElse(null);
+                    if (company != null) {
+                        builder.secondaryIndustry(company.getSecondaryIndustries());
+                        builder.companySize(company.getCompanySize());
+                        builder.specialties(company.getSpecialties());
+                        builder.careerPageUrl(company.getCareerPageUrl());
+                    }
+                    return builder.build();
+                })
                 .limit(5) // Limit to top 5 companies
-                .collect(Collectors.toList());
+                .collect(java.util.stream.Collectors.toList());
             
             return IndustryWiseCompaniesDTO.builder()
                 .industryId(industryId)
@@ -297,7 +308,7 @@ public class DropdownService {
                 .companyCount(companyCount)
                 .topCompanies(topCompanies)
                 .build();
-        }).collect(Collectors.toList());
+        }).collect(java.util.stream.Collectors.toList());
     }
 
     /**

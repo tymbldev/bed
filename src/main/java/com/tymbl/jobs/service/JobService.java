@@ -39,6 +39,7 @@ import org.springframework.data.domain.PageImpl;
 import java.util.ArrayList;
 import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
+import com.tymbl.common.repository.CompanyRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -52,6 +53,7 @@ public class JobService {
     private final ReferrerFeedbackRepository referrerFeedbackRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final UserRepository userRepository;
+    private final CompanyRepository companyRepository;
     private final CompanyService companyService;
     private final UserEnrichmentUtil userEnrichmentUtil;
     private final ElasticsearchJobService elasticsearchJobService;
@@ -247,7 +249,38 @@ public class JobService {
             userDesignationId = currentUser.getDesignationId();
         }
         
-        return elasticsearchJobService.searchJobs(request, userDesignationId);
+        JobSearchResponse response = elasticsearchJobService.searchJobs(request, userDesignationId);
+
+        // Populate companyMetaData
+        if (response.getJobs() != null && !response.getJobs().isEmpty()) {
+            java.util.Set<Long> companyIds = response.getJobs().stream()
+                .map(com.tymbl.jobs.dto.JobResponse::getCompanyId)
+                .filter(java.util.Objects::nonNull)
+                .collect(java.util.stream.Collectors.toSet());
+            java.util.Map<Long, JobSearchResponse.CompanyMetaData> companyMetaData = new java.util.HashMap<>();
+            for (Long companyId : companyIds) {
+                com.tymbl.jobs.entity.Company company = null;
+                try {
+                    company = companyRepository.findById(companyId).orElse(null);
+                } catch (Exception ignored) {}
+                if (company != null) {
+                    JobSearchResponse.CompanyMetaData meta = JobSearchResponse.CompanyMetaData.builder()
+                        .companyName(company.getName())
+                        .logoUrl(company.getLogoUrl())
+                        .website(company.getWebsite())
+                        .headquarters(company.getHeadquarters())
+                        .activeJobCount((long) jobRepository.countByCompanyIdAndActiveTrue(companyId))
+                        .secondaryIndustry(company.getSecondaryIndustries())
+                        .companySize(company.getCompanySize())
+                        .specialties(company.getSpecialties())
+                        .careerPageUrl(company.getCareerPageUrl())
+                        .build();
+                    companyMetaData.put(companyId, meta);
+                }
+            }
+            response.setCompanyMetaData(companyMetaData);
+        }
+        return response;
     }
 
     /**
