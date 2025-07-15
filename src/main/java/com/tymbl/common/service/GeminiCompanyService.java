@@ -174,7 +174,11 @@ public class GeminiCompanyService {
                 prompt.append(String.join(", ", excludeNames));
                 prompt.append(". ");
             }
-            prompt.append("Return ONLY a JSON array of 500 objects with 'name' and 'website' fields. Do NOT include any explanation, disclaimer, markdown, or text—just the JSON array. Example: [{\"name\":\"Infosys\",\"website\":\"https://www.infosys.com\"}]");
+            prompt.append("Your response MUST strictly match this schema: [{\"name\": string, \"website\": string}, ...] (500 items). ");
+            prompt.append("Return ONLY a JSON array of 500 objects with 'name' and 'website' fields. ");
+            prompt.append("Do NOT include any explanation, disclaimer, markdown, or text before or after the array—just the JSON array. ");
+            prompt.append("Example: [{\"name\":\"Infosys\",\"website\":\"https://www.infosys.com\"}]");
+            prompt.append("IMPORTANT: My system will parse your response as JSON. If you add any note, remark, explanation, or text before or after the array, the process will fail. Do NOT add anything except the JSON array.");
 
             Map<String, Object> requestBody = buildRequestBody(prompt.toString());
             HttpHeaders headers = new HttpHeaders();
@@ -186,6 +190,7 @@ public class GeminiCompanyService {
                 request,
                 String.class
             );
+            Thread.sleep(1000); // Add a delay to avoid hitting rate limits too quickly
             if (response.getStatusCodeValue() == 200) {
                 return parseCompanyListResponse(response.getBody());
             } else {
@@ -360,19 +365,27 @@ public class GeminiCompanyService {
     private String extractJsonFromText(String text) {
         text = text.replaceAll("```json\\s*", "").replaceAll("```\\s*", "");
         text = text.trim();
-        int jsonStart = text.indexOf('{');
-        if (jsonStart > 0) {
-            text = text.substring(jsonStart);
+        // If it's a JSON array, return as is
+        if (text.startsWith("[") && text.endsWith("]")) {
+            return text;
         }
-        int jsonEnd = text.lastIndexOf('}');
-        if (jsonEnd >= 0) {
-            text = text.substring(0, jsonEnd + 1);
+        // If it's a JSON object, return as is
+        if (text.startsWith("{") && text.endsWith("}")) {
+            return text;
         }
-        text = text.trim();
-        if (!text.startsWith("{") || !text.endsWith("}")) {
-            log.warn("Extracted text does not appear to be valid JSON: {}", text);
-            return "{}";
+        // Try to extract the first JSON array from the text
+        int arrayStart = text.indexOf('[');
+        int arrayEnd = text.lastIndexOf(']');
+        if (arrayStart != -1 && arrayEnd != -1 && arrayEnd > arrayStart) {
+            return text.substring(arrayStart, arrayEnd + 1);
         }
+        // Fallback to old logic (try to extract JSON object)
+        int objStart = text.indexOf('{');
+        int objEnd = text.lastIndexOf('}');
+        if (objStart != -1 && objEnd != -1 && objEnd > objStart) {
+            return text.substring(objStart, objEnd + 1);
+        }
+        // If nothing found, return as is (will likely fail to parse)
         return text;
     }
 
