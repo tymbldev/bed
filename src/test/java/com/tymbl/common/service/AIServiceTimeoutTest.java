@@ -24,14 +24,13 @@ class AIServiceTimeoutTest {
     void testGeminiTimeout() {
         // Given
         String companyName = "Test Company";
-        String linkedinUrl = "https://linkedin.com/company/test";
-        
+
         // Mock Gemini service to throw timeout exception
-        when(geminiService.generateCompanyInfo(companyName, linkedinUrl))
+        when(geminiService.generateCompanyInfo(companyName))
             .thenThrow(new RuntimeException("Request timeout for Gemini API"));
         
         // When
-        Optional<com.tymbl.jobs.entity.Company> result = aiService.generateCompanyInfo(companyName, linkedinUrl);
+        Optional<com.tymbl.jobs.entity.Company> result = aiService.generateCompanyInfo(companyName);
         
         // Then
         assertFalse(result.isPresent());
@@ -41,14 +40,13 @@ class AIServiceTimeoutTest {
     void testGeminiRateLimit() {
         // Given
         String companyName = "Test Company";
-        String linkedinUrl = "https://linkedin.com/company/test";
-        
+
         // Mock Gemini service to throw rate limit exception
-        when(geminiService.generateCompanyInfo(companyName, linkedinUrl))
+        when(geminiService.generateCompanyInfo(companyName))
             .thenThrow(new RuntimeException("Rate limit exceeded for Gemini API"));
         
         // When
-        Optional<com.tymbl.jobs.entity.Company> result = aiService.generateCompanyInfo(companyName, linkedinUrl);
+        Optional<com.tymbl.jobs.entity.Company> result = aiService.generateCompanyInfo(companyName);
         
         // Then
         assertFalse(result.isPresent());
