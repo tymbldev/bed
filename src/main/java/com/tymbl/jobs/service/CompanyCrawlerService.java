@@ -69,15 +69,6 @@ public class CompanyCrawlerService {
         try {
             log.info("Processing company: {} (ID: {})", company.getName(), company.getId());
             
-            // Check if company has LinkedIn URL
-            if (company.getLinkedinUrl() == null || company.getLinkedinUrl().trim().isEmpty()) {
-                log.warn("Company {} has no LinkedIn URL, marking as failed to crawl", company.getName());
-                company.setCrawled(false);
-                company.setLastCrawledAt(LocalDateTime.now());
-                companyRepository.save(company);
-                return;
-            }
-
             Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPage(company.getLinkedinUrl());
             
             if (crawlResult.isPresent()) {
