@@ -29,5 +29,9 @@ public class IndustryWiseCompaniesDTO {
         private String website;
         private String headquarters;
         private Long activeJobCount;
+        private String secondaryIndustry;
+        private String companySize;
+        private String specialties;
+        private String careerPageUrl;
     }
 } 

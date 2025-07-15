@@ -19,4 +19,11 @@ public class CompanyResponse {
     private String mission;
     private String culture;
     private List<JobResponse> jobs;
+    private String careerPageUrl;
+    private String linkedinUrl;
+    private String headquarters;
+    private Long primaryIndustryId;
+    private String secondaryIndustries;
+    private String companySize;
+    private String specialties;
 } 

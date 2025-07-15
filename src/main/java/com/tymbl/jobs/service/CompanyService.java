@@ -100,6 +100,16 @@ public class CompanyService {
         response.setVision(company.getVision());
         response.setMission(company.getMission());
         response.setCulture(company.getCulture());
+        response.setCareerPageUrl(company.getCareerPageUrl());
+        response.setLinkedinUrl(company.getLinkedinUrl());
+        response.setHeadquarters(company.getHeadquarters());
+        response.setPrimaryIndustryId(company.getPrimaryIndustryId());
+        response.setSecondaryIndustries(company.getSecondaryIndustries());
+        response.setCompanySize(company.getCompanySize());
+        response.setSpecialties(company.getSpecialties());
+        response.setCrawled(company.isCrawled());
+        response.setLastCrawledAt(company.getLastCrawledAt());
+        response.setCrawledData(company.getCrawledData());
         if (jobs != null) {
             response.setJobs(jobs.stream().map(this::mapJobToResponse).collect(Collectors.toList()));
         }
