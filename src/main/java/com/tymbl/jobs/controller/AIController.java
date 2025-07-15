@@ -35,6 +35,9 @@ import java.util.concurrent.ExecutorService;
 import com.tymbl.jobs.repository.CompanyRepository;
 import java.util.Optional;
 import com.tymbl.common.repository.IndustryRepository;
+import java.util.Set;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(
@@ -232,31 +235,40 @@ public class AIController {
                 String industryName = industry.getName();
                 Long industryId = industry.getId();
                 List<Company> existingCompanies = companyRepository.findByPrimaryIndustryId(industryId);
-                List<String> existingNames = existingCompanies.stream()
-                        .map(c -> c.getName().toLowerCase())
-                        .collect(java.util.stream.Collectors.toList());
-                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, existingNames);
-                int generated = 0;
-                int skipped = 0;
+                Set<String> existingNames = existingCompanies.stream()
+                    .map(c -> c.getName().trim().toLowerCase())
+                    .collect(Collectors.toSet());
+                Set<String> existingWebsites = existingCompanies.stream()
+                    .map(c -> normalizeWebsite(c.getWebsite()))
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, new ArrayList<>(existingNames));
+                int generated = 0, skipped = 0;
                 List<String> errors = new ArrayList<>();
                 for (Map<String, String> companyMap : generatedCompanies) {
                     String name = companyMap.getOrDefault("name", "").trim();
-                    String website = companyMap.getOrDefault("website", "").trim();
-                    if (name.isEmpty() || existingNames.contains(name.toLowerCase())) {
+                    String website = normalizeWebsite(companyMap.get("website"));
+                    if (name.isEmpty() || website == null || website.isEmpty()) {
                         skipped++;
                         continue;
                     }
+                    if (existingNames.contains(name.toLowerCase()) || existingWebsites.contains(website)) {
+                        skipped++;
+                        continue;
+                    }
+                    // Save new company
+                    Company company = new Company();
+                    company.setName(name);
+                    company.setWebsite(website);
+                    company.setPrimaryIndustryId(industryId);
                     try {
-                        Company company = new Company();
-                        company.setName(name);
-                        company.setWebsite(website);
-                        company.setPrimaryIndustryId(industryId);
                         companyRepository.save(company);
+                        existingNames.add(name.toLowerCase());
+                        existingWebsites.add(website);
                         generated++;
-                        totalGenerated++;
                     } catch (Exception e) {
-                        errors.add("Error saving company '" + name + "': " + e.getMessage());
-                        globalErrors.add("[" + industryName + "] " + name + ": " + e.getMessage());
+                        errors.add("Failed to save: " + name + " (" + website + ") - " + e.getMessage());
+                        skipped++;
                     }
                 }
                 totalSkipped += skipped;
@@ -840,6 +852,16 @@ public class AIController {
             log.warn("Error generating code for {} in {}: {}", questionText, language, e.getMessage());
         }
         return null;
+    }
+
+    // Add this utility method for website normalization
+    private String normalizeWebsite(String website) {
+        if (website == null) return null;
+        website = website.trim();
+        if (website.endsWith("/")) {
+            website = website.substring(0, website.length() - 1);
+        }
+        return website.toLowerCase();
     }
 
     // ============================================================================
