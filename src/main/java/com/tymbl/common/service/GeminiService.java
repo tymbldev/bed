@@ -14,8 +14,8 @@ public class GeminiService {
     private final GeminiInterviewService geminiInterviewService;
     
     // Company-related methods
-    public Optional<com.tymbl.jobs.entity.Company> generateCompanyInfo(String companyName, String linkedinUrl) {
-        return geminiCompanyService.generateCompanyInfo(companyName, linkedinUrl);
+    public Optional<com.tymbl.jobs.entity.Company> generateCompanyInfo(String companyName) {
+        return geminiCompanyService.generateCompanyInfo(companyName);
     }
     
     public Map<String, Object> detectCompanyIndustries(String companyName, String companyDescription, String specialties) {

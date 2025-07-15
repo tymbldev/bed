@@ -68,23 +68,19 @@ public class CompanyCrawlerService {
     public void processCompanyInTransaction(Company company) {
         try {
             log.info("Processing company: {} (ID: {})", company.getName(), company.getId());
-            
-            Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPage(company.getLinkedinUrl());
-            
+            // Always fetch/enrich based on company name only
+            Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPage(company.getName());
             if (crawlResult.isPresent()) {
                 CrawlingService.CrawlResult result = crawlResult.get();
                 Company generatedCompany = result.getCompany();
                 String rawData = result.getRawData();
-                
-                // Update company with generated information
+                // Update company with generated information (including LinkedIn URL if present)
                 updateCompanyFields(company, generatedCompany);
                 company.setCrawledData(rawData);
                 company.setCrawled(true); // Success - flag = 1
                 company.setLastCrawledAt(LocalDateTime.now());
-                
                 companyRepository.save(company);
                 log.info("Successfully updated company information for: {} (ID: {})", company.getName(), company.getId());
-                
             } else {
                 // Failed to generate information - flag = 2
                 log.warn("Failed to generate company information for: {} (ID: {}), marking as failed", company.getName(), company.getId());
@@ -92,7 +88,6 @@ public class CompanyCrawlerService {
                 company.setLastCrawledAt(LocalDateTime.now());
                 companyRepository.save(company);
             }
-            
         } catch (Exception e) {
             log.error("Error processing company: {} (ID: {})", company.getName(), company.getId(), e);
             // Mark as failed to crawl - flag = 2

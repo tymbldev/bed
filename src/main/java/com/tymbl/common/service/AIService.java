@@ -31,10 +31,9 @@ public class AIService {
      * Generate company information using Gemini AI.
      *
      * @param companyName The name of the company
-     * @param linkedinUrl The LinkedIn URL of the company
      * @return Optional<Company> containing the generated company information
      */
-    public Optional<Company> generateCompanyInfo(String companyName, String linkedinUrl) {
+    public Optional<Company> generateCompanyInfo(String companyName) {
         log.info("Starting AI-powered company information generation for: {}", companyName);
 
         // Check if crawling is disabled
@@ -47,7 +46,7 @@ public class AIService {
         if (!geminiDisabled.get() && geminiFailureThreshold > 0) {
             try {
                 log.info("Attempting to generate company info using Gemini AI for: {}", companyName);
-                Optional<Company> geminiResult = geminiService.generateCompanyInfo(companyName, linkedinUrl);
+                Optional<Company> geminiResult = geminiService.generateCompanyInfo(companyName);
 
                 if (geminiResult.isPresent()) {
                     log.info("Successfully generated company info using Gemini AI for: {}", companyName);

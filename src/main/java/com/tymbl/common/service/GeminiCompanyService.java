@@ -37,14 +37,14 @@ public class GeminiCompanyService {
     private final RestTemplate restTemplate;
     private final IndustryRepository industryRepository;
 
-    public Optional<Company> generateCompanyInfo(String companyName, String linkedinUrl) {
+    public Optional<Company> generateCompanyInfo(String companyName) {
         try {
             log.info("Starting company information generation for: {} using Gemini AI", companyName);
             if (companyName == null || companyName.trim().isEmpty()) {
                 log.warn("Company name is null or empty");
                 return Optional.empty();
             }
-            String prompt = buildCompanyGenerationPrompt(companyName, linkedinUrl);
+            String prompt = buildCompanyGenerationPrompt(companyName);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             log.debug("Sending request to Gemini API for company: {}", companyName);
             HttpHeaders headers = new HttpHeaders();
@@ -203,8 +203,10 @@ public class GeminiCompanyService {
         }
     }
 
-    private String buildCompanyGenerationPrompt(String companyName, String linkedinUrl) {
-        return "Generate detailed company information for: " + companyName + " (LinkedIn: " + linkedinUrl + ")";
+    private String buildCompanyGenerationPrompt(String companyName) {
+        return "Generate detailed company information for: " + companyName + ". For each of the following fields, provide a detailed, well-written, and comprehensive response (not a short summary): " +
+                "description, about_us, mission, vision, culture, specialties, company_size, headquarters, career_page_url, website, logo_url, linkedin_url. " +
+                "Each field should be as detailed and informative as possible, suitable for a company profile page. Do NOT provide short summaries. Return the result as a JSON object with these fields as keys.";
     }
 
     private String buildIndustryDetectionPrompt(String companyName, String companyDescription, String specialties) {

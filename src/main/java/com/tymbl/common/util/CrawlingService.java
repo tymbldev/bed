@@ -33,26 +33,17 @@ public class CrawlingService {
         }
     }
 
-    public Optional<CrawlResult> crawlCompanyPage(String linkedinUrl) {
+    public Optional<CrawlResult> crawlCompanyPage(String companyName) {
         try {
-            // Extract company name from LinkedIn URL
-            String companyName = extractCompanyNameFromUrl(linkedinUrl);
-            if (companyName == null || companyName.trim().isEmpty()) {
-                log.error("Could not extract company name from URL: {}", linkedinUrl);
-                return Optional.empty();
-            }
 
             log.info("Generating company information for: {} using AI Service", companyName);
             
             // Use AI Service to generate company information based on company name
-            Optional<Company> generatedCompany = aiService.generateCompanyInfo(companyName, linkedinUrl);
+            Optional<Company> generatedCompany = aiService.generateCompanyInfo(companyName);
             
             if (generatedCompany.isPresent()) {
                 Company company = generatedCompany.get();
-                // Ensure the LinkedIn URL is set
-                company.setLinkedinUrl(linkedinUrl);
                 log.info("Successfully generated company information for: {}", company.getName());
-                
                 // Create a summary of the generated data as raw data
                 String rawData = createRawDataSummary(company);
                 return Optional.of(new CrawlResult(company, rawData));
@@ -61,7 +52,6 @@ public class CrawlingService {
                 // Fallback: create a basic company object
                 Company company = new Company();
                 company.setName(companyName);
-                company.setLinkedinUrl(linkedinUrl);
                 company.setLastCrawledAt(LocalDateTime.now());
                 company.setCrawled(true);
                 company.setCrawledData("Generated using AI Service - Company: " + companyName);
