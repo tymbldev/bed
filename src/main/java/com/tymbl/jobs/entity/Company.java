@@ -60,6 +60,14 @@ public class Company {
     @Column(name = "crawled_data", columnDefinition = "LONGTEXT")
     private String crawledData;
 
+    @Column(name = "ai_error")
+    public Boolean getAiError() {
+        return aiError;
+    }
+    public void setAiError(Boolean aiError) {
+        this.aiError = aiError;
+    }
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
