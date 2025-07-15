@@ -21,6 +21,13 @@ public class GeminiService {
     public Map<String, Object> detectCompanyIndustries(String companyName, String companyDescription, String specialties) {
         return geminiCompanyService.detectCompanyIndustries(companyName, companyDescription, specialties);
     }
+
+    /**
+     * Delegates to GeminiCompanyService to generate a list of companies for an industry.
+     */
+    public List<Map<String, String>> generateCompanyListForIndustry(String industryName, List<String> excludeNames) {
+        return geminiCompanyService.generateCompanyListForIndustry(industryName, excludeNames);
+    }
     
     // Interview-related methods
     public List<Map<String, Object>> generateTopicsForDesignation(String designationName) {

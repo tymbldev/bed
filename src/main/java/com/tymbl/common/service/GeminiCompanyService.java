@@ -157,6 +157,47 @@ public class GeminiCompanyService {
         }
     }
 
+    /**
+     * Generate a list of companies (name, website) for a given industry, excluding provided names.
+     * @param industryName The industry to generate companies for
+     * @param excludeNames List of company names to ignore (case-insensitive)
+     * @return List of maps with keys 'name' and 'website'
+     */
+    public List<Map<String, String>> generateCompanyListForIndustry(String industryName, List<String> excludeNames) {
+        try {
+            StringBuilder prompt = new StringBuilder();
+            prompt.append("Give a random list of 500 real companies in the '")
+                  .append(industryName)
+                  .append("' industry. For each, provide company name and website. ");
+            if (excludeNames != null && !excludeNames.isEmpty()) {
+                prompt.append("Ignore these companies (do not include them in your response): ");
+                prompt.append(String.join(", ", excludeNames));
+                prompt.append(". ");
+            }
+            prompt.append("Return ONLY a JSON array of 500 objects with 'name' and 'website' fields. Do NOT include any explanation, disclaimer, markdown, or text—just the JSON array. Example: [{\"name\":\"Google\",\"website\":\"https://google.com\"}]");
+
+            Map<String, Object> requestBody = buildRequestBody(prompt.toString());
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+            if (response.getStatusCodeValue() == 200) {
+                return parseCompanyListResponse(response.getBody());
+            } else {
+                log.error("Gemini API error (company list): {} - {}", response.getStatusCodeValue(), response.getBody());
+                return Collections.emptyList();
+            }
+        } catch (Exception e) {
+            log.error("Error generating company list for industry {}: {}", industryName, e.getMessage(), e);
+            return Collections.emptyList();
+        }
+    }
+
     private String buildCompanyGenerationPrompt(String companyName, String linkedinUrl) {
         return "Generate detailed company information for: " + companyName + " (LinkedIn: " + linkedinUrl + ")";
     }
@@ -272,6 +313,47 @@ public class GeminiCompanyService {
         } catch (Exception e) {
             log.error("Error parsing Gemini response for industries", e);
             return new HashMap<>();
+        }
+    }
+
+    private List<Map<String, String>> parseCompanyListResponse(String responseBody) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        String jsonText = extractJsonFromText(generatedText);
+                        try {
+                            JsonNode arr = objectMapper.readTree(jsonText);
+                            if (arr.isArray()) {
+                                List<Map<String, String>> result = new ArrayList<>();
+                                for (JsonNode node : arr) {
+                                    String name = getStringValue(node, "name");
+                                    String website = getStringValue(node, "website");
+                                    if (!name.isEmpty()) {
+                                        Map<String, String> map = new HashMap<>();
+                                        map.put("name", name);
+                                        map.put("website", website);
+                                        result.add(map);
+                                    }
+                                }
+                                return result;
+                            }
+                        } catch (Exception e) {
+                            log.error("Failed to parse company list JSON: {}", jsonText, e);
+                        }
+                    }
+                }
+            }
+            log.error("Unexpected Gemini API response structure (company list): {}", responseBody);
+            return Collections.emptyList();
+        } catch (Exception e) {
+            log.error("Error parsing Gemini response (company list)", e);
+            return Collections.emptyList();
         }
     }
 

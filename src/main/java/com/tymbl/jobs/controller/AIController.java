@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import com.tymbl.jobs.repository.CompanyRepository;
 import java.util.Optional;
+import com.tymbl.common.repository.IndustryRepository;
 
 @RestController
 @CrossOrigin(
@@ -62,6 +63,7 @@ public class AIController {
     private final SkillTopicRepository skillTopicRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final CompanyRepository companyRepository;
+    private final IndustryRepository industryRepository;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -194,21 +196,25 @@ public class AIController {
 
     @PostMapping("/companies/generate-batch")
     @Operation(
-        summary = "Generate and save companies using Gemini in batches",
-        description = "Uses Gemini to generate companies in batches of 500, checks if each exists in the database, and saves new ones. Repeats for 100 iterations. Returns a summary of results."
+        summary = "Generate and save companies industry-wise using Gemini",
+        description = "For each industry, uses Gemini to generate a comprehensive list of companies (name, website), excluding those already present in the DB. Only name, website, and primaryIndustryId are saved. Returns a summary per industry."
     )
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
-            description = "Companies generated and saved successfully",
+            description = "Companies generated and saved successfully industry-wise",
             content = @Content(
                 examples = @ExampleObject(
                     value = "{\n" +
-                        "  \"total_batches\": 100,\n" +
-                        "  \"total_companies_processed\": 50000,\n" +
-                        "  \"companies_generated\": 1200,\n" +
-                        "  \"companies_skipped\": 48800,\n" +
-                        "  \"errors\": []\n" +
+                        "  'industry_results': [{\n" +
+                        "    'industry': 'FinTech',\n" +
+                        "    'generated': 10,\n" +
+                        "    'skipped': 5,\n" +
+                        "    'errors': []\n" +
+                        "  }],\n" +
+                        "  'total_generated': 10,\n" +
+                        "  'total_skipped': 5,\n" +
+                        "  'message': 'Company generation completed'\n" +
                         "}"
                 )
             )
@@ -216,46 +222,61 @@ public class AIController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> generateCompaniesBatch() {
-        int totalBatches = 100;
-        int batchSize = 500;
-        int companiesGenerated = 0;
-        int companiesSkipped = 0;
-        int totalProcessed = 0;
-        List<String> errors = new ArrayList<>();
-        for (int batch = 0; batch < totalBatches; batch++) {
-            // For demo, generate fake company names. Replace with Gemini batch call if available.
-            List<String> companyNames = new ArrayList<>();
-            for (int i = 0; i < batchSize; i++) {
-                companyNames.add("GeminiCompany_" + batch + "_" + i);
-            }
-            for (String companyName : companyNames) {
-                totalProcessed++;
-                try {
-                    if (companyRepository.existsByName(companyName)) {
-                        companiesSkipped++;
+        List<Map<String, Object>> industryResults = new ArrayList<>();
+        int totalGenerated = 0;
+        int totalSkipped = 0;
+        List<String> globalErrors = new ArrayList<>();
+        try {
+            List<com.tymbl.common.entity.Industry> industries = industryRepository.findAll();
+            for (com.tymbl.common.entity.Industry industry : industries) {
+                String industryName = industry.getName();
+                Long industryId = industry.getId();
+                List<Company> existingCompanies = companyRepository.findByPrimaryIndustryId(industryId);
+                List<String> existingNames = existingCompanies.stream()
+                        .map(c -> c.getName().toLowerCase())
+                        .collect(java.util.stream.Collectors.toList());
+                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, existingNames);
+                int generated = 0;
+                int skipped = 0;
+                List<String> errors = new ArrayList<>();
+                for (Map<String, String> companyMap : generatedCompanies) {
+                    String name = companyMap.getOrDefault("name", "").trim();
+                    String website = companyMap.getOrDefault("website", "").trim();
+                    if (name.isEmpty() || existingNames.contains(name.toLowerCase())) {
+                        skipped++;
                         continue;
                     }
-                    // Generate company info using GeminiService (no LinkedIn URL)
-                    Optional<com.tymbl.jobs.entity.Company> companyOpt = geminiService.generateCompanyInfo(companyName, null);
-                    if (companyOpt.isPresent()) {
-                        companyRepository.save(companyOpt.get());
-                        companiesGenerated++;
-                    } else {
-                        companiesSkipped++;
+                    try {
+                        Company company = new Company();
+                        company.setName(name);
+                        company.setWebsite(website);
+                        company.setPrimaryIndustryId(industryId);
+                        companyRepository.save(company);
+                        generated++;
+                        totalGenerated++;
+                    } catch (Exception e) {
+                        errors.add("Error saving company '" + name + "': " + e.getMessage());
+                        globalErrors.add("[" + industryName + "] " + name + ": " + e.getMessage());
                     }
-                } catch (Exception e) {
-                    errors.add("Error for company " + companyName + ": " + e.getMessage());
                 }
+                totalSkipped += skipped;
+                Map<String, Object> result = new HashMap<>();
+                result.put("industry", industryName);
+                result.put("generated", generated);
+                result.put("skipped", skipped);
+                result.put("errors", errors);
+                industryResults.add(result);
             }
+        } catch (Exception e) {
+            globalErrors.add("Fatal error: " + e.getMessage());
         }
-        Map<String, Object> result = new HashMap<>();
-        result.put("total_batches", totalBatches);
-        result.put("total_companies_processed", totalProcessed);
-        result.put("companies_generated", companiesGenerated);
-        result.put("companies_skipped", companiesSkipped);
-        result.put("errors", errors);
-        result.put("message", "Company batch generation completed");
-        return ResponseEntity.ok(result);
+        Map<String, Object> response = new HashMap<>();
+        response.put("industry_results", industryResults);
+        response.put("total_generated", totalGenerated);
+        response.put("total_skipped", totalSkipped);
+        response.put("errors", globalErrors);
+        response.put("message", "Company generation completed");
+        return ResponseEntity.ok(response);
     }
 
     // ============================================================================
