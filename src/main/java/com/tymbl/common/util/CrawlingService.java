@@ -95,10 +95,12 @@ public class CrawlingService {
         summary.append("Headquarters: ").append(company.getHeadquarters()).append("\n");
         summary.append("Company Size: ").append(company.getCompanySize()).append("\n");
         summary.append("Specialties: ").append(company.getSpecialties()).append("\n");
-        summary.append("About Us: ").append(company.getAboutUs()).append("\n");
+        summary.append("About Us (Original): ").append(company.getAboutUsOriginal()).append("\n");
+        summary.append("About Us (Shortened): ").append(company.getAboutUs()).append("\n");
         summary.append("Mission: ").append(company.getMission()).append("\n");
         summary.append("Vision: ").append(company.getVision()).append("\n");
-        summary.append("Culture: ").append(company.getCulture()).append("\n");
+        summary.append("Culture (Original): ").append(company.getCultureOriginal()).append("\n");
+        summary.append("Culture (Shortened): ").append(company.getCulture()).append("\n");
         summary.append("LinkedIn URL: ").append(company.getLinkedinUrl()).append("\n");
         summary.append("Generated At: ").append(company.getLastCrawledAt()).append("\n");
         return summary.toString();

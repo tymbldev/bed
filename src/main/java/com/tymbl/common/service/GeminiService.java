@@ -67,4 +67,9 @@ public class GeminiService {
     public List<Map<String, Object>> generateDesignationsForDepartment(String departmentName) {
         return geminiInterviewService.generateDesignationsForDepartment(departmentName);
     }
+    
+    // Content shortening method
+    public String shortenContent(String content, String contentType) {
+        return geminiInterviewService.shortenContent(content, contentType);
+    }
 } 

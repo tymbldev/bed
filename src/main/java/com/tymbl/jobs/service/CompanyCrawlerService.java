@@ -113,10 +113,10 @@ public class CompanyCrawlerService {
             existing.setCareerPageUrl(generated.getCareerPageUrl());
         }
         if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty()) {
-            existing.setAboutUs(generated.getAboutUs());
+            existing.setAboutUsOriginal(generated.getAboutUs());
         }
         if (generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
-            existing.setCulture(generated.getCulture());
+            existing.setCultureOriginal(generated.getCulture());
         }
         if (generated.getMission() != null && !generated.getMission().trim().isEmpty()) {
             existing.setMission(generated.getMission());

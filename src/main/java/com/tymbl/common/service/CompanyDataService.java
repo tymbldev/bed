@@ -222,8 +222,8 @@ public class CompanyDataService {
                 boolean updated = false;
                 
                 // Only update if current field is null or empty
-                if (company.getAboutUs() == null || company.getAboutUs().trim().isEmpty()) {
-                    company.setAboutUs(aboutUs);
+                if (company.getAboutUsOriginal() == null || company.getAboutUsOriginal().trim().isEmpty()) {
+                    company.setAboutUsOriginal(aboutUs);
                     updated = true;
                 }
                 
@@ -237,8 +237,8 @@ public class CompanyDataService {
                     updated = true;
                 }
                 
-                if (company.getCulture() == null || company.getCulture().trim().isEmpty()) {
-                    company.setCulture(culture);
+                if (company.getCultureOriginal() == null || company.getCultureOriginal().trim().isEmpty()) {
+                    company.setCultureOriginal(culture);
                     updated = true;
                 }
                 

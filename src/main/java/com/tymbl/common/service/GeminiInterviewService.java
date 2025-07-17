@@ -814,4 +814,70 @@ public class GeminiInterviewService {
             return questions;
         }
     }
+    
+    public String shortenContent(String content, String contentType) {
+        try {
+            log.info("[Gemini] Shortening {} content (length: {})", contentType, content.length());
+            String prompt = buildContentShorteningPrompt(content, contentType);
+            log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
+            Map<String, Object> requestBody = buildRequestBody(prompt);
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            
+            ResponseEntity<String> response = restTemplate.exchange(
+                GEMINI_API_URL + "?key=" + apiKey,
+                HttpMethod.POST,
+                request,
+                String.class
+            );
+            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
+            
+            if (response.getStatusCodeValue() == 200) {
+                String shortenedContent = parseShortenedContentResponse(response.getBody());
+                log.info("[Gemini] Successfully shortened {} content to {} characters", contentType, shortenedContent.length());
+                return shortenedContent;
+            } else {
+                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
+                return content; // Return original content if API fails
+            }
+        } catch (Exception e) {
+            log.error("[Gemini] Error shortening {} content", contentType, e);
+            return content; // Return original content if there's an error
+        }
+    }
+    
+    private String buildContentShorteningPrompt(String content, String contentType) {
+        return String.format(
+            "You are a content summarizer. Please shorten the following %s content to a maximum of 5 key points. " +
+            "Each point should start with a hyphen (-) and be concise but informative. " +
+            "Focus on the most important aspects and maintain the core message. " +
+            "Return only the shortened content with no additional text, comments, or formatting.\n\n" +
+            "Content to shorten:\n%s",
+            contentType, content
+        );
+    }
+    
+    private String parseShortenedContentResponse(String responseBody) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        return generatedText.trim();
+                    }
+                }
+            }
+            log.error("Unexpected Gemini API response structure for content shortening: {}", responseBody);
+            return "";
+        } catch (Exception e) {
+            log.error("Error parsing Gemini response for content shortening", e);
+            return "";
+        }
+    }
 } 

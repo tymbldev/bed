@@ -28,9 +28,17 @@ public class Company {
 
     private String logoUrl;
 
+    @Column(name = "about_us_original")
+    private String aboutUsOriginal;
+    
     private String aboutUs;
+    
     private String vision;
     private String mission;
+    
+    @Column(name = "culture_original")
+    private String cultureOriginal;
+    
     private String culture;
 
     @Column(name = "linkedin_url")

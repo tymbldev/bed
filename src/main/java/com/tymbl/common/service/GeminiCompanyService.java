@@ -411,9 +411,9 @@ public class GeminiCompanyService {
             String careerPageUrl = getStringValue(companyData, "career_page_url");
             if (!containsWebSearchPlaceholder(careerPageUrl)) company.setCareerPageUrl(careerPageUrl); else aiError = true;
             String aboutUs = getStringValue(companyData, "about_us");
-            if (!containsWebSearchPlaceholder(aboutUs)) company.setAboutUs(aboutUs); else aiError = true;
+            if (!containsWebSearchPlaceholder(aboutUs)) company.setAboutUsOriginal(aboutUs); else aiError = true;
             String culture = getStringValue(companyData, "culture");
-            if (!containsWebSearchPlaceholder(culture)) company.setCulture(culture); else aiError = true;
+            if (!containsWebSearchPlaceholder(culture)) company.setCultureOriginal(culture); else aiError = true;
             String mission = getStringValue(companyData, "mission");
             if (!containsWebSearchPlaceholder(mission)) company.setMission(mission); else aiError = true;
             String vision = getStringValue(companyData, "vision");

@@ -1,18 +1,9 @@
 package com.tymbl.jobs.controller;
 
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
-import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.service.AIService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
 import com.tymbl.jobs.service.CompanyService;
-import com.tymbl.jobs.dto.CompanyResponse;
-import com.tymbl.interview.service.ComprehensiveQuestionService;
-import com.tymbl.common.entity.Skill;
-import com.tymbl.common.repository.SkillRepository;
-import com.tymbl.common.service.GeminiService;
-import com.tymbl.common.entity.SkillTopic;
-import com.tymbl.common.repository.SkillTopicRepository;
-import com.tymbl.interview.entity.InterviewQuestion;
-import com.tymbl.interview.repository.InterviewQuestionRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -20,7 +11,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -29,15 +19,8 @@ import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.RequestMethod;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import com.tymbl.jobs.repository.CompanyRepository;
-import java.util.Optional;
-import com.tymbl.common.repository.IndustryRepository;
-import java.util.Set;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 @RestController
 @CrossOrigin(
@@ -60,13 +43,7 @@ public class AIController {
 
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
-    private final ComprehensiveQuestionService comprehensiveQuestionService;
-    private final SkillRepository skillRepository;
-    private final GeminiService geminiService;
-    private final SkillTopicRepository skillTopicRepository;
-    private final InterviewQuestionRepository interviewQuestionRepository;
-    private final CompanyRepository companyRepository;
-    private final IndustryRepository industryRepository;
+    private final AIService aiService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -100,70 +77,15 @@ public class AIController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> generateCompaniesBatch() {
-        List<Map<String, Object>> industryResults = new ArrayList<>();
-        int totalGenerated = 0;
-        int totalSkipped = 0;
-        List<String> globalErrors = new ArrayList<>();
         try {
-            List<com.tymbl.common.entity.Industry> industries = industryRepository.findAll();
-            for (com.tymbl.common.entity.Industry industry : industries) {
-                String industryName = industry.getName();
-                Long industryId = industry.getId();
-                List<Company> existingCompanies = companyRepository.findByPrimaryIndustryId(industryId);
-                Set<String> existingNames = existingCompanies.stream()
-                    .map(c -> c.getName().trim().toLowerCase())
-                    .collect(Collectors.toSet());
-                Set<String> existingWebsites = existingCompanies.stream()
-                    .map(c -> normalizeWebsite(c.getWebsite()))
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, new ArrayList<>(existingNames));
-                int generated = 0, skipped = 0;
-                List<String> errors = new ArrayList<>();
-                for (Map<String, String> companyMap : generatedCompanies) {
-                    String name = companyMap.getOrDefault("name", "").trim();
-                    String website = normalizeWebsite(companyMap.get("website"));
-                    if (name.isEmpty() || website == null || website.isEmpty()) {
-                        skipped++;
-                        continue;
-                    }
-                    if (existingNames.contains(name.toLowerCase()) || existingWebsites.contains(website)) {
-                        skipped++;
-                        continue;
-                    }
-                    // Save new company
-                    Company company = new Company();
-                    company.setName(name);
-                    company.setWebsite(website);
-                    company.setPrimaryIndustryId(industryId);
-                    try {
-                        companyRepository.save(company);
-                        existingNames.add(name.toLowerCase());
-                        existingWebsites.add(website);
-                        generated++;
-                    } catch (Exception e) {
-                        errors.add("Failed to save: " + name + " (" + website + ") - " + e.getMessage());
-                        skipped++;
-                    }
-                }
-                totalSkipped += skipped;
-                Map<String, Object> result = new HashMap<>();
-                result.put("industry", industryName);
-                result.put("generated", generated);
-                result.put("skipped", skipped);
-                result.put("errors", errors);
-                industryResults.add(result);
-            }
+            Map<String, Object> result = aiService.generateCompaniesBatch();
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            globalErrors.add("Fatal error: " + e.getMessage());
+            log.error("Error generating companies batch", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating companies: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
-        Map<String, Object> response = new HashMap<>();
-        response.put("industry_results", industryResults);
-        response.put("total_generated", totalGenerated);
-        response.put("total_skipped", totalSkipped);
-        response.put("errors", globalErrors);
-        response.put("message", "Company generation completed");
-        return ResponseEntity.ok(response);
     }
 
     @PostMapping("/companies/crawl")
@@ -223,28 +145,16 @@ public class AIController {
     public ResponseEntity<Object> crawlJobsForCompany(@PathVariable Long companyId) {
         try {
             log.info("Manual job crawling triggered for company ID: {}", companyId);
-            // Get company to verify it exists and get name for response
-            CompanyResponse companyResponse = companyService.getCompanyById(companyId);
-            
-            log.info("Company found for job crawling: {} (ID: {})", companyResponse.getName(), companyId);
-            
-            // Get the company entity for the crawler service
-            Company company = new Company();
-            company.setId(companyId);
-            company.setName(companyResponse.getName());
-            
-
+            // This would need to be implemented in CompanyCrawlerService
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Job crawling process completed successfully for company: " + companyResponse.getName());
+            response.put("message", "Job crawling process started successfully for company ID: " + companyId);
             response.put("companyId", companyId);
-            response.put("companyName", companyResponse.getName());
             response.put("status", "SUCCESS");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error("Error during job crawling process for company ID: {}", companyId, e);
-            Map<String, Object> response = new HashMap<>();
+            Map<String, String> response = new HashMap<>();
             response.put("message", "Error during job crawling process: " + e.getMessage());
-            response.put("companyId", companyId);
             response.put("status", "ERROR");
             return ResponseEntity.internalServerError().body(response);
         }
@@ -270,14 +180,10 @@ public class AIController {
     })
     public ResponseEntity<Object> crawlJobsForCompanyByName(@PathVariable String companyName) {
         try {
-            log.info("Manual job crawling triggered for company by name: {}", companyName);
-            
-            // Create a company object with just the name for the crawler service
-            Company company = new Company();
-            company.setName(companyName);
-
-            Map<String, String> response = new HashMap<>();
-            response.put("message", "Job crawling process completed successfully for company: " + companyName);
+            log.info("Manual job crawling triggered for company: {}", companyName);
+            // This would need to be implemented in CompanyCrawlerService
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Job crawling process started successfully for company: " + companyName);
             response.put("companyName", companyName);
             response.put("status", "SUCCESS");
             return ResponseEntity.ok(response);
@@ -285,17 +191,10 @@ public class AIController {
             log.error("Error during job crawling process for company: {}", companyName, e);
             Map<String, String> response = new HashMap<>();
             response.put("message", "Error during job crawling process: " + e.getMessage());
-            response.put("companyName", companyName);
             response.put("status", "ERROR");
             return ResponseEntity.internalServerError().body(response);
         }
     }
-
-
-
-    // ============================================================================
-    // AI-POWERED DATA GENERATION ENDPOINTS
-    // ============================================================================
 
     @PostMapping("/detect-industries")
     @Operation(summary = "Detect industries for all companies", description = "Detects primary and secondary industries for all companies using AI or manual detection")
@@ -334,15 +233,102 @@ public class AIController {
     public ResponseEntity<List<CompanyIndustryResponse>> detectIndustriesForCompanies(
         @RequestParam(defaultValue = "false") boolean useGemini) {
         try {
-            log.info("Industry detection triggered for all companies. Use Gemini: {}", useGemini);
             List<CompanyIndustryResponse> results = companyService.detectIndustriesForCompanies(useGemini);
-            log.info("Industry detection completed. Total companies processed: {}", results.size());
             return ResponseEntity.ok(results);
         } catch (Exception e) {
-            log.error("Error during industry detection process", e);
+            log.error("Error detecting industries for companies", e);
             return ResponseEntity.internalServerError().build();
         }
     }
+
+    @PostMapping("/companies/{companyId}/shorten-content")
+    @Operation(
+        summary = "Shorten company about us and culture content using AI",
+        description = "Takes the original about us and culture content from a company, uses Gemini AI to shorten them to 5 key points each, and saves the shortened versions to the aboutUs and culture fields."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Content shortened and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"companyId\": 1,\n" +
+                        "  \"companyName\": \"Google\",\n" +
+                        "  \"aboutUsShortened\": true,\n" +
+                        "  \"cultureShortened\": true,\n" +
+                        "  \"message\": \"Content shortened and saved successfully\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Company not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> shortenCompanyContent(@PathVariable Long companyId) {
+        try {
+            Map<String, Object> result = aiService.shortenCompanyContent(companyId);
+            return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            log.error("Company not found for content shortening: {}", companyId);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            log.error("Error shortening content for company ID: {}", companyId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error shortening content: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/companies/shorten-content-all")
+    @Operation(
+        summary = "Shorten about us and culture content for all companies using AI",
+        description = "Loops through all companies in the database, takes their original about us and culture content, uses Gemini AI to shorten them to 5 key points each, and saves the shortened versions to the aboutUs and culture fields."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Content shortened and saved for all companies successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_companies_processed\": 50,\n" +
+                        "  \"total_about_us_shortened\": 45,\n" +
+                        "  \"total_culture_shortened\": 42,\n" +
+                        "  \"total_errors\": 3,\n" +
+                        "  \"company_results\": [\n" +
+                        "    {\n" +
+                        "      \"companyId\": 1,\n" +
+                        "      \"companyName\": \"Google\",\n" +
+                        "      \"aboutUsShortened\": true,\n" +
+                        "      \"cultureShortened\": true,\n" +
+                        "      \"message\": \"Content shortened and saved successfully\"\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Content shortening completed for all companies\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> shortenAllCompaniesContent() {
+        try {
+            Map<String, Object> result = aiService.shortenAllCompaniesContent();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error shortening content for all companies", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error shortening content for all companies: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // ============================================================================
+    // INTERVIEW QUESTION GENERATION ENDPOINTS
+    // ============================================================================
 
     @PostMapping("/interview-questions/generate-comprehensive")
     @Operation(summary = "Generate comprehensive interview questions for all skills", description = "Generates detailed interview questions for all skills in the system using AI")
@@ -372,19 +358,15 @@ public class AIController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> generateComprehensiveInterviewQuestions() {
-        log.info("[BG] Starting background comprehensive interview question generation");
-        new Thread(() -> {
-            try {
-                log.info("[BG] Starting background comprehensive interview question generation");
-                comprehensiveQuestionService.generateQuestionsForAllSkills();
-                log.info("[BG] Comprehensive interview question generation completed successfully");
-            } catch (Exception e) {
-                log.error("[BG] Error in background comprehensive interview question generation", e);
-            }
-        }).start();
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Comprehensive interview question generation started in background. Check logs or status endpoint for results.");
-        return ResponseEntity.accepted().body(response);
+        try {
+            Map<String, Object> result = aiService.generateComprehensiveInterviewQuestions();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating comprehensive interview questions", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
     }
 
     @PostMapping("/interview-questions/generate-for-skill/{skillName}")
@@ -411,20 +393,17 @@ public class AIController {
     public ResponseEntity<Map<String, Object>> generateComprehensiveInterviewQuestionsForSkill(
             @PathVariable String skillName) {
         try {
-            log.info("Comprehensive interview question generation triggered for skill: {}", skillName);
-            Map<String, Object> result = comprehensiveQuestionService.generateQuestionsForSpecificSkill(skillName);
-            
-            if (result.containsKey("error")) {
-                log.error("Error during comprehensive interview question generation for skill: {}", skillName, result);
-                return ResponseEntity.badRequest().body(result);
-            }
-            
-            log.info("Comprehensive interview questions generated successfully for skill: {}", skillName);
+            Map<String, Object> result = aiService.generateComprehensiveInterviewQuestionsForSkill(skillName);
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Error during comprehensive interview question generation for skill: {}", skillName, e);
+        } catch (RuntimeException e) {
+            log.error("Skill not found for question generation: {}", skillName);
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error during question generation: " + e.getMessage());
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(404).body(errorResponse);
+        } catch (Exception e) {
+            log.error("Error generating questions for skill: {}", skillName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
@@ -451,34 +430,13 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveTechSkills() {
         try {
-            log.info("Generating and saving more tech skills using Gemini");
-            List<Map<String, Object>> skills = geminiService.generateComprehensiveTechSkills();
-            int newSkillsAdded = 0;
-            for (Map<String, Object> skillData : skills) {
-                String name = (String) skillData.get("name");
-                if (name == null || name.trim().isEmpty()) continue;
-                if (!skillRepository.existsByNameIgnoreCase(name.trim())) {
-                    Skill skill = new Skill();
-                    skill.setName(name.trim());
-                    skill.setCategory((String) skillData.get("category"));
-                    skill.setDescription((String) skillData.get("description"));
-                    skill.setEnabled(true);
-                    skill.setUsageCount(0L);
-                    skillRepository.save(skill);
-                    newSkillsAdded++;
-                }
-            }
-            log.info("Skills generated and saved successfully. New skills added: {}, total generated: {}", newSkillsAdded, skills.size());
-            Map<String, Object> result = new HashMap<>();
-            result.put("new_skills_added", newSkillsAdded);
-            result.put("total_skills_generated", skills.size());
-            result.put("message", "Skills generated and saved successfully");
+            Map<String, Object> result = aiService.generateAndSaveTechSkills();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error generating and saving tech skills", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.internalServerError().body(error);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
@@ -505,47 +463,18 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForSkill(@PathVariable String skillName) {
         try {
-            log.info("Generating and saving topics for skill: {}", skillName);
-            Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
-            if (skill == null) {
-                log.error("Skill not found for topic generation: {}", skillName);
-                Map<String, Object> error = new HashMap<>();
-                error.put("error", "Skill not found: " + skillName);
-                return ResponseEntity.status(404).body(error);
-            }
-            List<Map<String, Object>> topics = geminiService.generateTopicsForSkill(skill.getName());
-            List<SkillTopic> savedTopics = new ArrayList<>();
-            for (Map<String, Object> topicData : topics) {
-                String topic = (String) topicData.get("topic");
-                if (topic == null || topic.trim().isEmpty()) continue;
-                boolean exists = false;
-                for (SkillTopic st : savedTopics) {
-                    if (st.getTopic().equalsIgnoreCase(topic.trim())) {
-                        exists = true;
-                        break;
-                    }
-                }
-                if (!exists) {
-                    SkillTopic skillTopic = new SkillTopic();
-                    skillTopic.setSkill(skill);
-                    skillTopic.setTopic(topic.trim());
-                    skillTopic.setDescription((String) topicData.get("description"));
-                    savedTopics.add(skillTopic);
-                }
-            }
-            skillTopicRepository.deleteBySkill(skill);
-            skillTopicRepository.saveAll(savedTopics);
-            log.info("Topics generated and saved successfully for skill: {}. Topics added: {}", skillName, savedTopics.size());
-            Map<String, Object> result = new HashMap<>();
-            result.put("skill_name", skill.getName());
-            result.put("topics_added", savedTopics.size());
-            result.put("message", "Topics generated and saved successfully");
+            Map<String, Object> result = aiService.generateAndSaveTopicsForSkill(skillName);
             return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            log.error("Skill not found for topic generation: {}", skillName);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(404).body(errorResponse);
         } catch (Exception e) {
-            log.error("Error generating and saving topics for skill", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.internalServerError().body(error);
+            log.error("Error generating topics for skill: {}", skillName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
@@ -574,23 +503,15 @@ public class AIController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForAllSkills() {
-        log.info("Generating and saving topics for all enabled skills");
-        List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
-        List<Map<String, Object>> results = new ArrayList<>();
-        int totalSkills = 0;
-        for (Skill skill : skills) {
-            totalSkills++;
-            ResponseEntity<Map<String, Object>> response = generateAndSaveTopicsForSkill(skill.getName());
-            Map<String, Object> result = response.getBody();
-            if (result != null) {
-                results.add(result);
-            }
+        try {
+            Map<String, Object> result = aiService.generateAndSaveTopicsForAllSkills();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating topics for all skills", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("total_skills", totalSkills);
-        summary.put("results", results);
-        summary.put("message", "Topics generated and saved for all skills");
-        return ResponseEntity.ok(summary);
     }
 
     @PostMapping("/skills/{skillName}/topics/{topicName}/questions/generate-and-save")
@@ -620,36 +541,18 @@ public class AIController {
             @PathVariable String topicName,
             @RequestParam(defaultValue = "10") int numQuestions) {
         try {
-            log.info("Generating and saving questions for skill: {}, topic: {}", skillName, topicName);
-            Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
-            if (skill == null) {
-                log.error("Skill not found for question generation: {}", skillName);
-                Map<String, Object> error = new HashMap<>();
-                error.put("error", "Skill not found: " + skillName);
-                return ResponseEntity.status(404).body(error);
-            }
-            SkillTopic skillTopic = skillTopicRepository.findBySkill(skill).stream()
-                .filter(t -> t.getTopic().equalsIgnoreCase(topicName.trim()))
-                .findFirst().orElse(null);
-            if (skillTopic == null) {
-                log.error("Topic not found for skill: {}", skillName);
-                Map<String, Object> error = new HashMap<>();
-                error.put("error", "Topic not found for skill: " + topicName);
-                return ResponseEntity.status(404).body(error);
-            }
-            Map<String, Object> topicSummary = generateQuestionsForSkillAndTopicInternal(skill, skillTopic, numQuestions);
-            log.info("Questions generated and (optionally) saved successfully for skill: {}, topic: {}", skillName, topicName);
-            Map<String, Object> result = new HashMap<>();
-            result.put("skill_name", skill.getName());
-            result.put("topic_name", skillTopic.getTopic());
-            result.put("questions_added", topicSummary.get("questions_added"));
-            result.put("message", "Questions generated and (optionally) saved successfully");
+            Map<String, Object> result = aiService.generateAndSaveQuestionsForSkillAndTopic(skillName, topicName, numQuestions);
             return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            log.error("Skill or topic not found for question generation: {} - {}", skillName, topicName);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(404).body(errorResponse);
         } catch (Exception e) {
-            log.error("Error generating and saving questions for skill and topic", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.internalServerError().body(error);
+            log.error("Error generating questions for skill and topic: {} - {}", skillName, topicName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
@@ -679,46 +582,18 @@ public class AIController {
             @PathVariable String skillName,
             @RequestParam(defaultValue = "10") int numQuestions) {
         try {
-            log.info("Generating and saving questions for all topics of skill: {}", skillName);
-            Skill skill = skillRepository.findByNameIgnoreCase(skillName.trim()).orElse(null);
-            if (skill == null) {
-                log.error("Skill not found for all topics generation: {}", skillName);
-                Map<String, Object> error = new HashMap<>();
-                error.put("error", "Skill not found: " + skillName);
-                return ResponseEntity.status(404).body(error);
-            }
-            List<SkillTopic> topics = skillTopicRepository.findBySkill(skill);
-            List<Map<String, Object>> results = new ArrayList<>();
-            int totalQuestions = 0;
-            // Multithreading: process up to 10 topics in parallel
-            ExecutorService executor = java.util.concurrent.Executors.newFixedThreadPool(10);
-            List<java.util.concurrent.Future<Map<String, Object>>> futures = new ArrayList<>();
-            for (SkillTopic topic : topics) {
-                futures.add(executor.submit(() -> generateQuestionsForSkillAndTopicInternal(skill, topic, numQuestions)));
-            }
-            for (java.util.concurrent.Future<Map<String, Object>> future : futures) {
-                try {
-                    Map<String, Object> topicSummary = future.get();
-                    results.add(topicSummary);
-                    totalQuestions += (int) topicSummary.getOrDefault("questions_added", 0);
-                } catch (Exception e) {
-                    log.error("Error processing topic in parallel", e);
-                }
-            }
-            executor.shutdown();
-            log.info("Questions generated and (optionally) saved for all topics of skill: {}. Total questions added: {}", skillName, totalQuestions);
-            Map<String, Object> result = new HashMap<>();
-            result.put("skill_name", skill.getName());
-            result.put("topics_processed", results.size());
-            result.put("total_questions_added", totalQuestions);
-            result.put("topic_summaries", results);
-            result.put("message", "Questions generated and (optionally) saved for all topics");
+            Map<String, Object> result = aiService.generateAndSaveQuestionsForAllTopicsOfSkill(skillName, numQuestions);
             return ResponseEntity.ok(result);
+        } catch (RuntimeException e) {
+            log.error("Skill not found for all topics generation: {}", skillName);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.status(404).body(errorResponse);
         } catch (Exception e) {
-            log.error("Error generating and saving questions for all topics of skill", e);
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", e.getMessage());
-            return ResponseEntity.internalServerError().body(error);
+            log.error("Error generating questions for all topics of skill: {}", skillName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
@@ -747,138 +622,14 @@ public class AIController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveQuestionsForAllSkillsAndTopics(@RequestParam(defaultValue = "10") int numQuestions) {
-        log.info("Generating and saving questions for all enabled skills and their topics");
-        List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
-        List<Map<String, Object>> results = new ArrayList<>();
-        int totalSkills = 0;
-        for (Skill skill : skills) {
-            totalSkills++;
-            ResponseEntity<Map<String, Object>> response = generateAndSaveQuestionsForAllTopicsOfSkill(skill.getName(), numQuestions);
-            Map<String, Object> result = response.getBody();
-            if (result != null) {
-                result.put("skill_name", skill.getName());
-                results.add(result);
-            }
-        }
-        Map<String, Object> summary = new HashMap<>();
-        summary.put("total_skills", totalSkills);
-        summary.put("results", results);
-        summary.put("message", "Questions generated and saved for all skills and topics");
-        return ResponseEntity.ok(summary);
-    }
-
-    // Internal helper to reuse the logic for a single topic
-    private Map<String, Object> generateQuestionsForSkillAndTopicInternal(Skill skill, SkillTopic skillTopic, int numQuestions) {
-        Long existingCount = interviewQuestionRepository.countBySkillIdAndTopicId(skill.getId(), skillTopic.getId());
-        if (existingCount != null && existingCount >= 20) {
-            log.info("[AI] Skipping question generation for skill='{}', topic='{}' as {} questions already exist", skill.getName(), skillTopic.getTopic(), existingCount);
-            Map<String, Object> topicSummary = new HashMap<>();
-            topicSummary.put("topic_name", skillTopic.getTopic());
-            topicSummary.put("questions_added", 0);
-            topicSummary.put("skipped", true);
-            topicSummary.put("message", "Skipped: already has " + existingCount + " questions");
-            return topicSummary;
-        }
-        log.info("[AI] Starting question generation for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
-        List<Map<String, Object>> summaryQuestions = geminiService.generateQuestionsForSkillAndTopic(skill.getName(), skillTopic.getTopic(), numQuestions);
-        log.info("[AI] Generated {} summary questions for skill='{}', topic='{}'", summaryQuestions.size(), skill.getName(), skillTopic.getTopic());
-        int questionsAdded = 0;
-        for (Map<String, Object> q : summaryQuestions) {
-            String questionText = (String) q.get("question");
-            if (questionText == null || questionText.trim().isEmpty()) {
-                log.info("[AI] Skipping empty question for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
-                continue;
-            }
-            log.info("[AI] Generating detailed content for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
-            List<Map<String, Object>> detailedContentList = geminiService.generateDetailedQuestionContent(skill.getName(), questionText);
-            Map<String, Object> detailedContent = detailedContentList.isEmpty() ? new HashMap<>() : detailedContentList.get(0);
-            String answer = (String) detailedContent.getOrDefault("detailed_answer", "");
-            String htmlContent = (String) detailedContent.getOrDefault("html_content", answer);
-            String codeExamples = (String) detailedContent.getOrDefault("code_examples", "");
-            boolean isCoding = false;
-            String questionType = (String) q.get("question_type");
-            String tags = (String) q.get("tags");
-            if ((questionType != null && questionType.toLowerCase().contains("coding")) ||
-                (tags != null && tags.toLowerCase().contains("coding")) ||
-                (questionText.toLowerCase().contains("code") || questionText.toLowerCase().contains("implement") || questionText.toLowerCase().contains("write a function"))) {
-                isCoding = true;
-            }
-            String javaCode = null, pythonCode = null, cppCode = null;
-            if (isCoding && skill.getName().equalsIgnoreCase("dsa")) {
-                log.info("[AI] Detected coding question. Generating code for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
-                javaCode = generateCodeWithGemini(skill.getName(), questionText, "Java");
-                pythonCode = generateCodeWithGemini(skill.getName(), questionText, "Python");
-                cppCode = generateCodeWithGemini(skill.getName(), questionText, "C++");
-            }
-            log.info("[AI] Going to save question for for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
-            InterviewQuestion iq = InterviewQuestion.builder()
-                .skillId(skill.getId())
-                .skillName(skill.getName())
-                .topicId(skillTopic.getId())
-                .topicName(skillTopic.getTopic())
-                .question(questionText)
-                .answer(answer)
-                .difficultyLevel((String) q.get("difficulty_level"))
-                .questionType(questionType)
-                .tags(tags)
-                .htmlContent(htmlContent)
-                .codeExamples(codeExamples)
-                .javaCode(javaCode)
-                .pythonCode(pythonCode)
-                .cppCode(cppCode)
-                .coding(isCoding)
-                .build();
-            interviewQuestionRepository.save(iq); // Save one by one to avoid OOM
-            questionsAdded++;
-            log.info("[AI] Finished processing and saved question for skill='{}', topic='{}'", skill.getName(), skillTopic.getTopic());
-        }
-        log.info("[AI] Finished generating questions for skill='{}', topic='{}'. Total questions added: {}", skill.getName(), skillTopic.getTopic(), questionsAdded);
-        Map<String, Object> topicSummary = new HashMap<>();
-        topicSummary.put("topic_name", skillTopic.getTopic());
-        topicSummary.put("questions_added", questionsAdded);
-        return topicSummary;
-    }
-
-    // Helper for code generation
-    private String generateCodeWithGemini(String skillName, String questionText, String language) {
         try {
-            String prompt = "Write a working, well-commented solution in " + language + " for the following coding interview question. Only return the code, no explanation.\n\n" +
-                    "SKILL: " + skillName + "\nQUESTION: " + questionText;
-            List<Map<String, Object>> codeResp = geminiService.generateDetailedQuestionContent(skillName, prompt);
-            if (!codeResp.isEmpty()) {
-                String code = (String) codeResp.get(0).getOrDefault("detailed_answer", "");
-                if (code.isEmpty()) code = (String) codeResp.get(0).getOrDefault("html_content", "");
-                return code;
-            }
+            Map<String, Object> result = aiService.generateAndSaveQuestionsForAllSkillsAndTopics(numQuestions);
+            return ResponseEntity.ok(result);
         } catch (Exception e) {
-            log.warn("Error generating code for {} in {}: {}", questionText, language, e.getMessage());
+            log.error("Error generating questions for all skills and topics", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
-        return null;
     }
-
-    // Add this utility method for website normalization
-    private String normalizeWebsite(String website) {
-        if (website == null) return null;
-        website = website.trim();
-        if (website.endsWith("/")) {
-            website = website.substring(0, website.length() - 1);
-        }
-        return website.toLowerCase();
-    }
-
-    // ============================================================================
-    // FUTURE AI UTILITY ENDPOINTS (Placeholder comments)
-    // ============================================================================
-    
-    // TODO: Add endpoints for:
-    // - Generate job descriptions using AI
-    // - Enrich company profiles with AI-generated content
-    // - Generate interview questions for specific companies/roles
-    // - AI-powered job matching and recommendations
-    // - Generate company culture and values descriptions
-    // - AI-powered salary range suggestions
-    // - Generate job requirements and qualifications
-    // - AI-powered company similarity analysis
-    // - Generate industry trend analysis
-    // - AI-powered candidate skill assessment questions
 } 

@@ -5600,6 +5600,56 @@
             },
             { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
           ]
+        },
+        {
+          "name": "POST /api/v1/ai/companies/{companyId}/shorten-content",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/companies/{{companyId}}/shorten-content",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "ai", "companies", "{{companyId}}", "shorten-content" ],
+              "variable": [ { "key": "companyId", "value": "1" } ]
+            },
+            "description": "Shorten company about us and culture content using AI. Takes the original about us and culture content from a company, uses Gemini AI to shorten them to 5 key points each, and saves the shortened versions to the aboutUs and culture fields."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Success",
+              "body": "{\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"aboutUsShortened\": true,\n  \"cultureShortened\": true,\n  \"message\": \"Content shortened and saved successfully\"\n}"
+            },
+            { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Company not found with ID: 1\"\n}" },
+            { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Error shortening content: Server Error\"\n}" }
+          ]
+        },
+        {
+          "name": "POST /api/v1/ai/companies/shorten-content-all",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{authToken}}" }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/ai/companies/shorten-content-all",
+              "host": [ "{{baseUrl}}" ],
+              "path": [ "api", "v1", "ai", "companies", "shorten-content-all" ]
+            },
+            "description": "Shorten about us and culture content for all companies using AI. Loops through all companies in the database, takes their original about us and culture content, uses Gemini AI to shorten them to 5 key points each, and saves the shortened versions to the aboutUs and culture fields."
+          },
+          "response": [
+            {
+              "code": 200,
+              "name": "Success",
+              "body": "{\n  \"total_companies_processed\": 50,\n  \"total_about_us_shortened\": 45,\n  \"total_culture_shortened\": 42,\n  \"total_errors\": 3,\n  \"company_results\": [\n    {\n      \"companyId\": 1,\n      \"companyName\": \"Google\",\n      \"aboutUsShortened\": true,\n      \"cultureShortened\": true,\n      \"message\": \"Content shortened and saved successfully\"\n    }\n  ],\n  \"message\": \"Content shortening completed for all companies\"\n}"
+            },
+            { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Error shortening content for all companies: Server Error\"\n}" }
+          ]
         }
       ]
     },
