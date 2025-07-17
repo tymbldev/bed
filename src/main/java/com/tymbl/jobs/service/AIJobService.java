@@ -11,7 +11,9 @@ import com.tymbl.interview.entity.InterviewQuestion;
 import com.tymbl.interview.repository.InterviewQuestionRepository;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.repository.CompanyRepository;
+import com.tymbl.jobs.repository.CompanyContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -29,6 +31,7 @@ import java.util.stream.Collectors;
 public class AIJobService {
 
     private final CompanyRepository companyRepository;
+    private final CompanyContentRepository companyContentRepository;
     private final IndustryRepository industryRepository;
     private final SkillRepository skillRepository;
     private final SkillTopicRepository skillTopicRepository;
@@ -130,22 +133,33 @@ public class AIJobService {
         response.put("companyId", companyId);
         response.put("companyName", company.getName());
         
-        // Check if company has already been processed for content shortening
-        if (company.isContentShortened()) {
-            response.put("aboutUsShortened", false);
-            response.put("cultureShortened", false);
-            response.put("message", "Company content has already been shortened");
-            response.put("alreadyProcessed", true);
-            log.info("Company content already shortened for: {} (ID: {})", company.getName(), companyId);
-            return response;
+        // Get or create company content record
+        Optional<CompanyContent> contentOpt = companyContentRepository.findByCompanyId(companyId);
+        CompanyContent companyContent;
+        
+        if (contentOpt.isPresent()) {
+            companyContent = contentOpt.get();
+            // Check if company has already been processed for content shortening
+            if (companyContent.isContentShortened()) {
+                response.put("aboutUsShortened", false);
+                response.put("cultureShortened", false);
+                response.put("message", "Company content has already been shortened");
+                response.put("alreadyProcessed", true);
+                log.info("Company content already shortened for: {} (ID: {})", company.getName(), companyId);
+                return response;
+            }
+        } else {
+            // Create new company content record
+            companyContent = new CompanyContent();
+            companyContent.setCompanyId(companyId);
         }
         
         boolean aboutUsShortened = false;
         boolean cultureShortened = false;
         
         // Shorten about us content if original exists
-        if (company.getAboutUsOriginal() != null && !company.getAboutUsOriginal().trim().isEmpty()) {
-            String shortenedAboutUs = geminiService.shortenContent(company.getAboutUsOriginal(), "about us");
+        if (companyContent.getAboutUsOriginal() != null && !companyContent.getAboutUsOriginal().trim().isEmpty()) {
+            String shortenedAboutUs = geminiService.shortenContent(companyContent.getAboutUsOriginal(), "about us");
             if (shortenedAboutUs != null && !shortenedAboutUs.trim().isEmpty()) {
                 company.setAboutUs(shortenedAboutUs);
                 aboutUsShortened = true;
@@ -154,8 +168,8 @@ public class AIJobService {
         }
         
         // Shorten culture content if original exists
-        if (company.getCultureOriginal() != null && !company.getCultureOriginal().trim().isEmpty()) {
-            String shortenedCulture = geminiService.shortenContent(company.getCultureOriginal(), "culture");
+        if (companyContent.getCultureOriginal() != null && !companyContent.getCultureOriginal().trim().isEmpty()) {
+            String shortenedCulture = geminiService.shortenContent(companyContent.getCultureOriginal(), "culture");
             if (shortenedCulture != null && !shortenedCulture.trim().isEmpty()) {
                 company.setCulture(shortenedCulture);
                 cultureShortened = true;
@@ -165,7 +179,8 @@ public class AIJobService {
         
         // Save the company with shortened content and mark as processed
         if (aboutUsShortened || cultureShortened) {
-            company.setContentShortened(true);
+            companyContent.setContentShortened(true);
+            companyContentRepository.save(companyContent);
             companyRepository.save(company);
             response.put("aboutUsShortened", aboutUsShortened);
             response.put("cultureShortened", cultureShortened);
@@ -183,7 +198,7 @@ public class AIJobService {
 
     public Map<String, Object> shortenAllCompaniesContent() {
         // Only get companies that haven't been processed for content shortening and have original content
-        List<Company> unprocessedCompanies = companyRepository.findUnprocessedCompaniesWithOriginalContent();
+        List<CompanyContent> unprocessedContent = companyContentRepository.findUnprocessedContentWithOriginalData();
         List<Map<String, Object>> companyResults = new ArrayList<>();
         int totalProcessed = 0;
         int totalAboutUsShortened = 0;
@@ -191,18 +206,18 @@ public class AIJobService {
         int totalErrors = 0;
         int totalSkipped = 0;
         
-        log.info("Found {} unprocessed companies with original content for shortening", unprocessedCompanies.size());
+        log.info("Found {} unprocessed companies with original content for shortening", unprocessedContent.size());
         
-        for (Company company : unprocessedCompanies) {
+        for (CompanyContent companyContent : unprocessedContent) {
             try {
-                Map<String, Object> result = shortenCompanyContent(company.getId());
+                Map<String, Object> result = shortenCompanyContent(companyContent.getCompanyId());
                 companyResults.add(result);
                 totalProcessed++;
                 
                 // Check if company was already processed (shouldn't happen with our query, but just in case)
                 if (result.containsKey("alreadyProcessed") && (Boolean) result.get("alreadyProcessed")) {
                     totalSkipped++;
-                    log.info("Skipped already processed company: {} (ID: {})", company.getName(), company.getId());
+                    log.info("Skipped already processed company: {} (ID: {})", result.get("companyName"), companyContent.getCompanyId());
                     continue;
                 }
                 
@@ -214,13 +229,13 @@ public class AIJobService {
                 }
                 
                 log.info("Processed company {} of {}: {} (ID: {})", 
-                    totalProcessed, unprocessedCompanies.size(), company.getName(), company.getId());
+                    totalProcessed, unprocessedContent.size(), result.get("companyName"), companyContent.getCompanyId());
                 
             } catch (Exception e) {
-                log.error("Error shortening content for company: {} (ID: {})", company.getName(), company.getId(), e);
+                log.error("Error shortening content for company ID: {}", companyContent.getCompanyId(), e);
                 Map<String, Object> errorResult = new HashMap<>();
-                errorResult.put("companyId", company.getId());
-                errorResult.put("companyName", company.getName());
+                errorResult.put("companyId", companyContent.getCompanyId());
+                errorResult.put("companyName", "Unknown");
                 errorResult.put("aboutUsShortened", false);
                 errorResult.put("cultureShortened", false);
                 errorResult.put("error", e.getMessage());

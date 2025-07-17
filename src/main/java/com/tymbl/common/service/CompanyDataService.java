@@ -2,6 +2,8 @@ package com.tymbl.common.service;
 
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.repository.CompanyRepository;
+import com.tymbl.jobs.entity.CompanyContent;
+import com.tymbl.jobs.repository.CompanyContentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,9 @@ public class CompanyDataService {
 
     @Autowired
     private CompanyRepository companyRepository;
+
+    @Autowired
+    private CompanyContentRepository companyContentRepository;
 
     public CompanyDataService() {
         // Simple constructor to ensure the service can be instantiated
@@ -220,30 +225,41 @@ public class CompanyDataService {
             if (existingCompany.isPresent()) {
                 Company company = existingCompany.get();
                 boolean updated = false;
-                
+
+                // --- CompanyContent logic ---
+                CompanyContent companyContent = null;
+                if (companyContentRepository.existsByCompanyId(company.getId())) {
+                    companyContent = companyContentRepository.findByCompanyId(company.getId()).orElse(null);
+                }
+                if (companyContent == null) {
+                    companyContent = new CompanyContent();
+                    companyContent.setCompanyId(company.getId());
+                }
+
                 // Only update if current field is null or empty
-                if (company.getAboutUsOriginal() == null || company.getAboutUsOriginal().trim().isEmpty()) {
-                    company.setAboutUsOriginal(aboutUs);
+                if ((companyContent.getAboutUsOriginal() == null || companyContent.getAboutUsOriginal().trim().isEmpty()) && aboutUs != null && !aboutUs.trim().isEmpty()) {
+                    companyContent.setAboutUsOriginal(aboutUs);
                     updated = true;
                 }
-                
+
                 if (company.getVision() == null || company.getVision().trim().isEmpty()) {
                     company.setVision(vision);
                     updated = true;
                 }
-                
+
                 if (company.getMission() == null || company.getMission().trim().isEmpty()) {
                     company.setMission(mission);
                     updated = true;
                 }
-                
-                if (company.getCultureOriginal() == null || company.getCultureOriginal().trim().isEmpty()) {
-                    company.setCultureOriginal(culture);
+
+                if ((companyContent.getCultureOriginal() == null || companyContent.getCultureOriginal().trim().isEmpty()) && culture != null && !culture.trim().isEmpty()) {
+                    companyContent.setCultureOriginal(culture);
                     updated = true;
                 }
-                
+
                 if (updated) {
                     companyRepository.save(company);
+                    companyContentRepository.save(companyContent);
                     return "Updated detailed data for company: " + company.getName();
                 } else {
                     return "No updates needed for company: " + company.getName() + " (all fields already populated)";

@@ -27,17 +27,11 @@ public class Company {
     private String careerPageUrl;
 
     private String logoUrl;
-
-    @Column(name = "about_us_original")
-    private String aboutUsOriginal;
     
     private String aboutUs;
     
     private String vision;
     private String mission;
-    
-    @Column(name = "culture_original")
-    private String cultureOriginal;
     
     private String culture;
 
@@ -70,9 +64,6 @@ public class Company {
 
     @Column(name = "ai_error")
     private Boolean aiError;
-
-    @Column(name = "content_shortened", nullable = false)
-    private boolean contentShortened = false;
 
     @Column(name = "similar_companies_by_name", columnDefinition = "TEXT")
     private String similarCompaniesByName;

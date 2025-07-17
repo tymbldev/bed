@@ -5,6 +5,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.Industry;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.entity.CompanyContent;
+import com.tymbl.jobs.repository.CompanyRepository;
+import com.tymbl.jobs.repository.CompanyContentRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,6 +39,8 @@ public class GeminiCompanyService {
     @Qualifier("aiServiceRestTemplate")
     private final RestTemplate restTemplate;
     private final IndustryRepository industryRepository;
+    private final CompanyContentRepository companyContentRepository;
+    private final CompanyRepository companyRepository;
 
     public Optional<Company> generateCompanyInfo(String companyName) {
         try {
@@ -397,6 +402,7 @@ public class GeminiCompanyService {
     private Optional<Company> mapJsonToCompany(JsonNode companyData) {
         try {
             Company company = new Company();
+            CompanyContent companyContent = new CompanyContent();
             boolean aiError = false;
             String name = getStringValue(companyData, "name");
             if (!containsWebSearchPlaceholder(name)) company.setName(name); else aiError = true;
@@ -411,9 +417,9 @@ public class GeminiCompanyService {
             String careerPageUrl = getStringValue(companyData, "career_page_url");
             if (!containsWebSearchPlaceholder(careerPageUrl)) company.setCareerPageUrl(careerPageUrl); else aiError = true;
             String aboutUs = getStringValue(companyData, "about_us");
-            if (!containsWebSearchPlaceholder(aboutUs)) company.setAboutUsOriginal(aboutUs); else aiError = true;
+            if (!containsWebSearchPlaceholder(aboutUs)) companyContent.setAboutUsOriginal(aboutUs); else aiError = true;
             String culture = getStringValue(companyData, "culture");
-            if (!containsWebSearchPlaceholder(culture)) company.setCultureOriginal(culture); else aiError = true;
+            if (!containsWebSearchPlaceholder(culture)) companyContent.setCultureOriginal(culture); else aiError = true;
             String mission = getStringValue(companyData, "mission");
             if (!containsWebSearchPlaceholder(mission)) company.setMission(mission); else aiError = true;
             String vision = getStringValue(companyData, "vision");
@@ -428,6 +434,12 @@ public class GeminiCompanyService {
             String specialties = getStringValue(companyData, "specialties");
             if (!containsWebSearchPlaceholder(specialties)) company.setSpecialties(specialties); else aiError = true;
             company.setAiError(aiError);
+            
+            // Save company first to get the ID, then save company content
+            company = companyRepository.save(company);
+            companyContent.setCompanyId(company.getId());
+            companyContentRepository.save(companyContent);
+            
             return Optional.of(company);
         } catch (Exception e) {
             log.error("Error mapping JSON to Company", e);

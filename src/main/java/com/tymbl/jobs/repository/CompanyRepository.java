@@ -22,12 +22,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     @Query("SELECT c.website FROM Company c WHERE c.primaryIndustryId = :primaryIndustryId")
     java.util.List<String> findWebsitesByPrimaryIndustryId(Long primaryIndustryId);
     
-    // Find companies that haven't been processed for content shortening
-    List<Company> findByContentShortenedFalse();
-    
     // Find companies that haven't been processed for content shortening and have original content
-    @Query("SELECT c FROM Company c WHERE c.contentShortened = false AND (c.aboutUsOriginal IS NOT NULL OR c.cultureOriginal IS NOT NULL)")
-    List<Company> findUnprocessedCompaniesWithOriginalContent();
+    // This query will be handled by CompanyContentRepository now
     
     // Find companies that haven't been processed for similar company generation
     List<Company> findBySimilarCompaniesProcessedFalse();

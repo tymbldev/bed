@@ -2,6 +2,8 @@ package com.tymbl.common.util;
 
 import com.tymbl.common.service.AIService;
 import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.entity.CompanyContent;
+import com.tymbl.jobs.repository.CompanyContentRepository;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Component;
 public class CrawlingService {
 
     private final AIService aiService;
+    private final CompanyContentRepository companyContentRepository;
 
     public static class CrawlResult {
         private final Company company;
@@ -95,11 +98,22 @@ public class CrawlingService {
         summary.append("Headquarters: ").append(company.getHeadquarters()).append("\n");
         summary.append("Company Size: ").append(company.getCompanySize()).append("\n");
         summary.append("Specialties: ").append(company.getSpecialties()).append("\n");
-        summary.append("About Us (Original): ").append(company.getAboutUsOriginal()).append("\n");
+        
+        // Get original content from CompanyContent table
+        Optional<CompanyContent> contentOpt = companyContentRepository.findByCompanyId(company.getId());
+        String aboutUsOriginal = "";
+        String cultureOriginal = "";
+        if (contentOpt.isPresent()) {
+            CompanyContent content = contentOpt.get();
+            aboutUsOriginal = content.getAboutUsOriginal() != null ? content.getAboutUsOriginal() : "";
+            cultureOriginal = content.getCultureOriginal() != null ? content.getCultureOriginal() : "";
+        }
+        
+        summary.append("About Us (Original): ").append(aboutUsOriginal).append("\n");
         summary.append("About Us (Shortened): ").append(company.getAboutUs()).append("\n");
         summary.append("Mission: ").append(company.getMission()).append("\n");
         summary.append("Vision: ").append(company.getVision()).append("\n");
-        summary.append("Culture (Original): ").append(company.getCultureOriginal()).append("\n");
+        summary.append("Culture (Original): ").append(cultureOriginal).append("\n");
         summary.append("Culture (Shortened): ").append(company.getCulture()).append("\n");
         summary.append("LinkedIn URL: ").append(company.getLinkedinUrl()).append("\n");
         summary.append("Generated At: ").append(company.getLastCrawledAt()).append("\n");

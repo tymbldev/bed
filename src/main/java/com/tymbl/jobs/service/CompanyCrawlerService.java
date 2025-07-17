@@ -2,7 +2,9 @@ package com.tymbl.jobs.service;
 
 import com.tymbl.common.util.CrawlingService;
 import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.repository.CompanyRepository;
+import com.tymbl.jobs.repository.CompanyContentRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +23,7 @@ public class CompanyCrawlerService {
 
     private final CrawlingService crawlingService;
     private final CompanyRepository companyRepository;
+    private final CompanyContentRepository companyContentRepository;
     
     private static final int BATCH_SIZE = 10; // Process 10 companies at a time
 
@@ -112,12 +115,32 @@ public class CompanyCrawlerService {
         if (generated.getCareerPageUrl() != null && !generated.getCareerPageUrl().trim().isEmpty()) {
             existing.setCareerPageUrl(generated.getCareerPageUrl());
         }
-        if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty()) {
-            existing.setAboutUsOriginal(generated.getAboutUs());
+        
+        // Handle about us and culture content in CompanyContent table
+        if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty() ||
+            generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
+            
+            // Get or create company content record
+            Optional<CompanyContent> contentOpt = companyContentRepository.findByCompanyId(existing.getId());
+            CompanyContent companyContent;
+            
+            if (contentOpt.isPresent()) {
+                companyContent = contentOpt.get();
+            } else {
+                companyContent = new CompanyContent();
+                companyContent.setCompanyId(existing.getId());
+            }
+            
+            if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty()) {
+                companyContent.setAboutUsOriginal(generated.getAboutUs());
+            }
+            if (generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
+                companyContent.setCultureOriginal(generated.getCulture());
+            }
+            
+            companyContentRepository.save(companyContent);
         }
-        if (generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
-            existing.setCultureOriginal(generated.getCulture());
-        }
+        
         if (generated.getMission() != null && !generated.getMission().trim().isEmpty()) {
             existing.setMission(generated.getMission());
         }
