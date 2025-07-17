@@ -406,6 +406,68 @@
           ]
         },
         {
+          "name": "LinkedInAuthController",
+          "description": "LinkedIn authentication endpoints",
+          "item": [
+            {
+              "name": "POST /api/v1/auth/linkedin",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/auth/linkedin",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "auth",
+                    "linkedin"
+                  ]
+                },
+                "description": "Authenticates a user using their LinkedIn profile data. The frontend should provide the LinkedIn access token obtained from the LinkedIn OAuth flow.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"accessToken\": \"AQV...\",\n  \"linkedInProfileUrl\": \"https://www.linkedin.com/in/johndoe\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid input or email already registered\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Invalid LinkedIn access token\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
           "name": "UserResumeController",
           "description": "Resume management endpoints",
           "item": [
@@ -818,6 +880,62 @@
                   "code": 404,
                   "name": "Not Found",
                   "body": "{\n  \"error\": \"Not Found\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "RegistrationController",
+          "description": "User registration endpoints",
+          "item": [
+            {
+              "name": "POST /api/v1/registration",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/registration",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "registration"
+                  ]
+                },
+                "description": "Registers a new user with email and password. Only email and password are mandatory.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"token\": \"eyJhbGciOiJIUzI1NiJ9...\",\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"emailVerified\": false\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Email already registered\"\n}"
                 },
                 {
                   "code": 500,
@@ -1906,6 +2024,246 @@
                   "code": 404,
                   "name": "Not Found",
                   "body": "{\n  \"error\": \"Not Found\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST /api/v1/dropdowns/departments",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/dropdowns/departments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "dropdowns",
+                    "departments"
+                  ]
+                },
+                "description": "Create a new department",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Engineering\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"id\": 1,\n  \"name\": \"Engineering\"\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid input\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST /api/v1/dropdowns/locations",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/dropdowns/locations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "dropdowns",
+                    "locations"
+                  ]
+                },
+                "description": "Create a new location",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"id\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\"\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid input\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST /api/v1/dropdowns/designations",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/dropdowns/designations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "dropdowns",
+                    "designations"
+                  ]
+                },
+                "description": "Create a new designation",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Senior Software Engineer\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"id\": 1,\n  \"name\": \"Senior Software Engineer\"\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid input\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            },
+            {
+              "name": "POST /api/v1/dropdowns/industries",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/dropdowns/industries",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "dropdowns",
+                    "industries"
+                  ]
+                },
+                "description": "Create a new industry",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Technology\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"id\": 1,\n  \"name\": \"Technology\"\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid input\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
                 },
                 {
                   "code": 500,
@@ -3093,6 +3451,65 @@
               ]
             },
             {
+              "name": "POST /api/v1/institutions",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/institutions",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "institutions"
+                  ]
+                },
+                "description": "Create a new educational institution",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"name\": \"Example University\",\n  \"type\": \"University\",\n  \"country\": \"United States\",\n  \"city\": \"New York\",\n  \"website\": \"https://example.edu\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"id\": 1,\n  \"name\": \"Example University\",\n  \"type\": \"University\",\n  \"country\": \"United States\",\n  \"city\": \"New York\",\n  \"website\": \"https://example.edu\",\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\"\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid input\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            },
+            {
               "name": "GET /api/v1/institutions/search",
               "request": {
                 "method": "GET",
@@ -3265,6 +3682,43 @@
                   "code": 404,
                   "name": "Not Found",
                   "body": "{\n  \"error\": \"Not Found\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "name": "SkillController",
+          "description": "Skills suggester endpoints",
+          "item": [
+            {
+              "name": "GET /api/v1/skills",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/skills",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "skills"
+                  ]
+                },
+                "description": "Returns a list of all available skills sorted by usage count (descending) and name (ascending). Results are cached for better performance."
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "[\n  {\n    \"id\": 1,\n    \"name\": \"Java\",\n    \"usageCount\": 1000,\n    \"category\": \"Programming Language\"\n  },\n  {\n    \"id\": 2,\n    \"name\": \"Spring Boot\",\n    \"usageCount\": 800,\n    \"category\": \"Framework\"\n  },\n  {\n    \"id\": 3,\n    \"name\": \"AWS\",\n    \"usageCount\": 600,\n    \"category\": \"Cloud Platform\"\n  }\n]"
                 },
                 {
                   "code": 500,
@@ -3599,6 +4053,70 @@
           "description": "Job management endpoints that require authentication",
           "item": [
             {
+              "name": "POST /api/v1/jobmanagement",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/jobmanagement",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobmanagement"
+                  ]
+                },
+                "description": "Create a new job posting with the given details. The job posting will be associated with the authenticated user.",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"We are looking for a Senior Software Engineer to join our team...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"minSalary\": 80000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"jobType\": \"HYBRID\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Example Corp\",\n  \"tags\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"senior-software-engineer-example-corp\",\n  \"platform\": \"Internal\"\n}",
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
+                }
+              },
+              "response": [
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"We are looking for a Senior Software Engineer to join our team...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"minSalary\": 80000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"jobType\": \"HYBRID\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Example Corp\",\n  \"tags\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"senior-software-engineer-example-corp\",\n  \"platform\": \"Internal\",\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"approved\": 0,\n  \"postedById\": 1\n}"
+                },
+                {
+                  "code": 400,
+                  "name": "Bad Request",
+                  "body": "{\n  \"error\": \"Invalid request body format\",\n  \"message\": \"Validation failed\",\n  \"field\": \"title\"\n}"
+                },
+                {
+                  "code": 401,
+                  "name": "Unauthorized",
+                  "body": "{\n  \"error\": \"Unauthorized\"\n}"
+                },
+                {
+                  "code": 403,
+                  "name": "Forbidden",
+                  "body": "{\n  \"error\": \"Forbidden - Not authorized for this company\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
+              ]
+            },
+            {
               "name": "GET /api/v1/jobmanagement/my-posts",
               "request": {
                 "method": "GET",
@@ -3795,10 +4313,10 @@
                     "register-referrer"
                   ]
                 },
-                "description": "Auto-generated endpoint from JobManagementController",
+                "description": "Register yourself as a referrer for a job from your company. You can only register for jobs from the same company as yours.",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"example\": \"data\"\n}",
+                  "raw": "{\n  \"jobId\": 1\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3865,29 +4383,27 @@
                       "key": "applicationId",
                       "value": "{{applicationId}}"
                     }
+                  ],
+                  "query": [
+                    {
+                      "key": "status",
+                      "value": "SHORTLISTED",
+                      "description": "Application status (SHORTLISTED or REJECTED)"
+                    }
                   ]
                 },
-                "description": "Auto-generated endpoint from JobManagementController",
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"example\": \"data\"\n}",
-                  "options": {
-                    "raw": {
-                      "language": "json"
-                    }
-                  }
-                }
+                "description": "Allows the job poster or any user from the same company to accept a referral application and set its status to SHORTLISTED or REJECTED."
               },
               "response": [
                 {
                   "code": 200,
                   "name": "Success",
-                  "body": "{\n  \"message\": \"Success\"\n}"
+                  "body": "{\n  \"message\": \"Referral application status updated successfully\"\n}"
                 },
                 {
                   "code": 400,
                   "name": "Bad Request",
-                  "body": "{\n  \"error\": \"Bad Request\"\n}"
+                  "body": "{\n  \"error\": \"Invalid input or not allowed\",\n  \"message\": \"Status must be either SHORTLISTED or REJECTED\"\n}"
                 },
                 {
                   "code": 401,
@@ -3895,9 +4411,9 @@
                   "body": "{\n  \"error\": \"Unauthorized\"\n}"
                 },
                 {
-                  "code": 404,
-                  "name": "Not Found",
-                  "body": "{\n  \"error\": \"Not Found\"\n}"
+                  "code": 403,
+                  "name": "Forbidden",
+                  "body": "{\n  \"error\": \"Forbidden - Not authorized\"\n}"
                 },
                 {
                   "code": 500,
@@ -3938,10 +4454,10 @@
                     }
                   ]
                 },
-                "description": "Auto-generated endpoint from JobManagementController",
+                "description": "Updates an existing job posting with the given details. Only the user who posted the job can update it.",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"example\": \"data\"\n}",
+                  "raw": "{\n  \"title\": \"Updated Senior Software Engineer\",\n  \"description\": \"Updated job description for Senior Software Engineer position...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"minSalary\": 85000,\n  \"maxSalary\": 130000,\n  \"minExperience\": 4,\n  \"maxExperience\": 8,\n  \"jobType\": \"ONSITE\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Example Corp\",\n  \"tags\": [\"Java\", \"Spring Boot\", \"Microservices\", \"AWS\"],\n  \"openingCount\": 3,\n  \"uniqueUrl\": \"updated-senior-software-engineer-example-corp\",\n  \"platform\": \"Internal\"\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3953,12 +4469,12 @@
                 {
                   "code": 200,
                   "name": "Success",
-                  "body": "{\n  \"message\": \"Success\"\n}"
+                  "body": "{\n  \"id\": 1,\n  \"title\": \"Updated Senior Software Engineer\",\n  \"description\": \"Updated job description for Senior Software Engineer position...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Senior Software Engineer\",\n  \"minSalary\": 85000,\n  \"maxSalary\": 130000,\n  \"minExperience\": 4,\n  \"maxExperience\": 8,\n  \"jobType\": \"ONSITE\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Example Corp\",\n  \"tags\": [\"Java\", \"Spring Boot\", \"Microservices\", \"AWS\"],\n  \"openingCount\": 3,\n  \"uniqueUrl\": \"updated-senior-software-engineer-example-corp\",\n  \"platform\": \"Internal\",\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T11:00:00\",\n  \"approved\": 0,\n  \"postedById\": 1\n}"
                 },
                 {
                   "code": 400,
                   "name": "Bad Request",
-                  "body": "{\n  \"error\": \"Bad Request\"\n}"
+                  "body": "{\n  \"error\": \"Invalid request body format\",\n  \"message\": \"Validation failed\",\n  \"field\": \"title\"\n}"
                 },
                 {
                   "code": 401,
@@ -3966,9 +4482,14 @@
                   "body": "{\n  \"error\": \"Unauthorized\"\n}"
                 },
                 {
+                  "code": 403,
+                  "name": "Forbidden",
+                  "body": "{\n  \"error\": \"Forbidden - Not the job owner\"\n}"
+                },
+                {
                   "code": 404,
                   "name": "Not Found",
-                  "body": "{\n  \"error\": \"Not Found\"\n}"
+                  "body": "{\n  \"error\": \"Job posting not found\"\n}"
                 },
                 {
                   "code": 500,
@@ -4005,18 +4526,13 @@
                     }
                   ]
                 },
-                "description": "Auto-generated endpoint from JobManagementController"
+                "description": "Deactivates a job posting with the specified ID. Only the user who posted the job can delete it."
               },
               "response": [
                 {
                   "code": 200,
                   "name": "Success",
-                  "body": "{\n  \"message\": \"Success\"\n}"
-                },
-                {
-                  "code": 400,
-                  "name": "Bad Request",
-                  "body": "{\n  \"error\": \"Bad Request\"\n}"
+                  "body": "{\n  \"message\": \"Job posting deleted successfully\"\n}"
                 },
                 {
                   "code": 401,
@@ -4024,9 +4540,14 @@
                   "body": "{\n  \"error\": \"Unauthorized\"\n}"
                 },
                 {
+                  "code": 403,
+                  "name": "Forbidden",
+                  "body": "{\n  \"error\": \"Forbidden - Not the job owner\"\n}"
+                },
+                {
                   "code": 404,
                   "name": "Not Found",
-                  "body": "{\n  \"error\": \"Not Found\"\n}"
+                  "body": "{\n  \"error\": \"Job posting not found\"\n}"
                 },
                 {
                   "code": 500,

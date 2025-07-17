@@ -19,7 +19,8 @@ public class Job {
     public enum JobType {
         REMOTE_ONLY("Remote Only"),
         WFO("Work From Office"),
-        HYBRID("Hybrid");
+        HYBRID("Hybrid"),
+        ONSITE("Onsite"); // Alias for WFO for backward compatibility
         
         private final String displayName;
         
