@@ -306,12 +306,12 @@ public class DropdownService {
                 .collect(java.util.stream.Collectors.toList());
             Long totalJobCount = industryJobCountMap.getOrDefault(industryId, 0L);
             return IndustryWiseCompaniesDTO.builder()
-                    .industryId(industryId)
-                    .industryName(industryName)
-                    .companyCount(companyCount)
+                .industryId(industryId)
+                .industryName(industryName)
+                .companyCount(companyCount)
                     .totalJobCount(totalJobCount)
-                    .topCompanies(topCompanies)
-                    .build();
+                .topCompanies(topCompanies)
+                .build();
         }).collect(java.util.stream.Collectors.toList());
     }
 

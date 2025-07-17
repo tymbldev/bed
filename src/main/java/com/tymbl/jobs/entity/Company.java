@@ -71,6 +71,18 @@ public class Company {
     @Column(name = "ai_error")
     private Boolean aiError;
 
+    @Column(name = "content_shortened", nullable = false)
+    private boolean contentShortened = false;
+
+    @Column(name = "similar_companies_by_name", columnDefinition = "TEXT")
+    private String similarCompaniesByName;
+    
+    @Column(name = "similar_companies_by_id", columnDefinition = "TEXT")
+    private String similarCompaniesById;
+    
+    @Column(name = "similar_companies_processed", nullable = false)
+    private boolean similarCompaniesProcessed = false;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

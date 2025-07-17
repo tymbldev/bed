@@ -1,7 +1,7 @@
 package com.tymbl.jobs.controller;
 
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
-import com.tymbl.jobs.service.AIService;
+import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
 import com.tymbl.jobs.service.CompanyService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -43,7 +44,7 @@ public class AIController {
 
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
-    private final AIService aiService;
+    private final AIJobService aiJobService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -78,7 +79,7 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateCompaniesBatch() {
         try {
-            Map<String, Object> result = aiService.generateCompaniesBatch();
+            Map<String, Object> result = aiJobService.generateCompaniesBatch();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error generating companies batch", e);
@@ -244,7 +245,7 @@ public class AIController {
     @PostMapping("/companies/{companyId}/shorten-content")
     @Operation(
         summary = "Shorten company about us and culture content using AI",
-        description = "Takes the original about us and culture content from a company, uses Gemini AI to shorten them to 5 key points each, and saves the shortened versions to the aboutUs and culture fields."
+        description = "Takes the original about us and culture content from a company, uses Gemini AI to shorten them to 5 key points each with proper hyphen formatting (e.g., '- First point\\n- Second point'), and saves the shortened versions to the aboutUs and culture fields. Only processes companies that haven't been processed before (content_shortened = false)."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -263,11 +264,27 @@ public class AIController {
             )
         ),
         @ApiResponse(responseCode = "404", description = "Company not found"),
+        @ApiResponse(
+            responseCode = "409", 
+            description = "Company already processed", 
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"companyId\": 1,\n" +
+                        "  \"companyName\": \"Google\",\n" +
+                        "  \"aboutUsShortened\": false,\n" +
+                        "  \"cultureShortened\": false,\n" +
+                        "  \"message\": \"Company content has already been shortened\",\n" +
+                        "  \"alreadyProcessed\": true\n" +
+                        "}"
+                )
+            )
+        ),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> shortenCompanyContent(@PathVariable Long companyId) {
         try {
-            Map<String, Object> result = aiService.shortenCompanyContent(companyId);
+            Map<String, Object> result = aiJobService.shortenCompanyContent(companyId);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             log.error("Company not found for content shortening: {}", companyId);
@@ -284,8 +301,8 @@ public class AIController {
 
     @PostMapping("/companies/shorten-content-all")
     @Operation(
-        summary = "Shorten about us and culture content for all companies using AI",
-        description = "Loops through all companies in the database, takes their original about us and culture content, uses Gemini AI to shorten them to 5 key points each, and saves the shortened versions to the aboutUs and culture fields."
+        summary = "Shorten about us and culture content for all unprocessed companies using AI",
+        description = "Loops through all companies that haven't been processed for content shortening (content_shortened = false) and have original content, takes their original about us and culture content, uses Gemini AI to shorten them to 5 key points each with proper hyphen formatting (e.g., '- First point\\n- Second point'), and saves the shortened versions to the aboutUs and culture fields."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -298,6 +315,7 @@ public class AIController {
                         "  \"total_about_us_shortened\": 45,\n" +
                         "  \"total_culture_shortened\": 42,\n" +
                         "  \"total_errors\": 3,\n" +
+                        "  \"total_skipped\": 0,\n" +
                         "  \"company_results\": [\n" +
                         "    {\n" +
                         "      \"companyId\": 1,\n" +
@@ -307,7 +325,7 @@ public class AIController {
                         "      \"message\": \"Content shortened and saved successfully\"\n" +
                         "    }\n" +
                         "  ],\n" +
-                        "  \"message\": \"Content shortening completed for all companies\"\n" +
+                        "  \"message\": \"Content shortening completed for unprocessed companies\"\n" +
                         "}"
                 )
             )
@@ -316,7 +334,7 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> shortenAllCompaniesContent() {
         try {
-            Map<String, Object> result = aiService.shortenAllCompaniesContent();
+            Map<String, Object> result = aiJobService.shortenAllCompaniesContent();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error shortening content for all companies", e);
@@ -358,15 +376,15 @@ public class AIController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> generateComprehensiveInterviewQuestions() {
-        try {
-            Map<String, Object> result = aiService.generateComprehensiveInterviewQuestions();
+            try {
+            Map<String, Object> result = aiJobService.generateComprehensiveInterviewQuestions();
             return ResponseEntity.ok(result);
-        } catch (Exception e) {
+            } catch (Exception e) {
             log.error("Error generating comprehensive interview questions", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(errorResponse);
-        }
+            }
     }
 
     @PostMapping("/interview-questions/generate-for-skill/{skillName}")
@@ -393,7 +411,7 @@ public class AIController {
     public ResponseEntity<Map<String, Object>> generateComprehensiveInterviewQuestionsForSkill(
             @PathVariable String skillName) {
         try {
-            Map<String, Object> result = aiService.generateComprehensiveInterviewQuestionsForSkill(skillName);
+            Map<String, Object> result = aiJobService.generateComprehensiveInterviewQuestionsForSkill(skillName);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             log.error("Skill not found for question generation: {}", skillName);
@@ -430,7 +448,7 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveTechSkills() {
         try {
-            Map<String, Object> result = aiService.generateAndSaveTechSkills();
+            Map<String, Object> result = aiJobService.generateAndSaveTechSkills();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error generating and saving tech skills", e);
@@ -463,7 +481,7 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForSkill(@PathVariable String skillName) {
         try {
-            Map<String, Object> result = aiService.generateAndSaveTopicsForSkill(skillName);
+            Map<String, Object> result = aiJobService.generateAndSaveTopicsForSkill(skillName);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             log.error("Skill not found for topic generation: {}", skillName);
@@ -504,7 +522,7 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveTopicsForAllSkills() {
         try {
-            Map<String, Object> result = aiService.generateAndSaveTopicsForAllSkills();
+            Map<String, Object> result = aiJobService.generateAndSaveTopicsForAllSkills();
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error generating topics for all skills", e);
@@ -541,7 +559,7 @@ public class AIController {
             @PathVariable String topicName,
             @RequestParam(defaultValue = "10") int numQuestions) {
         try {
-            Map<String, Object> result = aiService.generateAndSaveQuestionsForSkillAndTopic(skillName, topicName, numQuestions);
+            Map<String, Object> result = aiJobService.generateAndSaveQuestionsForSkillAndTopic(skillName, topicName, numQuestions);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             log.error("Skill or topic not found for question generation: {} - {}", skillName, topicName);
@@ -582,7 +600,7 @@ public class AIController {
             @PathVariable String skillName,
             @RequestParam(defaultValue = "10") int numQuestions) {
         try {
-            Map<String, Object> result = aiService.generateAndSaveQuestionsForAllTopicsOfSkill(skillName, numQuestions);
+            Map<String, Object> result = aiJobService.generateAndSaveQuestionsForAllTopicsOfSkill(skillName, numQuestions);
             return ResponseEntity.ok(result);
         } catch (RuntimeException e) {
             log.error("Skill not found for all topics generation: {}", skillName);
@@ -623,13 +641,110 @@ public class AIController {
     })
     public ResponseEntity<Map<String, Object>> generateAndSaveQuestionsForAllSkillsAndTopics(@RequestParam(defaultValue = "10") int numQuestions) {
         try {
-            Map<String, Object> result = aiService.generateAndSaveQuestionsForAllSkillsAndTopics(numQuestions);
+            Map<String, Object> result = aiJobService.generateAndSaveQuestionsForAllSkillsAndTopics(numQuestions);
             return ResponseEntity.ok(result);
         } catch (Exception e) {
             log.error("Error generating questions for all skills and topics", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", e.getMessage());
             return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+    
+    @PostMapping("/designations/generate-similar")
+    @Operation(
+        summary = "Generate similar designations for all unprocessed designations",
+        description = "Loops through all designations that haven't been processed for similar designation generation, uses AI to find similar designations that a person can switch to, creates new designations if they don't exist, and stores the results in the designation table."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Similar designations generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_designations_processed\": 50,\n" +
+                        "  \"total_similar_designations_found\": 400,\n" +
+                        "  \"total_new_designations_created\": 25,\n" +
+                        "  \"total_errors\": 2,\n" +
+                        "  \"designation_results\": [\n" +
+                        "    {\n" +
+                        "      \"designationId\": 1,\n" +
+                        "      \"designationName\": \"Software Engineer\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"similarDesignationsFound\": 8,\n" +
+                        "      \"newDesignationsCreated\": 2,\n" +
+                        "      \"similarDesignationNames\": [\"Full Stack Engineer\", \"Backend Engineer\", \"DevOps Engineer\"],\n" +
+                        "      \"newDesignationNames\": [\"Platform Engineer\", \"Cloud Engineer\"],\n" +
+                        "      \"existingDesignationNames\": [\"Full Stack Engineer\", \"Backend Engineer\", \"DevOps Engineer\"]\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Similar designation generation completed\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateSimilarDesignationsForAll() {
+        try {
+            Map<String, Object> result = aiJobService.generateSimilarDesignationsForAll();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating similar designations", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating similar designations: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+    
+    @PostMapping("/companies/generate-similar")
+    @Operation(
+        summary = "Generate similar companies for all unprocessed companies",
+        description = "Loops through all companies that haven't been processed for similar company generation and have industry info, uses AI to find similar companies that a person can switch to based on industry, company size, business model, etc., creates new companies if they don't exist, and stores the results in the company table."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Similar companies generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total_companies_processed\": 50,\n" +
+                        "  \"total_similar_companies_found\": 400,\n" +
+                        "  \"total_new_companies_created\": 25,\n" +
+                        "  \"total_errors\": 2,\n" +
+                        "  \"company_results\": [\n" +
+                        "    {\n" +
+                        "      \"companyId\": 1,\n" +
+                        "      \"companyName\": \"Google\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"similarCompaniesFound\": 8,\n" +
+                        "      \"newCompaniesCreated\": 2,\n" +
+                        "      \"similarCompanyNames\": [\"Microsoft\", \"Amazon\", \"Apple\"],\n" +
+                        "      \"newCompanyNames\": [\"OpenAI\", \"Anthropic\"],\n" +
+                        "      \"existingCompanyNames\": [\"Microsoft\", \"Amazon\", \"Apple\"],\n" +
+                        "      \"industry\": \"Information Technology & Services\"\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Similar company generation completed\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateSimilarCompaniesForAll() {
+        try {
+            log.info("Starting similar company generation for all companies");
+            Map<String, Object> result = aiJobService.generateSimilarCompaniesForAll();
+            log.info("Similar company generation completed successfully");
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating similar companies for all", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Failed to generate similar companies: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
 } 

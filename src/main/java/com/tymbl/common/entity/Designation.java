@@ -27,6 +27,15 @@ public class Designation {
     @Column(nullable = true)
     private boolean enabled = true;
     
+    @Column(name = "similar_designations_by_name", columnDefinition = "TEXT")
+    private String similarDesignationsByName;
+    
+    @Column(name = "similar_designations_by_id", columnDefinition = "TEXT")
+    private String similarDesignationsById;
+    
+    @Column(name = "similar_designations_processed", nullable = false)
+    private boolean similarDesignationsProcessed = false;
+    
     public Designation(String title) {
         this.name = title;
     }

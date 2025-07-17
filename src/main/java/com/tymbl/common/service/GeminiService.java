@@ -72,4 +72,14 @@ public class GeminiService {
     public String shortenContent(String content, String contentType) {
         return geminiInterviewService.shortenContent(content, contentType);
     }
+    
+    // Similar designation generation method
+    public List<String> generateSimilarDesignations(String designationName) {
+        return geminiInterviewService.generateSimilarDesignations(designationName);
+    }
+    
+    // Similar company generation method
+    public List<String> generateSimilarCompanies(String companyName, String industry, String description) {
+        return geminiInterviewService.generateSimilarCompanies(companyName, industry, description);
+    }
 } 

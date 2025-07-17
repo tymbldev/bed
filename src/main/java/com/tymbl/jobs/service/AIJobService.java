@@ -2,6 +2,7 @@ package com.tymbl.jobs.service;
 
 import com.tymbl.common.entity.Skill;
 import com.tymbl.common.entity.SkillTopic;
+import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.common.repository.SkillTopicRepository;
@@ -25,13 +26,14 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class AIService {
+public class AIJobService {
 
     private final CompanyRepository companyRepository;
     private final IndustryRepository industryRepository;
     private final SkillRepository skillRepository;
     private final SkillTopicRepository skillTopicRepository;
     private final InterviewQuestionRepository interviewQuestionRepository;
+    private final DesignationRepository designationRepository;
     private final GeminiService geminiService;
     private final CompanyService companyService;
 
@@ -128,6 +130,16 @@ public class AIService {
         response.put("companyId", companyId);
         response.put("companyName", company.getName());
         
+        // Check if company has already been processed for content shortening
+        if (company.isContentShortened()) {
+            response.put("aboutUsShortened", false);
+            response.put("cultureShortened", false);
+            response.put("message", "Company content has already been shortened");
+            response.put("alreadyProcessed", true);
+            log.info("Company content already shortened for: {} (ID: {})", company.getName(), companyId);
+            return response;
+        }
+        
         boolean aboutUsShortened = false;
         boolean cultureShortened = false;
         
@@ -151,8 +163,9 @@ public class AIService {
             }
         }
         
-        // Save the company with shortened content
+        // Save the company with shortened content and mark as processed
         if (aboutUsShortened || cultureShortened) {
+            company.setContentShortened(true);
             companyRepository.save(company);
             response.put("aboutUsShortened", aboutUsShortened);
             response.put("cultureShortened", cultureShortened);
@@ -169,20 +182,29 @@ public class AIService {
     }
 
     public Map<String, Object> shortenAllCompaniesContent() {
-        List<Company> companies = companyRepository.findAll();
+        // Only get companies that haven't been processed for content shortening and have original content
+        List<Company> unprocessedCompanies = companyRepository.findUnprocessedCompaniesWithOriginalContent();
         List<Map<String, Object>> companyResults = new ArrayList<>();
         int totalProcessed = 0;
         int totalAboutUsShortened = 0;
         int totalCultureShortened = 0;
         int totalErrors = 0;
+        int totalSkipped = 0;
         
-        log.info("Starting content shortening for {} companies", companies.size());
+        log.info("Found {} unprocessed companies with original content for shortening", unprocessedCompanies.size());
         
-        for (Company company : companies) {
+        for (Company company : unprocessedCompanies) {
             try {
                 Map<String, Object> result = shortenCompanyContent(company.getId());
                 companyResults.add(result);
                 totalProcessed++;
+                
+                // Check if company was already processed (shouldn't happen with our query, but just in case)
+                if (result.containsKey("alreadyProcessed") && (Boolean) result.get("alreadyProcessed")) {
+                    totalSkipped++;
+                    log.info("Skipped already processed company: {} (ID: {})", company.getName(), company.getId());
+                    continue;
+                }
                 
                 if ((Boolean) result.get("aboutUsShortened")) {
                     totalAboutUsShortened++;
@@ -192,7 +214,7 @@ public class AIService {
                 }
                 
                 log.info("Processed company {} of {}: {} (ID: {})", 
-                    totalProcessed, companies.size(), company.getName(), company.getId());
+                    totalProcessed, unprocessedCompanies.size(), company.getName(), company.getId());
                 
             } catch (Exception e) {
                 log.error("Error shortening content for company: {} (ID: {})", company.getName(), company.getId(), e);
@@ -212,11 +234,12 @@ public class AIService {
         response.put("total_about_us_shortened", totalAboutUsShortened);
         response.put("total_culture_shortened", totalCultureShortened);
         response.put("total_errors", totalErrors);
+        response.put("total_skipped", totalSkipped);
         response.put("company_results", companyResults);
-        response.put("message", "Content shortening completed for all companies");
+        response.put("message", "Content shortening completed for unprocessed companies");
         
-        log.info("Completed content shortening for all companies. Processed: {}, AboutUs shortened: {}, Culture shortened: {}, Errors: {}", 
-            totalProcessed, totalAboutUsShortened, totalCultureShortened, totalErrors);
+        log.info("Completed content shortening for unprocessed companies. Processed: {}, AboutUs shortened: {}, Culture shortened: {}, Errors: {}, Skipped: {}", 
+            totalProcessed, totalAboutUsShortened, totalCultureShortened, totalErrors, totalSkipped);
         
         return response;
     }
@@ -334,13 +357,16 @@ public class AIService {
         for (Map<String, Object> topicData : generatedTopics) {
             String topicName = (String) topicData.get("topic");
             if (topicName != null && !topicName.trim().isEmpty()) {
-                Optional<SkillTopic> existingTopic = skillTopicRepository.findBySkillAndTopic(skill, topicName);
-                if (!existingTopic.isPresent()) {
+                // Check if topic already exists for this skill
+                List<SkillTopic> existingTopics = skillTopicRepository.findBySkill(skill);
+                boolean topicExists = existingTopics.stream()
+                    .anyMatch(topic -> topic.getTopic().equalsIgnoreCase(topicName));
+                
+                if (!topicExists) {
                     SkillTopic newTopic = new SkillTopic();
                     newTopic.setSkill(skill);
                     newTopic.setTopic(topicName);
                     newTopic.setDescription((String) topicData.get("description"));
-                    newTopic.setEnabled(true);
                     
                     try {
                         skillTopicRepository.save(newTopic);
@@ -391,7 +417,11 @@ public class AIService {
         Skill skill = skillRepository.findByNameIgnoreCase(skillName)
             .orElseThrow(() -> new RuntimeException("Skill not found: " + skillName));
         
-        SkillTopic skillTopic = skillTopicRepository.findBySkillAndTopic(skill, topicName)
+        // Find the topic by skill and topic name
+        List<SkillTopic> topics = skillTopicRepository.findBySkill(skill);
+        SkillTopic skillTopic = topics.stream()
+            .filter(topic -> topic.getTopic().equalsIgnoreCase(topicName))
+            .findFirst()
             .orElseThrow(() -> new RuntimeException("Topic not found: " + topicName + " for skill: " + skillName));
         
         return generateQuestionsForSkillAndTopicInternal(skill, skillTopic, numQuestions);
@@ -587,5 +617,316 @@ public class AIService {
             normalized = "https://" + normalized;
         }
         return normalized;
+    }
+    
+    // ============================================================================
+    // SIMILAR DESIGNATION METHODS
+    // ============================================================================
+    
+    public Map<String, Object> generateSimilarDesignationsForAll() {
+        List<Map<String, Object>> designationResults = new ArrayList<>();
+        int totalProcessed = 0;
+        int totalSimilarFound = 0;
+        int totalNewDesignationsCreated = 0;
+        int totalErrors = 0;
+        
+        try {
+            // Get all designations that haven't been processed for similar designation generation
+            List<com.tymbl.common.entity.Designation> unprocessedDesignations = 
+                designationRepository.findBySimilarDesignationsProcessedFalseAndEnabledTrue();
+            
+            log.info("Found {} unprocessed designations for similar designation generation", unprocessedDesignations.size());
+            
+            for (com.tymbl.common.entity.Designation designation : unprocessedDesignations) {
+                try {
+                    Map<String, Object> result = generateSimilarDesignationsForDesignation(designation);
+                    designationResults.add(result);
+                    totalProcessed++;
+                    
+                    if ((Boolean) result.get("success")) {
+                        totalSimilarFound += (Integer) result.get("similarDesignationsFound");
+                        totalNewDesignationsCreated += (Integer) result.get("newDesignationsCreated");
+                    } else {
+                        totalErrors++;
+                    }
+                    
+                    log.info("Processed designation {} of {}: {} (ID: {})", 
+                        totalProcessed, unprocessedDesignations.size(), designation.getName(), designation.getId());
+                    
+                } catch (Exception e) {
+                    log.error("Error generating similar designations for designation: {} (ID: {})", 
+                        designation.getName(), designation.getId(), e);
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("designationId", designation.getId());
+                    errorResult.put("designationName", designation.getName());
+                    errorResult.put("success", false);
+                    errorResult.put("error", e.getMessage());
+                    designationResults.add(errorResult);
+                    totalErrors++;
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("Error in generateSimilarDesignationsForAll", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("designationId", null);
+            errorResult.put("designationName", "GLOBAL_ERROR");
+            errorResult.put("success", false);
+            errorResult.put("error", e.getMessage());
+            designationResults.add(errorResult);
+            totalErrors++;
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("total_designations_processed", totalProcessed);
+        response.put("total_similar_designations_found", totalSimilarFound);
+        response.put("total_new_designations_created", totalNewDesignationsCreated);
+        response.put("total_errors", totalErrors);
+        response.put("designation_results", designationResults);
+        response.put("message", "Similar designation generation completed");
+        
+        return response;
+    }
+    
+    private Map<String, Object> generateSimilarDesignationsForDesignation(com.tymbl.common.entity.Designation designation) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("designationId", designation.getId());
+        result.put("designationName", designation.getName());
+        
+        try {
+            // Generate similar designations using AI
+            List<String> similarDesignationNames = geminiService.generateSimilarDesignations(designation.getName());
+            
+            if (similarDesignationNames == null || similarDesignationNames.isEmpty()) {
+                result.put("success", false);
+                result.put("error", "No similar designations generated by AI");
+                result.put("similarDesignationsFound", 0);
+                result.put("newDesignationsCreated", 0);
+                return result;
+            }
+            
+            List<String> existingDesignationNames = new ArrayList<>();
+            List<String> newDesignationNames = new ArrayList<>();
+            List<Long> existingDesignationIds = new ArrayList<>();
+            
+            // Check which similar designations already exist and create new ones if needed
+            for (String similarDesignationName : similarDesignationNames) {
+                Optional<com.tymbl.common.entity.Designation> existingDesignation = 
+                    designationRepository.findByName(similarDesignationName);
+                
+                if (existingDesignation.isPresent()) {
+                    existingDesignationNames.add(similarDesignationName);
+                    existingDesignationIds.add(existingDesignation.get().getId());
+                } else {
+                    // Create new designation
+                    com.tymbl.common.entity.Designation newDesignation = new com.tymbl.common.entity.Designation(similarDesignationName);
+                    newDesignation.setEnabled(true);
+                    newDesignation.setSimilarDesignationsProcessed(true); // Mark as processed since it's new
+                    
+                    try {
+                        com.tymbl.common.entity.Designation savedDesignation = designationRepository.save(newDesignation);
+                        newDesignationNames.add(similarDesignationName);
+                        existingDesignationIds.add(savedDesignation.getId());
+                        log.info("Created new designation: {} (ID: {})", similarDesignationName, savedDesignation.getId());
+                    } catch (Exception e) {
+                        log.error("Failed to create new designation: {}", similarDesignationName, e);
+                        // Continue with other designations
+                    }
+                }
+            }
+            
+            // Update the original designation with similar designations
+            designation.setSimilarDesignationsByName(String.join(",", similarDesignationNames));
+            designation.setSimilarDesignationsById(String.join(",", existingDesignationIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.toList())));
+            designation.setSimilarDesignationsProcessed(true);
+            
+            designationRepository.save(designation);
+            
+            result.put("success", true);
+            result.put("similarDesignationsFound", similarDesignationNames.size());
+            result.put("newDesignationsCreated", newDesignationNames.size());
+            result.put("existingDesignationsFound", existingDesignationNames.size());
+            result.put("similarDesignationNames", similarDesignationNames);
+            result.put("newDesignationNames", newDesignationNames);
+            result.put("existingDesignationNames", existingDesignationNames);
+            result.put("similarDesignationIds", existingDesignationIds);
+            
+            log.info("Successfully processed similar designations for: {} (ID: {}). Found: {}, Created: {}", 
+                designation.getName(), designation.getId(), similarDesignationNames.size(), newDesignationNames.size());
+            
+        } catch (Exception e) {
+            log.error("Error generating similar designations for designation: {} (ID: {})", 
+                designation.getName(), designation.getId(), e);
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            result.put("similarDesignationsFound", 0);
+            result.put("newDesignationsCreated", 0);
+        }
+        
+        return result;
+    }
+    
+    // ============================================================================
+    // SIMILAR COMPANY METHODS
+    // ============================================================================
+    
+    public Map<String, Object> generateSimilarCompaniesForAll() {
+        List<Map<String, Object>> companyResults = new ArrayList<>();
+        int totalProcessed = 0;
+        int totalSimilarFound = 0;
+        int totalNewCompaniesCreated = 0;
+        int totalErrors = 0;
+        
+        try {
+            // Get all companies that haven't been processed for similar company generation and have industry info
+            List<Company> unprocessedCompanies = companyRepository.findUnprocessedCompaniesWithIndustry();
+            
+            log.info("Found {} unprocessed companies with industry info for similar company generation", unprocessedCompanies.size());
+            
+            for (Company company : unprocessedCompanies) {
+                try {
+                    Map<String, Object> result = generateSimilarCompaniesForCompany(company);
+                    companyResults.add(result);
+                    totalProcessed++;
+                    
+                    if ((Boolean) result.get("success")) {
+                        totalSimilarFound += (Integer) result.get("similarCompaniesFound");
+                        totalNewCompaniesCreated += (Integer) result.get("newCompaniesCreated");
+                    } else {
+                        totalErrors++;
+                    }
+                    
+                    log.info("Processed company {} of {}: {} (ID: {})", 
+                        totalProcessed, unprocessedCompanies.size(), company.getName(), company.getId());
+                    
+                } catch (Exception e) {
+                    log.error("Error generating similar companies for company: {} (ID: {})", 
+                        company.getName(), company.getId(), e);
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("companyId", company.getId());
+                    errorResult.put("companyName", company.getName());
+                    errorResult.put("success", false);
+                    errorResult.put("error", e.getMessage());
+                    companyResults.add(errorResult);
+                    totalErrors++;
+                }
+            }
+            
+        } catch (Exception e) {
+            log.error("Error in generateSimilarCompaniesForAll", e);
+            Map<String, Object> errorResult = new HashMap<>();
+            errorResult.put("companyId", null);
+            errorResult.put("companyName", "GLOBAL_ERROR");
+            errorResult.put("success", false);
+            errorResult.put("error", e.getMessage());
+            companyResults.add(errorResult);
+            totalErrors++;
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("total_companies_processed", totalProcessed);
+        response.put("total_similar_companies_found", totalSimilarFound);
+        response.put("total_new_companies_created", totalNewCompaniesCreated);
+        response.put("total_errors", totalErrors);
+        response.put("company_results", companyResults);
+        response.put("message", "Similar company generation completed");
+        
+        return response;
+    }
+    
+    private Map<String, Object> generateSimilarCompaniesForCompany(Company company) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("companyId", company.getId());
+        result.put("companyName", company.getName());
+        
+        try {
+            // Get industry name for the company
+            String industryName = "Unknown Industry";
+            if (company.getPrimaryIndustryId() != null) {
+                Optional<com.tymbl.common.entity.Industry> industryOpt = industryRepository.findById(company.getPrimaryIndustryId());
+                if (industryOpt.isPresent()) {
+                    industryName = industryOpt.get().getName();
+                }
+            }
+            
+            // Generate similar companies using AI
+            List<String> similarCompanyNames = geminiService.generateSimilarCompanies(
+                company.getName(), 
+                industryName, 
+                company.getDescription()
+            );
+            
+            if (similarCompanyNames == null || similarCompanyNames.isEmpty()) {
+                result.put("success", false);
+                result.put("error", "No similar companies generated by AI");
+                result.put("similarCompaniesFound", 0);
+                result.put("newCompaniesCreated", 0);
+                return result;
+            }
+            
+            List<String> existingCompanyNames = new ArrayList<>();
+            List<String> newCompanyNames = new ArrayList<>();
+            List<Long> existingCompanyIds = new ArrayList<>();
+            
+            // Check which similar companies already exist and create new ones if needed
+            for (String similarCompanyName : similarCompanyNames) {
+                Optional<Company> existingCompany = companyRepository.findByName(similarCompanyName);
+                
+                if (existingCompany.isPresent()) {
+                    existingCompanyNames.add(similarCompanyName);
+                    existingCompanyIds.add(existingCompany.get().getId());
+                } else {
+                    // Create new company
+                    Company newCompany = new Company();
+                    newCompany.setName(similarCompanyName);
+                    newCompany.setPrimaryIndustryId(company.getPrimaryIndustryId()); // Same industry as original
+                    newCompany.setSimilarCompaniesProcessed(true); // Mark as processed since it's new
+                    
+                    try {
+                        Company savedCompany = companyRepository.save(newCompany);
+                        newCompanyNames.add(similarCompanyName);
+                        existingCompanyIds.add(savedCompany.getId());
+                        log.info("Created new company: {} (ID: {})", similarCompanyName, savedCompany.getId());
+                    } catch (Exception e) {
+                        log.error("Failed to create new company: {}", similarCompanyName, e);
+                        // Continue with other companies
+                    }
+                }
+            }
+            
+            // Update the original company with similar companies
+            company.setSimilarCompaniesByName(String.join(",", similarCompanyNames));
+            company.setSimilarCompaniesById(String.join(",", existingCompanyIds.stream()
+                .map(String::valueOf)
+                .collect(Collectors.toList())));
+            company.setSimilarCompaniesProcessed(true);
+            
+            companyRepository.save(company);
+            
+            result.put("success", true);
+            result.put("similarCompaniesFound", similarCompanyNames.size());
+            result.put("newCompaniesCreated", newCompanyNames.size());
+            result.put("existingCompaniesFound", existingCompanyNames.size());
+            result.put("similarCompanyNames", similarCompanyNames);
+            result.put("newCompanyNames", newCompanyNames);
+            result.put("existingCompanyNames", existingCompanyNames);
+            result.put("similarCompanyIds", existingCompanyIds);
+            result.put("industry", industryName);
+            
+            log.info("Successfully processed similar companies for: {} (ID: {}). Found: {}, Created: {}", 
+                company.getName(), company.getId(), similarCompanyNames.size(), newCompanyNames.size());
+            
+        } catch (Exception e) {
+            log.error("Error generating similar companies for company: {} (ID: {})", 
+                company.getName(), company.getId(), e);
+            result.put("success", false);
+            result.put("error", e.getMessage());
+            result.put("similarCompaniesFound", 0);
+            result.put("newCompaniesCreated", 0);
+        }
+        
+        return result;
     }
 } 
