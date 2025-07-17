@@ -105,6 +105,14 @@ public class RegistrationService {
       User user = userRepository.findById(userId)
           .orElseThrow(() -> new RuntimeException("User not found"));
 
+      // Check if email is being updated and validate it
+      if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+        // Check if the new email already exists for another user
+        if (userRepository.existsByEmail(request.getEmail())) {
+          throw new EmailAlreadyExistsException(request.getEmail());
+        }
+      }
+
       // Update the user fields
       updateUserFields(user, request);
       
@@ -160,6 +168,7 @@ public class RegistrationService {
       user.setEducation(registerRequest.getEducation());
     } else if (requestObj instanceof ProfileUpdateRequest) {
       ProfileUpdateRequest profileUpdateRequest = (ProfileUpdateRequest) requestObj;
+      if (profileUpdateRequest.getEmail() != null) user.setEmail(profileUpdateRequest.getEmail());
       if (profileUpdateRequest.getFirstName() != null) user.setFirstName(profileUpdateRequest.getFirstName());
       if (profileUpdateRequest.getLastName() != null) user.setLastName(profileUpdateRequest.getLastName());
       if (profileUpdateRequest.getPhoneNumber() != null) user.setPhoneNumber(profileUpdateRequest.getPhoneNumber());

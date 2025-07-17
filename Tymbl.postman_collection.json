@@ -966,7 +966,7 @@
                 "description": "Auto-generated endpoint from UserController",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"example\": \"data\"\n}",
+                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 1,\n  \"departmentId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"12345\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.dev\",\n  \"resume\": \"resume_url_here\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 80000,\n  \"currentSalaryCurrencyId\": 1,\n  \"expectedSalary\": 100000,\n  \"expectedSalaryCurrencyId\": 1,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"skillNames\": [\"Java\", \"Spring Boot\", \"React\"],\n  \"education\": [\n    {\n      \"institution\": \"University of Example\",\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"startDate\": \"2015-09-01T00:00:00\",\n      \"endDate\": \"2019-05-01T00:00:00\"\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -2858,8 +2858,7 @@
                 {
                   "code": 200,
                   "name": "Success",
-                  "body": "[
-  {\n    \"companyId\": 1,\n    \"companyName\": \"Google\",\n    \"logoUrl\": \"https://logo.com/google.png\",\n    \"website\": \"https://google.com\",\n    \"headquarters\": \"Mountain View, CA\",\n    \"activeJobCount\": 12,\n    \"secondaryIndustry\": \"Cloud, AI\",\n    \"companySize\": \"10000+\",\n    \"specialties\": \"Search, Cloud, AI\",\n    \"careerPageUrl\": \"https://careers.google.com\"\n  },\n  {\n    \"companyId\": 2,\n    \"companyName\": \"Microsoft\",\n    \"logoUrl\": \"https://logo.com/microsoft.png\",\n    \"website\": \"https://microsoft.com\",\n    \"headquarters\": \"Redmond, WA\",\n    \"activeJobCount\": 8,\n    \"secondaryIndustry\": \"Cloud, Productivity\",\n    \"companySize\": \"10000+\",\n    \"specialties\": \"Software, Cloud, Productivity\",\n    \"careerPageUrl\": \"https://careers.microsoft.com\"\n  }\n]"
+                  "body": "[\n  {\n    \"companyId\": 1,\n    \"companyName\": \"Google\",\n    \"logoUrl\": \"https://logo.com/google.png\",\n    \"website\": \"https://google.com\",\n    \"headquarters\": \"Mountain View, CA\",\n    \"activeJobCount\": 12,\n    \"secondaryIndustry\": \"Cloud, AI\",\n    \"companySize\": \"10000+\",\n    \"specialties\": \"Search, Cloud, AI\",\n    \"careerPageUrl\": \"https://careers.google.com\"\n  },\n  {\n    \"companyId\": 2,\n    \"companyName\": \"Microsoft\",\n    \"logoUrl\": \"https://logo.com/microsoft.png\",\n    \"website\": \"https://microsoft.com\",\n    \"headquarters\": \"Redmond, WA\",\n    \"activeJobCount\": 8,\n    \"secondaryIndustry\": \"Cloud, Productivity\",\n    \"companySize\": \"10000+\",\n    \"specialties\": \"Software, Cloud, Productivity\",\n    \"careerPageUrl\": \"https://careers.microsoft.com\"\n  }\n]"
                 },
                 {
                   "code": 404,
@@ -3411,7 +3410,8 @@
                 },
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"name\": \"Example Corp\",\n  \"description\": \"A technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://example.com/logo.png\"\n}"
+                  "raw": "{\n  \"name\": \"Example Corp\",\n  \"description\": \"A technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://example.com/logo.png\"\n}",
+                  "options": { "raw": { "language": "json" } }
                 },
                 "description": "Create or update a company."
               },
@@ -3453,18 +3453,18 @@
                   { "key": "Authorization", "value": "Bearer {{authToken}}" }
                 ],
                 "url": {
-                  "raw": "{{baseUrl}}/api/v1/companies",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "companies" ]
+                  "raw": "{{baseUrl}}/api/v1/companies?page=0&size=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "companies"],
+                  "query": [
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "100" }
+                  ]
                 },
-                "description": "Get all companies."
+                "description": "Get all companies (paginated)."
               },
               "response": [
-                {
-                  "code": 200,
-                  "name": "Success",
-                  "body": "[{\n  \"id\": 1,\n  \"name\": \"Example Corp\",\n  \"description\": \"A technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://example.com/logo.png\",\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"aboutUs\": \"About Example Corp\",\n  \"vision\": \"To innovate\",\n  \"mission\": \"Empower developers\",\n  \"culture\": \"Open and inclusive\",\n  \"jobs\": [],\n  \"careerPageUrl\": \"https://example.com/careers\",\n  \"linkedinUrl\": \"https://linkedin.com/company/example-corp\",\n  \"headquarters\": \"San Francisco, CA\",\n  \"primaryIndustryId\": 10,\n  \"secondaryIndustries\": \"Software,Cloud\",\n  \"companySize\": \"1000+\",\n  \"specialties\": \"AI,ML,Cloud\"\n}]"
-                }
+                { "code": 200, "name": "Success", "body": "{\n  \"content\": [ /* CompanyResponse[] */ ],\n  \"pageable\": { /* ... */ },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": { /* ... */ },\n  \"first\": true,\n  \"numberOfElements\": 1,\n  \"empty\": false\n}" }
               ]
             }
           ]

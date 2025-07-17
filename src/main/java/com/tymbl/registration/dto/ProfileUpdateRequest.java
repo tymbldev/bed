@@ -15,6 +15,9 @@ import java.util.HashSet;
 
 @Data
 public class ProfileUpdateRequest {
+    @Email(message = "Please provide a valid email address")
+    private String email;
+    
     private String firstName;
     private String lastName;
     

@@ -84,6 +84,9 @@ public class UserController {
             response.put("token", newToken);
             response.put("user", updatedUser);
             return ResponseEntity.ok(response);
+        } catch (EmailAlreadyExistsException e) {
+            logger.error("Email already exists during profile update. Error: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorResponse("Email already registered: " + e.getMessage()));
         } catch (RuntimeException e) {
             logger.error("Failed to update profile. Error: {}", e);
             return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
