@@ -287,10 +287,9 @@ public class AIController {
         ),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    public ResponseEntity<List<CompanyIndustryResponse>> detectIndustriesForCompanies(
-        @RequestParam(defaultValue = "false") boolean useGemini) {
+    public ResponseEntity<List<CompanyIndustryResponse>> detectIndustriesForCompanies() {
         try {
-            List<CompanyIndustryResponse> results = companyService.detectIndustriesForCompanies(useGemini);
+            List<CompanyIndustryResponse> results = companyService.detectIndustriesForCompanies();
             return ResponseEntity.ok(results);
         } catch (Exception e) {
             log.error("Error detecting industries for companies", e);

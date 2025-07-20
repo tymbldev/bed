@@ -5608,12 +5608,11 @@
                       { "key": "Authorization", "value": "Bearer {{authToken}}" }
                     ],
                     "url": {
-                      "raw": "{{baseUrl}}/api/v1/ai/detect-industries?useGemini=false",
+                      "raw": "{{baseUrl}}/api/v1/ai/detect-industries",
                       "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "detect-industries" ],
-                      "query": [ { "key": "useGemini", "value": "false" } ]
+                      "path": [ "api", "v1", "ai", "detect-industries" ]
                     },
-                    "description": "Detect industries for all companies using AI or manual detection"
+                    "description": "Detect industries for all companies using Gemini AI"
                   },
                   "response": [
                     {

@@ -225,7 +225,7 @@ public class GeminiCompanyService {
             .collect(Collectors.toList());
         
         StringBuilder prompt = new StringBuilder();
-        prompt.append("Analyze the following company details and identify its industries:\n");
+        prompt.append("Analyze the following company details and identify its industries and tags:\n");
         prompt.append("Company Name: ").append(companyName).append("\n");
         prompt.append("Company Description: ").append(companyDescription).append("\n");
         prompt.append("Specialties: ").append(specialties).append("\n\n");
@@ -235,24 +235,46 @@ public class GeminiCompanyService {
             prompt.append("- ").append(industry).append("\n");
         }
         
-        prompt.append("\nSECONDARY INDUSTRIES (choose 2-4 additional relevant industries from the list above):\n");
-        prompt.append("Examples of secondary industry combinations:\n");
-        prompt.append("- For a fintech company: Primary: 'FinTech', Secondary: 'Financial Services, Software Development, Data Analytics & Business Intelligence'\n");
-        prompt.append("- For a healthtech startup: Primary: 'Healthcare & HealthTech', Secondary: 'Software Development, Artificial Intelligence & Machine Learning (AI/ML), Mobile Applications'\n");
-        prompt.append("- For an e-commerce platform: Primary: 'E-commerce & Online Retail', Secondary: 'Software Development, Marketing & Advertising Technology (MarTech/AdTech), Logistics & Supply Chain'\n");
-        prompt.append("- For a cybersecurity firm: Primary: 'Cybersecurity', Secondary: 'Software Development, Information Technology & Services, Professional Services & Consulting'\n");
-        prompt.append("- For an AI company: Primary: 'Artificial Intelligence & Machine Learning (AI/ML)', Secondary: 'Software Development, Data Analytics & Business Intelligence, Professional Services & Consulting'\n");
+        prompt.append("\nSECONDARY INDUSTRIES & TAGS (choose 2-6 items from industries above OR relevant tags):\n");
+        prompt.append("Secondary items can include:\n");
+        prompt.append("1. Additional industries from the list above\n");
+        prompt.append("2. Company type tags such as:\n");
+        prompt.append("   - 'Startup' (for early-stage companies)\n");
+        prompt.append("   - 'Fortune 500' (for large established companies)\n");
+        prompt.append("   - 'Unicorn' (for companies valued over $1B)\n");
+        prompt.append("   - 'Product Based Company' (for product-focused companies)\n");
+        prompt.append("   - 'Service Based Company' (for service-focused companies)\n");
+        prompt.append("   - 'SaaS' (for Software-as-a-Service companies)\n");
+        prompt.append("   - 'B2B' (for Business-to-Business companies)\n");
+        prompt.append("   - 'B2C' (for Business-to-Consumer companies)\n");
+        prompt.append("   - 'Enterprise' (for enterprise-focused companies)\n");
+        prompt.append("   - 'SME' (for Small and Medium Enterprises)\n");
+        prompt.append("   - 'Public Company' (for publicly traded companies)\n");
+        prompt.append("   - 'Private Company' (for privately held companies)\n");
+        prompt.append("   - 'Remote First' (for companies with remote-first culture)\n");
+        prompt.append("   - 'Hybrid' (for companies with hybrid work model)\n");
+        prompt.append("   - 'Onsite' (for companies requiring office presence)\n");
+        
+        prompt.append("\nExamples of secondary industry and tag combinations:\n");
+        prompt.append("- For a fintech startup: Primary: 'FinTech', Secondary: 'Financial Services, Software Development, Startup, B2B, SaaS'\n");
+        prompt.append("- For a healthtech unicorn: Primary: 'Healthcare & HealthTech', Secondary: 'Software Development, AI/ML, Unicorn, Product Based Company, B2B'\n");
+        prompt.append("- For a Fortune 500 e-commerce company: Primary: 'E-commerce & Online Retail', Secondary: 'Software Development, MarTech/AdTech, Fortune 500, B2C, Enterprise'\n");
+        prompt.append("- For a cybersecurity startup: Primary: 'Cybersecurity', Secondary: 'Software Development, IT Services, Startup, B2B, SaaS'\n");
+        prompt.append("- For an AI enterprise company: Primary: 'AI/ML', Secondary: 'Software Development, Data Analytics, Enterprise, B2B, Product Based Company'\n");
         
         prompt.append("\nINSTRUCTIONS:\n");
         prompt.append("1. For PRIMARY INDUSTRY: Select exactly ONE industry from the available list that best represents the company's main business focus.\n");
-        prompt.append("2. For SECONDARY INDUSTRIES: Select 2-4 additional industries from the same list that are also relevant to the company's operations.\n");
-        prompt.append("3. Ensure all selected industries are from the provided list - do not create new industry names.\n");
-        prompt.append("4. Consider the company's description, specialties, and business model when making selections.\n\n");
+        prompt.append("2. For SECONDARY INDUSTRIES & TAGS: Select 2-6 items that can be either:\n");
+        prompt.append("   - Additional industries from the provided list\n");
+        prompt.append("   - Relevant company type tags (Startup, Fortune 500, Unicorn, etc.)\n");
+        prompt.append("   - Business model indicators (B2B, B2C, SaaS, etc.)\n");
+        prompt.append("3. Consider the company's description, specialties, size, business model, and work culture when making selections.\n");
+        prompt.append("4. Mix industries and tags appropriately based on the company's characteristics.\n\n");
         
         prompt.append("Provide response in this JSON format:\n");
         prompt.append("{\n");
         prompt.append("  \"primaryIndustry\": \"[selected primary industry name]\",\n");
-        prompt.append("  \"secondaryIndustries\": [\"[industry1]\", \"[industry2]\", \"[industry3]\"]\n");
+        prompt.append("  \"secondaryIndustries\": [\"[industry1 or tag1]\", \"[industry2 or tag2]\", \"[industry3 or tag3]\"]\n");
         prompt.append("}");
         
         return prompt.toString();
