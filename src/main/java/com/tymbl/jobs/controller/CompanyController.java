@@ -218,6 +218,105 @@ public class CompanyController {
         return ResponseEntity.ok(dropdownService.getIndustryStatistics());
     }
 
+    @GetMapping("/by-industry/{primaryIndustryId}")
+    @Operation(summary = "Get companies by primary industry ID", description = "Returns a paginated list of companies filtered by primary industry ID")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Companies retrieved successfully",
+            content = @Content(
+                schema = @Schema(implementation = CompanyResponse.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"content\": [\n" +
+                          "    {\n" +
+                          "      \"id\": 1,\n" +
+                          "      \"name\": \"Google\",\n" +
+                          "      \"description\": \"A technology company\",\n" +
+                          "      \"website\": \"https://google.com\",\n" +
+                          "      \"logoUrl\": \"https://google.com/logo.png\",\n" +
+                          "      \"createdAt\": \"2024-01-01T10:00:00\",\n" +
+                          "      \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
+                          "      \"aboutUs\": \"About Google\",\n" +
+                          "      \"vision\": \"To organize the world's information\",\n" +
+                          "      \"mission\": \"Make information universally accessible\",\n" +
+                          "      \"culture\": \"Innovative and inclusive\",\n" +
+                          "      \"jobs\": [],\n" +
+                          "      \"careerPageUrl\": \"https://careers.google.com\",\n" +
+                          "      \"linkedinUrl\": \"https://linkedin.com/company/google\",\n" +
+                          "      \"headquarters\": \"Mountain View, CA\",\n" +
+                          "      \"primaryIndustryId\": 1,\n" +
+                          "      \"secondaryIndustries\": \"Software,Cloud\",\n" +
+                          "      \"companySize\": \"100000+\",\n" +
+                          "      \"specialties\": \"AI,ML,Search\"\n" +
+                          "    },\n" +
+                          "    {\n" +
+                          "      \"id\": 2,\n" +
+                          "      \"name\": \"Microsoft\",\n" +
+                          "      \"description\": \"A technology company\",\n" +
+                          "      \"website\": \"https://microsoft.com\",\n" +
+                          "      \"logoUrl\": \"https://microsoft.com/logo.png\",\n" +
+                          "      \"createdAt\": \"2024-01-01T10:00:00\",\n" +
+                          "      \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
+                          "      \"aboutUs\": \"About Microsoft\",\n" +
+                          "      \"vision\": \"To empower every person and organization\",\n" +
+                          "      \"mission\": \"Empower every person and organization to achieve more\",\n" +
+                          "      \"culture\": \"Growth mindset\",\n" +
+                          "      \"jobs\": [],\n" +
+                          "      \"careerPageUrl\": \"https://careers.microsoft.com\",\n" +
+                          "      \"linkedinUrl\": \"https://linkedin.com/company/microsoft\",\n" +
+                          "      \"headquarters\": \"Redmond, WA\",\n" +
+                          "      \"primaryIndustryId\": 1,\n" +
+                          "      \"secondaryIndustries\": \"Software,Cloud\",\n" +
+                          "      \"companySize\": \"100000+\",\n" +
+                          "      \"specialties\": \"Windows,Office,Azure\"\n" +
+                          "    }\n" +
+                          "  ],\n" +
+                          "  \"pageable\": {\n" +
+                          "    \"sort\": {\n" +
+                          "      \"empty\": false,\n" +
+                          "      \"sorted\": true,\n" +
+                          "      \"unsorted\": false\n" +
+                          "    },\n" +
+                          "    \"offset\": 0,\n" +
+                          "    \"pageNumber\": 0,\n" +
+                          "    \"pageSize\": 100,\n" +
+                          "    \"paged\": true,\n" +
+                          "    \"unpaged\": false\n" +
+                          "  },\n" +
+                          "  \"last\": false,\n" +
+                          "  \"totalElements\": 25,\n" +
+                          "  \"totalPages\": 1,\n" +
+                          "  \"size\": 100,\n" +
+                          "  \"number\": 0,\n" +
+                          "  \"sort\": {\n" +
+                          "    \"empty\": false,\n" +
+                          "    \"sorted\": true,\n" +
+                          "    \"unsorted\": false\n" +
+                          "  },\n" +
+                          "  \"first\": true,\n" +
+                          "  \"numberOfElements\": 25,\n" +
+                          "  \"empty\": false\n" +
+                          "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "No companies found for the given industry ID")
+    })
+    public ResponseEntity<Page<CompanyResponse>> getCompaniesByPrimaryIndustryId(
+            @PathVariable Long primaryIndustryId,
+            @RequestParam(value = "page", required = false, defaultValue = "0") int page,
+            @RequestParam(value = "size", required = false, defaultValue = "100") int size) {
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            return ResponseEntity.ok(companyService.getCompaniesByPrimaryIndustryId(primaryIndustryId, pageable));
+        } catch (CompanyNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new RuntimeException("Error retrieving companies by industry ID: " + e.getMessage());
+        }
+    }
+
     @ExceptionHandler(CompanyNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleCompanyNotFoundException(CompanyNotFoundException e) {
         Map<String, String> response = new HashMap<>();

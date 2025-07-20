@@ -77,6 +77,35 @@ public class CompanyService {
         return companies.map(this::mapToResponse);
     }
 
+    /**
+     * Get company name by ID
+     * @param companyId The company ID
+     * @return Company name or null if not found
+     */
+    public String getCompanyNameById(Long companyId) {
+        try {
+            return companyRepository.findById(companyId)
+                .map(Company::getName)
+                .orElse(null);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    /**
+     * Get companies by primary industry ID with pagination
+     * @param primaryIndustryId The primary industry ID
+     * @param pageable Pagination parameters
+     * @return Page of companies
+     */
+    public Page<CompanyResponse> getCompaniesByPrimaryIndustryId(Long primaryIndustryId, Pageable pageable) {
+        Page<Company> companies = companyRepository.findByPrimaryIndustryId(primaryIndustryId, pageable);
+        if (companies.isEmpty()) {
+            throw new CompanyNotFoundException("No companies found for industry ID: " + primaryIndustryId);
+        }
+        return companies.map(this::mapToResponse);
+    }
+
     @Transactional(readOnly = true)
     public List<Company> getAllCompaniesForDropdown() {
         return companyRepository.findAll();

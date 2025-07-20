@@ -1,5 +1,6 @@
 package com.tymbl.jobs.controller;
 
+import com.tymbl.common.service.JobFetchingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
@@ -45,6 +46,7 @@ public class AIController {
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
     private final AIJobService aiJobService;
+    private final JobFetchingService jobFetchingService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -135,6 +137,23 @@ public class AIController {
                           "  \"message\": \"Job crawling process started successfully for company: Google\",\n" +
                           "  \"companyId\": 1,\n" +
                           "  \"companyName\": \"Google\",\n" +
+                          "  \"jobs\": [\n" +
+                          "    {\n" +
+                          "      \"title\": \"Software Engineer\",\n" +
+                          "      \"designation\": \"Software Engineer\",\n" +
+                          "      \"description\": \"Join our team...\",\n" +
+                          "      \"location\": {\"city\": \"Mountain View\", \"country\": \"USA\"},\n" +
+                          "      \"job_type\": \"Hybrid\",\n" +
+                          "      \"salary\": {\"min\": 120000, \"max\": 180000, \"currency\": \"USD\"},\n" +
+                          "      \"experience\": {\"min\": 2, \"max\": 5},\n" +
+                          "      \"skills\": [\"Java\", \"Spring\"],\n" +
+                          "      \"tags\": [\"backend\", \"fullstack\"],\n" +
+                          "      \"openings\": 5,\n" +
+                          "      \"posted\": \"2025-01-15\",\n" +
+                          "      \"platform\": \"LinkedIn\",\n" +
+                          "      \"apply_url\": \"https://careers.google.com/jobs/123\"\n" +
+                          "    }\n" +
+                          "  ],\n" +
                           "  \"status\": \"SUCCESS\"\n" +
                           "}"
                 )
@@ -146,10 +165,25 @@ public class AIController {
     public ResponseEntity<Object> crawlJobsForCompany(@PathVariable Long companyId) {
         try {
             log.info("Manual job crawling triggered for company ID: {}", companyId);
-            // This would need to be implemented in CompanyCrawlerService
+            
+            // Get company name from ID
+            String companyName = companyService.getCompanyNameById(companyId);
+            if (companyName == null) {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "Company not found with ID: " + companyId);
+                response.put("status", "ERROR");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+            
+            // Fetch jobs using JobFetchingService
+            List<Map<String, Object>> jobs = jobFetchingService.fetchJobsForCompany(companyName);
+            
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Job crawling process started successfully for company ID: " + companyId);
+            response.put("message", "Job crawling process completed successfully for company: " + companyName);
             response.put("companyId", companyId);
+            response.put("companyName", companyName);
+            response.put("jobs", jobs);
+            response.put("jobsCount", jobs.size());
             response.put("status", "SUCCESS");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -170,8 +204,25 @@ public class AIController {
             content = @Content(
                 examples = @ExampleObject(
                     value = "{\n" +
-                          "  \"message\": \"Job crawling process started successfully for company: Google\",\n" +
+                          "  \"message\": \"Job crawling process completed successfully for company: Google\",\n" +
                           "  \"companyName\": \"Google\",\n" +
+                          "  \"jobs\": [\n" +
+                          "    {\n" +
+                          "      \"title\": \"Software Engineer\",\n" +
+                          "      \"designation\": \"Software Engineer\",\n" +
+                          "      \"description\": \"Join our team...\",\n" +
+                          "      \"location\": {\"city\": \"Mountain View\", \"country\": \"USA\"},\n" +
+                          "      \"job_type\": \"Hybrid\",\n" +
+                          "      \"salary\": {\"min\": 120000, \"max\": 180000, \"currency\": \"USD\"},\n" +
+                          "      \"experience\": {\"min\": 2, \"max\": 5},\n" +
+                          "      \"skills\": [\"Java\", \"Spring\"],\n" +
+                          "      \"tags\": [\"backend\", \"fullstack\"],\n" +
+                          "      \"openings\": 5,\n" +
+                          "      \"posted\": \"2025-01-15\",\n" +
+                          "      \"platform\": \"LinkedIn\",\n" +
+                          "      \"apply_url\": \"https://careers.google.com/jobs/123\"\n" +
+                          "    }\n" +
+                          "  ],\n" +
                           "  \"status\": \"SUCCESS\"\n" +
                           "}"
                 )
@@ -182,10 +233,15 @@ public class AIController {
     public ResponseEntity<Object> crawlJobsForCompanyByName(@PathVariable String companyName) {
         try {
             log.info("Manual job crawling triggered for company: {}", companyName);
-            // This would need to be implemented in CompanyCrawlerService
+            
+            // Fetch jobs using JobFetchingService
+            List<Map<String, Object>> jobs = jobFetchingService.fetchJobsForCompany(companyName);
+            
             Map<String, Object> response = new HashMap<>();
-            response.put("message", "Job crawling process started successfully for company: " + companyName);
+            response.put("message", "Job crawling process completed successfully for company: " + companyName);
             response.put("companyName", companyName);
+            response.put("jobs", jobs);
+            response.put("jobsCount", jobs.size());
             response.put("status", "SUCCESS");
             return ResponseEntity.ok(response);
         } catch (Exception e) {
@@ -745,6 +801,111 @@ public class AIController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Failed to generate similar companies: " + e.getMessage());
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+
+    // ============================================================================
+    // URL CONTENT MANAGEMENT ENDPOINTS
+    // ============================================================================
+
+    @GetMapping("/url-content")
+    @Operation(summary = "Get all URL content", description = "Retrieves all URL content from the database")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "URL content retrieved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "[\n" +
+                        "  {\n" +
+                        "    \"id\": 1,\n" +
+                        "    \"url\": \"https://careers.google.com/jobs/123\",\n" +
+                        "    \"extractedText\": \"Job description content...\",\n" +
+                        "    \"extractionStatus\": \"SUCCESS\",\n" +
+                        "    \"extractedAt\": \"2025-01-15T10:30:00\"\n" +
+                        "  }\n" +
+                        "]"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Object> getAllUrlContent() {
+        try {
+            List<Map<String, Object>> urlContents = jobFetchingService.getAllUrlContents().stream()
+                .map(content -> {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("id", content.getId());
+                    map.put("url", content.getUrl());
+                    map.put("extractedText", content.getExtractedText());
+                    map.put("extractionStatus", content.getExtractionStatus());
+                    map.put("errorMessage", content.getErrorMessage());
+                    map.put("extractedAt", content.getExtractedAt());
+                    map.put("createdAt", content.getCreatedAt());
+                    map.put("updatedAt", content.getUpdatedAt());
+                    return map;
+                })
+                .collect(java.util.stream.Collectors.toList());
+            
+            return ResponseEntity.ok(urlContents);
+        } catch (Exception e) {
+            log.error("Error retrieving URL content", e);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error retrieving URL content: " + e.getMessage());
+            response.put("status", "ERROR");
+            return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    @GetMapping("/url-content/{url}")
+    @Operation(summary = "Get URL content by URL", description = "Retrieves URL content for a specific URL")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "URL content retrieved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"id\": 1,\n" +
+                        "  \"url\": \"https://careers.google.com/jobs/123\",\n" +
+                        "  \"extractedText\": \"Job description content...\",\n" +
+                        "  \"extractionStatus\": \"SUCCESS\",\n" +
+                        "  \"extractedAt\": \"2025-01-15T10:30:00\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "URL content not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Object> getUrlContent(@PathVariable String url) {
+        try {
+            java.util.Optional<com.tymbl.common.entity.UrlContent> urlContent = jobFetchingService.getUrlContent(url);
+            
+            if (urlContent.isPresent()) {
+                com.tymbl.common.entity.UrlContent content = urlContent.get();
+                Map<String, Object> response = new HashMap<>();
+                response.put("id", content.getId());
+                response.put("url", content.getUrl());
+                response.put("extractedText", content.getExtractedText());
+                response.put("extractionStatus", content.getExtractionStatus());
+                response.put("errorMessage", content.getErrorMessage());
+                response.put("extractedAt", content.getExtractedAt());
+                response.put("createdAt", content.getCreatedAt());
+                response.put("updatedAt", content.getUpdatedAt());
+                return ResponseEntity.ok(response);
+            } else {
+                Map<String, String> response = new HashMap<>();
+                response.put("message", "URL content not found for: " + url);
+                response.put("status", "NOT_FOUND");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(response);
+            }
+        } catch (Exception e) {
+            log.error("Error retrieving URL content for: {}", url, e);
+            Map<String, String> response = new HashMap<>();
+            response.put("message", "Error retrieving URL content: " + e.getMessage());
+            response.put("status", "ERROR");
+            return ResponseEntity.internalServerError().body(response);
         }
     }
 } 

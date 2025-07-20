@@ -26,6 +26,7 @@ import com.tymbl.jobs.repository.JobRepository;
 import com.tymbl.jobs.entity.JobApplication;
 import java.util.List;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
@@ -81,8 +82,16 @@ public class JobService {
             throw new BadRequestException("Invalid user ID");
         }
 
-        // If uniqueUrl and platform are provided, check for existing job
-        if (request.getUniqueUrl() != null && request.getPlatform() != null) {
+        if(request.getPlatform()==null || request.getPlatform().isEmpty()){
+            request.setPlatform("NA");
+        }
+
+        // Handle uniqueUrl based on platform
+        String finalUniqueUrl = request.getUniqueUrl();
+        if (request.getPlatform() != null && "other".equalsIgnoreCase(request.getPlatform())) {
+            finalUniqueUrl = generateRandomUniqueUrl();
+        } else if (request.getUniqueUrl() != null && request.getPlatform() != null) {
+            // For non-"other" platforms, check for existing job
             Job existingJob = jobRepository.findByUniqueUrlAndPlatform(request.getUniqueUrl(), request.getPlatform());
             if (existingJob != null) {
                 // Add user as referrer if not already present
@@ -112,7 +121,7 @@ public class JobService {
         job.setCompany(request.getCompany());
         job.setPostedById(postedBy.getId());
         job.setOpeningCount(request.getOpeningCount() != null ? request.getOpeningCount() : 1);
-        job.setUniqueUrl(request.getUniqueUrl());
+        job.setUniqueUrl(finalUniqueUrl);
         job.setPlatform(request.getPlatform());
         
         // Set approval status based on unique URL and platform
@@ -347,8 +356,13 @@ public class JobService {
             throw new ForbiddenException("You are not authorized to update this job");
         }
 
-        // Check for duplicate uniqueUrl and platform combination
-        if (request.getUniqueUrl() != null && request.getPlatform() != null) {
+        // Handle uniqueUrl based on platform
+        String finalUniqueUrl = request.getUniqueUrl();
+        if (request.getPlatform() != null && "other".equalsIgnoreCase(request.getPlatform())) {
+            // For "other" platform, generate a random uniqueUrl
+            finalUniqueUrl = generateRandomUniqueUrl();
+        } else if (request.getUniqueUrl() != null && request.getPlatform() != null) {
+            // For non-"other" platforms, check for duplicate uniqueUrl and platform combination
             Job existingJob = jobRepository.findByUniqueUrlAndPlatform(request.getUniqueUrl(), request.getPlatform());
             if (existingJob != null && !existingJob.getId().equals(jobId)) {
                 logger.warn("User {} attempted to update job {} with duplicate uniqueUrl '{}' and platform '{}' (existing job: {})", currentUser.getId(), jobId, request.getUniqueUrl(), request.getPlatform(), existingJob.getId());
@@ -391,7 +405,7 @@ public class JobService {
         job.setOpeningCount(request.getOpeningCount() != null ? request.getOpeningCount() : job.getOpeningCount());
         
         // Update uniqueUrl and platform from request
-        job.setUniqueUrl(request.getUniqueUrl());
+        job.setUniqueUrl(finalUniqueUrl);
         job.setPlatform(request.getPlatform());
         
         // Update tags
@@ -741,5 +755,13 @@ public class JobService {
         response.setReferrerCount(referrerResponses.size());
         
         return response;
+    }
+
+    /**
+     * Generates a random unique URL for jobs with "other" platform
+     * @return A random unique URL string
+     */
+    private String generateRandomUniqueUrl() {
+        return "other_" + System.currentTimeMillis() + "_" + UUID.randomUUID().toString().substring(0, 8);
     }
 }

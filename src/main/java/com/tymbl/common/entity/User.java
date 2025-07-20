@@ -203,11 +203,11 @@ public class User implements UserDetails {
         @Column(name = "field_of_study")
         private String fieldOfStudy;
         
-        @Column(name = "start_date")
-        private LocalDateTime startDate;
+        @Column(name = "start_year")
+        private Integer startYear;
         
-        @Column(name = "end_date")
-        private LocalDateTime endDate;
+        @Column(name = "end_year")
+        private Integer endYear;
     }
     
     @Override

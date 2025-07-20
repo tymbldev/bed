@@ -918,7 +918,7 @@
                 "description": "Registers a new user with email and password. Only email and password are mandatory.",
                 "body": {
                   "mode": "raw",
-                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019,\n      \"grade\": \"3.8\"\n    }\n  ]\n}",
+                  "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password123\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\",\n  \"role\": \"USER\",\n  \"phoneNumber\": \"+1234567890\",\n  \"company\": \"Example Corp\",\n  \"companyId\": 123,\n  \"designationId\": 1,\n  \"departmentId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"zipCode\": \"10001\",\n  \"linkedInProfile\": \"https://linkedin.com/in/johndoe\",\n  \"githubProfile\": \"https://github.com/johndoe\",\n  \"portfolioWebsite\": \"https://johndoe.com\",\n  \"resume\": \"base64_encoded_resume\",\n  \"yearsOfExperience\": 5,\n  \"monthsOfExperience\": 6,\n  \"currentSalary\": 100000,\n  \"expectedSalary\": 120000,\n  \"noticePeriod\": 30,\n  \"skillIds\": [1, 2, 3],\n  \"education\": [\n    {\n      \"degree\": \"Bachelor of Science\",\n      \"fieldOfStudy\": \"Computer Science\",\n      \"institution\": \"Example University\",\n      \"startYear\": 2015,\n      \"endYear\": 2019\n    }\n  ]\n}",
                   "options": {
                     "raw": {
                       "language": "json"
@@ -3919,6 +3919,39 @@
               },
               "response": [
                 { "code": 200, "name": "Success", "body": "{\n  \"content\": [ /* CompanyResponse[] */ ],\n  \"pageable\": { /* ... */ },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": { /* ... */ },\n  \"first\": true,\n  \"numberOfElements\": 1,\n  \"empty\": false\n}" }
+              ]
+            },
+            {
+              "name": "GET /api/v1/companies/by-industry/{primaryIndustryId}",
+              "request": {
+                "method": "GET",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/companies/by-industry/{primaryIndustryId}?page=0&size=100",
+                  "host": ["{{baseUrl}}"],
+                  "path": ["api", "v1", "companies", "by-industry", "{primaryIndustryId}"],
+                  "variable": [
+                    {
+                      "key": "primaryIndustryId",
+                      "value": "1"
+                    }
+                  ],
+                  "query": [
+                    { "key": "page", "value": "0" },
+                    { "key": "size", "value": "100" }
+                  ]
+                },
+                "description": "Get companies by primary industry ID with pagination support. Default page size is 100."
+              },
+              "response": [
+                { 
+                  "code": 200, 
+                  "name": "Success", 
+                  "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"name\": \"Google\",\n      \"description\": \"A technology company\",\n      \"website\": \"https://google.com\",\n      \"logoUrl\": \"https://google.com/logo.png\",\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"aboutUs\": \"About Google\",\n      \"vision\": \"To organize the world's information\",\n      \"mission\": \"Make information universally accessible\",\n      \"culture\": \"Innovative and inclusive\",\n      \"jobs\": [],\n      \"careerPageUrl\": \"https://careers.google.com\",\n      \"linkedinUrl\": \"https://linkedin.com/company/google\",\n      \"headquarters\": \"Mountain View, CA\",\n      \"primaryIndustryId\": 1,\n      \"secondaryIndustries\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"AI,ML,Search\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Microsoft\",\n      \"description\": \"A technology company\",\n      \"website\": \"https://microsoft.com\",\n      \"logoUrl\": \"https://microsoft.com/logo.png\",\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"aboutUs\": \"About Microsoft\",\n      \"vision\": \"To empower every person and organization\",\n      \"mission\": \"Empower every person and organization to achieve more\",\n      \"culture\": \"Growth mindset\",\n      \"jobs\": [],\n      \"careerPageUrl\": \"https://careers.microsoft.com\",\n      \"linkedinUrl\": \"https://linkedin.com/company/microsoft\",\n      \"headquarters\": \"Redmond, WA\",\n      \"primaryIndustryId\": 1,\n      \"secondaryIndustries\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"Windows,Office,Azure\"\n    }\n  ],\n  \"pageable\": {\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"offset\": 0,\n    \"pageNumber\": 0,\n    \"pageSize\": 100,\n    \"paged\": true,\n    \"unpaged\": false\n  },\n  \"last\": false,\n  \"totalElements\": 25,\n  \"totalPages\": 1,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": false\n  },\n  \"first\": true,\n  \"numberOfElements\": 25,\n  \"empty\": false\n}" 
+                },
+                { "code": 404, "name": "Not Found", "body": "{\n  \"error\": \"No companies found for industry ID: 1\"\n}" }
               ]
             }
           ]

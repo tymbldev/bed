@@ -229,8 +229,8 @@ CREATE TABLE IF NOT EXISTS user_education (
     institution VARCHAR(255) NOT NULL,
     degree VARCHAR(100) NOT NULL,
     field_of_study VARCHAR(100),
-    start_date TIMESTAMP,
-    end_date TIMESTAMP,
+    start_year INT,
+    end_year INT,
     PRIMARY KEY (user_id, institution, degree),
     FOREIGN KEY (user_id) REFERENCES users(id)
 );

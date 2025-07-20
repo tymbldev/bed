@@ -18,6 +18,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Page<Company> findByIsCrawledFalse(Pageable pageable);
     // Find all companies by primaryIndustryId
     List<Company> findByPrimaryIndustryId(Long primaryIndustryId);
+    
+    // Find all companies by primaryIndustryId with pagination
+    Page<Company> findByPrimaryIndustryId(Long primaryIndustryId, Pageable pageable);
     // Find all websites by primaryIndustryId
     @Query("SELECT c.website FROM Company c WHERE c.primaryIndustryId = :primaryIndustryId")
     java.util.List<String> findWebsitesByPrimaryIndustryId(Long primaryIndustryId);
