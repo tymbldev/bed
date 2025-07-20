@@ -14,19 +14,19 @@ public interface IndustryRepository extends JpaRepository<Industry, Long> {
     Optional<Industry> findByName(String name);
     boolean existsByName(String name);
     
-    @Query("SELECT i.id, i.name, i.description, COUNT(c.id) as companyCount " +
-           "FROM Industry i " +
-           "LEFT JOIN com.tymbl.jobs.entity.Company c ON c.primaryIndustryId = i.id " +
+    @Query(value = "SELECT i.id, i.name, i.description, COUNT(c.id) as companyCount " +
+           "FROM industries i " +
+           "LEFT JOIN companies c ON c.primary_industry_id = i.id " +
            "GROUP BY i.id, i.name, i.description " +
-           "ORDER BY companyCount DESC")
+           "ORDER BY companyCount DESC", nativeQuery = true)
     List<Object[]> getIndustryStatistics();
     
-    @Query("SELECT c.id, c.name, c.logoUrl, c.website, c.headquarters, COUNT(j.id) as activeJobCount " +
-           "FROM com.tymbl.jobs.entity.Company c " +
-           "LEFT JOIN com.tymbl.common.entity.Job j ON j.companyId = c.id AND j.active = true " +
-           "WHERE c.primaryIndustryId = :industryId " +
-           "GROUP BY c.id, c.name, c.logoUrl, c.website, c.headquarters " +
-           "ORDER BY activeJobCount DESC")
+    @Query(value = "SELECT c.id, c.name, c.logo_url, c.website, c.headquarters, COUNT(j.id) as activeJobCount " +
+           "FROM companies c " +
+           "LEFT JOIN jobs j ON j.company_id = c.id AND j.active = true " +
+           "WHERE c.primary_industry_id = :industryId " +
+           "GROUP BY c.id, c.name, c.logo_url, c.website, c.headquarters " +
+           "ORDER BY activeJobCount DESC", nativeQuery = true)
     List<Object[]> getTopCompaniesByIndustry(@Param("industryId") Long industryId);
 
     // Remove the broken join query
@@ -35,13 +35,13 @@ public interface IndustryRepository extends JpaRepository<Industry, Long> {
     List<Long> getAllIndustryIds();
 
     // Add a native query to count jobs for a given industryId
-    @Query(value = "SELECT COUNT(j.id) FROM jobs_job j JOIN jobs_company c ON j.company_id = c.id WHERE c.primary_industry_id = :industryId AND j.active = true", nativeQuery = true)
+    @Query(value = "SELECT COUNT(j.id) FROM jobs j JOIN companies c ON j.company_id = c.id WHERE c.primary_industry_id = :industryId AND j.active = true", nativeQuery = true)
     Long countActiveJobsByIndustryId(@Param("industryId") Long industryId);
 
     @Query(
       value = "SELECT c.primary_industry_id AS industryId, COUNT(j.id) AS jobCount " +
-              "FROM jobs_company c " +
-              "LEFT JOIN jobs_job j ON j.company_id = c.id AND j.active = true " +
+              "FROM companies c " +
+              "LEFT JOIN jobs j ON j.company_id = c.id AND j.active = true " +
               "GROUP BY c.primary_industry_id",
       nativeQuery = true
     )

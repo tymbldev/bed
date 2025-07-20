@@ -281,7 +281,8 @@ public class DropdownService {
         return industryStats.stream().map(stat -> {
             Long industryId = (Long) stat[0];
             String industryName = (String) stat[1];
-            Long companyCount = (Long) stat[2];
+            String industryDescription = (String) stat[2];
+            Long companyCount = (Long) stat[3];
             List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
             List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
                 .map(companyData -> {
@@ -308,8 +309,9 @@ public class DropdownService {
             return IndustryWiseCompaniesDTO.builder()
                 .industryId(industryId)
                 .industryName(industryName)
+                .industryDescription(industryDescription)
                 .companyCount(companyCount)
-                    .totalJobCount(totalJobCount)
+                .totalJobCount(totalJobCount)
                 .topCompanies(topCompanies)
                 .build();
         }).collect(java.util.stream.Collectors.toList());
