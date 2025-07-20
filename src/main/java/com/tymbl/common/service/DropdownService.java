@@ -279,21 +279,21 @@ public class DropdownService {
             }
         }
         return industryStats.stream().map(stat -> {
-            Long industryId = (Long) stat[0];
+            Long industryId = stat[0] == null ? null : ((Number) stat[0]).longValue();
             String industryName = (String) stat[1];
             String industryDescription = (String) stat[2];
-            Long companyCount = (Long) stat[3];
+            Long companyCount = stat[3] == null ? 0L : ((Number) stat[3]).longValue();
             List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
             List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
                 .map(companyData -> {
-                    Long companyId = (Long) companyData[0];
+                    Long companyId = companyData[0] == null ? null : ((Number) companyData[0]).longValue();
                     IndustryWiseCompaniesDTO.TopCompanyDTO.TopCompanyDTOBuilder builder = IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
                         .companyId(companyId)
                         .companyName((String) companyData[1])
                         .logoUrl((String) companyData[2])
                         .website((String) companyData[3])
                         .headquarters((String) companyData[4])
-                        .activeJobCount((Long) companyData[5]);
+                        .activeJobCount(companyData[5] == null ? 0L : ((Number) companyData[5]).longValue());
                     com.tymbl.jobs.entity.Company company = companyRepository.findById(companyId).orElse(null);
                     if (company != null) {
                         builder.secondaryIndustry(company.getSecondaryIndustries());
@@ -322,14 +322,14 @@ public class DropdownService {
         List<Object[]> companiesData = industryRepository.getTopCompaniesByIndustry(industryId);
         return companiesData.stream()
             .map(companyData -> {
-                Long companyId = (Long) companyData[0];
+                Long companyId = companyData[0] == null ? null : ((Number) companyData[0]).longValue();
                 IndustryWiseCompaniesDTO.TopCompanyDTO.TopCompanyDTOBuilder builder = IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
                     .companyId(companyId)
                     .companyName((String) companyData[1])
                     .logoUrl((String) companyData[2])
                     .website((String) companyData[3])
                     .headquarters((String) companyData[4])
-                    .activeJobCount((Long) companyData[5]);
+                    .activeJobCount(companyData[5] == null ? 0L : ((Number) companyData[5]).longValue());
                 com.tymbl.jobs.entity.Company company = companyRepository.findById(companyId).orElse(null);
                 if (company != null) {
                     builder.secondaryIndustry(company.getSecondaryIndustries());
