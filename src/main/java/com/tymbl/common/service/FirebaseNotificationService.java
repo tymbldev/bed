@@ -24,6 +24,9 @@ public class FirebaseNotificationService {
     @Value("${firebase.api.url:https://fcm.googleapis.com/fcm/send}")
     private String firebaseApiUrl;
     
+    @Value("${firebase.notifications.enabled:false}")
+    private boolean notificationsEnabled;
+    
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
     
@@ -31,6 +34,11 @@ public class FirebaseNotificationService {
      * Send push notification to a specific device
      */
     public boolean sendNotificationToDevice(String deviceToken, String title, String message, Map<String, Object> data) {
+        if (!notificationsEnabled) {
+            log.info("Firebase notifications are disabled. Skipping notification to device: {}", deviceToken);
+            return true; // Return true to indicate "success" when disabled
+        }
+        
         try {
             Map<String, Object> notification = new HashMap<>();
             notification.put("title", title);
@@ -77,6 +85,11 @@ public class FirebaseNotificationService {
      * Send notification to multiple devices
      */
     public boolean sendNotificationToMultipleDevices(String[] deviceTokens, String title, String message, Map<String, Object> data) {
+        if (!notificationsEnabled) {
+            log.info("Firebase notifications are disabled. Skipping notification to {} devices", deviceTokens.length);
+            return true; // Return true to indicate "success" when disabled
+        }
+        
         try {
             Map<String, Object> notification = new HashMap<>();
             notification.put("title", title);
@@ -121,6 +134,11 @@ public class FirebaseNotificationService {
      * Send notification to a topic
      */
     public boolean sendNotificationToTopic(String topic, String title, String message, Map<String, Object> data) {
+        if (!notificationsEnabled) {
+            log.info("Firebase notifications are disabled. Skipping notification to topic: {}", topic);
+            return true; // Return true to indicate "success" when disabled
+        }
+        
         try {
             Map<String, Object> notification = new HashMap<>();
             notification.put("title", title);
@@ -167,6 +185,11 @@ public class FirebaseNotificationService {
      * Send notification for a specific notification entity
      */
     public boolean sendNotification(Notification notification, String deviceToken) {
+        if (!notificationsEnabled) {
+            log.info("Firebase notifications are disabled. Skipping notification for entity: {}", notification.getId());
+            return true; // Return true to indicate "success" when disabled
+        }
+        
         try {
             Map<String, Object> data = new HashMap<>();
             data.put("notificationId", notification.getId().toString());
@@ -180,5 +203,19 @@ public class FirebaseNotificationService {
             log.error("Error sending notification for entity: {}", notification.getId(), e);
             return false;
         }
+    }
+    
+    /**
+     * Check if Firebase notifications are enabled
+     */
+    public boolean isNotificationsEnabled() {
+        return notificationsEnabled;
+    }
+    
+    /**
+     * Get the current notification status
+     */
+    public String getNotificationStatus() {
+        return notificationsEnabled ? "ENABLED" : "DISABLED";
     }
 } 

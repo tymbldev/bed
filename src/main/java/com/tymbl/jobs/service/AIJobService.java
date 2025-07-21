@@ -1,5 +1,6 @@
 package com.tymbl.jobs.service;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.Skill;
 import com.tymbl.common.entity.SkillTopic;
 import com.tymbl.common.repository.DesignationRepository;
@@ -9,22 +10,24 @@ import com.tymbl.common.repository.SkillTopicRepository;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.interview.entity.InterviewQuestion;
 import com.tymbl.interview.repository.InterviewQuestionRepository;
-import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
-import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.CompanyContentRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.*;
+import com.tymbl.jobs.repository.CompanyRepository;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 @Slf4j
 @Service
@@ -870,11 +873,14 @@ public class AIJobService {
                 }
             }
             
-            // Generate similar companies using AI
+            // Generate similar companies using AI with enhanced company details
             List<String> similarCompanyNames = geminiService.generateSimilarCompanies(
                 company.getName(), 
                 industryName, 
-                company.getDescription()
+                company.getDescription(),
+                company.getCompanySize(),
+                company.getSpecialties(),
+                company.getHeadquarters()
             );
             
             if (similarCompanyNames == null || similarCompanyNames.isEmpty()) {

@@ -2,6 +2,7 @@ package com.tymbl.common.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tymbl.common.dto.CompanyGenerationResponse;
 import com.tymbl.common.entity.Industry;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.jobs.entity.Company;
@@ -42,12 +43,15 @@ public class GeminiCompanyService {
     private final CompanyContentRepository companyContentRepository;
     private final CompanyRepository companyRepository;
 
-    public Optional<Company> generateCompanyInfo(String companyName) {
+    public CompanyGenerationResponse generateCompanyInfo(String companyName) {
         try {
             log.info("Starting company information generation for: {} using Gemini AI", companyName);
             if (companyName == null || companyName.trim().isEmpty()) {
                 log.warn("Company name is null or empty");
-                return Optional.empty();
+                return CompanyGenerationResponse.builder()
+                    .success(false)
+                    .errorMessage("Company name is null or empty")
+                    .build();
             }
             String prompt = buildCompanyGenerationPrompt(companyName);
             Map<String, Object> requestBody = buildRequestBody(prompt);
@@ -65,10 +69,13 @@ public class GeminiCompanyService {
                 log.debug("Gemini API response status: {}", response.getStatusCodeValue());
                 if (response.getStatusCodeValue() == 200) {
                     log.info("Successfully received response from Gemini API for company: {}", companyName);
-                    return parseGeminiResponse(response.getBody());
+                    return parseGeminiResponseWithJunkDetection(response.getBody(), companyName);
                 } else {
                     log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                    return Optional.empty();
+                    return CompanyGenerationResponse.builder()
+                        .success(false)
+                        .errorMessage("Gemini API error: " + response.getStatusCodeValue())
+                        .build();
                 }
             } catch (HttpClientErrorException e) {
                 if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
@@ -77,7 +84,10 @@ public class GeminiCompanyService {
                     throw new RuntimeException("Rate limit exceeded for Gemini API");
                 } else {
                     log.error("HTTP error calling Gemini API for company: {}", companyName, e);
-                    return Optional.empty();
+                    return CompanyGenerationResponse.builder()
+                        .success(false)
+                        .errorMessage("HTTP error: " + e.getMessage())
+                        .build();
                 }
             } catch (ResourceAccessException e) {
                 if (e.getCause() instanceof java.net.SocketTimeoutException) {
@@ -85,7 +95,10 @@ public class GeminiCompanyService {
                     throw new RuntimeException("Request timeout for Gemini API", e);
                 } else {
                     log.error("Connection error calling Gemini API for company: {}", companyName, e);
-                    return Optional.empty();
+                    return CompanyGenerationResponse.builder()
+                        .success(false)
+                        .errorMessage("Connection error: " + e.getMessage())
+                        .build();
                 }
             } catch (RuntimeException e) {
                 if (e.getMessage() != null && e.getMessage().contains("timeout")) {
@@ -93,12 +106,18 @@ public class GeminiCompanyService {
                     throw e;
                 } else {
                     log.error("Runtime error calling Gemini API for company: {}", companyName, e);
-                    return Optional.empty();
+                    return CompanyGenerationResponse.builder()
+                        .success(false)
+                        .errorMessage("Runtime error: " + e.getMessage())
+                        .build();
                 }
             }
         } catch (Exception e) {
             log.error("Error calling Gemini API for company: {}", companyName, e);
-            return Optional.empty();
+            return CompanyGenerationResponse.builder()
+                .success(false)
+                .errorMessage("Unexpected error: " + e.getMessage())
+                .build();
         }
     }
 
@@ -209,12 +228,62 @@ public class GeminiCompanyService {
     }
 
     private String buildCompanyGenerationPrompt(String companyName) {
-        return "Generate detailed company information for: " + companyName + ". For each of the following fields, provide a detailed, well-written, and comprehensive response (not a short summary): " +
-                "description, about_us, mission, vision, culture, specialties, company_size, headquarters, career_page_url, website, logo_url, linkedin_url. " +
-                "For the fields website, logo_url, linkedin_url, and career_page_url: The value must be a valid URL (starting with http/https and domain structure). If not present, return null. Do NOT return explanations, search instructions, or noisy text—only a valid URL or null. " +
-                "IMPORTANT: For ALL fields, if the information is not available or requires research, return the value as blank or null (do NOT use placeholders, example text, or instructions like '[Insert ...]'). " +
-                "Accuracy in response format is critical. Do not include explanations, instructions, or any text other than the required value for each field. " +
-                "Each field should be as detailed and informative as possible, suitable for a company profile page. Do NOT provide short summaries. Return the result as a JSON object with these fields as keys.";
+        return "Analyze the company name '" + companyName + "' and determine if it's a valid, real company name.\n\n" +
+                "JUNK COMPANY NAME DETECTION:\n" +
+                "First, evaluate if this is a valid company name. Consider these criteria:\n" +
+                "1. Is it a real, existing company? (not a product, service, technology, or generic term)\n" +
+                "2. Is it a complete company name? (not just a brand, product line, or technology)\n" +
+                "3. Is it specific enough to identify a unique company? (not too generic or ambiguous)\n" +
+                "4. Is it a legitimate business entity? (not a fictional company, joke, or placeholder)\n\n" +
+                "EXAMPLES OF JUNK/INVALID NAMES:\n" +
+                "- 'Azure' (Microsoft product, not a company)\n" +
+                "- 'React' (Facebook library, not a company)\n" +
+                "- 'Java' (Oracle technology, not a company)\n" +
+                "- 'Cloud' (generic term, not a company)\n" +
+                "- 'AI' (generic term, not a company)\n" +
+                "- 'Startup' (generic term, not a company)\n" +
+                "- 'Tech' (generic term, not a company)\n" +
+                "- 'Solutions' (generic term, not a company)\n" +
+                "- 'Services' (generic term, not a company)\n" +
+                "- 'Corp' (generic term, not a company)\n" +
+                "- 'Inc' (generic term, not a company)\n" +
+                "- 'LLC' (generic term, not a company)\n\n" +
+                "EXAMPLES OF VALID COMPANY NAMES:\n" +
+                "- 'Microsoft Corporation'\n" +
+                "- 'Google LLC'\n" +
+                "- 'Amazon Web Services'\n" +
+                "- 'Salesforce Inc'\n" +
+                "- 'Oracle Corporation'\n" +
+                "- 'Adobe Inc'\n" +
+                "- 'Netflix Inc'\n" +
+                "- 'Spotify Technology'\n\n" +
+                "If the name is JUNK/INVALID, return ONLY this JSON:\n" +
+                "{\n" +
+                "  \"junk_identified\": true,\n" +
+                "  \"junk_reason\": \"[specific reason why this is not a valid company name]\"\n" +
+                "}\n\n" +
+                "If the name is VALID, generate detailed company information and return this JSON:\n" +
+                "{\n" +
+                "  \"junk_identified\": false,\n" +
+                "  \"description\": \"[detailed company description]\",\n" +
+                "  \"about_us\": \"[detailed about us information]\",\n" +
+                "  \"mission\": \"[company mission statement]\",\n" +
+                "  \"vision\": \"[company vision statement]\",\n" +
+                "  \"culture\": \"[company culture description]\",\n" +
+                "  \"specialties\": \"[company specialties and focus areas]\",\n" +
+                "  \"company_size\": \"[employee count and company scale]\",\n" +
+                "  \"headquarters\": \"[company headquarters location]\",\n" +
+                "  \"career_page_url\": \"[valid URL or null]\",\n" +
+                "  \"website\": \"[valid URL or null]\",\n" +
+                "  \"logo_url\": \"[valid URL or null]\",\n" +
+                "  \"linkedin_url\": \"[valid URL or null]\"\n" +
+                "}\n\n" +
+                "IMPORTANT RULES:\n" +
+                "1. For URLs: Must be valid URLs starting with http/https. If not available, return null.\n" +
+                "2. For all fields: If information is not available, return null (not empty strings or placeholders).\n" +
+                "3. Be thorough in junk detection - when in doubt, mark as junk.\n" +
+                "4. Provide detailed, comprehensive information for valid companies.\n" +
+                "5. Do not include explanations or instructions in the response - only the JSON.";
     }
 
     private String buildIndustryDetectionPrompt(String companyName, String companyDescription, String specialties) {
@@ -289,6 +358,74 @@ public class GeminiCompanyService {
         content.put("parts", new Object[]{part});
         contents.put("contents", new Object[]{content});
         return contents;
+    }
+
+    private CompanyGenerationResponse parseGeminiResponseWithJunkDetection(String responseBody, String companyName) {
+        try {
+            JsonNode responseNode = objectMapper.readTree(responseBody);
+            JsonNode candidates = responseNode.get("candidates");
+            if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+                JsonNode content = candidates.get(0).get("content");
+                if (content != null) {
+                    JsonNode parts = content.get("parts");
+                    if (parts != null && parts.isArray() && parts.size() > 0) {
+                        String generatedText = parts.get(0).get("text").asText();
+                        log.debug("Raw generated text from Gemini: {}", generatedText);
+                        String jsonText = extractJsonFromText(generatedText);
+                        log.debug("Extracted JSON text: {}", jsonText);
+                        try {
+                            JsonNode companyData = objectMapper.readTree(jsonText);
+                            
+                            // Check if this is a junk response
+                            if (companyData.has("junk_identified") && companyData.get("junk_identified").asBoolean()) {
+                                String junkReason = companyData.has("junk_reason") ? 
+                                    companyData.get("junk_reason").asText() : "Invalid company name";
+                                log.info("Company '{}' identified as junk: {}", companyName, junkReason);
+                                return CompanyGenerationResponse.builder()
+                                    .success(true)
+                                    .junkIdentified(true)
+                                    .junkReason(junkReason)
+                                    .build();
+                            }
+                            
+                            // Process as valid company
+                            Optional<Company> companyOpt = mapJsonToCompany(companyData);
+                            if (companyOpt.isPresent()) {
+                                Company company = companyOpt.get();
+                                company.setJunkIdentified(false); // Ensure it's marked as not junk
+                                return CompanyGenerationResponse.builder()
+                                    .success(true)
+                                    .junkIdentified(false)
+                                    .company(company)
+                                    .build();
+                            } else {
+                                return CompanyGenerationResponse.builder()
+                                    .success(false)
+                                    .errorMessage("Failed to map company data")
+                                    .build();
+                            }
+                        } catch (Exception jsonParseException) {
+                            log.error("Failed to parse extracted JSON: {}", jsonText, jsonParseException);
+                            return CompanyGenerationResponse.builder()
+                                .success(false)
+                                .errorMessage("Failed to parse JSON: " + jsonParseException.getMessage())
+                                .build();
+                        }
+                    }
+                }
+            }
+            log.error("Unexpected Gemini API response structure: {}", responseBody);
+            return CompanyGenerationResponse.builder()
+                .success(false)
+                .errorMessage("Unexpected API response structure")
+                .build();
+        } catch (Exception e) {
+            log.error("Error parsing Gemini response", e);
+            return CompanyGenerationResponse.builder()
+                .success(false)
+                .errorMessage("Error parsing response: " + e.getMessage())
+                .build();
+        }
     }
 
     private Optional<Company> parseGeminiResponse(String responseBody) {
@@ -456,10 +593,11 @@ public class GeminiCompanyService {
             String specialties = getStringValue(companyData, "specialties");
             if (!containsWebSearchPlaceholder(specialties)) company.setSpecialties(specialties); else aiError = true;
             company.setAiError(aiError);
-            
+
             // Save company first to get the ID, then save company content
             company = companyRepository.save(company);
             companyContent.setCompanyId(company.getId());
+            companyContent.setContentShortened(false);
             companyContentRepository.save(companyContent);
             
             return Optional.of(company);

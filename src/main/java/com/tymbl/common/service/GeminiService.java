@@ -1,5 +1,6 @@
 package com.tymbl.common.service;
 
+import com.tymbl.common.dto.CompanyGenerationResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,6 +17,14 @@ public class GeminiService {
     
     // Company-related methods
     public Optional<com.tymbl.jobs.entity.Company> generateCompanyInfo(String companyName) {
+        CompanyGenerationResponse response = geminiCompanyService.generateCompanyInfo(companyName);
+        if (response.isSuccess() && !response.isJunkIdentified() && response.getCompany() != null) {
+            return Optional.of(response.getCompany());
+        }
+        return Optional.empty();
+    }
+    
+    public CompanyGenerationResponse generateCompanyInfoWithJunkDetection(String companyName) {
         return geminiCompanyService.generateCompanyInfo(companyName);
     }
     
@@ -82,5 +91,12 @@ public class GeminiService {
     // Similar company generation method
     public List<String> generateSimilarCompanies(String companyName, String industry, String description) {
         return aiSimilarContentFetchingService.generateSimilarCompanies(companyName, industry, description);
+    }
+    
+    // Enhanced similar company generation method with additional company details
+    public List<String> generateSimilarCompanies(String companyName, String industry, String description, 
+                                                String companySize, String specialties, String headquarters) {
+        return aiSimilarContentFetchingService.generateSimilarCompanies(companyName, industry, description, 
+                                                                        companySize, specialties, headquarters);
     }
 } 

@@ -1,5 +1,6 @@
 package com.tymbl.common.util;
 
+import com.tymbl.common.dto.CompanyGenerationResponse;
 import com.tymbl.common.service.AIService;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
@@ -38,7 +39,6 @@ public class CrawlingService {
 
     public Optional<CrawlResult> crawlCompanyPage(String companyName) {
         try {
-
             log.info("Generating company information for: {} using AI Service", companyName);
             
             // Use AI Service to generate company information based on company name
@@ -60,6 +60,47 @@ public class CrawlingService {
                 company.setCrawledData("Generated using AI Service - Company: " + companyName);
                 return Optional.of(new CrawlResult(company, "Generated using AI Service"));
             }
+        } catch (Exception e) {
+            log.error("Error generating company information for company: {}", companyName, e);
+            return Optional.empty();
+        }
+    }
+    
+    public Optional<CrawlResult> crawlCompanyPageWithJunkDetection(String companyName) {
+        try {
+            log.info("Generating company information with junk detection for: {} using AI Service", companyName);
+            
+            // Use the enhanced method that includes junk detection
+            CompanyGenerationResponse response = aiService.generateCompanyInfoWithJunkDetection(companyName);
+            
+            if (response.isSuccess()) {
+                if (response.isJunkIdentified()) {
+                    log.warn("Company '{}' identified as junk: {}", companyName, response.getJunkReason());
+                    // Create a company object marked as junk
+                    Company company = new Company();
+                    company.setName(companyName);
+                    company.setJunkIdentified(true);
+                    company.setLastCrawledAt(LocalDateTime.now());
+                    company.setCrawled(true);
+                    company.setCrawledData("JUNK COMPANY - Reason: " + response.getJunkReason());
+                    return Optional.of(new CrawlResult(company, "JUNK COMPANY - " + response.getJunkReason()));
+                } else if (response.getCompany() != null) {
+                    Company company = response.getCompany();
+                    company.setJunkIdentified(false); // Ensure it's marked as not junk
+                    log.info("Successfully generated company information for: {}", company.getName());
+                    String rawData = createRawDataSummary(company);
+                    return Optional.of(new CrawlResult(company, rawData));
+                }
+            }
+            
+            log.warn("Failed to generate company information for: {}", companyName);
+            // Fallback: create a basic company object
+            Company company = new Company();
+            company.setName(companyName);
+            company.setLastCrawledAt(LocalDateTime.now());
+            company.setCrawled(true);
+            company.setCrawledData("Generated using AI Service - Company: " + companyName);
+            return Optional.of(new CrawlResult(company, "Generated using AI Service"));
         } catch (Exception e) {
             log.error("Error generating company information for company: {}", companyName, e);
             return Optional.empty();

@@ -77,6 +77,9 @@ public class Company {
     @Column(name = "industry_processed", nullable = false)
     private boolean industryProcessed = false;
 
+    @Column(name = "junk_identified", nullable = false)
+    private boolean junkIdentified = false;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

@@ -31,6 +31,7 @@ public class CompanyService {
     private final GeminiService geminiService;
     private final IndustryRepository industryRepository;
     private final DropdownService dropdownService;
+    private final CompanyIndustryDetectionService companyIndustryDetectionService;
 
     private static final Long SUPER_ADMIN_ID = 0L;
 
@@ -186,70 +187,23 @@ public class CompanyService {
         return jobResponse;
     }
 
-    @Transactional
     public List<CompanyIndustryResponse> detectIndustriesForCompanies() {
         // Only fetch companies that haven't been processed for industry detection
         List<Company> companies = companyRepository.findByIndustryProcessedFalse();
         List<CompanyIndustryResponse> results = new ArrayList<>();
         
         for (Company company : companies) {
-            CompanyIndustryResponse response = CompanyIndustryResponse.builder()
-                .companyId(company.getId())
-                .companyName(company.getName())
-                .processed(false)
-                .build();
-            
-            try {
-                // Use Gemini AI to detect industries
-                Map<String, Object> industryData = geminiService.detectCompanyIndustries(
-                    company.getName(),
-                    company.getDescription(),
-                    company.getSpecialties()
-                );
-                
-                if (!industryData.isEmpty()) {
-                    String primaryIndustry = (String) industryData.get("primaryIndustry");
-                    @SuppressWarnings("unchecked")
-                    List<String> secondaryIndustries = (List<String>) industryData.get("secondaryIndustries");
-                    
-                    // Find primary industry ID
-                    Long primaryIndustryId = findIndustryIdByName(primaryIndustry);
-                    
-                    // Update company with detected industries and mark as processed
-                    company.setPrimaryIndustryId(primaryIndustryId);
-                    company.setSecondaryIndustries(String.join(",", secondaryIndustries != null ? secondaryIndustries : new ArrayList<>()));
-                    company.setIndustryProcessed(true);
-                    companyRepository.save(company);
-                    
-                    // Refresh company cache to ensure fresh data
-                    dropdownService.refreshCompanyList();
-                    
-                    response.setPrimaryIndustry(primaryIndustry);
-                    response.setPrimaryIndustryId(primaryIndustryId);
-                    response.setSecondaryIndustries(secondaryIndustries);
-                    response.setProcessed(true);
-                } else {
-                    response.setError("Failed to detect industries using Gemini AI");
-                }
-            } catch (Exception e) {
-                response.setError("Error processing company: " + e.getMessage());
-            }
-            
+            CompanyIndustryResponse response = companyIndustryDetectionService.processCompanyIndustryDetection(company);
             results.add(response);
         }
-        
         return results;
     }
     
-    private Long findIndustryIdByName(String industryName) {
-        if (industryName == null || industryName.trim().isEmpty()) {
-            return null;
-        }
-        
-        return industryRepository.findByName(industryName)
-            .map(industry -> industry.getId())
-            .orElse(null);
-    }
+
+
+
+    
+
     
     /**
      * Reset industry processed flag for all companies
