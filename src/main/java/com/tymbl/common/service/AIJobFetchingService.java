@@ -25,7 +25,7 @@ import org.springframework.web.client.RestTemplate;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class JobFetchingService {
+public class AIJobFetchingService {
 
     private final WebScrapingService webScrapingService;
     private final UrlContentRepository urlContentRepository;
@@ -148,41 +148,63 @@ public class JobFetchingService {
      */
     private String buildBasicJobFetchingPrompt(String companyName) {
         return String.format(
-            "Fetch only recent and authentic job listings for the company '%s'. Use real-time, verifiable data from multiple trusted sources such as:\n\n" +
-            "The company's official careers page\n" +
-            "LinkedIn\n" +
-            "Naukri.com\n" +
-            "Greenhouse, Lever, or other ATS pages\n" +
-            "Any other legitimate job portal with reliable listings\n\n" +
-            "Do NOT guess or fabricate any job. Only include roles that are publicly available right now. Return data strictly as a JSON array in the format below:\n\n" +
+            "You are an expert job researcher with access to real-time job market data. Your task is to find authentic, current job listings for '%s'.\n\n" +
+            "INSTRUCTIONS:\n" +
+            "1. Take as much time as you need to research thoroughly\n" +
+            "2. Search multiple reliable sources including:\n" +
+            "   - Company's official careers page\n" +
+            "   - LinkedIn Jobs\n" +
+            "   - Naukri.com\n" +
+            "   - Indeed\n" +
+            "   - Glassdoor\n" +
+            "   - Greenhouse, Lever, or other ATS platforms\n" +
+            "   - Any other legitimate job portals\n\n" +
+            "3. Verify each job listing is currently active and publicly available\n" +
+            "4. Extract accurate, detailed information for each job\n" +
+            "5. Do NOT guess, fabricate, or include expired/inactive jobs\n" +
+            "6. If you cannot find any current jobs, return an empty array []\n" +
+            "7. Quality over quantity - better to return fewer accurate jobs than many uncertain ones\n\n" +
+            "RESEARCH PROCESS:\n" +
+            "- Search the company name + \"careers\" or \"jobs\"\n" +
+            "- Check multiple job platforms for the same company\n" +
+            "- Verify job postings are recent (within last 30 days)\n" +
+            "- Extract complete information for each valid job found\n" +
+            "- Cross-reference information across sources when possible\n\n" +
+            "Return ONLY a valid JSON array with the exact format below. No explanations, comments, or additional text:\n\n" +
             "[\n" +
             "  {\n" +
-            "    \"title\": \"...\",                     // Job title\n" +
-            "    \"designation\": \"...\",               // Designation name (not ID)\n" +
-            "    \"description\": \"...\",               // Brief job description or summary\n" +
+            "    \"title\": \"Exact job title as posted\",\n" +
+            "    \"designation\": \"Job designation/role name\",\n" +
+            "    \"description\": \"Brief but informative job description\",\n" +
             "    \"location\": {\n" +
-            "      \"city\": \"...\",                    // City name\n" +
-            "      \"country\": \"...\"                  // Country name\n" +
+            "      \"city\": \"City name\",\n" +
+            "      \"country\": \"Country name\"\n" +
             "    },\n" +
-            "    \"job_type\": \"...\",                  // One of: \"Remote Only\", \"Onsite\", \"Hybrid\", \"Work From Office\"\n" +
+            "    \"job_type\": \"Remote Only|Onsite|Hybrid|Work From Office\",\n" +
             "    \"salary\": {\n" +
-            "      \"min\": ...,                       // Numeric value\n" +
-            "      \"max\": ...,                       // Numeric value\n" +
-            "      \"currency\": \"...\"                 // Currency code (e.g., USD, INR)\n" +
+            "      \"min\": 50000,\n" +
+            "      \"max\": 80000,\n" +
+            "      \"currency\": \"USD|INR|EUR\"\n" +
             "    },\n" +
             "    \"experience\": {\n" +
-            "      \"min\": ...,                       // Years\n" +
-            "      \"max\": ...\n" +
+            "      \"min\": 2,\n" +
+            "      \"max\": 5\n" +
             "    },\n" +
-            "    \"skills\": [\"...\", \"...\"],           // Required skills (names, not IDs)\n" +
-            "    \"tags\": [\"...\", \"...\"],             // Any relevant job tags or keywords\n" +
-            "    \"openings\": ...,                    // Number of openings\n" +
-            "    \"posted\": \"...\",                    // ISO date (e.g., \"2025-07-15\") or relative age (e.g., \"3 days ago\")\n" +
-            "    \"platform\": \"...\",                  // Source portal (e.g., \"LinkedIn\", \"Naukri\", \"Company Website\")\n" +
-            "    \"apply_url\": \"...\"                  // Direct link to apply\n" +
+            "    \"skills\": [\"Java\", \"Spring Boot\", \"React\"],\n" +
+            "    \"tags\": [\"Full-time\", \"Senior Level\", \"Tech\"],\n" +
+            "    \"openings\": 3,\n" +
+            "    \"posted\": \"2025-01-15\",\n" +
+            "    \"platform\": \"LinkedIn|Naukri|Company Website|Indeed\",\n" +
+            "    \"apply_url\": \"https://example.com/apply/job123\"\n" +
             "  }\n" +
             "]\n\n" +
-            "IMPORTANT: Return ONLY the JSON array. Do not include any explanations, comments, or additional text before or after the array.",
+            "CRITICAL REQUIREMENTS:\n" +
+            "- Return ONLY the JSON array, nothing else\n" +
+            "- Ensure all URLs are valid and accessible\n" +
+            "- Use realistic salary ranges based on market data\n" +
+            "- Include only currently active job postings\n" +
+            "- If no jobs found, return: []\n" +
+            "- Take your time to provide accurate, verified information",
             companyName
         );
     }
@@ -192,24 +214,37 @@ public class JobFetchingService {
      */
     private String buildDetailedJobPrompt(String jobTitle, String applyUrl) {
         return String.format(
-            "Get detailed information for the job '%s' from the URL '%s'. Extract comprehensive details including:\n\n" +
-            "1. Detailed job description with responsibilities\n" +
-            "2. Required qualifications and experience\n" +
-            "3. Technical skills and technologies\n" +
-            "4. Benefits and perks\n" +
-            "5. Company culture information\n" +
-            "6. Application process details\n" +
-            "7. Any additional requirements or preferences\n\n" +
-            "Return the information in JSON format:\n\n" +
+            "You are an expert job analyst. Your task is to extract comprehensive, detailed information for the job '%s' from the URL '%s'.\n\n" +
+            "INSTRUCTIONS:\n" +
+            "1. Take as much time as you need to thoroughly analyze the job posting\n" +
+            "2. Extract ALL available information from the provided URL\n" +
+            "3. Be comprehensive and detailed in your analysis\n" +
+            "4. If the URL is not accessible, use your knowledge to provide realistic job details\n" +
+            "5. Ensure all information is accurate and relevant to the job title\n" +
+            "6. Quality over quantity - provide detailed, useful information\n\n" +
+            "ANALYSIS PROCESS:\n" +
+            "- Read and understand the complete job description\n" +
+            "- Extract all responsibilities, requirements, and qualifications\n" +
+            "- Identify technical skills, technologies, and tools mentioned\n" +
+            "- Note any benefits, perks, or company culture information\n" +
+            "- Understand the application process and requirements\n" +
+            "- Look for any additional preferences or nice-to-have skills\n\n" +
+            "Return ONLY a valid JSON object with the exact format below. No explanations, comments, or additional text:\n\n" +
             "{\n" +
-            "  \"detailed_description\": \"...\",        // Comprehensive job description\n" +
-            "  \"responsibilities\": [\"...\", \"...\"],   // List of key responsibilities\n" +
-            "  \"requirements\": [\"...\", \"...\"],       // List of requirements\n" +
-            "  \"benefits\": [\"...\", \"...\"],           // List of benefits and perks\n" +
-            "  \"application_process\": \"...\",          // Application process details\n" +
-            "  \"additional_info\": \"...\"               // Any additional information\n" +
+            "  \"detailed_description\": \"Comprehensive job description with all key details\",\n" +
+            "  \"responsibilities\": [\"Key responsibility 1\", \"Key responsibility 2\", \"Key responsibility 3\"],\n" +
+            "  \"requirements\": [\"Required qualification 1\", \"Required qualification 2\", \"Required qualification 3\"],\n" +
+            "  \"benefits\": [\"Benefit 1\", \"Benefit 2\", \"Benefit 3\"],\n" +
+            "  \"application_process\": \"Detailed application process and requirements\",\n" +
+            "  \"additional_info\": \"Any additional information, preferences, or notes\"\n" +
             "}\n\n" +
-            "IMPORTANT: Return ONLY the JSON object. Do not include any explanations, comments, or additional text before or after the object.",
+            "CRITICAL REQUIREMENTS:\n" +
+            "- Return ONLY the JSON object, nothing else\n" +
+            "- Be thorough and comprehensive in your analysis\n" +
+            "- Include all relevant information found in the job posting\n" +
+            "- Use realistic and accurate information\n" +
+            "- Take your time to provide detailed, quality responses\n" +
+            "- If information is not available, use reasonable defaults based on the job title",
             jobTitle, applyUrl
         );
     }
@@ -533,7 +568,6 @@ public class JobFetchingService {
      * Build request body for Gemini API
      */
     private Map<String, Object> buildRequestBody(String prompt) {
-        Map<String, Object> requestBody = new HashMap<>();
         Map<String, Object> contents = new HashMap<>();
         Map<String, Object> part = new HashMap<>();
         part.put("text", prompt);

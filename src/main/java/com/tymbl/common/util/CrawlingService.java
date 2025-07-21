@@ -69,10 +69,10 @@ public class CrawlingService {
     public Optional<CrawlResult> crawlCompanyPageWithJunkDetection(String companyName) {
         try {
             log.info("Generating company information with junk detection for: {} using AI Service", companyName);
-            
+
             // Use the enhanced method that includes junk detection
             CompanyGenerationResponse response = aiService.generateCompanyInfoWithJunkDetection(companyName);
-            
+
             if (response.isSuccess()) {
                 if (response.isJunkIdentified()) {
                     log.warn("Company '{}' identified as junk: {}", companyName, response.getJunkReason());
@@ -92,7 +92,7 @@ public class CrawlingService {
                     return Optional.of(new CrawlResult(company, rawData));
                 }
             }
-            
+
             log.warn("Failed to generate company information for: {}", companyName);
             // Fallback: create a basic company object
             Company company = new Company();
@@ -107,26 +107,7 @@ public class CrawlingService {
         }
     }
 
-    private String extractCompanyNameFromUrl(String linkedinUrl) {
-        try {
-            // Extract company name from LinkedIn URL
-            // Example: https://www.linkedin.com/company/google -> google
-            if (linkedinUrl.contains("/company/")) {
-                String[] parts = linkedinUrl.split("/company/");
-                if (parts.length > 1) {
-                    String companyPart = parts[1];
-                    // Remove any trailing slashes or parameters
-                    companyPart = companyPart.split("/")[0];
-                    companyPart = companyPart.split("\\?")[0];
-                    return companyPart;
-                }
-            }
-            return null;
-        } catch (Exception e) {
-            log.warn("Error extracting company name from URL: {}", linkedinUrl, e);
-            return null;
-        }
-    }
+
 
     private String createRawDataSummary(Company company) {
         StringBuilder summary = new StringBuilder();

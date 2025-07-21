@@ -1,7 +1,7 @@
 package com.tymbl.jobs.controller;
 
 import com.tymbl.common.service.CityGenerationService;
-import com.tymbl.common.service.JobFetchingService;
+import com.tymbl.common.service.AIJobFetchingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
@@ -47,7 +47,7 @@ public class AIController {
     private final CompanyCrawlerService companyCrawlerService;
     private final CompanyService companyService;
     private final AIJobService aiJobService;
-    private final JobFetchingService jobFetchingService;
+    private final AIJobFetchingService AIJobFetchingService;
     private final CityGenerationService cityGenerationService;
 
     // ============================================================================
@@ -178,7 +178,7 @@ public class AIController {
             }
             
             // Fetch jobs using JobFetchingService
-            List<Map<String, Object>> jobs = jobFetchingService.fetchJobsForCompany(companyName);
+            List<Map<String, Object>> jobs = AIJobFetchingService.fetchJobsForCompany(companyName);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Job crawling process completed successfully for company: " + companyName);
@@ -237,7 +237,7 @@ public class AIController {
             log.info("Manual job crawling triggered for company: {}", companyName);
             
             // Fetch jobs using JobFetchingService
-            List<Map<String, Object>> jobs = jobFetchingService.fetchJobsForCompany(companyName);
+            List<Map<String, Object>> jobs = AIJobFetchingService.fetchJobsForCompany(companyName);
             
             Map<String, Object> response = new HashMap<>();
             response.put("message", "Job crawling process completed successfully for company: " + companyName);
@@ -865,7 +865,7 @@ public class AIController {
     })
     public ResponseEntity<Object> getAllUrlContent() {
         try {
-            List<Map<String, Object>> urlContents = jobFetchingService.getAllUrlContents().stream()
+            List<Map<String, Object>> urlContents = AIJobFetchingService.getAllUrlContents().stream()
                 .map(content -> {
                     Map<String, Object> map = new HashMap<>();
                     map.put("id", content.getId());
@@ -913,7 +913,7 @@ public class AIController {
     })
     public ResponseEntity<Object> getUrlContent(@PathVariable String url) {
         try {
-            java.util.Optional<com.tymbl.common.entity.UrlContent> urlContent = jobFetchingService.getUrlContent(url);
+            java.util.Optional<com.tymbl.common.entity.UrlContent> urlContent = AIJobFetchingService.getUrlContent(url);
             
             if (urlContent.isPresent()) {
                 com.tymbl.common.entity.UrlContent content = urlContent.get();

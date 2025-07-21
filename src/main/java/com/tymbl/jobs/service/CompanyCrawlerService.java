@@ -72,7 +72,7 @@ public class CompanyCrawlerService {
         try {
             log.info("Processing company: {} (ID: {})", company.getName(), company.getId());
             // Always fetch/enrich based on company name only
-            Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPage(company.getName());
+            Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPageWithJunkDetection(company.getName());
             if (crawlResult.isPresent()) {
                 CrawlingService.CrawlResult result = crawlResult.get();
                 Company generatedCompany = result.getCompany();
