@@ -12,6 +12,7 @@ import java.util.Optional;
 public class GeminiService {
     private final GeminiCompanyService geminiCompanyService;
     private final GeminiInterviewService geminiInterviewService;
+    private final AISimilarContentFetchingService aiSimilarContentFetchingService;
     
     // Company-related methods
     public Optional<com.tymbl.jobs.entity.Company> generateCompanyInfo(String companyName) {
@@ -75,11 +76,11 @@ public class GeminiService {
     
     // Similar designation generation method
     public List<String> generateSimilarDesignations(String designationName) {
-        return geminiInterviewService.generateSimilarDesignations(designationName);
+        return aiSimilarContentFetchingService.generateSimilarDesignations(designationName);
     }
     
     // Similar company generation method
     public List<String> generateSimilarCompanies(String companyName, String industry, String description) {
-        return geminiInterviewService.generateSimilarCompanies(companyName, industry, description);
+        return aiSimilarContentFetchingService.generateSimilarCompanies(companyName, industry, description);
     }
 } 

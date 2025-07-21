@@ -14,6 +14,7 @@ import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.CompanyContentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -750,11 +751,14 @@ public class AIJobService {
                 }
             }
             
-            // Update the original designation with similar designations
-            designation.setSimilarDesignationsByName(String.join(",", similarDesignationNames));
-            designation.setSimilarDesignationsById(String.join(",", existingDesignationIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.toList())));
+            // Convert to JSON before storing in database
+            ObjectMapper objectMapper = new ObjectMapper();
+            String similarDesignationsByNameJson = objectMapper.writeValueAsString(similarDesignationNames);
+            String similarDesignationsByIdJson = objectMapper.writeValueAsString(existingDesignationIds);
+            
+            // Update the original designation with similar designations as JSON
+            designation.setSimilarDesignationsByName(similarDesignationsByNameJson);
+            designation.setSimilarDesignationsById(similarDesignationsByIdJson);
             designation.setSimilarDesignationsProcessed(true);
             
             designationRepository.save(designation);
@@ -911,11 +915,14 @@ public class AIJobService {
                 }
             }
             
-            // Update the original company with similar companies
-            company.setSimilarCompaniesByName(String.join(",", similarCompanyNames));
-            company.setSimilarCompaniesById(String.join(",", existingCompanyIds.stream()
-                .map(String::valueOf)
-                .collect(Collectors.toList())));
+            // Convert to JSON before storing in database
+            ObjectMapper objectMapper = new ObjectMapper();
+            String similarCompaniesByNameJson = objectMapper.writeValueAsString(similarCompanyNames);
+            String similarCompaniesByIdJson = objectMapper.writeValueAsString(existingCompanyIds);
+            
+            // Update the original company with similar companies as JSON
+            company.setSimilarCompaniesByName(similarCompaniesByNameJson);
+            company.setSimilarCompaniesById(similarCompaniesByIdJson);
             company.setSimilarCompaniesProcessed(true);
             
             companyRepository.save(company);
