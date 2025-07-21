@@ -1,6 +1,7 @@
 package com.tymbl.jobs.service;
 
 import com.tymbl.common.entity.Job;
+import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
@@ -28,7 +29,9 @@ public class CompanyService {
     private final CompanyRepository companyRepository;
     private final JobRepository jobRepository;
     private final GeminiService geminiService;
+    private final IndustryRepository industryRepository;
     private final DropdownService dropdownService;
+
     private static final Long SUPER_ADMIN_ID = 0L;
 
     @Transactional
@@ -53,14 +56,13 @@ public class CompanyService {
         company.setCulture(request.getCulture());
 
         company = companyRepository.save(company);
+        
+        // Refresh company cache to ensure fresh data
+        dropdownService.refreshCompanyList();
+        
         return mapToResponse(company);
     }
 
-    public List<CompanyResponse> getAllCompanies() {
-        return companyRepository.findAll().stream()
-            .map(this::mapToResponse)
-            .collect(Collectors.toList());
-    }
 
     public CompanyResponse getCompanyById(Long id) {
         Company company = companyRepository.findById(id)
@@ -70,6 +72,7 @@ public class CompanyService {
     }
 
     public Page<CompanyResponse> getAllCompanies(Pageable pageable) {
+        // For pagination, we need to use repository directly
         Page<Company> companies = companyRepository.findAll(pageable);
         if (companies.isEmpty()) {
             throw new CompanyNotFoundException("No companies found");
@@ -83,13 +86,7 @@ public class CompanyService {
      * @return Company name or null if not found
      */
     public String getCompanyNameById(Long companyId) {
-        try {
-            return companyRepository.findById(companyId)
-                .map(Company::getName)
-                .orElse(null);
-        } catch (Exception e) {
-            return null;
-        }
+        return dropdownService.getCompanyNameById(companyId);
     }
 
     /**
@@ -99,11 +96,27 @@ public class CompanyService {
      * @return Page of companies
      */
     public Page<CompanyResponse> getCompaniesByPrimaryIndustryId(Long primaryIndustryId, Pageable pageable) {
+        // For pagination, we need to use repository directly
         Page<Company> companies = companyRepository.findByPrimaryIndustryId(primaryIndustryId, pageable);
         if (companies.isEmpty()) {
             throw new CompanyNotFoundException("No companies found for industry ID: " + primaryIndustryId);
         }
         return companies.map(this::mapToResponse);
+    }
+
+    /**
+     * Get companies by primary industry ID without pagination
+     * @param primaryIndustryId The primary industry ID
+     * @return List of companies
+     */
+    public List<CompanyResponse> getCompaniesByPrimaryIndustryId(Long primaryIndustryId) {
+        List<Company> companies = companyRepository.findByPrimaryIndustryId(primaryIndustryId);
+        if (companies.isEmpty()) {
+            throw new CompanyNotFoundException("No companies found for industry ID: " + primaryIndustryId);
+        }
+        return companies.stream()
+            .map(this::mapToResponse)
+            .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -175,7 +188,8 @@ public class CompanyService {
 
     @Transactional
     public List<CompanyIndustryResponse> detectIndustriesForCompanies() {
-        List<Company> companies = companyRepository.findAll();
+        // Only fetch companies that haven't been processed for industry detection
+        List<Company> companies = companyRepository.findByIndustryProcessedFalse();
         List<CompanyIndustryResponse> results = new ArrayList<>();
         
         for (Company company : companies) {
@@ -201,10 +215,14 @@ public class CompanyService {
                     // Find primary industry ID
                     Long primaryIndustryId = findIndustryIdByName(primaryIndustry);
                     
-                    // Update company with detected industries
+                    // Update company with detected industries and mark as processed
                     company.setPrimaryIndustryId(primaryIndustryId);
                     company.setSecondaryIndustries(String.join(",", secondaryIndustries != null ? secondaryIndustries : new ArrayList<>()));
+                    company.setIndustryProcessed(true);
                     companyRepository.save(company);
+                    
+                    // Refresh company cache to ensure fresh data
+                    dropdownService.refreshCompanyList();
                     
                     response.setPrimaryIndustry(primaryIndustry);
                     response.setPrimaryIndustryId(primaryIndustryId);
@@ -228,7 +246,20 @@ public class CompanyService {
             return null;
         }
         
-        return dropdownService.getIndustryIdByName(industryName);
+        return industryRepository.findByName(industryName)
+            .map(industry -> industry.getId())
+            .orElse(null);
+    }
+    
+    /**
+     * Reset industry processed flag for all companies
+     * This allows reprocessing of industry detection for all companies
+     */
+    @Transactional
+    public void resetIndustryProcessedFlag() {
+        companyRepository.resetIndustryProcessedFlag();
+        // Refresh company cache to ensure fresh data
+        dropdownService.refreshCompanyList();
     }
     
 

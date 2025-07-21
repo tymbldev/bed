@@ -26,6 +26,9 @@ public class Country {
     
     private String phoneCode;
     
+    @Column(name = "cities_processed", nullable = false)
+    private boolean citiesProcessed = false;
+    
     public Country(String name, String code) {
         this.name = name;
         this.code = code;

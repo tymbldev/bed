@@ -1,5 +1,6 @@
 package com.tymbl.jobs.controller;
 
+import com.tymbl.common.service.CityGenerationService;
 import com.tymbl.common.service.JobFetchingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
@@ -47,6 +48,7 @@ public class AIController {
     private final CompanyService companyService;
     private final AIJobService aiJobService;
     private final JobFetchingService jobFetchingService;
+    private final CityGenerationService cityGenerationService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -254,7 +256,7 @@ public class AIController {
     }
 
     @PostMapping("/detect-industries")
-    @Operation(summary = "Detect industries for all companies", description = "Detects primary and secondary industries for all companies using AI or manual detection")
+    @Operation(summary = "Detect industries for all unprocessed companies", description = "Detects primary and secondary industries for companies that haven't been processed yet using AI. Only processes companies where industry_processed = false.")
     @ApiResponses(value = {
         @ApiResponse(
             responseCode = "200",
@@ -294,6 +296,38 @@ public class AIController {
         } catch (Exception e) {
             log.error("Error detecting industries for companies", e);
             return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @PostMapping("/detect-industries/reset")
+    @Operation(summary = "Reset industry processed flag for all companies", description = "Resets the industry_processed flag to false for all companies, allowing reprocessing of industry detection")
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Industry processed flag reset successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"message\": \"Industry processed flag reset successfully for all companies\",\n" +
+                        "  \"status\": \"SUCCESS\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> resetIndustryProcessedFlag() {
+        try {
+            companyService.resetIndustryProcessedFlag();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Industry processed flag reset successfully for all companies");
+            response.put("status", "SUCCESS");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error resetting industry processed flag", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error resetting industry processed flag: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
@@ -905,6 +939,140 @@ public class AIController {
             response.put("message", "Error retrieving URL content: " + e.getMessage());
             response.put("status", "ERROR");
             return ResponseEntity.internalServerError().body(response);
+        }
+    }
+
+    // ============================================================================
+    // CITY GENERATION ENDPOINTS
+    // ============================================================================
+
+    @PostMapping("/cities/generate-for-countries")
+    @Operation(
+        summary = "Generate cities for all unprocessed countries using GenAI",
+        description = "Uses Gemini AI to generate major cities for countries that haven't been processed yet. Only processes countries where cities_processed = false. Generates 15-25 major cities per country focusing on business, technology, and employment opportunities. Each country is processed in its own transaction for data persistence."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Cities generated and saved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"totalCountries\": 10,\n" +
+                        "  \"totalCitiesGenerated\": 200,\n" +
+                        "  \"totalErrors\": 0,\n" +
+                        "  \"countryResults\": [\n" +
+                        "    {\n" +
+                        "      \"countryId\": 1,\n" +
+                        "      \"countryName\": \"United States\",\n" +
+                        "      \"countryCode\": \"US\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"citiesGenerated\": 20,\n" +
+                        "      \"citiesSaved\": 18,\n" +
+                        "      \"cities\": [\"New York\", \"San Francisco\", \"Los Angeles\", \"Chicago\"]\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"City generation completed for unprocessed countries\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateCitiesForCountries() {
+        try {
+            Map<String, Object> result = cityGenerationService.generateCitiesForAllCountries();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating cities for countries", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating cities for countries: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/cities/generate-for-country/{countryId}")
+    @Operation(
+        summary = "Generate cities for a specific country using GenAI",
+        description = "Uses Gemini AI to generate major cities for a specific country. Only processes if the country hasn't been processed yet (cities_processed = false). Generates 15-25 major cities focusing on business, technology, and employment opportunities."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Cities generated and saved successfully for the country",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"countryId\": 1,\n" +
+                        "  \"countryName\": \"United States\",\n" +
+                        "  \"citiesGenerated\": 20,\n" +
+                        "  \"citiesSaved\": 18,\n" +
+                        "  \"cities\": [\"New York\", \"San Francisco\", \"Los Angeles\", \"Chicago\"]\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Country not found"),
+        @ApiResponse(responseCode = "409", description = "Country already processed"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateCitiesForCountry(@PathVariable Long countryId) {
+        try {
+            Map<String, Object> result = cityGenerationService.generateCitiesForSingleCountry(countryId);
+            
+            if ((Boolean) result.get("success")) {
+                return ResponseEntity.ok(result);
+            } else {
+                String error = (String) result.get("error");
+                if (error.contains("Country not found")) {
+                    return ResponseEntity.notFound().build();
+                } else if (error.contains("already been processed")) {
+                    return ResponseEntity.status(409).body(result);
+                } else {
+                    return ResponseEntity.internalServerError().body(result);
+                }
+            }
+        } catch (Exception e) {
+            log.error("Error generating cities for country ID: {}", countryId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating cities for country: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/cities/reset-processed-flag")
+    @Operation(
+        summary = "Reset cities processed flag for all countries",
+        description = "Resets the cities_processed flag to false for all countries, allowing reprocessing of city generation"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Cities processed flag reset successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"message\": \"Cities processed flag reset successfully for all countries\",\n" +
+                        "  \"status\": \"SUCCESS\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> resetCitiesProcessedFlag() {
+        try {
+            cityGenerationService.resetCitiesProcessedFlag();
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Cities processed flag reset successfully for all countries");
+            response.put("status", "SUCCESS");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            log.error("Error resetting cities processed flag", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error resetting cities processed flag: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 } 

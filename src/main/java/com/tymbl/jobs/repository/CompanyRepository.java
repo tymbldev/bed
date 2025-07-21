@@ -31,10 +31,17 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Find companies that haven't been processed for similar company generation
     List<Company> findBySimilarCompaniesProcessedFalse();
     
+    // Find companies that haven't been processed for industry detection
+    List<Company> findByIndustryProcessedFalse();
+    
     // Find companies that haven't been processed for similar company generation and are enabled
     @Query("SELECT c FROM Company c WHERE c.similarCompaniesProcessed = false AND c.primaryIndustryId IS NOT NULL")
     List<Company> findUnprocessedCompaniesWithIndustry();
     
     // Find companies by primary industry
     List<Company> findByPrimaryIndustryIdAndIdNot(Long primaryIndustryId, Long companyId);
+    
+    // Reset industry processed flag for all companies (useful for reprocessing)
+    @Query("UPDATE Company c SET c.industryProcessed = false")
+    void resetIndustryProcessedFlag();
 } 

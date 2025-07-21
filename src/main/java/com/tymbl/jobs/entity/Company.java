@@ -74,6 +74,9 @@ public class Company {
     @Column(name = "similar_companies_processed", nullable = false)
     private boolean similarCompaniesProcessed = false;
 
+    @Column(name = "industry_processed", nullable = false)
+    private boolean industryProcessed = false;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
