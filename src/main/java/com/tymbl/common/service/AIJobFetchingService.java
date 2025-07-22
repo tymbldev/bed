@@ -163,12 +163,11 @@ public class AIJobFetchingService {
             "4. Extract accurate, detailed information for each job\n" +
             "5. Do NOT guess, fabricate, or include expired/inactive jobs\n" +
             "6. If you cannot find any current jobs, return an empty array []\n" +
-            "7. Quality over quantity - better to return fewer accurate jobs than many uncertain ones\n\n" +
+            "7. Quality - Make sure all jobs are authentic\n" +
             "RESEARCH PROCESS:\n" +
             "- Search the company name + \"careers\" or \"jobs\"\n" +
             "- Check multiple job platforms for the same company\n" +
             "- Verify job postings are recent (within last 30 days)\n" +
-            "- Extract complete information for each valid job found\n" +
             "- Cross-reference information across sources when possible\n\n" +
             "Return ONLY a valid JSON array with the exact format below. No explanations, comments, or additional text:\n\n" +
             "[\n" +
@@ -201,7 +200,6 @@ public class AIJobFetchingService {
             "CRITICAL REQUIREMENTS:\n" +
             "- Return ONLY the JSON array, nothing else\n" +
             "- Ensure all URLs are valid and accessible\n" +
-            "- Use realistic salary ranges based on market data\n" +
             "- Include only currently active job postings\n" +
             "- If no jobs found, return: []\n" +
             "- Take your time to provide accurate, verified information",
