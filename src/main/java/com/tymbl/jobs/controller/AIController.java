@@ -6,6 +6,8 @@ import com.tymbl.common.service.ProcessedNameService;
 import com.tymbl.common.service.DesignationGenerationService;
 import com.tymbl.common.service.CompanyShortnameService;
 import com.tymbl.common.service.SecondaryIndustryMappingService;
+import com.tymbl.common.service.GeminiService;
+import com.tymbl.jobs.service.CompanyCleanupService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
@@ -57,6 +59,8 @@ public class AIController {
     private final DesignationGenerationService designationGenerationService;
     private final CompanyShortnameService companyShortnameService;
     private final SecondaryIndustryMappingService secondaryIndustryMappingService;
+    private final GeminiService geminiService;
+    private final CompanyCleanupService companyCleanupService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -1618,33 +1622,72 @@ public class AIController {
     @PostMapping("/secondary-industries/reset-processed-flag")
     @Operation(
         summary = "Reset processed flag for all secondary industry mappings",
-        description = "Resets the processed flag to false for all secondary industry mappings, allowing reprocessing of industry mapping"
+        description = "Resets the processed flag for all secondary industry mappings to allow reprocessing"
     )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Processed flag reset successfully",
-            content = @Content(
-                examples = @ExampleObject(
-                    value = "{\n" +
-                        "  \"success\": true,\n" +
-                        "  \"message\": \"Processed flag reset successfully for all secondary industry mappings\"\n" +
-                        "}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
     public ResponseEntity<Map<String, Object>> resetSecondaryIndustryProcessedFlag() {
-        try {
-            log.info("Resetting processed flag for all secondary industry mappings");
-            Map<String, Object> result = secondaryIndustryMappingService.resetProcessedFlag();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Error resetting secondary industry processed flag", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error resetting secondary industry processed flag: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(errorResponse);
-        }
+        log.info("Resetting secondary industry processed flag");
+        Map<String, Object> result = secondaryIndustryMappingService.resetProcessedFlag();
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Process all companies for cleanup (remove junk/product companies)
+     */
+    @PostMapping("/companies/cleanup-all")
+    @Operation(summary = "Process all companies for cleanup",
+            description = "Processes all unprocessed companies to identify and clean up junk/product entries using GenAI")
+    public ResponseEntity<Map<String, Object>> processAllCompaniesForCleanup() {
+        log.info("Starting company cleanup process for all companies");
+        Map<String, Object> result = companyCleanupService.processAllCompanies();
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Process a specific company for cleanup
+     */
+    @PostMapping("/companies/cleanup/{companyName}")
+    @Operation(summary = "Process specific company for cleanup",
+            description = "Processes a specific company to identify if it's a junk/product entry and clean it up using GenAI")
+    public ResponseEntity<Map<String, Object>> processCompanyForCleanup(
+            @PathVariable String companyName) {
+        log.info("Processing company for cleanup: {}", companyName);
+        Map<String, Object> result = companyCleanupService.processCompanyByName(companyName);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Reset cleanup processed flag for all companies
+     */
+    @PostMapping("/companies/cleanup/reset-processed-flag")
+    @Operation(summary = "Reset cleanup processed flag for all companies",
+            description = "Resets the cleanup processed flag for all companies to allow reprocessing")
+    public ResponseEntity<Map<String, Object>> resetCompanyCleanupProcessedFlag() {
+        log.info("Resetting company cleanup processed flag");
+        Map<String, Object> result = companyCleanupService.resetCleanupProcessedFlag();
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Get all junk-marked companies for manual review
+     */
+    @GetMapping("/companies/cleanup/junk-marked")
+    @Operation(summary = "Get all junk-marked companies for review",
+            description = "Retrieves all companies marked as junk for manual review before deletion")
+    public ResponseEntity<Map<String, Object>> getJunkMarkedCompanies() {
+        log.info("Retrieving junk-marked companies for review");
+        Map<String, Object> result = companyCleanupService.getJunkMarkedCompanies();
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * Clear junk flag for a specific company
+     */
+    @PostMapping("/companies/cleanup/clear-junk-flag/{companyId}")
+    @Operation(summary = "Clear junk flag for a company",
+            description = "Removes the junk flag from a specific company, effectively undoing the junk marking")
+    public ResponseEntity<Map<String, Object>> clearJunkFlag(@PathVariable Long companyId) {
+        log.info("Clearing junk flag for company ID: {}", companyId);
+        Map<String, Object> result = companyCleanupService.clearJunkFlag(companyId);
+        return ResponseEntity.ok(result);
     }
 } 

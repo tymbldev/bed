@@ -54,4 +54,10 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Reset industry processed flag for all companies (useful for reprocessing)
     @Query("UPDATE Company c SET c.industryProcessed = false")
     void resetIndustryProcessedFlag();
+
+    List<Company> findByShortnameProcessedFalse();
+
+    List<Company> findByCleanupProcessedFalse();
+
+    List<Company> findByIsJunkTrue();
 } 

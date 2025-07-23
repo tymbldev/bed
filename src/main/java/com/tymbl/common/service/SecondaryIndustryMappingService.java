@@ -140,10 +140,10 @@ public class SecondaryIndustryMappingService {
                 SecondaryIndustryMapping existing = secondaryIndustryMappingRepository.findByName(industryName).orElse(null);
                 result.put("success", false);
                 result.put("message", "Already processed");
-                result.put("existingMapping", existing != null ? Map.of(
-                    "mappedName", existing.getMappedName(),
-                    "mappedId", existing.getMappedId()
-                ) : null);
+                result.put("existingMapping", existing != null ? new HashMap<String, Object>() {{
+                    put("mappedName", existing.getMappedName());
+                    put("mappedId", existing.getMappedId());
+                }} : null);
                 return result;
             }
             

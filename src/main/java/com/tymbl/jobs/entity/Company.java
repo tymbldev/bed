@@ -86,6 +86,24 @@ public class Company {
     @Column(name = "junk_identified", nullable = false)
     private boolean junkIdentified = false;
 
+    @Column(name = "shortname")
+    private String shortname;
+
+    @Column(name = "cleanup_processed", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean cleanupProcessed = false;
+
+    @Column(name = "cleanup_processed_at")
+    private LocalDateTime cleanupProcessedAt;
+
+    @Column(name = "is_junk", columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private Boolean isJunk = false;
+
+    @Column(name = "junk_reason", columnDefinition = "TEXT")
+    private String junkReason;
+
+    @Column(name = "parent_company_name")
+    private String parentCompanyName;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
