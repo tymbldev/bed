@@ -2,6 +2,10 @@ package com.tymbl.jobs.controller;
 
 import com.tymbl.common.service.CityGenerationService;
 import com.tymbl.common.service.AIJobFetchingService;
+import com.tymbl.common.service.ProcessedNameService;
+import com.tymbl.common.service.DesignationGenerationService;
+import com.tymbl.common.service.CompanyShortnameService;
+import com.tymbl.common.service.SecondaryIndustryMappingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
@@ -49,6 +53,10 @@ public class AIController {
     private final AIJobService aiJobService;
     private final AIJobFetchingService AIJobFetchingService;
     private final CityGenerationService cityGenerationService;
+    private final ProcessedNameService processedNameService;
+    private final DesignationGenerationService designationGenerationService;
+    private final CompanyShortnameService companyShortnameService;
+    private final SecondaryIndustryMappingService secondaryIndustryMappingService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
@@ -1072,6 +1080,570 @@ public class AIController {
             log.error("Error resetting cities processed flag", e);
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Error resetting cities processed flag: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // ============================================================================
+    // PROCESSED NAME GENERATION ENDPOINTS
+    // ============================================================================
+
+    @PostMapping("/processed-names/generate-all")
+    @Operation(
+        summary = "Generate processed names for all unprocessed entities",
+        description = "Generates processed names for countries, cities, companies, and designations that haven't been processed yet. Processed names remove special characters and common suffixes to ensure uniqueness and deduplication."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed names generated successfully for all entities",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"message\": \"Processed name generation completed\",\n" +
+                        "  \"countries\": {\n" +
+                        "    \"total\": 50,\n" +
+                        "    \"processed\": 48,\n" +
+                        "    \"errors\": 2,\n" +
+                        "    \"success\": true\n" +
+                        "  },\n" +
+                        "  \"cities\": {\n" +
+                        "    \"total\": 200,\n" +
+                        "    \"processed\": 195,\n" +
+                        "    \"errors\": 5,\n" +
+                        "    \"success\": true\n" +
+                        "  },\n" +
+                        "  \"companies\": {\n" +
+                        "    \"total\": 100,\n" +
+                        "    \"processed\": 95,\n" +
+                        "    \"errors\": 5,\n" +
+                        "    \"success\": true\n" +
+                        "  },\n" +
+                        "  \"designations\": {\n" +
+                        "    \"total\": 80,\n" +
+                        "    \"processed\": 78,\n" +
+                        "    \"errors\": 2,\n" +
+                        "    \"success\": true\n" +
+                        "  }\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateProcessedNamesForAllEntities() {
+        try {
+            log.info("Starting processed name generation for all entities");
+            Map<String, Object> result = processedNameService.generateProcessedNamesForAllEntities();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating processed names for all entities", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating processed names: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/processed-names/generate-countries")
+    @Operation(
+        summary = "Generate processed names for unprocessed countries",
+        description = "Generates processed names for countries that haven't been processed yet. Processed names remove special characters and common suffixes to ensure uniqueness."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed names generated successfully for countries",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total\": 50,\n" +
+                        "  \"processed\": 48,\n" +
+                        "  \"errors\": 2,\n" +
+                        "  \"success\": true\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateProcessedNamesForCountries() {
+        try {
+            log.info("Starting processed name generation for countries");
+            Map<String, Object> result = processedNameService.generateProcessedNamesForCountries();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating processed names for countries", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating processed names for countries: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/processed-names/generate-cities")
+    @Operation(
+        summary = "Generate processed names for unprocessed cities",
+        description = "Generates processed names for cities that haven't been processed yet. Processed names remove special characters and common suffixes to ensure uniqueness."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed names generated successfully for cities",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total\": 200,\n" +
+                        "  \"processed\": 195,\n" +
+                        "  \"errors\": 5,\n" +
+                        "  \"success\": true\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateProcessedNamesForCities() {
+        try {
+            log.info("Starting processed name generation for cities");
+            Map<String, Object> result = processedNameService.generateProcessedNamesForCities();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating processed names for cities", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating processed names for cities: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/processed-names/generate-companies")
+    @Operation(
+        summary = "Generate processed names for unprocessed companies",
+        description = "Generates processed names for companies that haven't been processed yet. Processed names remove special characters and common suffixes like .com, pvt ltd, etc. to ensure uniqueness."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed names generated successfully for companies",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total\": 100,\n" +
+                        "  \"processed\": 95,\n" +
+                        "  \"errors\": 5,\n" +
+                        "  \"success\": true\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateProcessedNamesForCompanies() {
+        try {
+            log.info("Starting processed name generation for companies");
+            Map<String, Object> result = processedNameService.generateProcessedNamesForCompanies();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating processed names for companies", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating processed names for companies: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/processed-names/generate-designations")
+    @Operation(
+        summary = "Generate processed names for unprocessed designations",
+        description = "Generates processed names for designations that haven't been processed yet. Processed names remove special characters and common suffixes to ensure uniqueness."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed names generated successfully for designations",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"total\": 80,\n" +
+                        "  \"processed\": 78,\n" +
+                        "  \"errors\": 2,\n" +
+                        "  \"success\": true\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateProcessedNamesForDesignations() {
+        try {
+            log.info("Starting processed name generation for designations");
+            Map<String, Object> result = processedNameService.generateProcessedNamesForDesignations();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating processed names for designations", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating processed names for designations: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/processed-names/reset")
+    @Operation(
+        summary = "Reset processed name generation flag for all entities",
+        description = "Resets the processed_name_generated flag to false for all countries, cities, companies, and designations, allowing reprocessing of processed name generation"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed name generation flags reset successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"message\": \"Processed name generation flags reset successfully for all entities\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> resetProcessedNameGenerationFlag() {
+        try {
+            log.info("Resetting processed name generation flags for all entities");
+            Map<String, Object> result = processedNameService.resetProcessedNameGenerationFlag();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error resetting processed name generation flags", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error resetting processed name generation flags: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // ============================================================================
+    // DESIGNATION GENERATION ENDPOINTS
+    // ============================================================================
+
+    @PostMapping("/designations/generate-for-departments")
+    @Operation(
+        summary = "Generate designations for all departments using GenAI",
+        description = "Uses Gemini AI to generate comprehensive job designations for all departments in the database. Generates 20-35 valid designations per department covering entry-level, mid-level, senior-level, and executive positions across different specializations and career paths."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Designations generated and saved successfully for all departments",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"totalDepartments\": 35,\n" +
+                        "  \"totalDesignationsGenerated\": 875,\n" +
+                        "  \"totalErrors\": 0,\n" +
+                        "  \"departmentResults\": [\n" +
+                        "    {\n" +
+                        "      \"departmentId\": 1,\n" +
+                        "      \"departmentName\": \"Engineering\",\n" +
+                        "      \"departmentDescription\": \"Software development and engineering teams\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"designationsGenerated\": 25,\n" +
+                        "      \"designationsSaved\": 23,\n" +
+                        "      \"designations\": [\"Software Engineer\", \"Senior Software Engineer\", \"Lead Engineer\", \"Engineering Manager\", \"CTO\"]\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"departmentId\": 2,\n" +
+                        "      \"departmentName\": \"Product\",\n" +
+                        "      \"departmentDescription\": \"Product management and product strategy\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"designationsGenerated\": 28,\n" +
+                        "      \"designationsSaved\": 26,\n" +
+                        "      \"designations\": [\"Product Manager\", \"Senior Product Manager\", \"Product Director\", \"VP of Product\", \"CPO\"]\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Designation generation completed for all departments\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateDesignationsForDepartments() {
+        try {
+            log.info("Starting designation generation for all departments");
+            Map<String, Object> result = designationGenerationService.generateDesignationsForAllDepartments();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating designations for departments", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating designations for departments: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/designations/generate-for-department/{departmentId}")
+    @Operation(
+        summary = "Generate designations for a specific department using GenAI",
+        description = "Uses Gemini AI to generate comprehensive job designations for a specific department. Generates 20-35 valid designations covering entry-level, mid-level, senior-level, and executive positions across different specializations."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Designations generated and saved successfully for the department",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"departmentId\": 1,\n" +
+                        "  \"departmentName\": \"Engineering\",\n" +
+                        "  \"designationsGenerated\": 25,\n" +
+                        "  \"designationsSaved\": 23,\n" +
+                        "  \"designations\": [\"Software Engineer\", \"Senior Software Engineer\", \"Lead Engineer\", \"Engineering Manager\", \"CTO\"]\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "404", description = "Department not found"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateDesignationsForDepartment(@PathVariable Long departmentId) {
+        try {
+            log.info("Starting designation generation for department ID: {}", departmentId);
+            Map<String, Object> result = designationGenerationService.generateDesignationsForSingleDepartment(departmentId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating designations for department ID: {}", departmentId, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating designations for department: " + e.getMessage());
+            errorResponse.put("departmentId", departmentId);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // ============================================================================
+    // COMPANY SHORTNAME GENERATION ENDPOINTS
+    // ============================================================================
+
+    @PostMapping("/companies/shortnames/generate-for-all")
+    @Operation(
+        summary = "Generate shortnames for all companies using GenAI",
+        description = "Uses Gemini AI to generate commonly used shortnames or nicknames for all companies in the database. Examples: 'Eternal' → 'Zomato', 'International Business Machines' → 'IBM', 'Microsoft' → 'MS'."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Company shortnames generated successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"totalCompanies\": 100,\n" +
+                        "  \"totalShortnamesGenerated\": 85,\n" +
+                        "  \"totalErrors\": 15,\n" +
+                        "  \"companyResults\": [\n" +
+                        "    {\n" +
+                        "      \"companyName\": \"Eternal\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"shortname\": \"Zomato\"\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"companyName\": \"International Business Machines\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"shortname\": \"IBM\"\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"companyName\": \"Google\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"shortname\": \"Google\"\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Company shortname generation completed\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateShortnamesForAllCompanies() {
+        try {
+            log.info("Starting shortname generation for all companies");
+            
+            // Get all company names from the database
+            List<String> companyNames = companyService.getAllCompanyNames();
+            
+            Map<String, Object> result = companyShortnameService.generateShortnamesForAllCompanies(companyNames);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating shortnames for all companies", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating shortnames for all companies: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/companies/shortnames/generate-for-company/{companyName}")
+    @Operation(
+        summary = "Generate shortname for a specific company using GenAI",
+        description = "Uses Gemini AI to generate the commonly used shortname or nickname for a specific company. Examples: 'Eternal' → 'Zomato', 'International Business Machines' → 'IBM'."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Company shortname generated successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"companyName\": \"Eternal\",\n" +
+                        "  \"shortname\": \"Zomato\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> generateShortnameForCompany(@PathVariable String companyName) {
+        try {
+            log.info("Starting shortname generation for company: {}", companyName);
+            Map<String, Object> result = companyShortnameService.generateShortnameForSingleCompany(companyName);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error generating shortname for company: {}", companyName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating shortname for company: " + e.getMessage());
+            errorResponse.put("companyName", companyName);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    // ============================================================================
+    // SECONDARY INDUSTRY MAPPING ENDPOINTS
+    // ============================================================================
+
+    @PostMapping("/secondary-industries/map-all")
+    @Operation(
+        summary = "Process and map all secondary industries using GenAI",
+        description = "Extracts all unique secondary industries from companies table, uses Gemini AI to create standardized mappings, and stores them in a separate mapping table. Groups similar variations (e.g., 'Fortune 500', 'Fortune500', 'Fortune 500 Top') under the same parent category."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Secondary industry mapping completed successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"totalIndustries\": 150,\n" +
+                        "  \"totalProcessed\": 120,\n" +
+                        "  \"totalErrors\": 5,\n" +
+                        "  \"totalSkipped\": 25,\n" +
+                        "  \"industryResults\": [\n" +
+                        "    {\n" +
+                        "      \"industryName\": \"Fortune 500\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"mappedName\": \"Fortune 500\",\n" +
+                        "      \"mappedId\": 1\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"industryName\": \"Fortune500\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"mappedName\": \"Fortune 500\",\n" +
+                        "      \"mappedId\": 1\n" +
+                        "    },\n" +
+                        "    {\n" +
+                        "      \"industryName\": \"Tech\",\n" +
+                        "      \"success\": true,\n" +
+                        "      \"mappedName\": \"Technology\",\n" +
+                        "      \"mappedId\": 2\n" +
+                        "    }\n" +
+                        "  ],\n" +
+                        "  \"message\": \"Secondary industry processing completed\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> processSecondaryIndustries() {
+        try {
+            log.info("Starting secondary industry mapping for all industries");
+            Map<String, Object> result = secondaryIndustryMappingService.processSecondaryIndustries();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error processing secondary industries", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error processing secondary industries: " + e.getMessage());
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/secondary-industries/map-industry/{industryName}")
+    @Operation(
+        summary = "Process and map a specific secondary industry using GenAI",
+        description = "Uses Gemini AI to create a standardized mapping for a specific secondary industry. Groups similar variations under the same parent category."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Secondary industry mapping completed successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"industryName\": \"Fortune 500\",\n" +
+                        "  \"mappedName\": \"Fortune 500\",\n" +
+                        "  \"mappedId\": 1\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "409", description = "Industry already processed"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> processSingleSecondaryIndustry(@PathVariable String industryName) {
+        try {
+            log.info("Starting secondary industry mapping for industry: {}", industryName);
+            Map<String, Object> result = secondaryIndustryMappingService.processSingleSecondaryIndustry(industryName);
+            
+            if ((Boolean) result.get("success")) {
+                return ResponseEntity.ok(result);
+            } else if (result.containsKey("existingMapping")) {
+                return ResponseEntity.status(409).body(result);
+            } else {
+                return ResponseEntity.internalServerError().body(result);
+            }
+        } catch (Exception e) {
+            log.error("Error processing secondary industry: {}", industryName, e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error processing secondary industry: " + e.getMessage());
+            errorResponse.put("industryName", industryName);
+            return ResponseEntity.internalServerError().body(errorResponse);
+        }
+    }
+
+    @PostMapping("/secondary-industries/reset-processed-flag")
+    @Operation(
+        summary = "Reset processed flag for all secondary industry mappings",
+        description = "Resets the processed flag to false for all secondary industry mappings, allowing reprocessing of industry mapping"
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Processed flag reset successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\n" +
+                        "  \"success\": true,\n" +
+                        "  \"message\": \"Processed flag reset successfully for all secondary industry mappings\"\n" +
+                        "}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> resetSecondaryIndustryProcessedFlag() {
+        try {
+            log.info("Resetting processed flag for all secondary industry mappings");
+            Map<String, Object> result = secondaryIndustryMappingService.resetProcessedFlag();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error resetting secondary industry processed flag", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error resetting secondary industry processed flag: " + e.getMessage());
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }

@@ -125,6 +125,17 @@ public class CompanyService {
         return companyRepository.findAll();
     }
 
+    /**
+     * Get all company names from the database
+     * @return List of company names
+     */
+    @Transactional(readOnly = true)
+    public List<String> getAllCompanyNames() {
+        return companyRepository.findAll().stream()
+            .map(Company::getName)
+            .collect(Collectors.toList());
+    }
+
     private CompanyResponse mapToResponse(Company company) {
         List<Job> jobs = jobRepository.findByCompanyId(company.getId());
         return mapToResponse(company, jobs);

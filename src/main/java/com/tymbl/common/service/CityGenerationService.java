@@ -173,19 +173,83 @@ public class CityGenerationService {
 
     private String buildCityGenerationPrompt(String countryName) {
         return String.format(
-            "You are a geographic data expert helping to populate a database with major cities for countries. " +
-            "Given the country '%s', provide 15-25 major cities that are important for business, technology, and employment opportunities. " +
-            "Consider factors like:\n" +
-            "- Major business and financial centers\n" +
-            "- Technology hubs and startup ecosystems\n" +
-            "- Large metropolitan areas with significant job markets\n" +
-            "- Cities with major universities and research institutions\n" +
-            "- International business centers\n" +
-            "- Cities with significant tech companies or headquarters\n\n" +
+            "You are a comprehensive geographic data expert helping to populate a database with major cities for countries. " +
+            "Given the country '%s', provide 25-40 major cities that are important for business, technology, employment, education, and cultural significance. " +
+            "Your goal is to provide COMPREHENSIVE coverage across all regions and sectors.\n\n" +
+            "INCLUSION CRITERIA - Include cities that are:\n" +
+            "1. MAJOR BUSINESS & FINANCIAL CENTERS:\n" +
+            "   - Capital cities and major administrative centers\n" +
+            "   - Financial districts and banking hubs\n" +
+            "   - Corporate headquarters locations\n" +
+            "   - Stock exchanges and trading centers\n\n" +
+            "2. TECHNOLOGY & INNOVATION HUBS:\n" +
+            "   - Silicon Valley equivalents and tech clusters\n" +
+            "   - Startup ecosystems and incubators\n" +
+            "   - Research and development centers\n" +
+            "   - Digital transformation hubs\n\n" +
+            "3. EDUCATION & RESEARCH CENTERS:\n" +
+            "   - University towns and academic hubs\n" +
+            "   - Research institutions and laboratories\n" +
+            "   - Medical centers and hospitals\n" +
+            "   - Innovation districts\n\n" +
+            "4. MAJOR METROPOLITAN AREAS:\n" +
+            "   - Population centers with 500K+ residents\n" +
+            "   - Economic powerhouses and GDP contributors\n" +
+            "   - Transportation and logistics hubs\n" +
+            "   - Cultural and entertainment centers\n\n" +
+            "5. INDUSTRIAL & MANUFACTURING CENTERS:\n" +
+            "   - Manufacturing hubs and industrial zones\n" +
+            "   - Port cities and trade centers\n" +
+            "   - Energy and resource centers\n" +
+            "   - Automotive and aerospace clusters\n\n" +
+            "6. EMERGING & GROWTH CITIES:\n" +
+            "   - Fast-growing cities and emerging markets\n" +
+            "   - Secondary cities with strong potential\n" +
+            "   - Regional economic centers\n" +
+            "   - New technology adoption centers\n\n" +
+            "7. TOURISM & HOSPITALITY CENTERS:\n" +
+            "   - Major tourist destinations\n" +
+            "   - Hospitality and service industry hubs\n" +
+            "   - Cultural and historical centers\n" +
+            "   - Conference and event destinations\n\n" +
+            "8. HEALTHCARE & BIOTECH CENTERS:\n" +
+            "   - Medical research and biotechnology hubs\n" +
+            "   - Pharmaceutical and healthcare innovation centers\n" +
+            "   - Medical tourism destinations\n" +
+            "   - Health tech startups and companies\n\n" +
+            "GEOGRAPHIC DIVERSITY REQUIREMENTS:\n" +
+            "- Include cities from ALL major regions of the country\n" +
+            "- Balance between coastal and inland cities\n" +
+            "- Include both northern and southern regions\n" +
+            "- Cover eastern and western areas\n" +
+            "- Include both urban and suburban centers\n" +
+            "- Consider cities in different time zones (if applicable)\n\n" +
+            "SIZE DIVERSITY:\n" +
+            "- Include mega-cities (10M+ population)\n" +
+            "- Include large cities (1M-10M population)\n" +
+            "- Include medium cities (500K-1M population)\n" +
+            "- Include some smaller but significant cities (100K-500K population)\n\n" +
+            "INDUSTRY DIVERSITY:\n" +
+            "- Technology and software companies\n" +
+            "- Financial services and banking\n" +
+            "- Manufacturing and industrial\n" +
+            "- Healthcare and biotechnology\n" +
+            "- Education and research\n" +
+            "- Tourism and hospitality\n" +
+            "- Retail and e-commerce\n" +
+            "- Transportation and logistics\n" +
+            "- Energy and utilities\n" +
+            "- Media and entertainment\n\n" +
+            "QUALITY REQUIREMENTS:\n" +
+            "- Use official city names (not nicknames or abbreviations)\n" +
+            "- Ensure cities are currently active and relevant\n" +
+            "- Prefer cities with strong job markets and opportunities\n" +
+            "- Include cities with international connections\n" +
+            "- Consider cities with good quality of life indicators\n\n" +
             "Return ONLY the city names separated by '||||' (4 pipe characters). " +
             "Do not include any explanations, comments, or additional text. " +
             "Example format: City 1||||City 2||||City 3\n\n" +
-            "Major cities for '%s':",
+            "Comprehensive list of major cities for '%s':",
             countryName, countryName
         );
     }

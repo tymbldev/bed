@@ -3,8 +3,9 @@
     "_postman_id": "tymbl-collection-001",
     "name": "Tymbl API Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Comprehensive Postman collection for Tymbl backend API. All endpoints grouped by controller with detailed request/response examples.\n\nUpdated with comprehensive interview question endpoints",
-    "updatedAt": "2025-07-13T09:34:23.730888Z"
+    "description": "Comprehensive Postman collection for Tymbl backend API. All endpoints grouped by controller with detailed request/response examples.\n\nUpdated with comprehensive interview question endpoints\n\nUpdated with processed name generation endpoints\n\nUpdated with processed name generation endpoints\n\nUpdated with designation generation endpoints\n\nUpdated with Company Shortname Generation endpoints\n\nUpdated with Secondary Industry Mapping endpoints\n\nUpdated with Secondary Industry Mapping endpoints",
+    "updatedAt": "2025-07-23T16:09:23.097699",
+    "updated": "2025-07-23T15:09:00.513255"
   },
   "variable": [
     {
@@ -3854,18 +3855,34 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/companies",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "companies" ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "companies"
+                  ]
                 },
                 "body": {
                   "mode": "raw",
                   "raw": "{\n  \"name\": \"Example Corp\",\n  \"description\": \"A technology company\",\n  \"website\": \"https://example.com\",\n  \"logoUrl\": \"https://example.com/logo.png\"\n}",
-                  "options": { "raw": { "language": "json" } }
+                  "options": {
+                    "raw": {
+                      "language": "json"
+                    }
+                  }
                 },
                 "description": "Create or update a company."
               },
@@ -3882,12 +3899,22 @@
               "request": {
                 "method": "GET",
                 "header": [
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/companies/1",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "companies", "1" ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "companies",
+                    "1"
+                  ]
                 },
                 "description": "Get company by ID."
               },
@@ -3904,21 +3931,40 @@
               "request": {
                 "method": "GET",
                 "header": [
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/companies?page=0&size=100",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["api", "v1", "companies"],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "companies"
+                  ],
                   "query": [
-                    { "key": "page", "value": "0" },
-                    { "key": "size", "value": "100" }
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "100"
+                    }
                   ]
                 },
                 "description": "Get all companies (paginated)."
               },
               "response": [
-                { "code": 200, "name": "Success", "body": "{\n  \"content\": [ /* CompanyResponse[] */ ],\n  \"pageable\": { /* ... */ },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": { /* ... */ },\n  \"first\": true,\n  \"numberOfElements\": 1,\n  \"empty\": false\n}" }
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"content\": [ /* CompanyResponse[] */ ],\n  \"pageable\": { /* ... */ },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": { /* ... */ },\n  \"first\": true,\n  \"numberOfElements\": 1,\n  \"empty\": false\n}"
+                }
               ]
             },
             {
@@ -3926,12 +3972,23 @@
               "request": {
                 "method": "GET",
                 "header": [
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/companies/by-industry/{primaryIndustryId}?page=0&size=100",
-                  "host": ["{{baseUrl}}"],
-                  "path": ["api", "v1", "companies", "by-industry", "{primaryIndustryId}"],
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "companies",
+                    "by-industry",
+                    "{primaryIndustryId}"
+                  ],
                   "variable": [
                     {
                       "key": "primaryIndustryId",
@@ -3939,19 +3996,29 @@
                     }
                   ],
                   "query": [
-                    { "key": "page", "value": "0" },
-                    { "key": "size", "value": "100" }
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "100"
+                    }
                   ]
                 },
                 "description": "Get companies by primary industry ID with pagination support. Default page size is 100."
               },
               "response": [
-                { 
-                  "code": 200, 
-                  "name": "Success", 
-                  "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"name\": \"Google\",\n      \"description\": \"A technology company\",\n      \"website\": \"https://google.com\",\n      \"logoUrl\": \"https://google.com/logo.png\",\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"aboutUs\": \"About Google\",\n      \"vision\": \"To organize the world's information\",\n      \"mission\": \"Make information universally accessible\",\n      \"culture\": \"Innovative and inclusive\",\n      \"jobs\": [],\n      \"careerPageUrl\": \"https://careers.google.com\",\n      \"linkedinUrl\": \"https://linkedin.com/company/google\",\n      \"headquarters\": \"Mountain View, CA\",\n      \"primaryIndustryId\": 1,\n      \"secondaryIndustries\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"AI,ML,Search\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Microsoft\",\n      \"description\": \"A technology company\",\n      \"website\": \"https://microsoft.com\",\n      \"logoUrl\": \"https://microsoft.com/logo.png\",\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"aboutUs\": \"About Microsoft\",\n      \"vision\": \"To empower every person and organization\",\n      \"mission\": \"Empower every person and organization to achieve more\",\n      \"culture\": \"Growth mindset\",\n      \"jobs\": [],\n      \"careerPageUrl\": \"https://careers.microsoft.com\",\n      \"linkedinUrl\": \"https://linkedin.com/company/microsoft\",\n      \"headquarters\": \"Redmond, WA\",\n      \"primaryIndustryId\": 1,\n      \"secondaryIndustries\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"Windows,Office,Azure\"\n    }\n  ],\n  \"pageable\": {\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"offset\": 0,\n    \"pageNumber\": 0,\n    \"pageSize\": 100,\n    \"paged\": true,\n    \"unpaged\": false\n  },\n  \"last\": false,\n  \"totalElements\": 25,\n  \"totalPages\": 1,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": false\n  },\n  \"first\": true,\n  \"numberOfElements\": 25,\n  \"empty\": false\n}" 
+                {
+                  "code": 200,
+                  "name": "Success",
+                  "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"name\": \"Google\",\n      \"description\": \"A technology company\",\n      \"website\": \"https://google.com\",\n      \"logoUrl\": \"https://google.com/logo.png\",\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"aboutUs\": \"About Google\",\n      \"vision\": \"To organize the world's information\",\n      \"mission\": \"Make information universally accessible\",\n      \"culture\": \"Innovative and inclusive\",\n      \"jobs\": [],\n      \"careerPageUrl\": \"https://careers.google.com\",\n      \"linkedinUrl\": \"https://linkedin.com/company/google\",\n      \"headquarters\": \"Mountain View, CA\",\n      \"primaryIndustryId\": 1,\n      \"secondaryIndustries\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"AI,ML,Search\"\n    },\n    {\n      \"id\": 2,\n      \"name\": \"Microsoft\",\n      \"description\": \"A technology company\",\n      \"website\": \"https://microsoft.com\",\n      \"logoUrl\": \"https://microsoft.com/logo.png\",\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"aboutUs\": \"About Microsoft\",\n      \"vision\": \"To empower every person and organization\",\n      \"mission\": \"Empower every person and organization to achieve more\",\n      \"culture\": \"Growth mindset\",\n      \"jobs\": [],\n      \"careerPageUrl\": \"https://careers.microsoft.com\",\n      \"linkedinUrl\": \"https://linkedin.com/company/microsoft\",\n      \"headquarters\": \"Redmond, WA\",\n      \"primaryIndustryId\": 1,\n      \"secondaryIndustries\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"Windows,Office,Azure\"\n    }\n  ],\n  \"pageable\": {\n    \"sort\": {\n      \"empty\": false,\n      \"sorted\": true,\n      \"unsorted\": false\n    },\n    \"offset\": 0,\n    \"pageNumber\": 0,\n    \"pageSize\": 100,\n    \"paged\": true,\n    \"unpaged\": false\n  },\n  \"last\": false,\n  \"totalElements\": 25,\n  \"totalPages\": 1,\n  \"size\": 100,\n  \"number\": 0,\n  \"sort\": {\n    \"empty\": false,\n    \"sorted\": true,\n    \"unsorted\": false\n  },\n  \"first\": true,\n  \"numberOfElements\": 25,\n  \"empty\": false\n}"
                 },
-                { "code": 404, "name": "Not Found", "body": "{\n  \"error\": \"No companies found for industry ID: 1\"\n}" }
+                {
+                  "code": 404,
+                  "name": "Not Found",
+                  "body": "{\n  \"error\": \"No companies found for industry ID: 1\"\n}"
+                }
               ]
             }
           ]
@@ -5426,13 +5493,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/generate-batch",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "generate-batch" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "generate-batch"
+                      ]
                     },
                     "description": "Generate and save companies using Gemini in batches of 500, checking for duplicates and saving new ones. Repeats for 100 iterations. Returns a summary of results."
                   },
@@ -5442,7 +5523,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_batches\": 100,\n  \"total_companies_processed\": 50000,\n  \"companies_generated\": 1200,\n  \"companies_skipped\": 48800,\n  \"errors\": [],\n  \"message\": \"Company batch generation completed\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5450,13 +5535,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/crawl",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "crawl" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "crawl"
+                      ]
                     },
                     "description": "Crawl all companies from the companies.txt file"
                   },
@@ -5466,7 +5565,11 @@
                       "name": "Success",
                       "body": "{\n  \"message\": \"Company crawling process completed successfully\",\n  \"status\": \"SUCCESS\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5474,14 +5577,35 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/{{companyId}}/jobs/crawl",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "{{companyId}}", "jobs", "crawl" ],
-                      "variable": [ { "key": "companyId", "value": "1" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "{{companyId}}",
+                        "jobs",
+                        "crawl"
+                      ],
+                      "variable": [
+                        {
+                          "key": "companyId",
+                          "value": "1"
+                        }
+                      ]
                     },
                     "description": "Crawl jobs for a specific company by ID"
                   },
@@ -5491,7 +5615,11 @@
                       "name": "Success",
                       "body": "{\n  \"message\": \"Job crawling process started successfully for company ID: 1\",\n  \"companyId\": 1,\n  \"status\": \"SUCCESS\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5499,14 +5627,35 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/{{companyName}}/jobs/crawl-by-name",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "{{companyName}}", "jobs", "crawl-by-name" ],
-                      "variable": [ { "key": "companyName", "value": "Google" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "{{companyName}}",
+                        "jobs",
+                        "crawl-by-name"
+                      ],
+                      "variable": [
+                        {
+                          "key": "companyName",
+                          "value": "Google"
+                        }
+                      ]
                     },
                     "description": "Crawl jobs for a company by name"
                   },
@@ -5516,7 +5665,11 @@
                       "name": "Success",
                       "body": "{\n  \"message\": \"Job crawling process started successfully for company: Google\",\n  \"companyName\": \"Google\",\n  \"status\": \"SUCCESS\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5524,14 +5677,34 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/{{companyId}}/shorten-content",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "{{companyId}}", "shorten-content" ],
-                      "variable": [ { "key": "companyId", "value": "1" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "{{companyId}}",
+                        "shorten-content"
+                      ],
+                      "variable": [
+                        {
+                          "key": "companyId",
+                          "value": "1"
+                        }
+                      ]
                     },
                     "description": "Shorten company about us and culture content using AI. Takes the original about us and culture content from a company, uses Gemini AI to shorten them to 5 key points each with proper hyphen formatting, and saves the shortened versions to the aboutUs and culture fields."
                   },
@@ -5541,8 +5714,16 @@
                       "name": "Success",
                       "body": "{\n  \"companyId\": 1,\n  \"companyName\": \"Google\",\n  \"aboutUsShortened\": true,\n  \"cultureShortened\": true,\n  \"message\": \"Content shortened and saved successfully\"\n}"
                     },
-                    { "code": 404, "name": "Company not found", "body": "{\n  \"error\": \"Company not found with ID: 1\"\n}" },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Error shortening content: Server Error\"\n}" }
+                    {
+                      "code": 404,
+                      "name": "Company not found",
+                      "body": "{\n  \"error\": \"Company not found with ID: 1\"\n}"
+                    },
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Error shortening content: Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5550,13 +5731,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/shorten-content-all",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "shorten-content-all" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "shorten-content-all"
+                      ]
                     },
                     "description": "Shorten about us and culture content for all unprocessed companies using AI. Loops through all companies that haven't been processed for content shortening, takes their original about us and culture content, uses Gemini AI to shorten them to 5 key points each with proper hyphen formatting, and saves the shortened versions to the aboutUs and culture fields."
                   },
@@ -5566,7 +5761,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_companies_processed\": 50,\n  \"total_about_us_shortened\": 45,\n  \"total_culture_shortened\": 42,\n  \"total_errors\": 3,\n  \"company_results\": [\n    {\n      \"companyId\": 1,\n      \"companyName\": \"Google\",\n      \"aboutUsShortened\": true,\n      \"cultureShortened\": true,\n      \"message\": \"Content shortened and saved successfully\"\n    }\n  ],\n  \"message\": \"Content shortening completed for all companies\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Error shortening content for all companies: Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Error shortening content for all companies: Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5574,13 +5773,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/companies/generate-similar",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "companies", "generate-similar" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "companies",
+                        "generate-similar"
+                      ]
                     },
                     "description": "Generate similar companies for all unprocessed companies. Loops through all companies that haven't been processed for similar company generation and have industry info, uses AI to find similar companies that a person can switch to based on industry, company size, business model, etc., creates new companies if they don't exist, and stores the results in the company table."
                   },
@@ -5590,7 +5803,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_companies_processed\": 50,\n  \"total_similar_companies_found\": 400,\n  \"total_new_companies_created\": 25,\n  \"total_errors\": 2,\n  \"company_results\": [\n    {\n      \"companyId\": 1,\n      \"companyName\": \"Google\",\n      \"success\": true,\n      \"similarCompaniesFound\": 8,\n      \"newCompaniesCreated\": 2,\n      \"similarCompanyNames\": [\"Microsoft\", \"Amazon\", \"Apple\"],\n      \"newCompanyNames\": [\"OpenAI\", \"Anthropic\"],\n      \"existingCompanyNames\": [\"Microsoft\", \"Amazon\", \"Apple\"],\n      \"industry\": \"Information Technology & Services\"\n    }\n  ],\n  \"message\": \"Similar company generation completed\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Failed to generate similar companies: Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Failed to generate similar companies: Server Error\"\n}"
+                    }
                   ]
                 }
               ]
@@ -5604,13 +5821,26 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/detect-industries",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "detect-industries" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "detect-industries"
+                      ]
                     },
                     "description": "Detect industries for all companies using Gemini AI"
                   },
@@ -5620,7 +5850,11 @@
                       "name": "Success",
                       "body": "[\n  {\n    \"companyId\": 1,\n    \"companyName\": \"Yatra\",\n    \"primaryIndustry\": \"Travel & Hospitality Technology\",\n    \"primaryIndustryId\": 15,\n    \"secondaryIndustries\": [\"OTA\", \"Travel Tech\", \"Product Based Company\"],\n    \"processed\": true,\n    \"error\": null\n  }\n]"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 }
               ]
@@ -5634,13 +5868,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/skills/generate-and-save",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "skills", "generate-and-save" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "skills",
+                        "generate-and-save"
+                      ]
                     },
                     "description": "Generate and save comprehensive tech skills using AI"
                   },
@@ -5650,7 +5898,11 @@
                       "name": "Success",
                       "body": "{\n  \"new_skills_added\": 10,\n  \"total_skills_generated\": 50,\n  \"added_skills\": [\n    {\"name\": \"Rust\", \"category\": \"Programming Language\", \"description\": \"A fast, safe systems programming language.\"}\n  ]\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5658,14 +5910,35 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/generate-and-save",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "generate-and-save" ],
-                      "variable": [ { "key": "skillName", "value": "Java" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "skills",
+                        "{{skillName}}",
+                        "topics",
+                        "generate-and-save"
+                      ],
+                      "variable": [
+                        {
+                          "key": "skillName",
+                          "value": "Java"
+                        }
+                      ]
                     },
                     "description": "Generate and save topics for a technical skill using Gemini."
                   },
@@ -5675,8 +5948,16 @@
                       "name": "Success",
                       "body": "{\n  \"skill_name\": \"Java\",\n  \"topics_added\": 8,\n  \"topics\": [{\"topic\": \"Collections\", \"description\": \"Data structures in Java\"}],\n  \"message\": \"Topics generated and saved successfully\"\n}"
                     },
-                    { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 404,
+                      "name": "Skill not found",
+                      "body": "{\n  \"error\": \"Skill not found: Java\"\n}"
+                    },
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5684,13 +5965,28 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/skills/topics/generate-and-save-all",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "skills", "topics", "generate-and-save-all" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "skills",
+                        "topics",
+                        "generate-and-save-all"
+                      ]
                     },
                     "description": "Generate and save topics for all enabled technical skills using Gemini."
                   },
@@ -5700,7 +5996,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_skills\": 15,\n  \"results\": [\n    {\"skill_name\": \"Java\", \"topics_added\": 8, \"message\": \"Topics generated and saved successfully\"},\n    {\"skill_name\": \"Python\", \"topics_added\": 10, \"message\": \"Topics generated and saved successfully\"}\n  ],\n  \"message\": \"Topics generated and saved for all skills\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 }
               ]
@@ -5714,13 +6014,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/interview-questions/generate-comprehensive",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "interview-questions", "generate-comprehensive" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "interview-questions",
+                        "generate-comprehensive"
+                      ]
                     },
                     "description": "Generate comprehensive interview questions for all skills in the system using AI"
                   },
@@ -5730,7 +6044,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_skills_processed\": 15,\n  \"total_questions_generated\": 450,\n  \"message\": \"Comprehensive question generation completed\",\n  \"skill_results\": [\n    {\n      \"skill_name\": \"Java\",\n      \"skill_id\": 1,\n      \"questions_generated\": 30,\n      \"mappings_created\": 90,\n      \"status\": \"success\"\n    }\n  ]\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5738,14 +6056,34 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/interview-questions/generate-for-skill/{{skillName}}",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "interview-questions", "generate-for-skill", "{{skillName}}" ],
-                      "variable": [ { "key": "skillName", "value": "Java" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "interview-questions",
+                        "generate-for-skill",
+                        "{{skillName}}"
+                      ],
+                      "variable": [
+                        {
+                          "key": "skillName",
+                          "value": "Java"
+                        }
+                      ]
                     },
                     "description": "Generate comprehensive interview questions for a specific skill using AI"
                   },
@@ -5755,8 +6093,16 @@
                       "name": "Success",
                       "body": "{\n  \"skill_name\": \"Java\",\n  \"skill_id\": 1,\n  \"questions_generated\": 30,\n  \"mappings_created\": 90,\n  \"status\": \"success\"\n}"
                     },
-                    { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 404,
+                      "name": "Skill not found",
+                      "body": "{\n  \"error\": \"Skill not found: Java\"\n}"
+                    },
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5764,15 +6110,47 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/{{topicName}}/questions/generate-and-save?numQuestions=10",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "{{topicName}}", "questions", "generate-and-save" ],
-                      "query": [ { "key": "numQuestions", "value": "10" } ],
-                      "variable": [ { "key": "skillName", "value": "Java" }, { "key": "topicName", "value": "Collections" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "skills",
+                        "{{skillName}}",
+                        "topics",
+                        "{{topicName}}",
+                        "questions",
+                        "generate-and-save"
+                      ],
+                      "query": [
+                        {
+                          "key": "numQuestions",
+                          "value": "10"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "skillName",
+                          "value": "Java"
+                        },
+                        {
+                          "key": "topicName",
+                          "value": "Collections"
+                        }
+                      ]
                     },
                     "description": "Generate and save interview questions for a skill and topic using Gemini. Generates summary and detailed questions, and for coding questions, generates code in Java, Python, and C++."
                   },
@@ -5782,8 +6160,16 @@
                       "name": "Success",
                       "body": "{\n  \"skill_name\": \"Java\",\n  \"topic_name\": \"Collections\",\n  \"questions_added\": 10,\n  \"questions\": [{\"question\": \"Explain Java Collections Framework\", \"answer\": \"<div>...</div>\", \"coding\": true, \"javaCode\": \"...\", \"pythonCode\": \"...\", \"cppCode\": \"...\"}],\n  \"message\": \"Questions generated and (optionally) saved successfully\"\n}"
                     },
-                    { "code": 404, "name": "Skill or topic not found", "body": "{\n  \"error\": \"Skill or topic not found\"\n}" },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 404,
+                      "name": "Skill or topic not found",
+                      "body": "{\n  \"error\": \"Skill or topic not found\"\n}"
+                    },
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5791,15 +6177,42 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/questions/generate-and-save?numQuestions=10",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "questions", "generate-and-save" ],
-                      "query": [ { "key": "numQuestions", "value": "10" } ],
-                      "variable": [ { "key": "skillName", "value": "Java" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "skills",
+                        "{{skillName}}",
+                        "topics",
+                        "questions",
+                        "generate-and-save"
+                      ],
+                      "query": [
+                        {
+                          "key": "numQuestions",
+                          "value": "10"
+                        }
+                      ],
+                      "variable": [
+                        {
+                          "key": "skillName",
+                          "value": "Java"
+                        }
+                      ]
                     },
                     "description": "Generate and save interview questions for all topics of a skill using Gemini. Loops through all topics and uses the same logic as the single-topic endpoint."
                   },
@@ -5809,8 +6222,16 @@
                       "name": "Success",
                       "body": "{\n  \"skill_name\": \"Java\",\n  \"results\": [\n    {\"topic_name\": \"Collections\", \"questions_added\": 10, \"questions\": [...]},\n    {\"topic_name\": \"Multithreading\", \"questions_added\": 8, \"questions\": [...]}\n  ],\n  \"message\": \"Questions generated and (optionally) saved for all topics\"\n}"
                     },
-                    { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 404,
+                      "name": "Skill not found",
+                      "body": "{\n  \"error\": \"Skill not found: Java\"\n}"
+                    },
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 },
                 {
@@ -5818,14 +6239,35 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/skills/topics/questions/generate-and-save-all?numQuestions=10",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "skills", "topics", "questions", "generate-and-save-all" ],
-                      "query": [ { "key": "numQuestions", "value": "10" } ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "skills",
+                        "topics",
+                        "questions",
+                        "generate-and-save-all"
+                      ],
+                      "query": [
+                        {
+                          "key": "numQuestions",
+                          "value": "10"
+                        }
+                      ]
                     },
                     "description": "Generate and save interview questions for all enabled skills and all their topics using Gemini. Loops through all skills and topics and uses the same logic as the single-skill endpoint."
                   },
@@ -5835,7 +6277,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_skills\": 15,\n  \"results\": [\n    {\"skill_name\": \"Java\", \"topics_processed\": 8, \"total_questions_added\": 80, \"message\": \"Questions generated and saved for all topics\"},\n    {\"skill_name\": \"Python\", \"topics_processed\": 10, \"total_questions_added\": 100, \"message\": \"Questions generated and saved for all topics\"}\n  ],\n  \"message\": \"Questions generated and saved for all skills and topics\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Server Error\"\n}"
+                    }
                   ]
                 }
               ]
@@ -5849,13 +6295,27 @@
                   "request": {
                     "method": "POST",
                     "header": [
-                      { "key": "Content-Type", "value": "application/json" },
-                      { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                      {
+                        "key": "Content-Type",
+                        "value": "application/json"
+                      },
+                      {
+                        "key": "Authorization",
+                        "value": "Bearer {{authToken}}"
+                      }
                     ],
                     "url": {
                       "raw": "{{baseUrl}}/api/v1/ai/designations/generate-similar",
-                      "host": [ "{{baseUrl}}" ],
-                      "path": [ "api", "v1", "ai", "designations", "generate-similar" ]
+                      "host": [
+                        "{{baseUrl}}"
+                      ],
+                      "path": [
+                        "api",
+                        "v1",
+                        "ai",
+                        "designations",
+                        "generate-similar"
+                      ]
                     },
                     "description": "Generate similar designations for all unprocessed designations. Loops through all designations that haven't been processed for similar designation generation, uses AI to find similar designations that a person can switch to, creates new designations if they don't exist, and stores the results in the designation table."
                   },
@@ -5865,7 +6325,11 @@
                       "name": "Success",
                       "body": "{\n  \"total_designations_processed\": 50,\n  \"total_similar_designations_found\": 400,\n  \"total_new_designations_created\": 25,\n  \"total_errors\": 2,\n  \"designation_results\": [\n    {\n      \"designationId\": 1,\n      \"designationName\": \"Software Engineer\",\n      \"success\": true,\n      \"similarDesignationsFound\": 8,\n      \"newDesignationsCreated\": 2,\n      \"similarDesignationNames\": [\"Full Stack Engineer\", \"Backend Engineer\", \"DevOps Engineer\"],\n      \"newDesignationNames\": [\"Platform Engineer\", \"Cloud Engineer\"],\n      \"existingDesignationNames\": [\"Full Stack Engineer\", \"Backend Engineer\", \"DevOps Engineer\"]\n    }\n  ],\n  \"message\": \"Similar designation generation completed\"\n}"
                     },
-                    { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Error generating similar designations: Server Error\"\n}" }
+                    {
+                      "code": 500,
+                      "name": "Server Error",
+                      "body": "{\n  \"error\": \"Error generating similar designations: Server Error\"\n}"
+                    }
                   ]
                 }
               ]
@@ -6378,13 +6842,28 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/ai/skills/topics/generate-and-save-all",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "ai", "skills", "topics", "generate-and-save-all" ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "skills",
+                    "topics",
+                    "generate-and-save-all"
+                  ]
                 },
                 "description": "Generate and save topics for all enabled technical skills using Gemini."
               },
@@ -6394,7 +6873,11 @@
                   "name": "Success",
                   "body": "{\n  \"total_skills\": 15,\n  \"results\": [\n    {\"skill_name\": \"Java\", \"topics_added\": 8, \"message\": \"Topics generated and saved successfully\"},\n    {\"skill_name\": \"Python\", \"topics_added\": 10, \"message\": \"Topics generated and saved successfully\"}\n  ],\n  \"message\": \"Topics generated and saved for all skills\"\n}"
                 },
-                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
               ]
             },
             {
@@ -6402,14 +6885,35 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/generate-and-save",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "generate-and-save" ],
-                  "variable": [ { "key": "skillName", "value": "Java" } ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "skills",
+                    "{{skillName}}",
+                    "topics",
+                    "generate-and-save"
+                  ],
+                  "variable": [
+                    {
+                      "key": "skillName",
+                      "value": "Java"
+                    }
+                  ]
                 },
                 "description": "Generate and save topics for a technical skill using Gemini."
               },
@@ -6419,8 +6923,16 @@
                   "name": "Success",
                   "body": "{\n  \"skill_name\": \"Java\",\n  \"topics_added\": 8,\n  \"topics\": [{\"topic\": \"Collections\", \"description\": \"Data structures in Java\"}],\n  \"message\": \"Topics generated and saved successfully\"\n}"
                 },
-                { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
-                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                {
+                  "code": 404,
+                  "name": "Skill not found",
+                  "body": "{\n  \"error\": \"Skill not found: Java\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
               ]
             },
             {
@@ -6428,15 +6940,47 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/{{topicName}}/questions/generate-and-save?numQuestions=10",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "{{topicName}}", "questions", "generate-and-save" ],
-                  "query": [ { "key": "numQuestions", "value": "10" } ],
-                  "variable": [ { "key": "skillName", "value": "Java" }, { "key": "topicName", "value": "Collections" } ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "skills",
+                    "{{skillName}}",
+                    "topics",
+                    "{{topicName}}",
+                    "questions",
+                    "generate-and-save"
+                  ],
+                  "query": [
+                    {
+                      "key": "numQuestions",
+                      "value": "10"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "skillName",
+                      "value": "Java"
+                    },
+                    {
+                      "key": "topicName",
+                      "value": "Collections"
+                    }
+                  ]
                 },
                 "description": "Generate and save interview questions for a skill and topic using Gemini. Generates summary and detailed questions, and for coding questions, generates code in Java, Python, and C++."
               },
@@ -6446,8 +6990,16 @@
                   "name": "Success",
                   "body": "{\n  \"skill_name\": \"Java\",\n  \"topic_name\": \"Collections\",\n  \"questions_added\": 10,\n  \"questions\": [{\"question\": \"Explain Java Collections Framework\", \"answer\": \"<div>...</div>\", \"coding\": true, \"javaCode\": \"...\", \"pythonCode\": \"...\", \"cppCode\": \"...\"}],\n  \"message\": \"Questions generated and (optionally) saved successfully\"\n}"
                 },
-                { "code": 404, "name": "Skill or topic not found", "body": "{\n  \"error\": \"Skill or topic not found\"\n}" },
-                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                {
+                  "code": 404,
+                  "name": "Skill or topic not found",
+                  "body": "{\n  \"error\": \"Skill or topic not found\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
               ]
             },
             {
@@ -6455,15 +7007,42 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/ai/skills/{{skillName}}/topics/questions/generate-and-save?numQuestions=10",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "ai", "skills", "{{skillName}}", "topics", "questions", "generate-and-save" ],
-                  "query": [ { "key": "numQuestions", "value": "10" } ],
-                  "variable": [ { "key": "skillName", "value": "Java" } ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "skills",
+                    "{{skillName}}",
+                    "topics",
+                    "questions",
+                    "generate-and-save"
+                  ],
+                  "query": [
+                    {
+                      "key": "numQuestions",
+                      "value": "10"
+                    }
+                  ],
+                  "variable": [
+                    {
+                      "key": "skillName",
+                      "value": "Java"
+                    }
+                  ]
                 },
                 "description": "Generate and save interview questions for all topics of a skill using Gemini. Loops through all topics and uses the same logic as the single-topic endpoint."
               },
@@ -6473,8 +7052,16 @@
                   "name": "Success",
                   "body": "{\n  \"skill_name\": \"Java\",\n  \"results\": [\n    {\"topic_name\": \"Collections\", \"questions_added\": 10, \"questions\": [...]},\n    {\"topic_name\": \"Multithreading\", \"questions_added\": 8, \"questions\": [...]}\n  ],\n  \"message\": \"Questions generated and (optionally) saved for all topics\"\n}"
                 },
-                { "code": 404, "name": "Skill not found", "body": "{\n  \"error\": \"Skill not found: Java\"\n}" },
-                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                {
+                  "code": 404,
+                  "name": "Skill not found",
+                  "body": "{\n  \"error\": \"Skill not found: Java\"\n}"
+                },
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
               ]
             },
             {
@@ -6482,14 +7069,35 @@
               "request": {
                 "method": "POST",
                 "header": [
-                  { "key": "Content-Type", "value": "application/json" },
-                  { "key": "Authorization", "value": "Bearer {{authToken}}" }
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
                 ],
                 "url": {
                   "raw": "{{baseUrl}}/api/v1/ai/skills/topics/questions/generate-and-save-all?numQuestions=10",
-                  "host": [ "{{baseUrl}}" ],
-                  "path": [ "api", "v1", "ai", "skills", "topics", "questions", "generate-and-save-all" ],
-                  "query": [ { "key": "numQuestions", "value": "10" } ]
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "skills",
+                    "topics",
+                    "questions",
+                    "generate-and-save-all"
+                  ],
+                  "query": [
+                    {
+                      "key": "numQuestions",
+                      "value": "10"
+                    }
+                  ]
                 },
                 "description": "Generate and save interview questions for all enabled skills and all their topics using Gemini. Loops through all skills and topics and uses the same logic as the single-skill endpoint."
               },
@@ -6499,8 +7107,735 @@
                   "name": "Success",
                   "body": "{\n  \"total_skills\": 15,\n  \"results\": [\n    {\"skill_name\": \"Java\", \"topics_processed\": 8, \"total_questions_added\": 80, \"message\": \"Questions generated and saved for all topics\"},\n    {\"skill_name\": \"Python\", \"topics_processed\": 10, \"total_questions_added\": 100, \"message\": \"Questions generated and saved for all topics\"}\n  ],\n  \"message\": \"Questions generated and saved for all skills and topics\"\n}"
                 },
-                { "code": 500, "name": "Server Error", "body": "{\n  \"error\": \"Server Error\"\n}" }
+                {
+                  "code": 500,
+                  "name": "Server Error",
+                  "body": "{\n  \"error\": \"Server Error\"\n}"
+                }
               ]
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-all",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-all"
+                  ]
+                },
+                "description": "Generate processed names for all unprocessed entities (countries, cities, companies, designations)"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-countries",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-countries",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-countries"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed countries"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-cities",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-cities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-cities"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed cities"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-companies",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-companies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-companies"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed companies"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-designations",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-designations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-designations"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed designations"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/reset",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/reset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "reset"
+                  ]
+                },
+                "description": "Reset processed name generation flag for all entities"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-all",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-all",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-all"
+                  ]
+                },
+                "description": "Generate processed names for all unprocessed entities (countries, cities, companies, designations)"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-countries",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-countries",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-countries"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed countries"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-cities",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-cities",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-cities"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed cities"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-companies",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-companies",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-companies"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed companies"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/generate-designations",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/generate-designations",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "generate-designations"
+                  ]
+                },
+                "description": "Generate processed names for unprocessed designations"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/processed-names/reset",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/processed-names/reset",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "processed-names",
+                    "reset"
+                  ]
+                },
+                "description": "Reset processed name generation flag for all entities"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/designations/generate-for-departments",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/designations/generate-for-departments",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "designations",
+                    "generate-for-departments"
+                  ]
+                },
+                "description": "Generate designations for all departments using GenAI"
+              }
+            },
+            {
+              "name": "POST /api/v1/ai/designations/generate-for-department/{departmentId}",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  },
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{authToken}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{baseUrl}}/api/v1/ai/designations/generate-for-department/1",
+                  "host": [
+                    "{{baseUrl}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "designations",
+                    "generate-for-department",
+                    "1"
+                  ]
+                },
+                "description": "Generate designations for a specific department using GenAI"
+              }
+            },
+            {
+              "name": "--- COMPANY SHORTNAME GENERATION ---",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/health",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "health"
+                  ]
+                },
+                "description": "Section separator for Company Shortname Generation endpoints"
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Shortnames for All Companies",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-all",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "companies",
+                    "shortnames",
+                    "generate-for-all"
+                  ]
+                },
+                "description": "Uses Gemini AI to generate commonly used shortnames or nicknames for all companies in the database. Examples: 'Eternal' → 'Zomato', 'International Business Machines' → 'IBM', 'Microsoft' → 'MS'."
+              },
+              "response": []
+            },
+            {
+              "name": "Generate Shortname for Specific Company",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-company/Eternal",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "companies",
+                    "shortnames",
+                    "generate-for-company",
+                    "Eternal"
+                  ],
+                  "variable": [
+                    {
+                      "key": "companyName",
+                      "value": "Eternal",
+                      "description": "Company name to generate shortname for"
+                    }
+                  ]
+                },
+                "description": "Uses Gemini AI to generate the commonly used shortname or nickname for a specific company. Examples: 'Eternal' → 'Zomato', 'International Business Machines' → 'IBM'."
+              },
+              "response": []
+            },
+            {
+              "name": "--- SECONDARY INDUSTRY MAPPING ---",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/health",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "health"
+                  ]
+                },
+                "description": "Section separator for Secondary Industry Mapping endpoints"
+              },
+              "response": []
+            },
+            {
+              "name": "Process All Secondary Industries",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/secondary-industries/map-all",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "secondary-industries",
+                    "map-all"
+                  ]
+                },
+                "description": "Extracts all unique secondary industries from companies table, uses Gemini AI to create standardized mappings, and stores them in a separate mapping table. Groups similar variations (e.g., 'Fortune 500', 'Fortune500', 'Fortune 500 Top') under the same parent category."
+              },
+              "response": []
+            },
+            {
+              "name": "Process Single Secondary Industry",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/secondary-industries/map-industry/Fortune 500",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "secondary-industries",
+                    "map-industry",
+                    "Fortune 500"
+                  ],
+                  "variable": [
+                    {
+                      "key": "industryName",
+                      "value": "Fortune 500",
+                      "description": "Secondary industry name to process and map"
+                    }
+                  ]
+                },
+                "description": "Uses Gemini AI to create a standardized mapping for a specific secondary industry. Groups similar variations under the same parent category."
+              },
+              "response": []
+            },
+            {
+              "name": "Reset Secondary Industry Processed Flag",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/secondary-industries/reset-processed-flag",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "secondary-industries",
+                    "reset-processed-flag"
+                  ]
+                },
+                "description": "Resets the processed flag to false for all secondary industry mappings, allowing reprocessing of industry mapping"
+              },
+              "response": []
+            },
+            {
+              "name": "--- SECONDARY INDUSTRY MAPPING ---",
+              "request": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/health",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "health"
+                  ]
+                },
+                "description": "Section separator for Secondary Industry Mapping endpoints"
+              },
+              "response": []
+            },
+            {
+              "name": "Process All Secondary Industries",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/secondary-industries/map-all",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "secondary-industries",
+                    "map-all"
+                  ]
+                },
+                "description": "Extracts all unique secondary industries from companies table, uses Gemini AI to create standardized mappings, and stores them in a separate mapping table. Groups similar variations (e.g., 'Fortune 500', 'Fortune500', 'Fortune 500 Top') under the same parent category."
+              },
+              "response": []
+            },
+            {
+              "name": "Process Single Secondary Industry",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/secondary-industries/map-industry/Fortune 500",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "secondary-industries",
+                    "map-industry",
+                    "Fortune 500"
+                  ],
+                  "variable": [
+                    {
+                      "key": "industryName",
+                      "value": "Fortune 500",
+                      "description": "Secondary industry name to process and map"
+                    }
+                  ]
+                },
+                "description": "Uses Gemini AI to create a standardized mapping for a specific secondary industry. Groups similar variations under the same parent category."
+              },
+              "response": []
+            },
+            {
+              "name": "Reset Secondary Industry Processed Flag",
+              "request": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/secondary-industries/reset-processed-flag",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "secondary-industries",
+                    "reset-processed-flag"
+                  ]
+                },
+                "description": "Resets the processed flag to false for all secondary industry mappings, allowing reprocessing of industry mapping"
+              },
+              "response": []
             }
           ]
         }

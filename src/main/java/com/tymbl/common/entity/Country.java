@@ -29,6 +29,12 @@ public class Country {
     @Column(name = "cities_processed", nullable = false)
     private boolean citiesProcessed = false;
     
+    @Column(name = "processed_name")
+    private String processedName;
+    
+    @Column(name = "processed_name_generated", nullable = false)
+    private boolean processedNameGenerated = false;
+    
     public Country(String name, String code) {
         this.name = name;
         this.code = code;

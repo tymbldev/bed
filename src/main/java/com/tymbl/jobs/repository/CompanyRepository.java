@@ -31,6 +31,16 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Find companies that haven't been processed for similar company generation
     List<Company> findBySimilarCompaniesProcessedFalse();
     
+    // Find companies that haven't been processed for processed name generation
+    List<Company> findByProcessedNameGeneratedFalse();
+    
+    // Check if processed name exists
+    boolean existsByProcessedName(String processedName);
+    
+    // Reset processed name generated flag for all companies
+    @Query("UPDATE Company c SET c.processedNameGenerated = false")
+    void resetProcessedNameGeneratedFlag();
+    
     // Find companies that haven't been processed for industry detection
     List<Company> findByIndustryProcessedFalse();
     

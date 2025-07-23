@@ -26,6 +26,12 @@ public class City {
     @Column(name = "zip_code")
     private String zipCode;
     
+    @Column(name = "processed_name")
+    private String processedName;
+    
+    @Column(name = "processed_name_generated", nullable = false)
+    private boolean processedNameGenerated = false;
+    
     public City(String name, Country country) {
         this.name = name;
         this.countryId = country.getId();

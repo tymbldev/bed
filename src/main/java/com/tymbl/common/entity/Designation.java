@@ -36,6 +36,12 @@ public class Designation {
     @Column(name = "similar_designations_processed", nullable = false)
     private boolean similarDesignationsProcessed = false;
     
+    @Column(name = "processed_name")
+    private String processedName;
+    
+    @Column(name = "processed_name_generated", nullable = false)
+    private boolean processedNameGenerated = false;
+    
     public Designation(String title) {
         this.name = title;
     }

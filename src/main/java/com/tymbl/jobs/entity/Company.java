@@ -73,6 +73,12 @@ public class Company {
     
     @Column(name = "similar_companies_processed", nullable = false)
     private boolean similarCompaniesProcessed = false;
+    
+    @Column(name = "processed_name")
+    private String processedName;
+    
+    @Column(name = "processed_name_generated", nullable = false)
+    private boolean processedNameGenerated = false;
 
     @Column(name = "industry_processed", nullable = false)
     private boolean industryProcessed = false;

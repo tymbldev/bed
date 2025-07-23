@@ -21,4 +21,14 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
     // Reset cities processed flag for all countries (useful for reprocessing)
     @Query("UPDATE Country c SET c.citiesProcessed = false")
     void resetCitiesProcessedFlag();
+    
+    // Find countries that haven't been processed for processed name generation
+    List<Country> findByProcessedNameGeneratedFalse();
+    
+    // Check if processed name exists
+    boolean existsByProcessedName(String processedName);
+    
+    // Reset processed name generated flag for all countries
+    @Query("UPDATE Country c SET c.processedNameGenerated = false")
+    void resetProcessedNameGeneratedFlag();
 } 
