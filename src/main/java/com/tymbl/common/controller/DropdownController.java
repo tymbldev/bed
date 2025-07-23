@@ -11,6 +11,7 @@ import com.tymbl.common.service.CurrencyService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyService;
+import com.tymbl.jobs.service.ElasticsearchIndexingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -26,6 +27,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -60,6 +62,7 @@ public class DropdownController {
     private final CurrencyService currencyService;
     private final GeminiService geminiService;
     private final CompanyService companyService;
+    private final ElasticsearchIndexingService elasticsearchIndexingService;
 
     // Department endpoints
     @GetMapping("/departments")
@@ -717,5 +720,72 @@ public class DropdownController {
     })
     public ResponseEntity<List<Map<String, String>>> autosuggest(@RequestParam("query") String query) {
         return ResponseEntity.ok(dropdownService.autosuggest(query));
+    }
+
+    @GetMapping("/autosuggest-elasticsearch")
+    @Operation(
+        summary = "Elasticsearch-powered autosuggest for companies, designations, and cities",
+        description = "Uses Elasticsearch to provide fast autosuggest functionality for companies, designations, and cities. Requires keyword (min 2 chars) and entity type (companies, designations, or cities)."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "Autosuggest results retrieved successfully",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "[\n" +
+                        "  {\n" +
+                        "    \"id\": 1,\n" +
+                        "    \"name\": \"Google\",\n" +
+                        "    \"type\": \"companies\",\n" +
+                        "    \"score\": 8.5,\n" +
+                        "    \"website\": \"https://google.com\",\n" +
+                        "    \"headquarters\": \"Mountain View, CA\",\n" +
+                        "    \"industry\": \"Technology\"\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    \"id\": 2,\n" +
+                        "    \"name\": \"Software Engineer\",\n" +
+                        "    \"type\": \"designations\",\n" +
+                        "    \"score\": 7.2,\n" +
+                        "    \"department\": \"Engineering\",\n" +
+                        "    \"description\": \"Entry-level software development position\"\n" +
+                        "  },\n" +
+                        "  {\n" +
+                        "    \"id\": 3,\n" +
+                        "    \"name\": \"New York\",\n" +
+                        "    \"type\": \"cities\",\n" +
+                        "    \"score\": 6.8,\n" +
+                        "    \"country\": \"United States\",\n" +
+                        "    \"state\": \"NY\"\n" +
+                        "  }\n" +
+                        "]"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "400", description = "Invalid parameters"),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<List<Map<String, Object>>> autosuggestElasticsearch(
+            @RequestParam("keyword") String keyword,
+            @RequestParam("entityType") String entityType,
+            @RequestParam(value = "limit", defaultValue = "10") int limit) {
+        
+        if (keyword == null || keyword.trim().length() < 2) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        
+        if (entityType == null || entityType.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
+        }
+        
+        try {
+            List<Map<String, Object>> results = elasticsearchIndexingService.searchAutosuggest(
+                keyword.trim(), entityType.trim(), limit);
+            
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Collections.emptyList());
+        }
     }
 } 

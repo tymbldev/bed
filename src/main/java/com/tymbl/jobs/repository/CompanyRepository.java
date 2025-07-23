@@ -55,8 +55,6 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     @Query("UPDATE Company c SET c.industryProcessed = false")
     void resetIndustryProcessedFlag();
 
-    List<Company> findByShortnameProcessedFalse();
-
     List<Company> findByCleanupProcessedFalse();
 
     List<Company> findByIsJunkTrue();

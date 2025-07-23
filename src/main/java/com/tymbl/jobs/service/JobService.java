@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
 import com.tymbl.jobs.repository.CompanyRepository;
+import com.tymbl.jobs.service.ElasticsearchIndexingService;
 
 @Service
 @RequiredArgsConstructor
@@ -58,6 +59,7 @@ public class JobService {
     private final CompanyService companyService;
     private final UserEnrichmentUtil userEnrichmentUtil;
     private final ElasticsearchJobService elasticsearchJobService;
+    private final ElasticsearchIndexingService elasticsearchIndexingService;
 
     @Value("${referrer.sort.weight.designation:0.3}")
     private double designationWeight;
@@ -151,6 +153,16 @@ public class JobService {
             // Don't fail the main transaction
         }
         
+        // Update company job count in Elasticsearch (non-blocking)
+        try {
+            if (job.getCompanyId() != null) {
+                elasticsearchIndexingService.updateCompanyJobCount(job.getCompanyId());
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update job count for company {} in Elasticsearch: {}", job.getCompanyId(), e.getMessage());
+            // Don't fail the main transaction
+        }
+        
         return mapToResponse(job);
     }
 
@@ -241,6 +253,16 @@ public class JobService {
         // Set job as inactive
         job.setActive(false);
         jobRepository.save(job);
+        
+        // Update company job count in Elasticsearch (non-blocking)
+        try {
+            if (job.getCompanyId() != null) {
+                elasticsearchIndexingService.updateCompanyJobCount(job.getCompanyId());
+            }
+        } catch (Exception e) {
+            logger.error("Failed to update job count for company {} in Elasticsearch: {}", job.getCompanyId(), e.getMessage());
+            // Don't fail the main transaction
+        }
     }
 
     @Transactional(readOnly = true)

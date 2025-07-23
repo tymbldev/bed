@@ -3,8 +3,8 @@
     "_postman_id": "tymbl-collection-001",
     "name": "Tymbl API Collection",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-    "description": "Comprehensive Postman collection for Tymbl backend API. All endpoints grouped by controller with detailed request/response examples.\n\nUpdated with comprehensive interview question endpoints\n\nUpdated with processed name generation endpoints\n\nUpdated with processed name generation endpoints\n\nUpdated with designation generation endpoints\n\nUpdated with Company Shortname Generation endpoints\n\nUpdated with Secondary Industry Mapping endpoints\n\nUpdated with Secondary Industry Mapping endpoints\n\nUpdated with ALL AIController endpoints\n\nAdded company cleanup endpoints\n\nAdded company cleanup endpoints",
-    "updatedAt": "2025-07-23T17:16:55.873522",
+    "description": "Comprehensive Postman collection for Tymbl backend API. All endpoints grouped by controller with detailed request/response examples.\n\nUpdated with comprehensive interview question endpoints\n\nUpdated with processed name generation endpoints\n\nUpdated with processed name generation endpoints\n\nUpdated with designation generation endpoints\n\nUpdated with Company Shortname Generation endpoints\n\nUpdated with Secondary Industry Mapping endpoints\n\nUpdated with Secondary Industry Mapping endpoints\n\nUpdated with ALL AIController endpoints\n\nAdded company cleanup endpoints\n\nAdded company cleanup endpoints\n\nUpdated with Elasticsearch indexing and autosuggest endpoints.\n\nUpdated with ListOfCompaniesController endpoints.",
+    "updatedAt": "2025-07-23T13:05:38.867042Z",
     "updated": "2025-07-23T15:09:00.513255"
   },
   "variable": [
@@ -15,6 +15,60 @@
     {
       "key": "authToken",
       "value": "{{authToken}}"
+    },
+    {
+      "key": "keyword",
+      "value": "google",
+      "type": "string",
+      "description": "Search keyword for autosuggest"
+    },
+    {
+      "key": "entityType",
+      "value": "companies",
+      "type": "string",
+      "description": "Entity type for autosuggest (companies, designations, cities)"
+    },
+    {
+      "key": "limit",
+      "value": "10",
+      "type": "string",
+      "description": "Maximum number of autosuggest results"
+    },
+    {
+      "key": "location",
+      "value": "Mountain View",
+      "type": "string",
+      "description": "Company headquarters location for search"
+    },
+    {
+      "key": "industryName",
+      "value": "Information Technology",
+      "type": "string",
+      "description": "Primary industry name for search"
+    },
+    {
+      "key": "secondaryIndustryName",
+      "value": "Software",
+      "type": "string",
+      "description": "Secondary industry name for search"
+    },
+    {
+      "key": "page",
+      "value": "0",
+      "type": "string",
+      "description": "Page number for pagination"
+    },
+    {
+      "key": "size",
+      "value": "10",
+      "type": "string",
+      "description": "Page size for pagination"
+    },
+    {
+      "key": "companyId",
+      "value": "1",
+      "type": "string",
+      "description": "Company ID for job count update"
     }
   ],
   "item": [
@@ -3729,6 +3783,43 @@
               ]
             }
           ]
+        },
+        {
+          "name": "Elasticsearch Autosuggest",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/autosuggest-elasticsearch?keyword={{keyword}}&entityType={{entityType}}&limit={{limit}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "autosuggest-elasticsearch"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "{{keyword}}",
+                  "description": "Search keyword (minimum 2 characters)"
+                },
+                {
+                  "key": "entityType",
+                  "value": "{{entityType}}",
+                  "description": "Entity type: companies, designations, or cities"
+                },
+                {
+                  "key": "limit",
+                  "value": "{{limit}}",
+                  "description": "Maximum number of results (default: 10)"
+                }
+              ]
+            },
+            "description": "Uses Elasticsearch to provide fast autosuggest functionality for companies, designations, and cities. Requires keyword (min 2 chars) and entity type (companies, designations, or cities)."
+          }
         }
       ]
     },
@@ -5203,6 +5294,79 @@
               ]
             }
           ]
+        },
+        {
+          "name": "Search Companies with Filters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/search?location={{location}}&industryName={{industryName}}&secondaryIndustryName={{secondaryIndustryName}}&page={{page}}&size={{size}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "location",
+                  "value": "{{location}}",
+                  "description": "Company headquarters location (optional)"
+                },
+                {
+                  "key": "industryName",
+                  "value": "{{industryName}}",
+                  "description": "Primary industry name (optional)"
+                },
+                {
+                  "key": "secondaryIndustryName",
+                  "value": "{{secondaryIndustryName}}",
+                  "description": "Secondary industry name (optional)"
+                },
+                {
+                  "key": "page",
+                  "value": "{{page}}",
+                  "description": "Page number (default: 0)"
+                },
+                {
+                  "key": "size",
+                  "value": "{{size}}",
+                  "description": "Page size (default: 10, max: 100)"
+                }
+              ]
+            },
+            "description": "Search companies by location (headquarters), industry name, and secondary industry name. Results are sorted by job count (descending) and then by company name (ascending)."
+          }
+        },
+        {
+          "name": "Update Company Job Count",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/{{companyId}}/update-job-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "{{companyId}}",
+                "update-job-count"
+              ]
+            },
+            "description": "Updates the job count for a specific company in Elasticsearch. This should be called when jobs are posted or updated."
+          }
         }
       ]
     },
@@ -7653,6 +7817,110 @@
               "response": []
             }
           ]
+        },
+        {
+          "name": "Index All Entities to Elasticsearch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/elasticsearch/index-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "elasticsearch",
+                "index-all"
+              ]
+            },
+            "description": "Indexes all companies, designations, and cities to separate Elasticsearch indexes for fast search and autosuggest functionality"
+          }
+        },
+        {
+          "name": "Index Companies to Elasticsearch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/elasticsearch/index-companies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "elasticsearch",
+                "index-companies"
+              ]
+            },
+            "description": "Indexes all companies to the companies Elasticsearch index for fast search and autosuggest functionality"
+          }
+        },
+        {
+          "name": "Index Designations to Elasticsearch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/elasticsearch/index-designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "elasticsearch",
+                "index-designations"
+              ]
+            },
+            "description": "Indexes all designations to the designations Elasticsearch index for fast search and autosuggest functionality"
+          }
+        },
+        {
+          "name": "Index Cities to Elasticsearch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/elasticsearch/index-cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "elasticsearch",
+                "index-cities"
+              ]
+            },
+            "description": "Indexes all cities to the cities Elasticsearch index for fast search and autosuggest functionality"
+          }
         }
       ]
     },

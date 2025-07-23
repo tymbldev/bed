@@ -8,6 +8,7 @@ import com.tymbl.common.service.CompanyShortnameService;
 import com.tymbl.common.service.SecondaryIndustryMappingService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.jobs.service.CompanyCleanupService;
+import com.tymbl.jobs.service.ElasticsearchIndexingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
@@ -61,6 +62,7 @@ public class AIController {
     private final SecondaryIndustryMappingService secondaryIndustryMappingService;
     private final GeminiService geminiService;
     private final CompanyCleanupService companyCleanupService;
+    private final ElasticsearchIndexingService elasticsearchIndexingService;
 
     // ============================================================================
     // COMPANY CRAWLING ENDPOINTS (Legacy - kept for backward compatibility)
