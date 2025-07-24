@@ -262,6 +262,10 @@ public class ProcessedNameService {
         // Convert to lowercase and trim
         String processed = originalName.toLowerCase().trim();
         
+        // Remove brackets and parentheses with their content using regex
+        String bracketsRegEx = "(\\[|\\().+?(\\]|\\))\\s*";
+        processed = processed.replaceAll(bracketsRegEx, "");
+        
         // Remove special characters (dots, commas, parentheses, etc.)
         processed = processed.replaceAll("[.,()\\[\\]{}!@#$%^&*+=|\\\\/\"'`~]", "");
         
@@ -269,6 +273,15 @@ public class ProcessedNameService {
         processed = removeCompanySuffixes(processed);
         
         // Remove extra spaces and convert to single spaces
+        processed = processed.replaceAll("\\s+", " ");
+        
+        // Handle ampersand surrounded by words (convert "word and word" to "word & word")
+        processed = processed.replaceAll("(.*[a-zA-Z0-9]+.*) and (.*[a-zA-Z0-9]+.*)", "$1 & $2");
+        
+        // Remove everything except alphanumeric, hyphens, and spaces
+        processed = processed.replaceAll("[^a-zA-Z0-9&\\-\\s]+", "");
+        
+        // Final cleanup - remove extra spaces again
         processed = processed.replaceAll("\\s+", " ");
         
         // Trim again
