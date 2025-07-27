@@ -1,13 +1,223 @@
 {
   "info": {
-    "name": "Tymbl API",
-    "description": "Tymbl API Collection",
+    "name": "Tymbl API - Complete Collection",
+    "description": "Complete Tymbl API Collection with all endpoints",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"password\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "login"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"password\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "register"
+              ]
+            }
+          }
+        },
+        {
+          "name": "LinkedIn Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"code\":\"linkedin_auth_code\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/auth/linkedin",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "auth",
+                "linkedin"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "Job Management",
       "item": [
+        {
+          "name": "Create Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Software Engineer\",\"description\":\"Job description\",\"companyId\":1,\"designationId\":1,\"cityId\":1,\"countryId\":1,\"currencyId\":1,\"minSalary\":100000,\"maxSalary\":150000}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Job",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"title\":\"Updated Job Title\",\"description\":\"Updated description\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Job",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/my-posts?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "my-posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
         {
           "name": "Get Job Details with Referrers",
           "request": {
@@ -15,8 +225,7 @@
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -31,48 +240,71 @@
                 "1",
                 "details"
               ]
-            },
-            "description": "Get job details with referrer profiles including dropdown values"
-          },
-          "response": [
-            {
-              "name": "Dropdown Enriched Response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/jobmanagement/1/details",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "jobmanagement",
-                    "1",
-                    "details"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"id\": 1,\n  \"title\": \"Software Engineer\",\n  \"description\": \"We are looking for a talented software engineer...\",\n  \"cityId\": 1,\n  \"cityName\": \"Mountain View\",\n  \"countryId\": 1,\n  \"countryName\": \"United States\",\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"designationName\": \"Software Engineer\",\n  \"minSalary\": 100000,\n  \"maxSalary\": 150000,\n  \"minExperience\": 2,\n  \"maxExperience\": 5,\n  \"jobType\": \"HYBRID\",\n  \"currencyId\": 1,\n  \"currencyName\": \"US Dollar\",\n  \"currencySymbol\": \"$\",\n  \"companyId\": 1,\n  \"company\": \"Google\",\n  \"companyName\": \"Google\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"tags\": [\n    \"Java\",\n    \"Spring\",\n    \"Microservices\"\n  ],\n  \"openingCount\": 5,\n  \"uniqueUrl\": \"https://careers.google.com/jobs/123\",\n  \"platform\": \"Google Careers\",\n  \"approved\": 1,\n  \"approvalStatus\": \"APPROVED\",\n  \"referrerCount\": 2,\n  \"referrers\": [\n    {\n      \"userId\": 123,\n      \"userName\": \"Alice Smith\",\n      \"email\": \"alice@google.com\",\n      \"designation\": \"Senior Engineer\",\n      \"company\": \"Google\",\n      \"companyId\": 1,\n      \"companyName\": \"Google\",\n      \"yearsOfExperience\": \"5\",\n      \"monthsOfExperience\": \"6\",\n      \"education\": \"MS Computer Science from Stanford University\",\n      \"portfolioWebsite\": \"https://alice.dev\",\n      \"linkedInProfile\": \"https://linkedin.com/in/alice-smith\",\n      \"githubProfile\": \"https://github.com/alice-smith\",\n      \"numApplicationsAccepted\": 5,\n      \"feedbackScore\": 4.5,\n      \"overallScore\": 7.2,\n      \"registeredAt\": \"2024-01-01T10:00:00\"\n    }\n  ]\n}"
             }
-          ]
+          }
+        },
+        {
+          "name": "Register as Referrer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jobId\":1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/register-referrer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "register-referrer"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Accept Referral",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/accept/1?status=SHORTLISTED",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "accept",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "status",
+                  "value": "SHORTLISTED"
+                }
+              ]
+            }
+          }
         }
       ]
     },
@@ -80,24 +312,40 @@
       "name": "Job Search",
       "item": [
         {
+          "name": "Get Job by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "1"
+              ]
+            }
+          }
+        },
+        {
           "name": "Search Jobs",
           "request": {
             "method": "POST",
             "header": [
               {
-                "key": "Content-Type",
-                "value": "application/json",
-                "type": "text"
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
               },
               {
-                "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
+                "key": "Content-Type",
+                "value": "application/json"
               }
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"keyword\": \"software engineer\",\n  \"page\": 0,\n  \"size\": 20\n}"
+              "raw": "{\"keyword\":\"software engineer\",\"page\":0,\"size\":20}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/jobsearch/search",
@@ -110,56 +358,27 @@
                 "jobsearch",
                 "search"
               ]
-            },
-            "description": "Search jobs with dropdown-enriched responses"
-          },
-          "response": [
-            {
-              "name": "Dropdown Enriched Response",
-              "originalRequest": {
-                "method": "POST",
-                "header": [
-                  {
-                    "key": "Content-Type",
-                    "value": "application/json",
-                    "type": "text"
-                  },
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "body": {
-                  "mode": "raw",
-                  "raw": "{\n  \"keyword\": \"software engineer\",\n  \"page\": 0,\n  \"size\": 20\n}"
-                },
-                "url": {
-                  "raw": "{{base_url}}/api/v1/jobsearch/search",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "jobsearch",
-                    "search"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"jobs\": [\n    {\n      \"id\": 1,\n      \"title\": \"Software Engineer\",\n      \"description\": \"We are looking for a talented software engineer...\",\n      \"company\": \"Google\",\n      \"designation\": \"Software Engineer\",\n      \"minSalary\": 100000,\n      \"maxSalary\": 150000,\n      \"minExperience\": 2,\n      \"maxExperience\": 5,\n      \"jobType\": \"HYBRID\",\n      \"cityId\": 1,\n      \"cityName\": \"Mountain View\",\n      \"countryId\": 1,\n      \"countryName\": \"United States\",\n      \"companyId\": 1,\n      \"companyName\": \"Google\",\n      \"designationId\": 1,\n      \"designationName\": \"Software Engineer\",\n      \"currencyId\": 1,\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"postedBy\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-01T10:00:00\",\n      \"updatedAt\": \"2024-01-01T10:00:00\",\n      \"tags\": [\n        \"Java\",\n        \"Spring\",\n        \"Microservices\"\n      ],\n      \"openingCount\": 5,\n      \"uniqueUrl\": \"https://careers.google.com/jobs/123\",\n      \"platform\": \"Google Careers\",\n      \"approved\": 1,\n      \"referrerCount\": 2,\n      \"userRole\": \"VIEWER\",\n      \"actualPostedBy\": 1,\n      \"isSuperAdminPosted\": false\n    }\n  ],\n  \"total\": 1,\n  \"page\": 0,\n  \"size\": 20,\n  \"totalPages\": 1,\n  \"companyMetaData\": {\n    \"1\": {\n      \"companyName\": \"Google\",\n      \"logoUrl\": \"https://google.com/logo.png\",\n      \"website\": \"https://google.com\",\n      \"headquarters\": \"Mountain View, CA\",\n      \"activeJobCount\": 15,\n      \"secondaryIndustry\": \"Software,Cloud\",\n      \"companySize\": \"100000+\",\n      \"specialties\": \"AI,ML,Search\",\n      \"careerPageUrl\": \"https://careers.google.com\"\n    }\n  }\n}"
             }
-          ]
+          }
+        },
+        {
+          "name": "Get Referrers for Job",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/1/referrers",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "1",
+                "referrers"
+              ]
+            }
+          }
         }
       ]
     },
@@ -167,10 +386,63 @@
       "name": "Companies",
       "item": [
         {
+          "name": "Create/Update Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Google\",\"description\":\"Technology company\",\"website\":\"https://google.com\",\"primaryIndustryId\":1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies?page=0&size=100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            }
+          }
+        },
+        {
           "name": "Get Company by ID",
           "request": {
             "method": "GET",
-            "header": [],
             "url": {
               "raw": "{{base_url}}/api/v1/companies/1",
               "host": [
@@ -182,41 +454,55 @@
                 "companies",
                 "1"
               ]
-            },
-            "description": "Get company details with dropdown values"
-          },
-          "response": [
-            {
-              "name": "Dropdown Enriched Response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/companies/1",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "companies",
-                    "1"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"id\": 1,\n  \"name\": \"Google\",\n  \"description\": \"A technology company\",\n  \"website\": \"https://google.com\",\n  \"logoUrl\": \"https://google.com/logo.png\",\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\",\n  \"aboutUs\": \"About Google\",\n  \"vision\": \"To organize the world's information\",\n  \"mission\": \"Make information universally accessible\",\n  \"culture\": \"Innovative and inclusive\",\n  \"jobs\": [],\n  \"careerPageUrl\": \"https://careers.google.com\",\n  \"linkedinUrl\": \"https://linkedin.com/company/google\",\n  \"headquarters\": \"Mountain View, CA\",\n  \"primaryIndustryId\": 1,\n  \"primaryIndustryName\": \"Information Technology & Services\",\n  \"secondaryIndustries\": \"Software,Cloud\",\n  \"companySize\": \"100000+\",\n  \"specialties\": \"AI,ML,Search\"\n}"
             }
-          ]
+          }
+        },
+        {
+          "name": "Get Industry-wise Companies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/industry-wise-companies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "industry-wise-companies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Companies by Industry",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/by-industry/1?page=0&size=100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "by-industry",
+                "1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "100"
+                }
+              ]
+            }
+          }
         }
       ]
     },
@@ -224,14 +510,187 @@
       "name": "Job Applications",
       "item": [
         {
-          "name": "Get Job Application Details",
+          "name": "Apply for Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jobId\":1,\"jobReferrerId\":1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Applications",
           "request": {
             "method": "GET",
             "header": [
               {
                 "key": "Authorization",
-                "value": "Bearer {{token}}",
-                "type": "text"
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Referrer Feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jobId\":1,\"referrerUserId\":1,\"feedbackText\":\"Great experience\",\"score\":5}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications/feedback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "feedback"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Switch Referrer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications/switch-referrer?applicationId=1&newJobReferrerId=2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "switch-referrer"
+              ],
+              "query": [
+                {
+                  "key": "applicationId",
+                  "value": "1"
+                },
+                {
+                  "key": "newJobReferrerId",
+                  "value": "2"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Job Applications Management",
+      "item": [
+        {
+          "name": "Get Applications for My Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/job-applications/my-jobs",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "my-jobs"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Applications for Job",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/job-applications/job/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "job-applications",
+                "job",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Application Details",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
               }
             ],
             "url": {
@@ -245,47 +704,1931 @@
                 "job-applications",
                 "1"
               ]
-            },
-            "description": "Get job application details with comprehensive dropdown values"
-          },
-          "response": [
-            {
-              "name": "Dropdown Enriched Response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [
-                  {
-                    "key": "Authorization",
-                    "value": "Bearer {{token}}",
-                    "type": "text"
-                  }
-                ],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/job-applications/1",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "job-applications",
-                    "1"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"id\": 1,\n  \"jobId\": 1,\n  \"jobTitle\": \"Software Engineer\",\n  \"jobCityId\": 1,\n  \"jobCityName\": \"Mountain View\",\n  \"jobCountryId\": 1,\n  \"jobCountryName\": \"United States\",\n  \"jobDesignationId\": 1,\n  \"jobDesignationName\": \"Software Engineer\",\n  \"jobCurrencyId\": 1,\n  \"jobCurrencyName\": \"US Dollar\",\n  \"jobCurrencySymbol\": \"$\",\n  \"jobCompanyId\": 1,\n  \"jobCompanyName\": \"Google\",\n  \"applicantId\": 2,\n  \"applicantName\": \"John Doe\",\n  \"applicantEmail\": \"john@example.com\",\n  \"applicantCompanyId\": 2,\n  \"applicantCompanyName\": \"Microsoft\",\n  \"applicantDesignationId\": 2,\n  \"applicantDesignationName\": \"Senior Developer\",\n  \"applicantDepartmentId\": 1,\n  \"applicantDepartmentNameValue\": \"Engineering\",\n  \"applicantCityId\": 2,\n  \"applicantCityNameValue\": \"Seattle\",\n  \"applicantCountryId\": 1,\n  \"applicantCountryNameValue\": \"United States\",\n  \"applicantCurrentSalaryCurrencyId\": 1,\n  \"applicantCurrentSalaryCurrencyName\": \"US Dollar\",\n  \"applicantCurrentSalaryCurrencySymbol\": \"$\",\n  \"applicantExpectedSalaryCurrencyId\": 1,\n  \"applicantExpectedSalaryCurrencyName\": \"US Dollar\",\n  \"applicantExpectedSalaryCurrencySymbol\": \"$\",\n  \"status\": \"PENDING\",\n  \"createdAt\": \"2024-01-01T10:00:00\",\n  \"updatedAt\": \"2024-01-01T10:00:00\"\n}"
             }
-          ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Super Admin",
+      "item": [
+        {
+          "name": "Get Pending Jobs",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/superadmin/jobs/pending?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "superadmin",
+                "jobs",
+                "pending"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Approve Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"status\":\"APPROVED\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/superadmin/jobs/1/approve",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "superadmin",
+                "jobs",
+                "1",
+                "approve"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Company Controller",
+      "item": [
+        {
+          "name": "Generate Companies Batch",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"industries\":[\"Technology\",\"Finance\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/generate-batch",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "generate-batch"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Process Company Operations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"companyName\":\"Google\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Company Flags",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"flags\":[\"is_crawled\",\"industry_processed\"],\"companyName\":\"Google\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "reset-flags"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Shortnames for All",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "shortnames",
+                "generate-for-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Shortname for Company",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-company/Google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "shortnames",
+                "generate-for-company",
+                "Google"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Dropdown Controller",
+      "item": [
+        {
+          "name": "Generate Designations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"industries\":[\"Technology\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdown/designations/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdown",
+                "designations",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Similar Designations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"designation\":\"Software Engineer\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdown/designations/similar",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdown",
+                "designations",
+                "similar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Cities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"countries\":[\"United States\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdown/cities/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdown",
+                "cities",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Industries",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"keywords\":[\"technology\",\"finance\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdown/industries/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdown",
+                "industries",
+                "generate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Interview Controller",
+      "item": [
+        {
+          "name": "Generate Interview Questions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"designation\":\"Software Engineer\",\"company\":\"Google\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/interview/questions/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "interview",
+                "questions",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Skills",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"designation\":\"Software Engineer\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/interview/skills/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "interview",
+                "skills",
+                "generate"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "AI Controller",
+      "item": [
+        {
+          "name": "Generate Similar Companies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"companyName\":\"Google\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/similar-companies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "similar-companies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Process URL Content",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"url\":\"https://example.com\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/url-content/process",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "url-content",
+                "process"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dropdown Controller",
+      "item": [
+        {
+          "name": "Get All Designations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "designations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Cities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "cities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Countries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/countries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "countries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Industries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/industries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "industries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Currencies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/currencies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "currencies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "departments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdown/companies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdown",
+                "companies"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interview Controller",
+      "item": [
+        {
+          "name": "Get Designations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview/designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview",
+                "designations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Topics by Designation",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview/designations/Software%20Engineer/topics",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview",
+                "designations",
+                "Software Engineer",
+                "topics"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Questions by Designation",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview/designations/Software%20Engineer/questions/general",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview",
+                "designations",
+                "Software Engineer",
+                "questions",
+                "general"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Controller",
+      "item": [
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"firstName\":\"John\",\"lastName\":\"Doe\",\"designation\":\"Software Engineer\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Profile",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/users/profile",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "users",
+                "profile"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Health Controller",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/health",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Database Health",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/health/database",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "health",
+                "database"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "List of Companies",
+      "item": [
+        {
+          "name": "Search Companies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/search?keyword=google&page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "google"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Job Count",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"activeJobCount\":15}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/companies/1/update-job-count",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "companies",
+                "1",
+                "update-job-count"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Utility Controller",
+      "item": [
+        {
+          "name": "Load Basic Company Data",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/utility/company-data/load-basic",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "utility",
+                "company-data",
+                "load-basic"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Detailed Company Data",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/utility/company-data/update-detailed",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "utility",
+                "company-data",
+                "update-detailed"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Cleanup Duplicate Companies",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/utility/company-data/cleanup-duplicates",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "utility",
+                "company-data",
+                "cleanup-duplicates"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reindex Jobs",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/utility/job-admin/reindex",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "utility",
+                "job-admin",
+                "reindex"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Location Controller",
+      "item": [
+        {
+          "name": "Get All Countries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/countries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "countries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Cities by Country",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/countries/1/cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "countries",
+                "1",
+                "cities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Cities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/cities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "cities"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get City by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/cities/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "cities",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Cities",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/locations/cities/search?keyword=mountain",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "locations",
+                "cities",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "mountain"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Institution Controller",
+      "item": [
+        {
+          "name": "Get All Institutions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/institutions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Institution",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Stanford University\",\"type\":\"UNIVERSITY\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/institutions",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Institution by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/institutions/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Institution",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"name\":\"Updated University Name\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/institutions/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Institution",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/v1/institutions/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Institutions",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/institutions/search?keyword=stanford",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "institutions",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "stanford"
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Skill Controller",
+      "item": [
+        {
+          "name": "Get All Skills",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "skills"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Notification Controller",
+      "item": [
+        {
+          "name": "Get Recent Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/recent/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "recent",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/all/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "all",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Notifications",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/unread/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "unread",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/unread-count/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "unread-count",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark Notification as Read",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/mark-read/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "mark-read",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Mark All Notifications as Read",
+          "request": {
+            "method": "PUT",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/mark-all-read/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "mark-all-read",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Notifications by Type",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/notifications/type/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "notifications",
+                "type",
+                "1"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "User Resume Controller",
+      "item": [
+        {
+          "name": "Upload Resume",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/upload",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "upload"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get User Resumes",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/user",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "user"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Latest Resume",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/user/latest",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "user",
+                "latest"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Resume by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download Resume by UUID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/download/abc123",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "download",
+                "abc123"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Download Resume by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/1/download",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "1",
+                "download"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Update Resume",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "src": []
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Resume",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/resumes",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "resumes"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Registration Controller",
+      "item": [
+        {
+          "name": "Register User",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"email\":\"user@example.com\",\"password\":\"password\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/registration",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "registration"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Interview Generation Controller",
+      "item": [
+        {
+          "name": "Generate Topics for Designation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"topics\":[\"Data Structures\",\"Algorithms\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/designations/Software%20Engineer/topics/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "designations",
+                "Software Engineer",
+                "topics",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate and Save Topics for Designation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"topics\":[\"Data Structures\",\"Algorithms\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/designations/Software%20Engineer/topics/generate-and-save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "designations",
+                "Software Engineer",
+                "topics",
+                "generate-and-save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate All Topics",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/designations/topics/generate-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "designations",
+                "topics",
+                "generate-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate and Save All Topics",
+          "request": {
+            "method": "POST",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/designations/topics/generate-and-save-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "designations",
+                "topics",
+                "generate-and-save-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Questions",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"topics\":[\"Data Structures\"],\"designation\":\"Software Engineer\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/questions/generate",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "questions",
+                "generate"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Generation Queue by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/questions/generation/queue/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "questions",
+                "generation",
+                "queue",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Pending Generation Queue",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/questions/generation/queue/pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "questions",
+                "generation",
+                "queue",
+                "pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get In Progress Generation Queue",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/questions/generation/queue/in-progress",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "questions",
+                "generation",
+                "queue",
+                "in-progress"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate and Save Questions for Skill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"topics\":[\"Java Programming\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/interview-generation/skills/Java/topics/questions/generate-and-save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "interview-generation",
+                "skills",
+                "Java",
+                "topics",
+                "questions",
+                "generate-and-save"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "My Job Applications Controller",
+      "item": [
+        {
+          "name": "Apply for Job",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jobId\":1,\"jobReferrerId\":1}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get My Applications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Referrer Feedback",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"jobId\":1,\"referrerUserId\":1,\"feedbackText\":\"Great experience\",\"score\":5}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications/feedback",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "feedback"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Switch Referrer",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/my-applications/switch-referrer?applicationId=1&newJobReferrerId=2",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "my-applications",
+                "switch-referrer"
+              ],
+              "query": [
+                {
+                  "key": "applicationId",
+                  "value": "1"
+                },
+                {
+                  "key": "newJobReferrerId",
+                  "value": "2"
+                }
+              ]
+            }
+          }
         }
       ]
     }
@@ -293,7 +2636,7 @@
   "variable": [
     {
       "key": "base_url",
-      "value": "http://localhost:8080",
+      "value": "http://localhost:8085/tymbl-service",
       "type": "string"
     },
     {
