@@ -8,31 +8,20 @@ import lombok.AllArgsConstructor;
 import java.util.List;
 
 @Data
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
 public class IndustryWiseCompaniesDTO {
     private Long industryId;
-    private String industryName;
+    private String industryName; // Dropdown value for industryId
     private String industryDescription;
-    private Long companyCount;
-    private Long totalJobCount;
+    private Integer companyCount;
     private List<TopCompanyDTO> topCompanies;
     
     @Data
-    @Builder
-    @NoArgsConstructor
-    @AllArgsConstructor
     public static class TopCompanyDTO {
         private Long companyId;
         private String companyName;
         private String logoUrl;
         private String website;
         private String headquarters;
-        private Long activeJobCount;
-        private String secondaryIndustry;
-        private String companySize;
-        private String specialties;
-        private String careerPageUrl;
+        private Integer activeJobCount;
     }
 } 

@@ -399,6 +399,51 @@ public class ElasticsearchJobService {
         response.setUserRole("VIEWER");
         response.setActualPostedBy(response.getPostedBy());
         
+        // Enrich with dropdown values
+        enrichJobResponseWithDropdownValues(response);
+        
         return response;
+    }
+
+    /**
+     * Enrich job response with dropdown values from DropdownService
+     */
+    private void enrichJobResponseWithDropdownValues(JobResponse response) {
+        try {
+            // Get city name
+            if (response.getCityId() != null) {
+                String cityName = dropdownService.getCityNameById(response.getCityId());
+                response.setCityName(cityName);
+            }
+            
+            // Get country name
+            if (response.getCountryId() != null) {
+                String countryName = dropdownService.getCountryNameById(response.getCountryId());
+                response.setCountryName(countryName);
+            }
+            
+            // Get designation name
+            if (response.getDesignationId() != null) {
+                String designationName = dropdownService.getDesignationNameById(response.getDesignationId());
+                response.setDesignationName(designationName);
+            }
+            
+            // Get currency information
+            if (response.getCurrencyId() != null) {
+                String currencyName = dropdownService.getCurrencyNameById(response.getCurrencyId());
+                String currencySymbol = dropdownService.getCurrencySymbolById(response.getCurrencyId());
+                response.setCurrencyName(currencyName);
+                response.setCurrencySymbol(currencySymbol);
+            }
+            
+            // Get company name
+            if (response.getCompanyId() != null) {
+                String companyName = dropdownService.getCompanyNameById(response.getCompanyId());
+                response.setCompanyName(companyName);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to enrich job response with dropdown values for job {}: {}", 
+                     response.getId(), e.getMessage());
+        }
     }
 } 

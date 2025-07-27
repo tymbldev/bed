@@ -28,6 +28,9 @@ public interface CountryRepository extends JpaRepository<Country, Long> {
     // Check if processed name exists
     boolean existsByProcessedName(String processedName);
     
+    // Find countries by processed name
+    List<Country> findByProcessedName(String processedName);
+    
     // Reset processed name generated flag for all countries
     @Query("UPDATE Country c SET c.processedNameGenerated = false")
     void resetProcessedNameGeneratedFlag();

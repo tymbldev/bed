@@ -12,6 +12,7 @@ import com.tymbl.common.util.UserEnrichmentUtil;
 import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
 import com.tymbl.common.repository.JobReferrerRepository;
+import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.NotificationService;
 import com.tymbl.common.entity.JobReferrer;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +38,7 @@ public class JobApplicationService {
     private final CompanyService companyService;
     private final UserEnrichmentUtil userEnrichmentUtil;
     private final NotificationService notificationService;
+    private final DropdownService dropdownService;
 
     /**
      * Helper method to enrich user data with all names (company, designation, department, country, city)
@@ -271,6 +273,10 @@ public class JobApplicationService {
         
         // Application details
         details.setApplicationStatus(convertStatus(application.getStatus()));
+        
+        // Enrich with dropdown values
+        enrichJobApplicationDetailsWithDropdownValues(details);
+        
         return details;
     }
     
@@ -413,5 +419,83 @@ public class JobApplicationService {
         }
         
         return mapToBasicResponse(application);
+    }
+    
+    /**
+     * Enrich job application details with dropdown values from DropdownService
+     */
+    private void enrichJobApplicationDetailsWithDropdownValues(JobApplicationResponseExtendedDetails details) {
+        try {
+            // Job-related dropdown values
+            if (details.getJobCityId() != null) {
+                String cityName = dropdownService.getCityNameById(details.getJobCityId());
+                details.setJobCityName(cityName);
+            }
+            
+            if (details.getJobCountryId() != null) {
+                String countryName = dropdownService.getCountryNameById(details.getJobCountryId());
+                details.setJobCountryName(countryName);
+            }
+            
+            if (details.getJobDesignationId() != null) {
+                String designationName = dropdownService.getDesignationNameById(details.getJobDesignationId());
+                details.setJobDesignationName(designationName);
+            }
+            
+            if (details.getJobCurrencyId() != null) {
+                String currencyName = dropdownService.getCurrencyNameById(details.getJobCurrencyId());
+                String currencySymbol = dropdownService.getCurrencySymbolById(details.getJobCurrencyId());
+                details.setJobCurrencyName(currencyName);
+                details.setJobCurrencySymbol(currencySymbol);
+            }
+            
+            if (details.getJobCompanyId() != null) {
+                String companyName = dropdownService.getCompanyNameById(details.getJobCompanyId());
+                details.setJobCompanyName(companyName);
+            }
+            
+            // Applicant-related dropdown values
+            if (details.getApplicantCompanyId() != null) {
+                String companyName = dropdownService.getCompanyNameById(details.getApplicantCompanyId());
+                details.setApplicantCompanyName(companyName);
+            }
+            
+            if (details.getApplicantDesignationId() != null) {
+                String designationName = dropdownService.getDesignationNameById(details.getApplicantDesignationId());
+                details.setApplicantDesignationName(designationName);
+            }
+            
+            if (details.getApplicantDepartmentId() != null) {
+                String departmentName = dropdownService.getDepartmentNameById(details.getApplicantDepartmentId());
+                details.setApplicantDepartmentNameValue(departmentName);
+            }
+            
+            if (details.getApplicantCityId() != null) {
+                String cityName = dropdownService.getCityNameById(details.getApplicantCityId());
+                details.setApplicantCityNameValue(cityName);
+            }
+            
+            if (details.getApplicantCountryId() != null) {
+                String countryName = dropdownService.getCountryNameById(details.getApplicantCountryId());
+                details.setApplicantCountryNameValue(countryName);
+            }
+            
+            if (details.getApplicantCurrentSalaryCurrencyId() != null) {
+                String currencyName = dropdownService.getCurrencyNameById(details.getApplicantCurrentSalaryCurrencyId());
+                String currencySymbol = dropdownService.getCurrencySymbolById(details.getApplicantCurrentSalaryCurrencyId());
+                details.setApplicantCurrentSalaryCurrencyName(currencyName);
+                details.setApplicantCurrentSalaryCurrencySymbol(currencySymbol);
+            }
+            
+            if (details.getApplicantExpectedSalaryCurrencyId() != null) {
+                String currencyName = dropdownService.getCurrencyNameById(details.getApplicantExpectedSalaryCurrencyId());
+                String currencySymbol = dropdownService.getCurrencySymbolById(details.getApplicantExpectedSalaryCurrencyId());
+                details.setApplicantExpectedSalaryCurrencyName(currencyName);
+                details.setApplicantExpectedSalaryCurrencySymbol(currencySymbol);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to enrich job application details with dropdown values for application {}: {}", 
+                       details.getId(), e.getMessage());
+        }
     }
 } 

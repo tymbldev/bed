@@ -3,6 +3,7 @@ package com.tymbl.common.service;
 import com.tymbl.common.dto.IndustryWiseCompaniesDTO;
 import com.tymbl.common.entity.City;
 import com.tymbl.common.entity.Country;
+import com.tymbl.common.entity.Currency;
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
 import com.tymbl.common.entity.Industry;
@@ -12,6 +13,8 @@ import com.tymbl.common.repository.CountryRepository;
 import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.IndustryRepository;
+import com.tymbl.common.repository.CurrencyRepository;
+import com.tymbl.common.util.DesignationNameCleaner;
 import com.tymbl.common.repository.LocationRepository;
 import com.tymbl.jobs.repository.CompanyRepository;
 import java.util.ArrayList;
@@ -43,6 +46,7 @@ public class DropdownService {
   private final CityRepository cityRepository;
   private final IndustryRepository industryRepository;
   private final CompanyRepository companyRepository;
+  private final CurrencyRepository currencyRepository;
 
   @Qualifier("taskExecutor")
   private final Executor taskExecutor;
@@ -58,6 +62,8 @@ public class DropdownService {
   private final Map<Long, String> cityCache = new ConcurrentHashMap<>();
   private final Map<Long, String> industryCache = new ConcurrentHashMap<>();
   private final Map<Long, String> companyNameCache = new ConcurrentHashMap<>();
+  private final Map<Long, String> currencyNameCache = new ConcurrentHashMap<>();
+  private final Map<Long, String> currencySymbolCache = new ConcurrentHashMap<>();
   private List<com.tymbl.jobs.entity.Company> companyList = new ArrayList<>();
 
   @PostConstruct
@@ -148,10 +154,18 @@ public class DropdownService {
 
   @Transactional
   public Designation createDesignation(Designation designation) {
-    if (designationRepository.existsByName(designation.getName())) {
-      throw new RuntimeException(
-          "Designation with title '" + designation.getName() + "' already exists");
+    // Clean and validate the designation name
+    String cleanedName = DesignationNameCleaner.cleanAndValidateDesignationName(designation.getName());
+    if (cleanedName == null) {
+      throw new RuntimeException("Invalid designation name: " + designation.getName());
     }
+    
+    if (designationRepository.existsByName(cleanedName)) {
+      throw new RuntimeException(
+          "Designation with title '" + cleanedName + "' already exists");
+    }
+    
+    designation.setName(cleanedName);
     return designationRepository.save(designation);
   }
 
@@ -347,6 +361,56 @@ public class DropdownService {
     }
   }
 
+  @Transactional(readOnly = true)
+  public String getCurrencyNameById(Long id) {
+      if (id == null) {
+          return null;
+      }
+
+    // Try cache first
+    String name = currencyNameCache.get(id);
+    if (name != null) {
+      return name;
+    }
+
+    // Fallback to database if cache not initialized
+    try {
+      Currency currency = currencyRepository.findById(id).orElse(null);
+      name = currency != null ? currency.getName() : null;
+      if (name != null) {
+        currencyNameCache.put(id, name);
+      }
+      return name;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  @Transactional(readOnly = true)
+  public String getCurrencySymbolById(Long id) {
+      if (id == null) {
+          return null;
+      }
+
+    // Try cache first
+    String symbol = currencySymbolCache.get(id);
+    if (symbol != null) {
+      return symbol;
+    }
+
+    // Fallback to database if cache not initialized
+    try {
+      Currency currency = currencyRepository.findById(id).orElse(null);
+      symbol = currency != null ? currency.getSymbol() : null;
+      if (symbol != null) {
+        currencySymbolCache.put(id, symbol);
+      }
+      return symbol;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
 
   // Method to clear cache (useful for testing or when data changes)
   public void clearCache() {
@@ -356,6 +420,8 @@ public class DropdownService {
     cityCache.clear();
     industryCache.clear();
     companyNameCache.clear();
+    currencyNameCache.clear();
+    currencySymbolCache.clear();
     companyList.clear();
   }
 
@@ -523,6 +589,8 @@ public class DropdownService {
     cityCache.clear();
     industryCache.clear();
     companyNameCache.clear();
+    currencyNameCache.clear();
+    currencySymbolCache.clear();
     companyList.clear();
 
     // Re-initialize all caches in background
@@ -555,28 +623,27 @@ public class DropdownService {
       List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
           .map(companyData -> {
             Long companyId = companyData[0] == null ? null : ((Number) companyData[0]).longValue();
-            IndustryWiseCompaniesDTO.TopCompanyDTO.TopCompanyDTOBuilder builder = IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
-                .companyId(companyId)
-                .companyName((String) companyData[1])
-                .logoUrl((String) companyData[2])
-                .website((String) companyData[3])
-                .headquarters((String) companyData[4])
-                .activeJobCount(
-                    companyData[5] == null ? 0L : ((Number) companyData[5]).longValue());
-
-            return builder.build();
+            IndustryWiseCompaniesDTO.TopCompanyDTO topCompany = new IndustryWiseCompaniesDTO.TopCompanyDTO();
+            topCompany.setCompanyId(companyId);
+            topCompany.setCompanyName((String) companyData[1]);
+            topCompany.setLogoUrl((String) companyData[2]);
+            topCompany.setWebsite((String) companyData[3]);
+            topCompany.setHeadquarters((String) companyData[4]);
+            topCompany.setActiveJobCount(
+                companyData[5] == null ? 0 : ((Number) companyData[5]).intValue());
+            return topCompany;
           })
           .limit(5)
           .collect(java.util.stream.Collectors.toList());
-      Long totalJobCount = industryJobCountMap.getOrDefault(industryId, 0L);
-      return IndustryWiseCompaniesDTO.builder()
-          .industryId(industryId)
-          .industryName(industryName)
-          .industryDescription(industryDescription)
-          .companyCount(companyCount)
-          .totalJobCount(totalJobCount)
-          .topCompanies(topCompanies)
-          .build();
+      
+      IndustryWiseCompaniesDTO industryDTO = new IndustryWiseCompaniesDTO();
+      industryDTO.setIndustryId(industryId);
+      industryDTO.setIndustryName(industryName);
+      industryDTO.setIndustryDescription(industryDescription);
+      industryDTO.setCompanyCount(companyCount.intValue());
+      industryDTO.setTopCompanies(topCompanies);
+      
+      return industryDTO;
     }).collect(java.util.stream.Collectors.toList());
   }
 
@@ -586,15 +653,14 @@ public class DropdownService {
     return companiesData.stream()
         .map(companyData -> {
           Long companyId = companyData[0] == null ? null : ((Number) companyData[0]).longValue();
-          IndustryWiseCompaniesDTO.TopCompanyDTO.TopCompanyDTOBuilder builder = IndustryWiseCompaniesDTO.TopCompanyDTO.builder()
-              .companyId(companyId)
-              .companyName((String) companyData[1])
-              .logoUrl((String) companyData[2])
-              .website((String) companyData[3])
-              .headquarters((String) companyData[4])
-              .activeJobCount(companyData[5] == null ? 0L : ((Number) companyData[5]).longValue());
-
-          return builder.build();
+          IndustryWiseCompaniesDTO.TopCompanyDTO topCompany = new IndustryWiseCompaniesDTO.TopCompanyDTO();
+          topCompany.setCompanyId(companyId);
+          topCompany.setCompanyName((String) companyData[1]);
+          topCompany.setLogoUrl((String) companyData[2]);
+          topCompany.setWebsite((String) companyData[3]);
+          topCompany.setHeadquarters((String) companyData[4]);
+          topCompany.setActiveJobCount(companyData[5] == null ? 0 : ((Number) companyData[5]).intValue());
+          return topCompany;
         })
         .collect(java.util.stream.Collectors.toList());
   }

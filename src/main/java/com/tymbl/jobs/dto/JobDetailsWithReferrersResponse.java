@@ -14,17 +14,23 @@ public class JobDetailsWithReferrersResponse {
     private String title;
     private String description;
     private Long cityId;
+    private String cityName; // Dropdown value for cityId
     private Long countryId;
+    private String countryName; // Dropdown value for countryId
     private Long designationId;
     private String designation;
+    private String designationName; // Dropdown value for designationId
     private BigDecimal minSalary;
     private BigDecimal maxSalary;
     private Integer minExperience;
     private Integer maxExperience;
     private JobType jobType;
     private Long currencyId;
+    private String currencyName; // Dropdown value for currencyId
+    private String currencySymbol; // Dropdown value for currencyId
     private Long companyId;
     private String company;
+    private String companyName; // Dropdown value for companyId
     private Long postedBy;
     private boolean active;
     private LocalDateTime createdAt;
@@ -48,6 +54,7 @@ public class JobDetailsWithReferrersResponse {
         private String designation;
         private String company;
         private Long companyId;
+        private String companyName; // Dropdown value for companyId
         private String yearsOfExperience;
         private String monthsOfExperience;
         private String education;

@@ -8,6 +8,8 @@ import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.common.repository.SkillTopicRepository;
 import com.tymbl.common.service.GeminiService;
+import com.tymbl.common.util.CompanyNameCleaner;
+import com.tymbl.common.util.DesignationNameCleaner;
 import com.tymbl.interview.entity.InterviewQuestion;
 import com.tymbl.interview.repository.InterviewQuestionRepository;
 import com.tymbl.jobs.entity.Company;
@@ -67,35 +69,40 @@ public class AIJobService {
                     .map(c -> normalizeWebsite(c.getWebsite()))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toSet());
-                
-                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(industryName, new ArrayList<>(existingNames));
+
+                List<Map<String, String>> generatedCompanies = geminiService.generateCompanyListForIndustry(
+                    industryName, new ArrayList<>(existingNames));
                 int generated = 0, skipped = 0;
                 List<String> errors = new ArrayList<>();
                 
                 for (Map<String, String> companyMap : generatedCompanies) {
-                    String name = companyMap.getOrDefault("name", "").trim();
+                    String rawName = companyMap.getOrDefault("name", "");
                     String website = normalizeWebsite(companyMap.get("website"));
-                    if (name.isEmpty() || website == null || website.isEmpty()) {
+                    
+                    // Clean and validate the company name
+                    String cleanedName = CompanyNameCleaner.cleanAndValidateCompanyName(rawName);
+                    if (cleanedName == null || website == null || website.isEmpty()) {
                         skipped++;
                         continue;
                     }
-                    if (existingNames.contains(name.toLowerCase()) || existingWebsites.contains(website)) {
+                    
+                    if (existingNames.contains(cleanedName.toLowerCase()) || existingWebsites.contains(website)) {
                         skipped++;
                         continue;
                     }
                     
                     // Save new company
                     Company company = new Company();
-                    company.setName(name);
+                    company.setName(cleanedName);
                     company.setWebsite(website);
                     company.setPrimaryIndustryId(industryId);
                     try {
                         companyRepository.save(company);
-                        existingNames.add(name.toLowerCase());
+                        existingNames.add(cleanedName.toLowerCase());
                         existingWebsites.add(website);
                         generated++;
                     } catch (Exception e) {
-                        errors.add("Failed to save: " + name + " (" + website + ") - " + e.getMessage());
+                        errors.add("Failed to save: " + cleanedName + " (" + website + ") - " + e.getMessage());
                         skipped++;
                     }
                 }
@@ -729,26 +736,33 @@ public class AIJobService {
             List<Long> existingDesignationIds = new ArrayList<>();
             
             // Check which similar designations already exist and create new ones if needed
-            for (String similarDesignationName : similarDesignationNames) {
+            for (String rawSimilarDesignationName : similarDesignationNames) {
+                // Clean and validate the designation name
+                String cleanedSimilarDesignationName = DesignationNameCleaner.cleanAndValidateDesignationName(rawSimilarDesignationName);
+                if (cleanedSimilarDesignationName == null) {
+                    log.warn("Skipping invalid similar designation name: '{}'", rawSimilarDesignationName);
+                    continue;
+                }
+                
                 Optional<com.tymbl.common.entity.Designation> existingDesignation = 
-                    designationRepository.findByName(similarDesignationName);
+                    designationRepository.findByName(cleanedSimilarDesignationName);
                 
                 if (existingDesignation.isPresent()) {
-                    existingDesignationNames.add(similarDesignationName);
+                    existingDesignationNames.add(cleanedSimilarDesignationName);
                     existingDesignationIds.add(existingDesignation.get().getId());
                 } else {
                     // Create new designation
-                    com.tymbl.common.entity.Designation newDesignation = new com.tymbl.common.entity.Designation(similarDesignationName);
+                    com.tymbl.common.entity.Designation newDesignation = new com.tymbl.common.entity.Designation(cleanedSimilarDesignationName);
                     newDesignation.setEnabled(true);
                     newDesignation.setSimilarDesignationsProcessed(true); // Mark as processed since it's new
                     
                     try {
                         com.tymbl.common.entity.Designation savedDesignation = designationRepository.save(newDesignation);
-                        newDesignationNames.add(similarDesignationName);
+                        newDesignationNames.add(cleanedSimilarDesignationName);
                         existingDesignationIds.add(savedDesignation.getId());
-                        log.info("Created new designation: {} (ID: {})", similarDesignationName, savedDesignation.getId());
+                        log.info("Created new designation: {} (ID: {})", cleanedSimilarDesignationName, savedDesignation.getId());
                     } catch (Exception e) {
-                        log.error("Failed to create new designation: {}", similarDesignationName, e);
+                        log.error("Failed to create new designation: {}", cleanedSimilarDesignationName, e);
                         // Continue with other designations
                     }
                 }
@@ -896,34 +910,41 @@ public class AIJobService {
             List<Long> existingCompanyIds = new ArrayList<>();
             
             // Check which similar companies already exist and create new ones if needed
-            for (String similarCompanyName : similarCompanyNames) {
-                Optional<Company> existingCompany = companyRepository.findByName(similarCompanyName);
+            for (String rawSimilarCompanyName : similarCompanyNames) {
+                // Clean and validate the company name
+                String cleanedSimilarCompanyName = CompanyNameCleaner.cleanAndValidateCompanyName(rawSimilarCompanyName);
+                if (cleanedSimilarCompanyName == null) {
+                    log.warn("Skipping invalid similar company name: '{}'", rawSimilarCompanyName);
+                    continue;
+                }
+                
+                Optional<Company> existingCompany = companyRepository.findByName(cleanedSimilarCompanyName);
                 
                 if (existingCompany.isPresent()) {
-                    existingCompanyNames.add(similarCompanyName);
+                    existingCompanyNames.add(cleanedSimilarCompanyName);
                     existingCompanyIds.add(existingCompany.get().getId());
                 } else {
                     // Create new company
                     Company newCompany = new Company();
-                    newCompany.setName(similarCompanyName);
+                    newCompany.setName(cleanedSimilarCompanyName);
                     newCompany.setPrimaryIndustryId(company.getPrimaryIndustryId()); // Same industry as original
                     newCompany.setSimilarCompaniesProcessed(true); // Mark as processed since it's new
                     
                     try {
                         Company savedCompany = companyRepository.save(newCompany);
-                        newCompanyNames.add(similarCompanyName);
+                        newCompanyNames.add(cleanedSimilarCompanyName);
                         existingCompanyIds.add(savedCompany.getId());
-                        log.info("Created new company: {} (ID: {})", similarCompanyName, savedCompany.getId());
+                        log.info("Created new company: {} (ID: {})", cleanedSimilarCompanyName, savedCompany.getId());
                     } catch (Exception e) {
-                        log.error("Failed to create new company: {}", similarCompanyName, e);
+                        log.error("Failed to create new company: {}", cleanedSimilarCompanyName, e);
                         // Continue with other companies
                     }
                 }
             }
             
-            // Convert to JSON before storing in database
+            // Convert to JSON before storing in database - use cleaned names
             ObjectMapper objectMapper = new ObjectMapper();
-            String similarCompaniesByNameJson = objectMapper.writeValueAsString(similarCompanyNames);
+            String similarCompaniesByNameJson = objectMapper.writeValueAsString(existingCompanyNames);
             String similarCompaniesByIdJson = objectMapper.writeValueAsString(existingCompanyIds);
             
             // Update the original company with similar companies as JSON
@@ -934,17 +955,17 @@ public class AIJobService {
             companyRepository.save(company);
             
             result.put("success", true);
-            result.put("similarCompaniesFound", similarCompanyNames.size());
+            result.put("similarCompaniesFound", existingCompanyNames.size() + newCompanyNames.size());
             result.put("newCompaniesCreated", newCompanyNames.size());
             result.put("existingCompaniesFound", existingCompanyNames.size());
-            result.put("similarCompanyNames", similarCompanyNames);
+            result.put("similarCompanyNames", existingCompanyNames);
             result.put("newCompanyNames", newCompanyNames);
             result.put("existingCompanyNames", existingCompanyNames);
             result.put("similarCompanyIds", existingCompanyIds);
             result.put("industry", industryName);
             
             log.info("Successfully processed similar companies for: {} (ID: {}). Found: {}, Created: {}", 
-                company.getName(), company.getId(), similarCompanyNames.size(), newCompanyNames.size());
+                company.getName(), company.getId(), existingCompanyNames.size() + newCompanyNames.size(), newCompanyNames.size());
             
         } catch (Exception e) {
             log.error("Error generating similar companies for company: {} (ID: {})", 

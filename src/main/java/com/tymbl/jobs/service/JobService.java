@@ -42,6 +42,7 @@ import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
 import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.service.ElasticsearchIndexingService;
+import com.tymbl.common.service.DropdownService;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +61,7 @@ public class JobService {
     private final UserEnrichmentUtil userEnrichmentUtil;
     private final ElasticsearchJobService elasticsearchJobService;
     private final ElasticsearchIndexingService elasticsearchIndexingService;
+    private final DropdownService dropdownService;
 
     @Value("${referrer.sort.weight.designation:0.3}")
     private double designationWeight;
@@ -660,7 +662,52 @@ public class JobService {
         int referrerCount = jobReferrerRepository.countByJobId(job.getId());
         response.setReferrerCount(referrerCount);
         
+        // Enrich with dropdown values
+        enrichJobResponseWithDropdownValues(response);
+        
         return response;
+    }
+
+    /**
+     * Enrich job response with dropdown values from DropdownService
+     */
+    private void enrichJobResponseWithDropdownValues(JobResponse response) {
+        try {
+            // Get city name
+            if (response.getCityId() != null) {
+                String cityName = dropdownService.getCityNameById(response.getCityId());
+                response.setCityName(cityName);
+            }
+            
+            // Get country name
+            if (response.getCountryId() != null) {
+                String countryName = dropdownService.getCountryNameById(response.getCountryId());
+                response.setCountryName(countryName);
+            }
+            
+            // Get designation name
+            if (response.getDesignationId() != null) {
+                String designationName = dropdownService.getDesignationNameById(response.getDesignationId());
+                response.setDesignationName(designationName);
+            }
+            
+            // Get currency information
+            if (response.getCurrencyId() != null) {
+                String currencyName = dropdownService.getCurrencyNameById(response.getCurrencyId());
+                String currencySymbol = dropdownService.getCurrencySymbolById(response.getCurrencyId());
+                response.setCurrencyName(currencyName);
+                response.setCurrencySymbol(currencySymbol);
+            }
+            
+            // Get company name
+            if (response.getCompanyId() != null) {
+                String companyName = dropdownService.getCompanyNameById(response.getCompanyId());
+                response.setCompanyName(companyName);
+            }
+        } catch (Exception e) {
+            logger.warn("Failed to enrich job response with dropdown values for job {}: {}", 
+                       response.getId(), e.getMessage());
+        }
     }
 
     private JobResponse mapToResponseWithRole(Job job, User user) {
@@ -685,32 +732,41 @@ public class JobService {
         
         JobDetailsWithReferrersResponse response = new JobDetailsWithReferrersResponse();
         
-        // Map job details
-        response.setId(job.getId());
-        response.setTitle(job.getTitle());
-        response.setDescription(job.getDescription());
-        response.setCityId(job.getCityId());
-        response.setCountryId(job.getCountryId());
-        response.setDesignationId(job.getDesignationId());
-        response.setDesignation(job.getDesignation());
-        response.setMinSalary(job.getMinSalary());
-        response.setMaxSalary(job.getMaxSalary());
-        response.setMinExperience(job.getMinExperience());
-        response.setMaxExperience(job.getMaxExperience());
-        response.setJobType(job.getJobType());
-        response.setCurrencyId(job.getCurrencyId());
-        response.setCompanyId(job.getCompanyId());
-        response.setCompany(job.getCompany());
-        response.setPostedBy(job.getPostedById());
-        response.setActive(job.isActive());
-        response.setCreatedAt(job.getCreatedAt());
-        response.setUpdatedAt(job.getUpdatedAt());
-        response.setTags(job.getTags());
-        response.setOpeningCount(job.getOpeningCount());
-        response.setUniqueUrl(job.getUniqueUrl());
-        response.setPlatform(job.getPlatform());
-        response.setApproved(job.getApproved());
-        response.setApprovalStatus(job.getApprovalStatus().name());
+        // Use mapToResponse to get job details with dropdown enrichment
+        JobResponse jobResponse = mapToResponse(job);
+        
+        // Map job details from enriched JobResponse
+        response.setId(jobResponse.getId());
+        response.setTitle(jobResponse.getTitle());
+        response.setDescription(jobResponse.getDescription());
+        response.setCityId(jobResponse.getCityId());
+        response.setCityName(jobResponse.getCityName()); // Dropdown value
+        response.setCountryId(jobResponse.getCountryId());
+        response.setCountryName(jobResponse.getCountryName()); // Dropdown value
+        response.setDesignationId(jobResponse.getDesignationId());
+        response.setDesignation(jobResponse.getDesignation());
+        response.setDesignationName(jobResponse.getDesignationName()); // Dropdown value
+        response.setMinSalary(jobResponse.getMinSalary());
+        response.setMaxSalary(jobResponse.getMaxSalary());
+        response.setMinExperience(jobResponse.getMinExperience());
+        response.setMaxExperience(jobResponse.getMaxExperience());
+        response.setJobType(jobResponse.getJobType());
+        response.setCurrencyId(jobResponse.getCurrencyId());
+        response.setCurrencyName(jobResponse.getCurrencyName()); // Dropdown value
+        response.setCurrencySymbol(jobResponse.getCurrencySymbol()); // Dropdown value
+        response.setCompanyId(jobResponse.getCompanyId());
+        response.setCompany(jobResponse.getCompany());
+        response.setCompanyName(jobResponse.getCompanyName()); // Dropdown value
+        response.setPostedBy(jobResponse.getPostedBy());
+        response.setActive(jobResponse.isActive());
+        response.setCreatedAt(jobResponse.getCreatedAt());
+        response.setUpdatedAt(jobResponse.getUpdatedAt());
+        response.setTags(jobResponse.getTags());
+        response.setOpeningCount(jobResponse.getOpeningCount());
+        response.setUniqueUrl(jobResponse.getUniqueUrl());
+        response.setPlatform(jobResponse.getPlatform());
+        response.setApproved(jobResponse.getApproved());
+        response.setApprovalStatus(jobResponse.getApprovalStatus());
         
         // Get referrers with detailed profiles
         List<JobReferrer> referrers = jobReferrerRepository.findByJobId(jobId);
@@ -730,6 +786,12 @@ public class JobService {
             referrerResponse.setDesignation(user.getDesignation());
             referrerResponse.setCompany(user.getCompany());
             referrerResponse.setCompanyId(user.getCompanyId());
+            
+            // Enrich referrer dropdown values
+            if (user.getCompanyId() != null) {
+                String companyName = dropdownService.getCompanyNameById(user.getCompanyId());
+                referrerResponse.setCompanyName(companyName);
+            }
             
             // Experience
             referrerResponse.setYearsOfExperience(String.valueOf(user.getYearsOfExperience()));

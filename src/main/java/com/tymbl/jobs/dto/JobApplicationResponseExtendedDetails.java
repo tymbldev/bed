@@ -16,17 +16,23 @@ public class JobApplicationResponseExtendedDetails {
     private String jobTitle;
     private String jobDescription;
     private Long jobCityId;
+    private String jobCityName; // Dropdown value for jobCityId
     private Long jobCountryId;
+    private String jobCountryName; // Dropdown value for jobCountryId
     private Long jobDesignationId;
     private String jobDesignation;
+    private String jobDesignationName; // Dropdown value for jobDesignationId
     private BigDecimal jobMinSalary;
     private BigDecimal jobMaxSalary;
     private Integer jobMinExperience;
     private Integer jobMaxExperience;
     private JobType jobJobType;
     private Long jobCurrencyId;
+    private String jobCurrencyName; // Dropdown value for jobCurrencyId
+    private String jobCurrencySymbol; // Dropdown value for jobCurrencyId
     private Long jobCompanyId;
     private String jobCompany;
+    private String jobCompanyName; // Dropdown value for jobCompanyId
     private List<Long> jobSkillIds;
 
     private LocalDateTime createdAt;
@@ -44,21 +50,30 @@ public class JobApplicationResponseExtendedDetails {
     private String applicantPhoneNumber;
     private String applicantCompany;
     private Long applicantCompanyId;
+    private String applicantCompanyName; // Dropdown value for applicantCompanyId
     private Long applicantDesignationId;
     private String applicantDesignation;
+    private String applicantDesignationName; // Dropdown value for applicantDesignationId
     private String applicantDepartmentName;
     private Long applicantDepartmentId;
+    private String applicantDepartmentNameValue; // Dropdown value for applicantDepartmentId
     private String applicantCityName;
     private Long applicantCityId;
+    private String applicantCityNameValue; // Dropdown value for applicantCityId
     private String applicantCountryName;
     private Long applicantCountryId;
+    private String applicantCountryNameValue; // Dropdown value for applicantCountryId
     private String applicantZipCode;
     private Integer applicantYearsOfExperience;
     private Integer applicantMonthsOfExperience;
     private Integer applicantCurrentSalary;
     private Long applicantCurrentSalaryCurrencyId;
+    private String applicantCurrentSalaryCurrencyName; // Dropdown value for applicantCurrentSalaryCurrencyId
+    private String applicantCurrentSalaryCurrencySymbol; // Dropdown value for applicantCurrentSalaryCurrencyId
     private Integer applicantExpectedSalary;
     private Long applicantExpectedSalaryCurrencyId;
+    private String applicantExpectedSalaryCurrencyName; // Dropdown value for applicantExpectedSalaryCurrencyId
+    private String applicantExpectedSalaryCurrencySymbol; // Dropdown value for applicantExpectedSalaryCurrencyId
     private Integer applicantNoticePeriod;
     private String applicantResume;
     private String applicantResumeContentType;

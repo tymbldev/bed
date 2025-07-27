@@ -23,6 +23,7 @@ public class CompanyResponse {
     private String linkedinUrl;
     private String headquarters;
     private Long primaryIndustryId;
+    private String primaryIndustryName; // Dropdown value for primaryIndustryId
     private String secondaryIndustries;
     private String companySize;
     private String specialties;

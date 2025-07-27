@@ -6,6 +6,7 @@ import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
 import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.common.repository.DesignationRepository;
+import com.tymbl.common.util.DesignationNameCleaner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -274,31 +275,40 @@ public class DesignationGenerationService {
     private int saveDesignationsToDatabase(List<String> designations, Department department) {
         int savedCount = 0;
         int errorCount = 0;
+        int skippedCount = 0;
         
         log.info("Starting to save {} designations for department: {} ({})", designations.size(), department.getName(), department.getId());
         
-        for (String designationName : designations) {
+        for (String rawDesignationName : designations) {
             try {
+                // Clean and validate the designation name
+                String cleanedDesignationName = DesignationNameCleaner.cleanAndValidateDesignationName(rawDesignationName);
+                if (cleanedDesignationName == null) {
+                    log.warn("Skipping invalid designation name: '{}' for department: {}", rawDesignationName, department.getName());
+                    skippedCount++;
+                    continue;
+                }
+                
                 // Check if designation already exists
-                boolean designationExists = designationRepository.existsByName(designationName);
+                boolean designationExists = designationRepository.existsByName(cleanedDesignationName);
                 
                 if (!designationExists) {
-                    Designation designation = new Designation(designationName);
+                    Designation designation = new Designation(cleanedDesignationName);
                     designation.setEnabled(true);
                     designationRepository.save(designation);
                     savedCount++;
-                    log.debug("Saved designation: {} for department: {}", designationName, department.getName());
+                    log.debug("Saved designation: {} for department: {}", cleanedDesignationName, department.getName());
                 } else {
-                    log.debug("Designation already exists: {} for department: {}", designationName, department.getName());
+                    log.debug("Designation already exists: {} for department: {}", cleanedDesignationName, department.getName());
                 }
             } catch (Exception e) {
                 errorCount++;
-                log.error("Error saving designation: {} for department: {}, Error: {}", designationName, department.getName(), e.getMessage());
+                log.error("Error saving designation: {} for department: {}, Error: {}", rawDesignationName, department.getName(), e.getMessage());
             }
         }
         
-        log.info("Designation save completed for department: {} ({}). Saved: {}, Errors: {}", 
-                department.getName(), department.getId(), savedCount, errorCount);
+        log.info("Designation save completed for department: {} ({}). Saved: {}, Skipped: {}, Errors: {}", 
+                department.getName(), department.getId(), savedCount, skippedCount, errorCount);
         
         return savedCount;
     }

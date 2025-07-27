@@ -18,6 +18,9 @@ public interface CityRepository extends JpaRepository<City, Long> {
     // Check if processed name exists
     boolean existsByProcessedName(String processedName);
     
+    // Find cities by processed name
+    List<City> findByProcessedName(String processedName);
+    
     // Reset processed name generated flag for all cities
     @Query("UPDATE City c SET c.processedNameGenerated = false")
     void resetProcessedNameGeneratedFlag();

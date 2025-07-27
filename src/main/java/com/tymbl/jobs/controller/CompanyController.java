@@ -74,6 +74,7 @@ public class CompanyController {
                           "  \"linkedinUrl\": \"https://linkedin.com/company/example-corp\",\n" +
                           "  \"headquarters\": \"San Francisco, CA\",\n" +
                           "  \"primaryIndustryId\": 10,\n" +
+                          "  \"primaryIndustryName\": \"Information Technology & Services\",\n" +
                           "  \"secondaryIndustries\": \"Software,Cloud\",\n" +
                           "  \"companySize\": \"1000+\",\n" +
                           "  \"specialties\": \"AI,ML,Cloud\"\n" +
@@ -142,6 +143,7 @@ public class CompanyController {
                           "  \"linkedinUrl\": \"https://linkedin.com/company/example-corp\",\n" +
                           "  \"headquarters\": \"San Francisco, CA\",\n" +
                           "  \"primaryIndustryId\": 10,\n" +
+                          "  \"primaryIndustryName\": \"Information Technology & Services\",\n" +
                           "  \"secondaryIndustries\": \"Software,Cloud\",\n" +
                           "  \"companySize\": \"1000+\",\n" +
                           "  \"specialties\": \"AI,ML,Cloud\"\n" +
@@ -246,6 +248,7 @@ public class CompanyController {
                           "      \"linkedinUrl\": \"https://linkedin.com/company/google\",\n" +
                           "      \"headquarters\": \"Mountain View, CA\",\n" +
                           "      \"primaryIndustryId\": 1,\n" +
+                          "      \"primaryIndustryName\": \"Information Technology & Services\",\n" +
                           "      \"secondaryIndustries\": \"Software,Cloud\",\n" +
                           "      \"companySize\": \"100000+\",\n" +
                           "      \"specialties\": \"AI,ML,Search\"\n" +
@@ -267,6 +270,7 @@ public class CompanyController {
                           "      \"linkedinUrl\": \"https://linkedin.com/company/microsoft\",\n" +
                           "      \"headquarters\": \"Redmond, WA\",\n" +
                           "      \"primaryIndustryId\": 1,\n" +
+                          "      \"primaryIndustryName\": \"Information Technology & Services\",\n" +
                           "      \"secondaryIndustries\": \"Software,Cloud\",\n" +
                           "      \"companySize\": \"100000+\",\n" +
                           "      \"specialties\": \"Windows,Office,Azure\"\n" +

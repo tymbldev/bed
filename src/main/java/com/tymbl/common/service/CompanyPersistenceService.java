@@ -1,6 +1,7 @@
 package com.tymbl.common.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.tymbl.common.util.CompanyNameCleaner;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.repository.CompanyRepository;
@@ -26,25 +27,31 @@ public class CompanyPersistenceService {
             Company company;
             CompanyContent companyContent = new CompanyContent();
             boolean aiError = false;
-            String name = companyName;
+            
+            // Clean and validate the company name
+            String cleanedName = CompanyNameCleaner.cleanAndValidateCompanyName(companyName);
+            if (cleanedName == null) {
+                log.warn("Invalid company name after cleaning: '{}'", companyName);
+                return Optional.empty();
+            }
             
             // Check if company already exists by name
-            Optional<Company> existingCompany = companyRepository.findByName(name);
+            Optional<Company> existingCompany = companyRepository.findByName(cleanedName);
             if (existingCompany.isPresent()) {
                 company = existingCompany.get();
-                log.info("Found existing company with name: {}, updating details", name);
-                if (containsWebSearchPlaceholder(name)) {
+                log.info("Found existing company with name: {}, updating details", cleanedName);
+                if (containsWebSearchPlaceholder(cleanedName)) {
                     aiError = true;
                 }
             } else {
                 company = new Company();
-                company.setName(name);
-                if (!containsWebSearchPlaceholder(name)) {
-                    company.setName(name);
+                company.setName(cleanedName);
+                if (!containsWebSearchPlaceholder(cleanedName)) {
+                    company.setName(cleanedName);
                 } else {
                     aiError = true;
                 }
-                log.info("Creating new company with name: {}", name);
+                log.info("Creating new company with name: {}", cleanedName);
             }
 
             String description = getStringValue(companyData, "description");

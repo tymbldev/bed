@@ -2,10 +2,10 @@ package com.tymbl.jobs.controller;
 
 import com.tymbl.auth.service.JwtService;
 import com.tymbl.common.entity.User;
+import com.tymbl.jobs.dto.JobDetailsWithReferrersResponse;
+import com.tymbl.jobs.dto.JobReferrerRegistrationRequest;
 import com.tymbl.jobs.dto.JobRequest;
 import com.tymbl.jobs.dto.JobResponse;
-import com.tymbl.jobs.dto.JobReferrerRegistrationRequest;
-import com.tymbl.jobs.dto.JobDetailsWithReferrersResponse;
 import com.tymbl.jobs.entity.ApplicationStatus;
 import com.tymbl.jobs.service.JobService;
 import com.tymbl.registration.controller.UserController.ErrorResponse;
@@ -13,19 +13,27 @@ import com.tymbl.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import java.util.List;
+import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.*;
-
-import javax.validation.Valid;
-import java.util.List;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/jobmanagement")
@@ -234,7 +242,66 @@ public class JobManagementController {
         @ApiResponse(
             responseCode = "200", 
             description = "Job details with referrer profiles retrieved successfully",
-            content = @Content(schema = @Schema(implementation = JobDetailsWithReferrersResponse.class))
+            content = @Content(
+                schema = @Schema(implementation = JobDetailsWithReferrersResponse.class),
+                examples = @ExampleObject(
+                    value = "{\n" +
+                          "  \"id\": 1,\n" +
+                          "  \"title\": \"Software Engineer\",\n" +
+                          "  \"description\": \"We are looking for a talented software engineer...\",\n" +
+                          "  \"cityId\": 1,\n" +
+                          "  \"cityName\": \"Mountain View\",\n" +
+                          "  \"countryId\": 1,\n" +
+                          "  \"countryName\": \"United States\",\n" +
+                          "  \"designationId\": 1,\n" +
+                          "  \"designation\": \"Software Engineer\",\n" +
+                          "  \"designationName\": \"Software Engineer\",\n" +
+                          "  \"minSalary\": 100000,\n" +
+                          "  \"maxSalary\": 150000,\n" +
+                          "  \"minExperience\": 2,\n" +
+                          "  \"maxExperience\": 5,\n" +
+                          "  \"jobType\": \"HYBRID\",\n" +
+                          "  \"currencyId\": 1,\n" +
+                          "  \"currencyName\": \"US Dollar\",\n" +
+                          "  \"currencySymbol\": \"$\",\n" +
+                          "  \"companyId\": 1,\n" +
+                          "  \"company\": \"Google\",\n" +
+                          "  \"companyName\": \"Google\",\n" +
+                          "  \"postedBy\": 1,\n" +
+                          "  \"active\": true,\n" +
+                          "  \"createdAt\": \"2024-01-01T10:00:00\",\n" +
+                          "  \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
+                          "  \"tags\": [\"Java\", \"Spring\", \"Microservices\"],\n" +
+                          "  \"openingCount\": 5,\n" +
+                          "  \"uniqueUrl\": \"https://careers.google.com/jobs/123\",\n" +
+                          "  \"platform\": \"Google Careers\",\n" +
+                          "  \"approved\": 1,\n" +
+                          "  \"approvalStatus\": \"APPROVED\",\n" +
+                          "  \"referrerCount\": 2,\n" +
+                          "  \"referrers\": [\n" +
+                          "    {\n" +
+                          "      \"userId\": 123,\n" +
+                          "      \"userName\": \"Alice Smith\",\n" +
+                          "      \"email\": \"alice@google.com\",\n" +
+                          "      \"designation\": \"Senior Engineer\",\n" +
+                          "      \"company\": \"Google\",\n" +
+                          "      \"companyId\": 1,\n" +
+                          "      \"companyName\": \"Google\",\n" +
+                          "      \"yearsOfExperience\": \"5\",\n" +
+                          "      \"monthsOfExperience\": \"6\",\n" +
+                          "      \"education\": \"MS Computer Science from Stanford University\",\n" +
+                          "      \"portfolioWebsite\": \"https://alice.dev\",\n" +
+                          "      \"linkedInProfile\": \"https://linkedin.com/in/alice-smith\",\n" +
+                          "      \"githubProfile\": \"https://github.com/alice-smith\",\n" +
+                          "      \"numApplicationsAccepted\": 5,\n" +
+                          "      \"feedbackScore\": 4.5,\n" +
+                          "      \"overallScore\": 7.2,\n" +
+                          "      \"registeredAt\": \"2024-01-01T10:00:00\"\n" +
+                          "    }\n" +
+                          "  ]\n" +
+                          "}"
+                )
+            )
         ),
         @ApiResponse(responseCode = "401", description = "Unauthorized"),
         @ApiResponse(responseCode = "403", description = "Forbidden - Not authorized to view this job"),

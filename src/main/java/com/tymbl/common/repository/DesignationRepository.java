@@ -29,6 +29,9 @@ public interface DesignationRepository extends JpaRepository<Designation, Long> 
     // Check if processed name exists
     boolean existsByProcessedName(String processedName);
     
+    // Find designations by processed name
+    List<Designation> findByProcessedName(String processedName);
+    
     // Reset processed name generated flag for all designations
     @Modifying
     @Query("UPDATE Designation d SET d.processedNameGenerated = false")

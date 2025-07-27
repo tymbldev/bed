@@ -70,10 +70,16 @@ public class JobSearchController {
                           "      \"maxExperience\": 5,\n" +
                           "      \"jobType\": \"HYBRID\",\n" +
                           "      \"cityId\": 1,\n" +
+                          "      \"cityName\": \"Mountain View\",\n" +
                           "      \"countryId\": 1,\n" +
+                          "      \"countryName\": \"United States\",\n" +
                           "      \"companyId\": 1,\n" +
+                          "      \"companyName\": \"Google\",\n" +
                           "      \"designationId\": 1,\n" +
+                          "      \"designationName\": \"Software Engineer\",\n" +
                           "      \"currencyId\": 1,\n" +
+                          "      \"currencyName\": \"US Dollar\",\n" +
+                          "      \"currencySymbol\": \"$\",\n" +
                           "      \"postedBy\": 1,\n" +
                           "      \"active\": true,\n" +
                           "      \"createdAt\": \"2024-01-01T10:00:00\",\n" +

@@ -37,6 +37,9 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Check if processed name exists
     boolean existsByProcessedName(String processedName);
     
+    // Find companies by processed name
+    List<Company> findByProcessedName(String processedName);
+    
     // Reset processed name generated flag for all companies
     @Query("UPDATE Company c SET c.processedNameGenerated = false")
     void resetProcessedNameGeneratedFlag();

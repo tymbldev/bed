@@ -12,11 +12,13 @@ import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.exception.CompanyNotFoundException;
 import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.JobRepository;
+import com.tymbl.common.util.CompanyNameCleaner;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.ArrayList;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -24,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CompanyService {
 
     private final CompanyRepository companyRepository;
@@ -39,9 +42,13 @@ public class CompanyService {
     public CompanyResponse createOrUpdateCompany(CompanyRequest request) {
         Company company;
         if (request.getId() == 1000) {
-            // New company
+            // New company - clean and validate the name
+            String cleanedName = CompanyNameCleaner.cleanAndValidateCompanyName(request.getName());
+            if (cleanedName == null) {
+                throw new IllegalArgumentException("Invalid company name: " + request.getName());
+            }
             company = new Company();
-            company.setName(request.getName());
+            company.setName(cleanedName);
         } else {
             // Existing company
             company = companyRepository.findById(request.getId())
@@ -164,6 +171,9 @@ public class CompanyService {
         // Ensure all fields are always set
         if (response.getSecondaryIndustries() == null) response.setSecondaryIndustries("");
         if (response.getCompanySize() == null) response.setCompanySize("");
+        
+        // Enrich with dropdown values
+        enrichCompanyResponseWithDropdownValues(response);
         if (response.getSpecialties() == null) response.setSpecialties("");
         if (response.getCareerPageUrl() == null) response.setCareerPageUrl("");
         if (jobs != null) {
@@ -195,7 +205,69 @@ public class CompanyService {
         jobResponse.setUpdatedAt(job.getUpdatedAt());
         jobResponse.setTags(job.getTags());
         jobResponse.setSuperAdminPosted(SUPER_ADMIN_ID.equals(job.getPostedById()));
+        
+        // Enrich with dropdown values
+        enrichJobResponseWithDropdownValues(jobResponse);
+        
         return jobResponse;
+    }
+    
+    /**
+     * Enrich job response with dropdown values from DropdownService
+     */
+    private void enrichJobResponseWithDropdownValues(JobResponse response) {
+        try {
+            // Get city name
+            if (response.getCityId() != null) {
+                String cityName = dropdownService.getCityNameById(response.getCityId());
+                response.setCityName(cityName);
+            }
+            
+            // Get country name
+            if (response.getCountryId() != null) {
+                String countryName = dropdownService.getCountryNameById(response.getCountryId());
+                response.setCountryName(countryName);
+            }
+            
+            // Get designation name
+            if (response.getDesignationId() != null) {
+                String designationName = dropdownService.getDesignationNameById(response.getDesignationId());
+                response.setDesignationName(designationName);
+            }
+            
+            // Get currency information
+            if (response.getCurrencyId() != null) {
+                String currencyName = dropdownService.getCurrencyNameById(response.getCurrencyId());
+                String currencySymbol = dropdownService.getCurrencySymbolById(response.getCurrencyId());
+                response.setCurrencyName(currencyName);
+                response.setCurrencySymbol(currencySymbol);
+            }
+            
+            // Get company name
+            if (response.getCompanyId() != null) {
+                String companyName = dropdownService.getCompanyNameById(response.getCompanyId());
+                response.setCompanyName(companyName);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to enrich job response with dropdown values for job {}: {}", 
+                     response.getId(), e.getMessage());
+        }
+    }
+    
+    /**
+     * Enrich company response with dropdown values from DropdownService
+     */
+    private void enrichCompanyResponseWithDropdownValues(CompanyResponse response) {
+        try {
+            // Get primary industry name
+            if (response.getPrimaryIndustryId() != null) {
+                String industryName = dropdownService.getIndustryNameById(response.getPrimaryIndustryId());
+                response.setPrimaryIndustryName(industryName);
+            }
+        } catch (Exception e) {
+            log.warn("Failed to enrich company response with dropdown values for company {}: {}", 
+                     response.getId(), e.getMessage());
+        }
     }
 
     public List<CompanyIndustryResponse> detectIndustriesForCompanies() {
