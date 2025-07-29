@@ -286,7 +286,7 @@ public class GeminiCompanyService {
         "  \"headquarters\": \"[company headquarters location]\",\n" +
         "  \"career_page_url\": \"[valid URL or null]\",\n" +
         "  \"website\": \"[valid URL or null]\",\n" +
-        "  \"logo_url\": \"[valid URL or null]\",\n" +
+        "  \"logo_url\": \"[valid Company Logo URL or null]\",\n" +
         "  \"linkedin_url\": \"[valid URL or null]\"\n" +
         "}\n\n" +
         "IMPORTANT RULES:\n" +

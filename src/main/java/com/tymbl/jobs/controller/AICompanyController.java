@@ -11,6 +11,7 @@ import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.CompanyContentRepository;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
+import com.tymbl.jobs.service.CompanyTransactionService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -24,6 +25,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -59,6 +61,7 @@ public class AICompanyController {
     private final CompanyShortnameService companyShortnameService;
     private final CompanyRepository companyRepository;
     private final CompanyContentRepository companyContentRepository;
+    private final CompanyTransactionService companyTransactionService;
 
     /**
      * Generate and save companies industry-wise using Gemini
@@ -103,13 +106,13 @@ public class AICompanyController {
     }
 
     /**
-     * Consolidated endpoint to process all company operations
+     * Consolidated endpoint to process specific company operations
      * Handles: crawl, detect industries, shorten content, similar companies, cleanup
      */
     @PostMapping("/process")
     @Operation(
-        summary = "Process all company operations",
-        description = "Consolidated endpoint that processes all company operations. If companyName is provided, processes only that company. Otherwise processes all companies. Skips operations if their respective flags are already set."
+        summary = "Process specific company operations",
+        description = "Consolidated endpoint that processes specific company operations. If companyName is provided, processes only that company. Otherwise processes all companies. If operations parameter is provided, processes only those specific operations. Skips operations if their respective flags are already set."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -120,53 +123,106 @@ public class AICompanyController {
                     value = "{\n" +
                         "  \"message\": \"Company processing completed\",\n" +
                         "  \"companyName\": \"Google\",\n" +
+                        "  \"requestedOperations\": [\"crawl\", \"detectIndustries\"],\n" +
                         "  \"operations\": {\n" +
                         "    \"crawl\": {\"processed\": true, \"message\": \"Company crawled successfully\"},\n" +
-                        "    \"detectIndustries\": {\"processed\": true, \"message\": \"Industries detected successfully\"},\n" +
-                        "    \"shortenContent\": {\"processed\": false, \"message\": \"Already processed\"},\n" +
-                        "    \"similarCompanies\": {\"processed\": true, \"message\": \"Similar companies generated\"},\n" +
-                        "    \"cleanup\": {\"processed\": true, \"message\": \"Cleanup completed\"}\n" +
+                        "    \"detectIndustries\": {\"processed\": true, \"message\": \"Industries detected successfully\"}\n" +
                         "  },\n" +
                         "  \"status\": \"SUCCESS\"\n" +
                         "}"
                 )
             )
         ),
+        @ApiResponse(responseCode = "400", description = "Invalid operations provided"),
         @ApiResponse(responseCode = "404", description = "Company not found (if companyName provided)"),
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> processCompanyOperations(
+            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, cleanup")
+            @RequestParam(required = false) String operations,
             @Parameter(description = "Optional company name to process specific company")
             @RequestParam(required = false) String companyName) {
         
         try {
             Map<String, Object> result = new HashMap<>();
-            Map<String, Object> operations = new HashMap<>();
+            Map<String, Object> processedOperations = new HashMap<>();
+            
+            // Parse operations parameter
+            List<String> operationsList = new ArrayList<>();
+            if (operations != null && !operations.trim().isEmpty()) {
+                operationsList = Arrays.asList(operations.split(","));
+                
+                // Validate operations
+                List<String> validOperations = Arrays.asList(
+                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup"
+                );
+                
+                for (String operation : operationsList) {
+                    if (!validOperations.contains(operation.trim())) {
+                        Map<String, Object> errorResponse = new HashMap<>();
+                        errorResponse.put("error", "Invalid operation: " + operation + ". Valid operations: " + validOperations);
+                        errorResponse.put("status", "ERROR");
+                        return ResponseEntity.badRequest().body(errorResponse);
+                    }
+                }
+            } else {
+                // If no operations specified, process all operations
+                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup");
+            }
             
             if (companyName != null && !companyName.trim().isEmpty()) {
-                log.info("Processing specific company: {}", companyName);
+                log.info("Processing specific company: {} with operations: {}", companyName, operationsList);
                 result.put("companyName", companyName);
                 
                 // Process specific company operations
-                operations.put("crawl", processCompanyCrawl(companyName));
-                operations.put("detectIndustries", processCompanyIndustryDetection(companyName));
-                operations.put("shortenContent", processCompanyContentShortening(companyName));
-                operations.put("similarCompanies", processCompanySimilarCompanies(companyName));
-                operations.put("cleanup", processCompanyCleanup(companyName));
+                for (String operation : operationsList) {
+                    switch (operation.trim()) {
+                        case "crawl":
+                            processedOperations.put("crawl", processCompanyCrawl(companyName));
+                            break;
+                        case "detectIndustries":
+                            processedOperations.put("detectIndustries", processCompanyIndustryDetection(companyName));
+                            break;
+                        case "shortenContent":
+                            processedOperations.put("shortenContent", processCompanyContentShortening(companyName));
+                            break;
+                        case "similarCompanies":
+                            processedOperations.put("similarCompanies", processCompanySimilarCompanies(companyName));
+                            break;
+                        case "cleanup":
+                            processedOperations.put("cleanup", processCompanyCleanup(companyName));
+                            break;
+                    }
+                }
                 
             } else {
-                log.info("Processing all companies");
+                log.info("Processing all companies with operations: {}", operationsList);
                 result.put("companyName", "ALL");
                 
-                // Process all companies operations
-                operations.put("crawl", processAllCompaniesCrawl());
-                operations.put("detectIndustries", processAllCompaniesIndustryDetection());
-                operations.put("shortenContent", processAllCompaniesContentShortening());
-                operations.put("similarCompanies", processAllCompaniesSimilarCompanies());
-                operations.put("cleanup", processAllCompaniesCleanup());
+                // Process all companies operations in batches
+                for (String operation : operationsList) {
+                    switch (operation.trim()) {
+                        case "crawl":
+                            processedOperations.put("crawl", processAllCompaniesCrawlInBatches());
+                            break;
+                        case "detectIndustries":
+                            processedOperations.put("detectIndustries", processAllCompaniesIndustryDetectionInBatches());
+                            break;
+                        case "shortenContent":
+                            processedOperations.put("shortenContent", processAllCompaniesContentShorteningInBatches());
+                            break;
+                        case "similarCompanies":
+                            processedOperations.put("similarCompanies", processAllCompaniesSimilarCompaniesInBatches());
+                            break;
+                        case "cleanup":
+                            processedOperations.put("cleanup", processAllCompaniesCleanupInBatches());
+                            break;
+                    }
+                }
             }
             
-            result.put("operations", operations);
+            result.put("requestedOperations", operationsList);
+            result.put("operations", processedOperations);
             result.put("message", "Company processing completed");
             result.put("status", "SUCCESS");
             
@@ -177,7 +233,7 @@ public class AICompanyController {
             Map<String, Object> errorResponse = new HashMap<>();
             errorResponse.put("error", "Error processing company operations: " + e.getMessage());
             errorResponse.put("status", "ERROR");
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+            return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
 
@@ -381,7 +437,7 @@ public class AICompanyController {
         }
     }
 
-    private Map<String, Object> processAllCompaniesCrawl() {
+    private Map<String, Object> processAllCompaniesCrawlInBatches() {
         try {
             // Check if already crawled
             if (areAllCompaniesAlreadyCrawled()) {
@@ -391,8 +447,8 @@ public class AICompanyController {
                 return response;
             }
             
-            // Perform crawling for all companies
-            companyCrawlerService.crawlCompanies();
+            // Perform crawling for all companies in batches
+            companyCrawlerService.crawlCompaniesInBatches();
             Map<String, Object> result = new HashMap<>();
             result.put("message", "Company crawling completed");
             Map<String, Object> response = new HashMap<>();
@@ -401,10 +457,10 @@ public class AICompanyController {
             response.put("result", result);
             return response;
         } catch (Exception e) {
-            log.error("Error crawling all companies", e);
+            log.error("Error crawling all companies in batches", e);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", false);
-            response.put("message", "Error crawling all companies: " + e.getMessage());
+            response.put("message", "Error crawling all companies in batches: " + e.getMessage());
             return response;
         }
     }
@@ -437,7 +493,7 @@ public class AICompanyController {
         }
     }
 
-    private Map<String, Object> processAllCompaniesIndustryDetection() {
+    private Map<String, Object> processAllCompaniesIndustryDetectionInBatches() {
         try {
             // Check if already processed
             if (areAllCompaniesIndustryAlreadyProcessed()) {
@@ -447,8 +503,8 @@ public class AICompanyController {
                 return response;
             }
             
-            // Perform industry detection for all companies
-            List<CompanyIndustryResponse> results = companyService.detectIndustriesForCompanies();
+            // Perform industry detection for all companies in batches
+            List<CompanyIndustryResponse> results = companyService.detectIndustriesForCompaniesInBatches();
             Map<String, Object> result = new HashMap<>();
             result.put("results", results);
             result.put("count", results.size());
@@ -459,10 +515,10 @@ public class AICompanyController {
             response.put("result", result);
             return response;
         } catch (Exception e) {
-            log.error("Error detecting industries for all companies", e);
+            log.error("Error detecting industries for all companies in batches", e);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", false);
-            response.put("message", "Error detecting industries for all companies: " + e.getMessage());
+            response.put("message", "Error detecting industries for all companies in batches: " + e.getMessage());
             return response;
         }
     }
@@ -492,7 +548,7 @@ public class AICompanyController {
         }
     }
 
-    private Map<String, Object> processAllCompaniesContentShortening() {
+    private Map<String, Object> processAllCompaniesContentShorteningInBatches() {
         try {
             // Check if already processed
             if (areAllCompaniesContentAlreadyShortened()) {
@@ -502,18 +558,18 @@ public class AICompanyController {
                 return response;
             }
             
-            // Perform content shortening for all companies
-            Map<String, Object> result = aiJobService.shortenAllCompaniesContent();
+            // Perform content shortening for all companies in batches
+            Map<String, Object> result = aiJobService.shortenAllCompaniesContentInBatches();
             Map<String, Object> response = new HashMap<>();
             response.put("processed", true);
             response.put("message", "All companies content shortened successfully");
             response.put("result", result);
             return response;
         } catch (Exception e) {
-            log.error("Error shortening content for all companies", e);
+            log.error("Error shortening content for all companies in batches", e);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", false);
-            response.put("message", "Error shortening content for all companies: " + e.getMessage());
+            response.put("message", "Error shortening content for all companies in batches: " + e.getMessage());
             return response;
         }
     }
@@ -543,7 +599,7 @@ public class AICompanyController {
         }
     }
 
-    private Map<String, Object> processAllCompaniesSimilarCompanies() {
+    private Map<String, Object> processAllCompaniesSimilarCompaniesInBatches() {
         try {
             // Check if already processed
             if (areAllCompaniesSimilarCompaniesAlreadyProcessed()) {
@@ -553,18 +609,18 @@ public class AICompanyController {
                 return response;
             }
             
-            // Perform similar companies generation for all companies
-            Map<String, Object> result = aiJobService.generateSimilarCompaniesForAll();
+            // Perform similar companies generation for all companies in batches
+            Map<String, Object> result = aiJobService.generateSimilarCompaniesForAllInBatches();
             Map<String, Object> response = new HashMap<>();
             response.put("processed", true);
             response.put("message", "All companies similar companies generated successfully");
             response.put("result", result);
             return response;
         } catch (Exception e) {
-            log.error("Error generating similar companies for all companies", e);
+            log.error("Error generating similar companies for all companies in batches", e);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", false);
-            response.put("message", "Error generating similar companies for all companies: " + e.getMessage());
+            response.put("message", "Error generating similar companies for all companies in batches: " + e.getMessage());
             return response;
         }
     }
@@ -580,7 +636,7 @@ public class AICompanyController {
             }
             
             // Perform cleanup
-            Map<String, Object> result = companyCleanupService.processCompanyByName(companyName);
+            Map<String, Object> result = companyTransactionService.processCompanyByName(companyName);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", true);
             response.put("message", "Cleanup completed successfully");
@@ -595,7 +651,7 @@ public class AICompanyController {
         }
     }
 
-    private Map<String, Object> processAllCompaniesCleanup() {
+    private Map<String, Object> processAllCompaniesCleanupInBatches() {
         try {
             // Check if already processed
             if (areAllCompaniesCleanupAlreadyProcessed()) {
@@ -605,18 +661,18 @@ public class AICompanyController {
                 return response;
             }
             
-            // Perform cleanup for all companies
-            Map<String, Object> result = companyCleanupService.processAllCompanies();
+            // Perform cleanup for all companies in batches
+            Map<String, Object> result = companyCleanupService.processAllCompaniesInBatches();
             Map<String, Object> response = new HashMap<>();
             response.put("processed", true);
             response.put("message", "All companies cleanup completed successfully");
             response.put("result", result);
             return response;
         } catch (Exception e) {
-            log.error("Error cleaning up all companies", e);
+            log.error("Error cleaning up all companies in batches", e);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", false);
-            response.put("message", "Error cleaning up all companies: " + e.getMessage());
+            response.put("message", "Error cleaning up all companies in batches: " + e.getMessage());
             return response;
         }
     }

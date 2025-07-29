@@ -34,7 +34,7 @@ public class CompanyService {
     private final GeminiService geminiService;
     private final IndustryRepository industryRepository;
     private final DropdownService dropdownService;
-    private final CompanyIndustryDetectionService companyIndustryDetectionService;
+    private final CompanyTransactionService companyTransactionService;
 
     private static final Long SUPER_ADMIN_ID = 0L;
 
@@ -276,9 +276,57 @@ public class CompanyService {
         List<CompanyIndustryResponse> results = new ArrayList<>();
         
         for (Company company : companies) {
-            CompanyIndustryResponse response = companyIndustryDetectionService.processCompanyIndustryDetection(company);
+            CompanyIndustryResponse response = companyTransactionService.processCompanyIndustryDetectionInTransaction(company);
             results.add(response);
         }
+        return results;
+    }
+
+    /**
+     * Detect industries for companies in batches with individual transactions per batch
+     * This ensures that each batch is processed in its own transaction
+     */
+    public List<CompanyIndustryResponse> detectIndustriesForCompaniesInBatches() {
+        log.info("Starting industry detection for companies in batches");
+        
+        // Only fetch companies that haven't been processed for industry detection
+        List<Company> companies = companyRepository.findByIndustryProcessedFalse();
+        List<CompanyIndustryResponse> results = new ArrayList<>();
+        
+        int totalProcessed = 0;
+        int totalErrors = 0;
+        int batchSize = 10; // Process 10 companies at a time
+        
+        for (int i = 0; i < companies.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, companies.size());
+            List<Company> batch = companies.subList(i, endIndex);
+            
+            log.info("Processing industry detection batch {} with {} companies", (i / batchSize) + 1, batch.size());
+            
+            // Process each company in the batch with its own transaction
+            for (Company company : batch) {
+                try {
+                    CompanyIndustryResponse response = companyTransactionService.processCompanyIndustryDetectionInTransaction(company);
+                    results.add(response);
+                    totalProcessed++;
+                    log.info("Successfully processed industry detection for company: {} (ID: {})", company.getName(), company.getId());
+                } catch (Exception e) {
+                    totalErrors++;
+                    log.error("Error processing industry detection for company: {} (ID: {})", company.getName(), company.getId(), e);
+                    
+                    // Create error response
+                    CompanyIndustryResponse errorResponse = CompanyIndustryResponse.builder()
+                        .companyId(company.getId())
+                        .companyName(company.getName())
+                        .processed(false)
+                        .error("Error processing company: " + e.getMessage())
+                        .build();
+                    results.add(errorResponse);
+                }
+            }
+        }
+        
+        log.info("Completed industry detection in batches. Total processed: {}, Total errors: {}", totalProcessed, totalErrors);
         return results;
     }
     

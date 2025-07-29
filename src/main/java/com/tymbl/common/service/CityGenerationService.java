@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,16 +30,15 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CityGenerationService {
 
+    private final CountryRepository countryRepository;
+    private final CityRepository cityRepository;
+    private final RestTemplate restTemplate;
+    
     @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
     private String apiKey;
 
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Qualifier("aiServiceRestTemplate")
-    private final RestTemplate restTemplate;
-    private final CountryRepository countryRepository;
-    private final CityRepository cityRepository;
 
     public Map<String, Object> generateCitiesForAllCountries() {
         List<Country> countries = countryRepository.findByCitiesProcessedFalse();

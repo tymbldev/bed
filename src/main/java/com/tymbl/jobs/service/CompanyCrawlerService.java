@@ -15,6 +15,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.context.ApplicationContext;
 
 @Slf4j
 @Service
@@ -24,6 +25,7 @@ public class CompanyCrawlerService {
     private final CrawlingService crawlingService;
     private final CompanyRepository companyRepository;
     private final CompanyContentRepository companyContentRepository;
+    private final CompanyTransactionService companyTransactionService;
     
     private static final int BATCH_SIZE = 10; // Process 10 companies at a time
 
@@ -48,7 +50,7 @@ public class CompanyCrawlerService {
                 
                 for (Company company : companyPage.getContent()) {
                     try {
-                        processCompanyInTransaction(company);
+                        companyTransactionService.processCompanyCrawlingInTransaction(company);
                         // Add delay to avoid rate limiting
                        //Thread.sleep(60000);
                     } catch (Exception e) {
@@ -67,98 +69,51 @@ public class CompanyCrawlerService {
         log.info("Completed company crawling process");
     }
 
-    @Transactional
-    public void processCompanyInTransaction(Company company) {
-        try {
-            log.info("Processing company: {} (ID: {})", company.getName(), company.getId());
-            // Always fetch/enrich based on company name only
-            Optional<CrawlingService.CrawlResult> crawlResult = crawlingService.crawlCompanyPageWithJunkDetection(company.getName());
-            if (crawlResult.isPresent()) {
-                CrawlingService.CrawlResult result = crawlResult.get();
-                Company generatedCompany = result.getCompany();
-                String rawData = result.getRawData();
-                // Update company with generated information (including LinkedIn URL if present)
-                updateCompanyFields(company, generatedCompany);
-                company.setCrawledData(rawData);
-                company.setCrawled(true); // Success - flag = 1
-                company.setLastCrawledAt(LocalDateTime.now());
-                companyRepository.save(company);
-                log.info("Successfully updated company information for: {} (ID: {})", company.getName(), company.getId());
-            } else {
-                // Failed to generate information - flag = 2
-                log.warn("Failed to generate company information for: {} (ID: {}), marking as failed", company.getName(), company.getId());
-                company.setCrawled(false);
-                company.setLastCrawledAt(LocalDateTime.now());
-                companyRepository.save(company);
+    /**
+     * Crawl companies in batches with individual transactions per batch
+     * This ensures that each batch is processed in its own transaction
+     */
+    public void crawlCompaniesInBatches() {
+        log.info("Starting company crawling process in batches");
+        
+        int pageNumber = 0;
+        boolean hasMoreCompanies = true;
+        int totalProcessed = 0;
+        int totalErrors = 0;
+        
+        while (hasMoreCompanies) {
+            try {
+                Pageable pageable = PageRequest.of(pageNumber, BATCH_SIZE);
+                Page<Company> companyPage = companyRepository.findByIsCrawledFalse(pageable);
+                if (companyPage.isEmpty()) {
+                    log.info("No more companies to crawl");
+                    hasMoreCompanies = false;
+                    break;
+                }
+                
+                log.info("Processing crawling batch {} with {} companies", pageNumber + 1, companyPage.getContent().size());
+                
+                // Process each company in the batch with its own transaction
+                for (Company company : companyPage.getContent()) {
+                    try {
+                        companyTransactionService.processCompanyCrawlingInTransaction(company);
+                        totalProcessed++;
+                        log.info("Successfully processed company: {} (ID: {})", company.getName(), company.getId());
+                    } catch (Exception e) {
+                        totalErrors++;
+                        log.error("Error processing company: {} (ID: {})", company.getName(), company.getId(), e);
+                    }
+                }
+                
+                pageNumber++;
+                
+            } catch (Exception e) {
+                log.error("Error processing crawling batch {}", pageNumber + 1, e);
+                totalErrors++;
+                pageNumber++;
             }
-        } catch (Exception e) {
-            log.error("Error processing company: {} (ID: {})", company.getName(), company.getId(), e);
-            // Mark as failed to crawl - flag = 2
-            company.setCrawled(false);
-            company.setLastCrawledAt(LocalDateTime.now());
-            companyRepository.save(company);
-            throw e; // Re-throw to ensure transaction rollback
-        }
-    }
-
-    private void updateCompanyFields(Company existing, Company generated) {
-        // Update all available fields from the generated company data
-        if (generated.getDescription() != null && !generated.getDescription().trim().isEmpty()) {
-            existing.setDescription(generated.getDescription());
-        }
-        if (generated.getLogoUrl() != null && !generated.getLogoUrl().trim().isEmpty()) {
-            existing.setLogoUrl(generated.getLogoUrl());
-        }
-        if (generated.getWebsite() != null && !generated.getWebsite().trim().isEmpty()) {
-            existing.setWebsite(generated.getWebsite());
-        }
-        if (generated.getCareerPageUrl() != null && !generated.getCareerPageUrl().trim().isEmpty()) {
-            existing.setCareerPageUrl(generated.getCareerPageUrl());
         }
         
-        // Handle about us and culture content in CompanyContent table
-        if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty() ||
-            generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
-            
-            // Get or create company content record
-            Optional<CompanyContent> contentOpt = companyContentRepository.findByCompanyId(existing.getId());
-            CompanyContent companyContent;
-            
-            if (contentOpt.isPresent()) {
-                companyContent = contentOpt.get();
-            } else {
-                companyContent = new CompanyContent();
-                companyContent.setCompanyId(existing.getId());
-            }
-            
-            if (generated.getAboutUs() != null && !generated.getAboutUs().trim().isEmpty()) {
-                companyContent.setAboutUsOriginal(generated.getAboutUs());
-            }
-            if (generated.getCulture() != null && !generated.getCulture().trim().isEmpty()) {
-                companyContent.setCultureOriginal(generated.getCulture());
-            }
-            
-            companyContentRepository.save(companyContent);
-        }
-        
-        if (generated.getMission() != null && !generated.getMission().trim().isEmpty()) {
-            existing.setMission(generated.getMission());
-        }
-        if (generated.getVision() != null && !generated.getVision().trim().isEmpty()) {
-            existing.setVision(generated.getVision());
-        }
-        if (generated.getCompanySize() != null && !generated.getCompanySize().trim().isEmpty()) {
-            existing.setCompanySize(generated.getCompanySize());
-        }
-        if (generated.getHeadquarters() != null && !generated.getHeadquarters().trim().isEmpty()) {
-            existing.setHeadquarters(generated.getHeadquarters());
-        }
-        if (generated.getSpecialties() != null && !generated.getSpecialties().trim().isEmpty()) {
-            existing.setSpecialties(generated.getSpecialties());
-        }
-        // Keep the existing LinkedIn URL as it was provided
-        if (generated.getLinkedinUrl() != null && !generated.getLinkedinUrl().trim().isEmpty()) {
-            existing.setLinkedinUrl(generated.getLinkedinUrl());
-        }
+        log.info("Completed company crawling in batches. Total processed: {}, Total errors: {}", totalProcessed, totalErrors);
     }
 } 

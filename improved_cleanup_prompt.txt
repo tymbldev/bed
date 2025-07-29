@@ -1,0 +1,319 @@
+Analyze the company name "%s" and determine if it's:
+
+1. A PRODUCT/SERVICE name that should be mapped to its parent company
+2. A junk/incorrect entry that should be deleted
+3. A valid company name that should remain unchanged
+4. A company name with extra descriptive text that should be cleaned up
+
+IMPORTANT: Focus on identifying products, services, platforms, or tools that belong to larger companies.
+
+NEW: COMPANY NAME CLEANUP - Remove extra descriptive text that shouldn't be part of the official company name.
+
+Examples of COMPANY NAMES THAT NEED CLEANUP:
+- "Tata Consultancy Services (TCS) (for IT related roles)" → Clean to: "Tata Consultancy Services" or "TCS"
+  Reason: The extra phrase "(for IT related roles)" is descriptive text that should not be part of the official company name.
+- "Google (Alphabet Inc.)" → Clean to: "Google" or "Alphabet"
+  Reason: Parenthetical company structure information should be simplified.
+- "Microsoft Corporation (MSFT)" → Clean to: "Microsoft"
+  Reason: Stock ticker symbols should not be part of the company name.
+- "Apple Inc. (AAPL) - Technology Company" → Clean to: "Apple"
+  Reason: Stock ticker and descriptive phrases should be removed.
+- "Amazon.com, Inc. (AMZN) - E-commerce Giant" → Clean to: "Amazon"
+  Reason: Legal suffixes and descriptive text should be removed.
+- "Meta Platforms, Inc. (formerly Facebook)" → Clean to: "Meta"
+  Reason: Legal suffixes and "formerly" information should be removed.
+- "Netflix, Inc. (NFLX) - Streaming Service" → Clean to: "Netflix"
+  Reason: Legal suffixes and descriptive phrases should be removed.
+- "Salesforce.com, Inc. (CRM)" → Clean to: "Salesforce"
+  Reason: Legal suffixes and stock tickers should be removed.
+- "Adobe Systems Incorporated (ADBE)" → Clean to: "Adobe"
+  Reason: Legal suffixes and stock tickers should be removed.
+- "Oracle Corporation (ORCL) - Database Company" → Clean to: "Oracle"
+  Reason: Legal suffixes, stock tickers, and descriptive text should be removed.
+
+CLEANUP RULES:
+1. Remove parenthetical descriptive text like "(for IT related roles)", "(technology company)", etc.
+2. Remove stock ticker symbols like "(GOOGL)", "(MSFT)", "(AAPL)", etc.
+3. Remove legal suffixes like "Inc.", "Corp.", "LLC", "Ltd." when they're not essential
+4. Remove "formerly" or "previously" information
+5. Remove descriptive phrases like "- E-commerce Giant", "- Technology Company", etc.
+6. Keep the core, recognizable company name
+7. Prefer shorter, more commonly used names (e.g., "Google" over "Alphabet Inc.")
+
+Examples of PRODUCTS/SERVICES that should be mapped to parent companies:
+- "AWS" → Parent: "Amazon Web Services" or "Amazon"
+- "Google Cloud" → Parent: "Google" or "Alphabet"
+- "Microsoft Azure" → Parent: "Microsoft"
+- "GitHub" → Parent: "Microsoft"
+- "LinkedIn" → Parent: "Microsoft"
+- "Instagram" → Parent: "Meta" or "Facebook"
+- "WhatsApp" → Parent: "Meta" or "Facebook"
+- "YouTube" → Parent: "Google" or "Alphabet"
+- "Chrome" → Parent: "Google" or "Alphabet"
+- "Android" → Parent: "Google" or "Alphabet"
+- "iOS" → Parent: "Apple"
+- "Safari" → Parent: "Apple"
+- "Xcode" → Parent: "Apple"
+- "Visual Studio" → Parent: "Microsoft"
+- "Office 365" → Parent: "Microsoft"
+- "Teams" → Parent: "Microsoft"
+- "Slack" → Parent: "Salesforce"
+- "Tableau" → Parent: "Salesforce"
+- "MongoDB Atlas" → Parent: "MongoDB"
+- "React" → Parent: "Meta" or "Facebook"
+- "Angular" → Parent: "Google" or "Alphabet"
+- "Vue.js" → Parent: "Evan You" (individual creator)
+- "Docker" → Parent: "Docker Inc."
+- "Kubernetes" → Parent: "Cloud Native Computing Foundation"
+- "Jenkins" → Parent: "Jenkins Project"
+- "Jira" → Parent: "Atlassian"
+- "Confluence" → Parent: "Atlassian"
+- "Bitbucket" → Parent: "Atlassian"
+- "Trello" → Parent: "Atlassian"
+- "Figma" → Parent: "Adobe" (acquired)
+- "Sketch" → Parent: "Bohemian Coding"
+- "Notion" → Parent: "Notion Labs"
+- "Zoom" → Parent: "Zoom Video Communications"
+- "Discord" → Parent: "Discord Inc."
+- "Twitch" → Parent: "Amazon"
+- "Spotify" → Parent: "Spotify Technology"
+- "Uber Eats" → Parent: "Uber"
+- "DoorDash" → Parent: "DoorDash Inc."
+- "Zomato" → Parent: "Zomato Limited"
+- "Swiggy" → Parent: "Swiggy"
+- "PayPal" → Parent: "PayPal Holdings"
+- "Stripe" → Parent: "Stripe Inc."
+- "Shopify" → Parent: "Shopify Inc."
+- "WooCommerce" → Parent: "Automattic"
+- "Magento" → Parent: "Adobe"
+- "Salesforce CRM" → Parent: "Salesforce"
+- "HubSpot" → Parent: "HubSpot Inc."
+- "Mailchimp" → Parent: "Intuit"
+- "Canva" → Parent: "Canva Pty Ltd"
+- "Adobe Photoshop" → Parent: "Adobe"
+- "Adobe Illustrator" → Parent: "Adobe"
+- "Adobe Premiere" → Parent: "Adobe"
+- "Final Cut Pro" → Parent: "Apple"
+- "Logic Pro" → Parent: "Apple"
+- "Android Studio" → Parent: "Google" or "Alphabet"
+- "VS Code" → Parent: "Microsoft"
+- "IntelliJ IDEA" → Parent: "JetBrains"
+- "PyCharm" → Parent: "JetBrains"
+- "WebStorm" → Parent: "JetBrains"
+- "Eclipse" → Parent: "Eclipse Foundation"
+- "NetBeans" → Parent: "Apache Software Foundation"
+- "Sublime Text" → Parent: "Sublime HQ"
+- "Atom" → Parent: "GitHub" (now Microsoft)
+- "Brackets" → Parent: "Adobe"
+- "Postman" → Parent: "Postman Inc."
+- "Insomnia" → Parent: "Kong Inc."
+- "Swagger" → Parent: "SmartBear Software"
+- "JUnit" → Parent: "JUnit Team"
+- "TestNG" → Parent: "Cedric Beust"
+- "Selenium" → Parent: "Selenium Project"
+- "Cypress" → Parent: "Cypress.io"
+- "Playwright" → Parent: "Microsoft"
+- "Puppeteer" → Parent: "Google" or "Alphabet"
+- "Jest" → Parent: "Meta" or "Facebook"
+- "Mocha" → Parent: "Mocha Team"
+- "Chai" → Parent: "Chai Team"
+- "Lodash" → Parent: "Lodash Team"
+- "Moment.js" → Parent: "Moment.js Team"
+- "Axios" → Parent: "Axios Team"
+- "Express.js" → Parent: "Express.js Team"
+- "Next.js" → Parent: "Vercel"
+- "Nuxt.js" → Parent: "Nuxt.js Team"
+- "Gatsby" → Parent: "Netlify"
+- "Webpack" → Parent: "Webpack Team"
+- "Babel" → Parent: "Babel Team"
+- "ESLint" → Parent: "ESLint Team"
+- "Prettier" → Parent: "Prettier Team"
+- "TypeScript" → Parent: "Microsoft"
+- "Node.js" → Parent: "Node.js Foundation"
+- "Deno" → Parent: "Deno Team"
+- "Bun" → Parent: "Bun Team"
+- "Rust" → Parent: "Rust Team"
+- "Go" → Parent: "Google" or "Alphabet"
+- "Kotlin" → Parent: "JetBrains"
+- "Swift" → Parent: "Apple"
+- "Flutter" → Parent: "Google" or "Alphabet"
+- "React Native" → Parent: "Meta" or "Facebook"
+- "Xamarin" → Parent: "Microsoft"
+- "Ionic" → Parent: "Ionic Team"
+- "Cordova" → Parent: "Apache Software Foundation"
+- "Electron" → Parent: "GitHub" (now Microsoft)
+- "Tauri" → Parent: "Tauri Team"
+- "Unity" → Parent: "Unity Technologies"
+- "Unreal Engine" → Parent: "Epic Games"
+- "Godot" → Parent: "Godot Team"
+- "Blender" → Parent: "Blender Foundation"
+- "Maya" → Parent: "Autodesk"
+- "3ds Max" → Parent: "Autodesk"
+- "AutoCAD" → Parent: "Autodesk"
+- "Fusion 360" → Parent: "Autodesk"
+- "SolidWorks" → Parent: "Dassault Systèmes"
+- "CATIA" → Parent: "Dassault Systèmes"
+- "Creo" → Parent: "PTC"
+- "Inventor" → Parent: "Autodesk"
+- "SketchUp" → Parent: "Trimble"
+- "Revit" → Parent: "Autodesk"
+- "ArchiCAD" → Parent: "Graphisoft"
+- "Vectorworks" → Parent: "Vectorworks Inc."
+- "Cinema 4D" → Parent: "Maxon"
+- "Houdini" → Parent: "SideFX"
+- "Nuke" → Parent: "Foundry"
+- "DaVinci Resolve" → Parent: "Blackmagic Design"
+- "Premiere Pro" → Parent: "Adobe"
+- "After Effects" → Parent: "Adobe"
+- "InDesign" → Parent: "Adobe"
+- "Lightroom" → Parent: "Adobe"
+- "Bridge" → Parent: "Adobe"
+- "Acrobat" → Parent: "Adobe"
+- "Dreamweaver" → Parent: "Adobe"
+- "Flash" → Parent: "Adobe" (discontinued)
+- "Fireworks" → Parent: "Adobe" (discontinued)
+- "FreeHand" → Parent: "Adobe" (discontinued)
+- "Director" → Parent: "Adobe" (discontinued)
+- "Authorware" → Parent: "Adobe" (discontinued)
+- "ColdFusion" → Parent: "Adobe"
+- "RoboHelp" → Parent: "Adobe"
+- "FrameMaker" → Parent: "Adobe"
+- "Captivate" → Parent: "Adobe"
+- "Presenter" → Parent: "Adobe"
+- "Connect" → Parent: "Adobe"
+- "Audition" → Parent: "Adobe"
+- "Media Encoder" → Parent: "Adobe"
+- "Character Animator" → Parent: "Adobe"
+- "Dimension" → Parent: "Adobe"
+- "Substance" → Parent: "Adobe"
+- "Aero" → Parent: "Adobe"
+- "Rush" → Parent: "Adobe"
+- "Spark" → Parent: "Adobe"
+- "Behance" → Parent: "Adobe"
+- "Creative Cloud" → Parent: "Adobe"
+- "Document Cloud" → Parent: "Adobe"
+- "Experience Cloud" → Parent: "Adobe"
+- "Analytics" → Parent: "Adobe"
+- "Target" → Parent: "Adobe"
+- "Audience Manager" → Parent: "Adobe"
+- "Campaign" → Parent: "Adobe"
+- "Experience Manager" → Parent: "Adobe"
+- "Commerce" → Parent: "Adobe"
+- "Workfront" → Parent: "Adobe"
+- "Marketo" → Parent: "Adobe"
+- "Adobe XD" → Parent: "Adobe"
+- "InVision" → Parent: "InVision"
+- "Marvel" → Parent: "Marvel"
+- "Framer" → Parent: "Framer"
+- "Principle" → Parent: "Principle"
+- "Protopie" → Parent: "Protopie"
+- "Axure" → Parent: "Axure Software Solutions"
+- "Balsamiq" → Parent: "Balsamiq Studios"
+- "Lucidchart" → Parent: "Lucid Software"
+- "Draw.io" → Parent: "JGraph Ltd"
+- "Visio" → Parent: "Microsoft"
+- "OmniGraffle" → Parent: "The Omni Group"
+
+Examples of VALID COMPANIES (no action needed):
+- "Netflix" → Valid company, keep as is
+- "Spotify Technology" → Valid company, keep as is
+- "Uber" → Valid company, keep as is
+- "Airbnb" → Valid company, keep as is
+- "Stripe Inc." → Valid company, keep as is
+- "Shopify Inc." → Valid company, keep as is
+- "Salesforce" → Valid company, keep as is
+- "HubSpot Inc." → Valid company, keep as is
+- "Intuit" → Valid company, keep as is
+- "Canva Pty Ltd" → Valid company, keep as is
+- "Adobe" → Valid company, keep as is
+- "Microsoft" → Valid company, keep as is
+- "Apple" → Valid company, keep as is
+- "Google" → Valid company, keep as is
+- "Alphabet" → Valid company, keep as is
+- "Meta" → Valid company, keep as is
+- "Facebook" → Valid company, keep as is
+- "Amazon" → Valid company, keep as is
+- "Amazon Web Services" → Valid company, keep as is
+- "JetBrains" → Valid company, keep as is
+- "Eclipse Foundation" → Valid company, keep as is
+- "Apache Software Foundation" → Valid company, keep as is
+- "Sublime HQ" → Valid company, keep as is
+- "Postman Inc." → Valid company, keep as is
+- "Kong Inc." → Valid company, keep as is
+- "SmartBear Software" → Valid company, keep as is
+- "JUnit Team" → Valid company, keep as is
+- "Selenium Project" → Valid company, keep as is
+- "Cypress.io" → Valid company, keep as is
+- "Mocha Team" → Valid company, keep as is
+- "Chai Team" → Valid company, keep as is
+- "Lodash Team" → Valid company, keep as is
+- "Moment.js Team" → Valid company, keep as is
+- "Axios Team" → Valid company, keep as is
+- "Express.js Team" → Valid company, keep as is
+- "Vercel" → Valid company, keep as is
+- "Nuxt.js Team" → Valid company, keep as is
+- "Netlify" → Valid company, keep as is
+- "Webpack Team" → Valid company, keep as is
+- "Babel Team" → Valid company, keep as is
+- "ESLint Team" → Valid company, keep as is
+- "Prettier Team" → Valid company, keep as is
+- "Node.js Foundation" → Valid company, keep as is
+- "Deno Team" → Valid company, keep as is
+- "Bun Team" → Valid company, keep as is
+- "Rust Team" → Valid company, keep as is
+- "Tauri Team" → Valid company, keep as is
+- "Unity Technologies" → Valid company, keep as is
+- "Epic Games" → Valid company, keep as is
+- "Godot Team" → Valid company, keep as is
+- "Blender Foundation" → Valid company, keep as is
+- "Autodesk" → Valid company, keep as is
+- "Dassault Systèmes" → Valid company, keep as is
+- "PTC" → Valid company, keep as is
+- "Trimble" → Valid company, keep as is
+- "Graphisoft" → Valid company, keep as is
+- "Vectorworks Inc." → Valid company, keep as is
+- "Maxon" → Valid company, keep as is
+- "SideFX" → Valid company, keep as is
+- "Foundry" → Valid company, keep as is
+- "Blackmagic Design" → Valid company, keep as is
+- "Bohemian Coding" → Valid company, keep as is
+- "InVision" → Valid company, keep as is
+- "Marvel" → Valid company, keep as is
+- "Framer" → Valid company, keep as is
+- "Principle" → Valid company, keep as is
+- "Protopie" → Valid company, keep as is
+- "Axure Software Solutions" → Valid company, keep as is
+- "Balsamiq Studios" → Valid company, keep as is
+- "Lucid Software" → Valid company, keep as is
+- "JGraph Ltd" → Valid company, keep as is
+- "The Omni Group" → Valid company, keep as is
+
+Examples of JUNK entries (should be deleted):
+- "Random Junk Name" → Should be deleted
+- "Test Company" → Should be deleted
+- "Sample Corp" → Should be deleted
+- "Demo Inc" → Should be deleted
+- "Example Ltd" → Should be deleted
+- "Fake Company" → Should be deleted
+- "Dummy Corp" → Should be deleted
+- "Mock Business" → Should be deleted
+- "Placeholder Inc" → Should be deleted
+- "Temporary Corp" → Should be deleted
+
+Respond in JSON format:
+{
+    "action": "delete|rename|keep",
+    "reason": "detailed explanation",
+    "parentCompany": "parent company name if this is a product/service",
+    "newName": "new name if rename action"
+}
+
+IMPORTANT RULES:
+1. If it's a product/service, always provide the parentCompany name
+2. Use action "delete" for products/services that should be mapped to parent companies
+3. Use action "delete" for junk entries
+4. Use action "keep" only for valid standalone companies
+5. Use action "rename" for company names with extra descriptive text that should be cleaned up
+6. Be very thorough in identifying products vs companies
+7. When in doubt, treat it as a product and provide the most likely parent company
+8. For cleanup cases, provide a clear reason explaining what descriptive text was removed 

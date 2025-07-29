@@ -20,7 +20,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"user@example.com\",\"password\":\"password\"}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/login",
@@ -48,7 +48,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"user@example.com\",\"password\":\"password\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/register",
@@ -76,7 +76,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"code\":\"linkedin_auth_code\"}"
+              "raw": "{\n  \"code\": \"linkedin_auth_code\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/auth/linkedin",
@@ -113,7 +113,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"title\":\"Software Engineer\",\"description\":\"Job description\",\"companyId\":1,\"designationId\":1,\"cityId\":1,\"countryId\":1,\"currencyId\":1,\"minSalary\":100000,\"maxSalary\":150000}"
+              "raw": "{\n  \"title\": \"Software Engineer\",\n  \"description\": \"Job description\",\n  \"companyId\": 1,\n  \"designationId\": 1,\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"currencyId\": 1,\n  \"minSalary\": 100000,\n  \"maxSalary\": 150000\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/jobmanagement",
@@ -144,7 +144,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"title\":\"Updated Job Title\",\"description\":\"Updated description\"}"
+              "raw": "{\n  \"title\": \"Updated Job Title\",\n  \"description\": \"Updated description\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/jobmanagement/1",
@@ -259,7 +259,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"jobId\":1}"
+              "raw": "{\n  \"jobId\": 1\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/jobmanagement/register-referrer",
@@ -345,7 +345,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"keyword\":\"software engineer\",\"page\":0,\"size\":20}"
+              "raw": "{\n  \"keyword\": \"software engineer\",\n  \"page\": 0,\n  \"size\": 20\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/jobsearch/search",
@@ -397,7 +397,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\":\"Google\",\"description\":\"Technology company\",\"website\":\"https://google.com\",\"primaryIndustryId\":1}"
+              "raw": "{\n  \"name\": \"Google\",\n  \"description\": \"Technology company\",\n  \"website\": \"https://google.com\",\n  \"primaryIndustryId\": 1\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/companies",
@@ -525,7 +525,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"jobId\":1,\"jobReferrerId\":1}"
+              "raw": "{\n  \"jobId\": 1,\n  \"jobReferrerId\": 1\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/my-applications",
@@ -579,7 +579,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"jobId\":1,\"referrerUserId\":1,\"feedbackText\":\"Great experience\",\"score\":5}"
+              "raw": "{\n  \"jobId\": 1,\n  \"referrerUserId\": 1,\n  \"feedbackText\": \"Great experience\",\n  \"score\": 5\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/my-applications/feedback",
@@ -763,7 +763,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"status\":\"APPROVED\"}"
+              "raw": "{\n  \"status\": \"APPROVED\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/superadmin/jobs/1/approve",
@@ -798,7 +798,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"industries\":[\"Technology\",\"Finance\"]}"
+              "raw": "{\n  \"industries\": [\"Technology\", \"Finance\", \"Healthcare\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/companies/generate-batch",
@@ -816,7 +816,7 @@
           }
         },
         {
-          "name": "Process Company Operations",
+          "name": "Process All Operations (All Companies)",
           "request": {
             "method": "POST",
             "header": [
@@ -827,7 +827,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"companyName\":\"Google\"}"
+              "raw": "{\n  \"note\": \"Processes all operations for all companies (no operations parameter specified)\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/companies/process",
@@ -845,7 +845,7 @@
           }
         },
         {
-          "name": "Reset Company Flags",
+          "name": "Process Specific Operations (All Companies)",
           "request": {
             "method": "POST",
             "header": [
@@ -856,10 +856,119 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"flags\":[\"is_crawled\",\"industry_processed\"],\"companyName\":\"Google\"}"
+              "raw": "{\n  \"note\": \"Processes only crawl and detectIndustries for all companies\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags",
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,detectIndustries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "operations",
+                  "value": "crawl,detectIndustries"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Process All Operations (Specific Company)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Processes all operations for specific company (no operations parameter specified)\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process?companyName=Google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "companyName",
+                  "value": "Google"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Process Specific Operations (Specific Company)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Processes only crawl and cleanup for specific company\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,cleanup&companyName=Google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "operations",
+                  "value": "crawl,cleanup"
+                },
+                {
+                  "key": "companyName",
+                  "value": "Google"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Company Flags (All Companies)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Resets flags for all companies\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed",
               "host": [
                 "{{base_url}}"
               ],
@@ -869,14 +978,69 @@
                 "ai",
                 "companies",
                 "reset-flags"
+              ],
+              "query": [
+                {
+                  "key": "flags",
+                  "value": "is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed"
+                }
               ]
             }
           }
         },
         {
-          "name": "Generate Shortnames for All",
+          "name": "Reset Company Flags (Specific Company)",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Resets flags for specific company\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed&companyName=Google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "reset-flags"
+              ],
+              "query": [
+                {
+                  "key": "flags",
+                  "value": "is_crawled,industry_processed"
+                },
+                {
+                  "key": "companyName",
+                  "value": "Google"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Shortnames for All Companies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Generates shortnames for all companies using AI\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-all",
               "host": [
@@ -894,9 +1058,19 @@
           }
         },
         {
-          "name": "Generate Shortname for Company",
+          "name": "Generate Shortname for Specific Company",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Generates shortname for specific company using AI\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-company/Google",
               "host": [
@@ -931,7 +1105,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"industries\":[\"Technology\"]}"
+              "raw": "{\n  \"industries\": [\"Technology\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/dropdown/designations/generate",
@@ -961,7 +1135,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"designation\":\"Software Engineer\"}"
+              "raw": "{\n  \"designation\": \"Software Engineer\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/dropdown/designations/similar",
@@ -991,7 +1165,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"countries\":[\"United States\"]}"
+              "raw": "{\n  \"countries\": [\"United States\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/dropdown/cities/generate",
@@ -1021,7 +1195,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"keywords\":[\"technology\",\"finance\"]}"
+              "raw": "{\n  \"keywords\": [\"technology\", \"finance\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/dropdown/industries/generate",
@@ -1056,7 +1230,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"designation\":\"Software Engineer\",\"company\":\"Google\"}"
+              "raw": "{\n  \"designation\": \"Software Engineer\",\n  \"company\": \"Google\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/interview/questions/generate",
@@ -1086,7 +1260,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"designation\":\"Software Engineer\"}"
+              "raw": "{\n  \"designation\": \"Software Engineer\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/interview/skills/generate",
@@ -1121,7 +1295,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"companyName\":\"Google\"}"
+              "raw": "{\n  \"companyName\": \"Google\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/similar-companies",
@@ -1149,7 +1323,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"url\":\"https://example.com\"}"
+              "raw": "{\n  \"url\": \"https://example.com\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/ai/url-content/process",
@@ -1511,7 +1685,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"activeJobCount\":15}"
+              "raw": "{\n  \"activeJobCount\": 15\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/companies/1/update-job-count",
@@ -1537,6 +1711,16 @@
           "name": "Load Basic Company Data",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Loads basic company data from files\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/utility/company-data/load-basic",
               "host": [
@@ -1556,6 +1740,16 @@
           "name": "Update Detailed Company Data",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Updates detailed company data\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/utility/company-data/update-detailed",
               "host": [
@@ -1575,6 +1769,16 @@
           "name": "Cleanup Duplicate Companies",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Cleans up duplicate companies\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/utility/company-data/cleanup-duplicates",
               "host": [
@@ -1594,6 +1798,16 @@
           "name": "Reindex Jobs",
           "request": {
             "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Reindexes jobs in Elasticsearch\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/utility/job-admin/reindex",
               "host": [
@@ -1748,7 +1962,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\":\"Stanford University\",\"type\":\"UNIVERSITY\"}"
+              "raw": "{\n  \"name\": \"Stanford University\",\n  \"type\": \"UNIVERSITY\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/institutions",
@@ -1793,7 +2007,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"name\":\"Updated University Name\"}"
+              "raw": "{\n  \"name\": \"Updated University Name\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/institutions/1",
@@ -1958,6 +2172,16 @@
           "name": "Mark Notification as Read",
           "request": {
             "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Marks notification as read\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/notifications/mark-read/1",
               "host": [
@@ -1977,6 +2201,16 @@
           "name": "Mark All Notifications as Read",
           "request": {
             "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Marks all notifications as read\"\n}"
+            },
             "url": {
               "raw": "{{base_url}}/api/v1/notifications/mark-all-read/1",
               "host": [
@@ -2259,7 +2493,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"email\":\"user@example.com\",\"password\":\"password\",\"firstName\":\"John\",\"lastName\":\"Doe\"}"
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\",\n  \"firstName\": \"John\",\n  \"lastName\": \"Doe\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/registration",
@@ -2291,7 +2525,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"topics\":[\"Data Structures\",\"Algorithms\"]}"
+              "raw": "{\n  \"topics\": [\"Data Structures\", \"Algorithms\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/interview-generation/designations/Software%20Engineer/topics/generate",
@@ -2322,7 +2556,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"topics\":[\"Data Structures\",\"Algorithms\"]}"
+              "raw": "{\n  \"topics\": [\"Data Structures\", \"Algorithms\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/interview-generation/designations/Software%20Engineer/topics/generate-and-save",
@@ -2393,7 +2627,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"topics\":[\"Data Structures\"],\"designation\":\"Software Engineer\"}"
+              "raw": "{\n  \"topics\": [\"Data Structures\"],\n  \"designation\": \"Software Engineer\"\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/interview-generation/questions/generate",
@@ -2485,7 +2719,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"topics\":[\"Java Programming\"]}"
+              "raw": "{\n  \"topics\": [\"Java Programming\"]\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/interview-generation/skills/Java/topics/questions/generate-and-save",
@@ -2526,7 +2760,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"jobId\":1,\"jobReferrerId\":1}"
+              "raw": "{\n  \"jobId\": 1,\n  \"jobReferrerId\": 1\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/my-applications",
@@ -2580,7 +2814,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\"jobId\":1,\"referrerUserId\":1,\"feedbackText\":\"Great experience\",\"score\":5}"
+              "raw": "{\n  \"jobId\": 1,\n  \"referrerUserId\": 1,\n  \"feedbackText\": \"Great experience\",\n  \"score\": 5\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/my-applications/feedback",

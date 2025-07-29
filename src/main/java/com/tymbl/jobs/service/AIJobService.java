@@ -7,6 +7,7 @@ import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.common.repository.SkillTopicRepository;
+import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.common.util.CompanyNameCleaner;
 import com.tymbl.common.util.DesignationNameCleaner;
@@ -31,9 +32,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-@Slf4j
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AIJobService {
 
     private final CompanyRepository companyRepository;
@@ -44,8 +45,9 @@ public class AIJobService {
     private final InterviewQuestionRepository interviewQuestionRepository;
     private final DesignationRepository designationRepository;
     private final GeminiService geminiService;
-    private final CompanyService companyService;
-
+    private final DropdownService dropdownService;
+    private final CompanyTransactionService companyTransactionService;
+    
     // ============================================================================
     // COMPANY GENERATION METHODS
     // ============================================================================
@@ -221,7 +223,7 @@ public class AIJobService {
         
         for (CompanyContent companyContent : unprocessedContent) {
             try {
-                Map<String, Object> result = shortenCompanyContent(companyContent.getCompanyId());
+                Map<String, Object> result = companyTransactionService.processCompanyContentShorteningInTransaction(companyContent.getCompanyId());
                 companyResults.add(result);
                 totalProcessed++;
                 
@@ -243,31 +245,107 @@ public class AIJobService {
                     totalProcessed, unprocessedContent.size(), result.get("companyName"), companyContent.getCompanyId());
                 
             } catch (Exception e) {
-                log.error("Error shortening content for company ID: {}", companyContent.getCompanyId(), e);
+                totalErrors++;
+                log.error("Error shortening content for company: {} (ID: {})", 
+                    companyContent.getCompanyId(), companyContent.getCompanyId(), e);
                 Map<String, Object> errorResult = new HashMap<>();
                 errorResult.put("companyId", companyContent.getCompanyId());
                 errorResult.put("companyName", "Unknown");
-                errorResult.put("aboutUsShortened", false);
-                errorResult.put("cultureShortened", false);
+                errorResult.put("success", false);
                 errorResult.put("error", e.getMessage());
                 companyResults.add(errorResult);
-                totalErrors++;
             }
         }
         
-        Map<String, Object> response = new HashMap<>();
-        response.put("total_companies_processed", totalProcessed);
-        response.put("total_about_us_shortened", totalAboutUsShortened);
-        response.put("total_culture_shortened", totalCultureShortened);
-        response.put("total_errors", totalErrors);
-        response.put("total_skipped", totalSkipped);
-        response.put("company_results", companyResults);
-        response.put("message", "Content shortening completed for unprocessed companies");
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalProcessed", totalProcessed);
+        result.put("totalAboutUsShortened", totalAboutUsShortened);
+        result.put("totalCultureShortened", totalCultureShortened);
+        result.put("totalErrors", totalErrors);
+        result.put("totalSkipped", totalSkipped);
+        result.put("companyResults", companyResults);
         
-        log.info("Completed content shortening for unprocessed companies. Processed: {}, AboutUs shortened: {}, Culture shortened: {}, Errors: {}, Skipped: {}", 
+        log.info("Content shortening completed. Processed: {}, AboutUs: {}, Culture: {}, Errors: {}, Skipped: {}", 
             totalProcessed, totalAboutUsShortened, totalCultureShortened, totalErrors, totalSkipped);
         
-        return response;
+        return result;
+    }
+
+    /**
+     * Shorten content for all companies in batches with individual transactions per batch
+     * This ensures that each batch is processed in its own transaction
+     */
+    public Map<String, Object> shortenAllCompaniesContentInBatches() {
+        log.info("Starting content shortening for companies in batches");
+        
+        // Only get companies that haven't been processed for content shortening and have original content
+        List<CompanyContent> unprocessedContent = companyContentRepository.findUnprocessedContentWithOriginalData();
+        List<Map<String, Object>> companyResults = new ArrayList<>();
+        int totalProcessed = 0;
+        int totalAboutUsShortened = 0;
+        int totalCultureShortened = 0;
+        int totalErrors = 0;
+        int totalSkipped = 0;
+        int batchSize = 10; // Process 10 companies at a time
+        
+        log.info("Found {} unprocessed companies with original content for shortening", unprocessedContent.size());
+        
+        for (int i = 0; i < unprocessedContent.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, unprocessedContent.size());
+            List<CompanyContent> batch = unprocessedContent.subList(i, endIndex);
+            
+            log.info("Processing content shortening batch {} with {} companies", (i / batchSize) + 1, batch.size());
+            
+            // Process each company in the batch with its own transaction
+            for (CompanyContent companyContent : batch) {
+                try {
+                    Map<String, Object> result = companyTransactionService.processCompanyContentShorteningInTransaction(companyContent.getCompanyId());
+                    companyResults.add(result);
+                    totalProcessed++;
+                    
+                    // Check if company was already processed (shouldn't happen with our query, but just in case)
+                    if (result.containsKey("alreadyProcessed") && (Boolean) result.get("alreadyProcessed")) {
+                        totalSkipped++;
+                        log.info("Skipped already processed company: {} (ID: {})", result.get("companyName"), companyContent.getCompanyId());
+                        continue;
+                    }
+                    
+                    if ((Boolean) result.get("aboutUsShortened")) {
+                        totalAboutUsShortened++;
+                    }
+                    if ((Boolean) result.get("cultureShortened")) {
+                        totalCultureShortened++;
+                    }
+                    
+                    log.info("Successfully processed content shortening for company: {} (ID: {})", 
+                        result.get("companyName"), companyContent.getCompanyId());
+                    
+                } catch (Exception e) {
+                    totalErrors++;
+                    log.error("Error shortening content for company: {} (ID: {})", 
+                        companyContent.getCompanyId(), companyContent.getCompanyId(), e);
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("companyId", companyContent.getCompanyId());
+                    errorResult.put("companyName", "Unknown");
+                    errorResult.put("success", false);
+                    errorResult.put("error", e.getMessage());
+                    companyResults.add(errorResult);
+                }
+            }
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalProcessed", totalProcessed);
+        result.put("totalAboutUsShortened", totalAboutUsShortened);
+        result.put("totalCultureShortened", totalCultureShortened);
+        result.put("totalErrors", totalErrors);
+        result.put("totalSkipped", totalSkipped);
+        result.put("companyResults", companyResults);
+        
+        log.info("Content shortening in batches completed. Processed: {}, AboutUs: {}, Culture: {}, Errors: {}, Skipped: {}", 
+            totalProcessed, totalAboutUsShortened, totalCultureShortened, totalErrors, totalSkipped);
+        
+        return result;
     }
 
     // ============================================================================
@@ -868,6 +946,74 @@ public class AIJobService {
         response.put("total_errors", totalErrors);
         response.put("company_results", companyResults);
         response.put("message", "Similar company generation completed");
+        
+        return response;
+    }
+
+    /**
+     * Generate similar companies for a single company in batches with individual transactions per batch
+     * This ensures that each batch is processed in its own transaction
+     */
+    public Map<String, Object> generateSimilarCompaniesForAllInBatches() {
+        log.info("Starting similar company generation for companies in batches");
+        
+        // Get all companies that haven't been processed for similar company generation and have industry info
+        List<Company> unprocessedCompanies = companyRepository.findUnprocessedCompaniesWithIndustry();
+        List<Map<String, Object>> companyResults = new ArrayList<>();
+        int totalProcessed = 0;
+        int totalSimilarFound = 0;
+        int totalNewCompaniesCreated = 0;
+        int totalErrors = 0;
+        int batchSize = 10; // Process 10 companies at a time
+        
+        log.info("Found {} unprocessed companies with industry info for similar company generation", unprocessedCompanies.size());
+        
+        for (int i = 0; i < unprocessedCompanies.size(); i += batchSize) {
+            int endIndex = Math.min(i + batchSize, unprocessedCompanies.size());
+            List<Company> batch = unprocessedCompanies.subList(i, endIndex);
+            
+            log.info("Processing similar company generation batch {} with {} companies", (i / batchSize) + 1, batch.size());
+            
+            // Process each company in the batch with its own transaction
+            for (Company company : batch) {
+                try {
+                    Map<String, Object> result = companyTransactionService.processSimilarCompaniesGenerationInTransaction(company);
+                    companyResults.add(result);
+                    totalProcessed++;
+                    
+                    if ((Boolean) result.get("success")) {
+                        totalSimilarFound += (Integer) result.get("similarCompaniesFound");
+                        totalNewCompaniesCreated += (Integer) result.get("newCompaniesCreated");
+                    } else {
+                        totalErrors++;
+                    }
+                    
+                    log.info("Successfully processed similar company generation for company: {} (ID: {})", 
+                        result.get("companyName"), company.getId());
+                    
+                } catch (Exception e) {
+                    totalErrors++;
+                    log.error("Error generating similar companies for company: {} (ID: {})", 
+                        company.getName(), company.getId(), e);
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("companyId", company.getId());
+                    errorResult.put("companyName", company.getName());
+                    errorResult.put("success", false);
+                    errorResult.put("error", e.getMessage());
+                    companyResults.add(errorResult);
+                }
+            }
+        }
+        
+        Map<String, Object> response = new HashMap<>();
+        response.put("totalProcessed", totalProcessed);
+        response.put("totalSimilarFound", totalSimilarFound);
+        response.put("totalNewCompaniesCreated", totalNewCompaniesCreated);
+        response.put("totalErrors", totalErrors);
+        response.put("companyResults", companyResults);
+        
+        log.info("Similar company generation in batches completed. Processed: {}, Similar Found: {}, New Created: {}, Errors: {}", 
+            totalProcessed, totalSimilarFound, totalNewCompaniesCreated, totalErrors);
         
         return response;
     }
