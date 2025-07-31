@@ -436,7 +436,7 @@ public class DropdownService {
       companyList = companyRepository.findAll();
       // Pre-populate company name cache
       for (com.tymbl.jobs.entity.Company company : companyList) {
-        if (company != null && company.getId() != null) {
+        if (company != null && company.getId() != null && company.getName() != null) {
           companyNameCache.put(company.getId(), company.getName());
         }
       }
@@ -455,7 +455,9 @@ public class DropdownService {
       log.info("Initializing designation cache...");
       List<Designation> designations = designationRepository.findAll();
       for (Designation designation : designations) {
-        designationCache.put(designation.getId(), designation.getName());
+        if (designation != null && designation.getId() != null && designation.getName() != null) {
+          designationCache.put(designation.getId(), designation.getName());
+        }
       }
       log.info("Designation cache initialized with {} designations", designations.size());
     } catch (Exception e) {
@@ -472,7 +474,9 @@ public class DropdownService {
       log.info("Initializing department cache...");
       List<Department> departments = departmentRepository.findAll();
       for (Department department : departments) {
-        departmentCache.put(department.getId(), department.getName());
+        if (department != null && department.getId() != null && department.getName() != null) {
+          departmentCache.put(department.getId(), department.getName());
+        }
       }
       log.info("Department cache initialized with {} departments", departments.size());
     } catch (Exception e) {
@@ -489,7 +493,9 @@ public class DropdownService {
       log.info("Initializing country cache...");
       List<Country> countries = countryRepository.findAll();
       for (Country country : countries) {
-        countryCache.put(country.getId(), country.getName());
+        if (country != null && country.getId() != null && country.getName() != null) {
+          countryCache.put(country.getId(), country.getName());
+        }
       }
       log.info("Country cache initialized with {} countries", countries.size());
     } catch (Exception e) {
@@ -506,7 +512,9 @@ public class DropdownService {
       log.info("Initializing city cache...");
       List<City> cities = cityRepository.findAll();
       for (City city : cities) {
-        cityCache.put(city.getId(), city.getName());
+        if (city != null && city.getId() != null && city.getName() != null) {
+          cityCache.put(city.getId(), city.getName());
+        }
       }
       log.info("City cache initialized with {} cities", cities.size());
     } catch (Exception e) {
@@ -523,7 +531,9 @@ public class DropdownService {
       log.info("Initializing industry cache...");
       List<Industry> industries = industryRepository.findAll();
       for (Industry industry : industries) {
-        industryCache.put(industry.getId(), industry.getName());
+        if (industry != null && industry.getId() != null && industry.getName() != null) {
+          industryCache.put(industry.getId(), industry.getName());
+        }
       }
       log.info("Industry cache initialized with {} industries", industries.size());
     } catch (Exception e) {
