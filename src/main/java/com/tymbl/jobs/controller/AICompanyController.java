@@ -883,16 +883,6 @@ public class AICompanyController {
         }
     }
 
-    private boolean areAllCompaniesLogosAlreadyFetched() {
-        try {
-            // Check if there are any companies that haven't been processed for logo fetching
-            List<Company> unprocessedCompanies = companyRepository.findByLogoUrlFetched(0);
-            return unprocessedCompanies.isEmpty();
-        } catch (Exception e) {
-            log.error("Error checking if all companies logos are already fetched", e);
-            return false;
-        }
-    }
 
     private boolean isCompanyWebsiteAlreadyFetched(String companyName) {
         try {
@@ -904,16 +894,6 @@ public class AICompanyController {
         }
     }
 
-    private boolean areAllCompaniesWebsitesAlreadyFetched() {
-        try {
-            // Check if there are any companies that haven't been processed for website fetching
-            List<Company> unprocessedCompanies = companyRepository.findByWebsiteFetched(0);
-            return unprocessedCompanies.isEmpty();
-        } catch (Exception e) {
-            log.error("Error checking if all companies websites are already fetched", e);
-            return false;
-        }
-    }
 
     // Helper methods for resetting flags
     private void resetFlagsForCompany(String companyName, List<String> flags) {

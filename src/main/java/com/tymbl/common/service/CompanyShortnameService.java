@@ -166,7 +166,7 @@ public class CompanyShortnameService {
     private String buildRobustShortnameGenerationPrompt(String companyName) {
         return String.format(
             "You are a business and technology expert helping to identify the most commonly used and recognized shortnames for companies. " +
-            "Given the company name '%s', provide the most widely recognized and commonly used shortname or nickname for this company.\n\n" +
+            "Given the company name, provide the most widely recognized and commonly used shortname or nickname for this company.\n\n" +
             "CRITICAL REQUIREMENTS:\n" +
             "1. Focus on the CORE company name that people actually use in conversation\n" +
             "2. Remove ALL legal suffixes, descriptive text, and extra information\n" +

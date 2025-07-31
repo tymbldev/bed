@@ -207,7 +207,7 @@ public class CompanyWebsiteService {
     private String buildWebsiteGenerationPrompt(String companyName) {
         return String.format(
             "You are a business and technology expert helping to find the official website URL for companies. " +
-            "Given the company name '%s', provide the official website URL for this company.\n\n" +
+            "Given the company name, provide the official website URL for this company.\n\n" +
             "CRITICAL REQUIREMENTS:\n" +
             "1. Return ONLY the official website URL for the company\n" +
             "2. The URL should be the main corporate website (not social media, job boards, etc.)\n" +

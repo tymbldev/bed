@@ -207,7 +207,7 @@ public class CompanyLogoService {
     private String buildLogoUrlGenerationPrompt(String companyName) {
         return String.format(
             "You are a business and technology expert helping to find the official logo URL for companies. " +
-            "Given the company name '%s', provide the direct download URL to the company's official logo.\n\n" +
+            "Given the company name, provide the direct download URL to the company's official logo.\n\n" +
             "CRITICAL REQUIREMENTS:\n" +
             "1. Return ONLY a direct download URL to the company's official logo\n" +
             "2. The URL should be publicly accessible and downloadable\n" +
