@@ -298,7 +298,7 @@ public class CompanyTransactionService {
             // No action needed
             log.info("No action needed for company: {} - Reason: {}", company.getName(), result.get("reason"));
 
-            //company.setCleanupProcessed(true);
+            company.setCleanupProcessed(true);
             company.setCleanupProcessedAt(LocalDateTime.now());
             companyRepository.save(company);
 
