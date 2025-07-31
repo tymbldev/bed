@@ -859,7 +859,7 @@
               "raw": "{\n  \"note\": \"Processes only crawl and detectIndustries for all companies\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,detectIndustries",
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,detectIndustries,fetchLogos,fetchWebsites",
               "host": [
                 "{{base_url}}"
               ],
@@ -873,7 +873,7 @@
               "query": [
                 {
                   "key": "operations",
-                  "value": "crawl,detectIndustries"
+                  "value": "crawl,detectIndustries,fetchLogos,fetchWebsites"
                 }
               ]
             }
@@ -929,7 +929,7 @@
               "raw": "{\n  \"note\": \"Processes only crawl and cleanup for specific company\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,cleanup&companyName=Google",
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,cleanup,fetchLogos,fetchWebsites&companyName=Google",
               "host": [
                 "{{base_url}}"
               ],
@@ -943,7 +943,7 @@
               "query": [
                 {
                   "key": "operations",
-                  "value": "crawl,cleanup"
+                  "value": "crawl,cleanup,fetchLogos,fetchWebsites"
                 },
                 {
                   "key": "companyName",
@@ -968,7 +968,7 @@
               "raw": "{\n  \"note\": \"Resets flags for all companies\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed",
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,shortname_generated,logoUrlFetched,websiteFetched",
               "host": [
                 "{{base_url}}"
               ],
@@ -982,7 +982,7 @@
               "query": [
                 {
                   "key": "flags",
-                  "value": "is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed"
+                  "value": "is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,shortname_generated,logoUrlFetched,websiteFetched"
                 }
               ]
             }
@@ -1003,7 +1003,7 @@
               "raw": "{\n  \"note\": \"Resets flags for specific company\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed&companyName=Google",
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,logoUrlFetched,websiteFetched&companyName=Google",
               "host": [
                 "{{base_url}}"
               ],
@@ -1017,7 +1017,7 @@
               "query": [
                 {
                   "key": "flags",
-                  "value": "is_crawled,industry_processed"
+                  "value": "is_crawled,industry_processed,logoUrlFetched,websiteFetched"
                 },
                 {
                   "key": "companyName",
@@ -1084,6 +1084,224 @@
                 "shortnames",
                 "generate-for-company",
                 "Google"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fetch Logos for All Companies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Fetches logos for all companies using AI\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=fetchLogos",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "operations",
+                  "value": "fetchLogos"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fetch Logo for Specific Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Fetches logo for specific company using AI\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=fetchLogos&companyName=Google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "operations",
+                  "value": "fetchLogos"
+                },
+                {
+                  "key": "companyName",
+                  "value": "Google"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fetch Websites for All Companies",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Fetches websites for all companies using AI\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=fetchWebsites",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "operations",
+                  "value": "fetchWebsites"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Fetch Website for Specific Company",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Fetches website for specific company using AI\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=fetchWebsites&companyName=Google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "process"
+              ],
+              "query": [
+                {
+                  "key": "operations",
+                  "value": "fetchWebsites"
+                },
+                {
+                  "key": "companyName",
+                  "value": "Google"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Logo Flags (All Companies)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Resets logo fetching flags for all companies\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=logoUrlFetched",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "reset-flags"
+              ],
+              "query": [
+                {
+                  "key": "flags",
+                  "value": "logoUrlFetched"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Website Flags (All Companies)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Resets website fetching flags for all companies\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=websiteFetched",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "companies",
+                "reset-flags"
+              ],
+              "query": [
+                {
+                  "key": "flags",
+                  "value": "websiteFetched"
+                }
               ]
             }
           }

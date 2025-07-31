@@ -89,6 +89,15 @@ public class Company {
     @Column(name = "shortname")
     private String shortname;
 
+    @Column(name = "shortname_generated", nullable = false)
+    private boolean shortnameGenerated = false;
+
+    @Column(name = "logo_url_fetched", nullable = false)
+    private Integer logoUrlFetched = 0; // 0 = not tried, 1 = fetched, 2 = failed
+
+    @Column(name = "website_fetched", nullable = false)
+    private Integer websiteFetched = 0; // 0 = not tried, 1 = fetched, 2 = failed
+
     @Column(name = "cleanup_processed", columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean cleanupProcessed = false;
 

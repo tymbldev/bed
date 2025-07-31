@@ -155,16 +155,17 @@ public class DropdownService {
   @Transactional
   public Designation createDesignation(Designation designation) {
     // Clean and validate the designation name
-    String cleanedName = DesignationNameCleaner.cleanAndValidateDesignationName(designation.getName());
+    String cleanedName = DesignationNameCleaner.cleanAndValidateDesignationName(
+        designation.getName());
     if (cleanedName == null) {
       throw new RuntimeException("Invalid designation name: " + designation.getName());
     }
-    
+
     if (designationRepository.existsByName(cleanedName)) {
       throw new RuntimeException(
           "Designation with title '" + cleanedName + "' already exists");
     }
-    
+
     designation.setName(cleanedName);
     return designationRepository.save(designation);
   }
@@ -238,9 +239,9 @@ public class DropdownService {
   // Cached methods for enrichment
   @Transactional(readOnly = true)
   public String getDesignationNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = designationCache.get(id);
@@ -263,9 +264,9 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public String getDepartmentNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = departmentCache.get(id);
@@ -288,9 +289,9 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public String getCountryNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = countryCache.get(id);
@@ -313,9 +314,9 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public String getCityNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = cityCache.get(id);
@@ -338,9 +339,9 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public String getIndustryNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = industryCache.get(id);
@@ -363,9 +364,9 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public String getCurrencyNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = currencyNameCache.get(id);
@@ -388,9 +389,9 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public String getCurrencySymbolById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String symbol = currencySymbolCache.get(id);
@@ -435,7 +436,9 @@ public class DropdownService {
       companyList = companyRepository.findAll();
       // Pre-populate company name cache
       for (com.tymbl.jobs.entity.Company company : companyList) {
-        companyNameCache.put(company.getId(), company.getName());
+        if (company != null && company.getId() != null) {
+          companyNameCache.put(company.getId(), company.getName());
+        }
       }
       log.info("Company cache initialized with {} companies", companyList.size());
     } catch (Exception e) {
@@ -542,9 +545,9 @@ public class DropdownService {
    * Get company name by ID from in-memory cache
    */
   public String getCompanyNameById(Long id) {
-      if (id == null) {
-          return null;
-      }
+    if (id == null) {
+      return null;
+    }
 
     // Try cache first
     String name = companyNameCache.get(id);
@@ -635,14 +638,14 @@ public class DropdownService {
           })
           .limit(5)
           .collect(java.util.stream.Collectors.toList());
-      
+
       IndustryWiseCompaniesDTO industryDTO = new IndustryWiseCompaniesDTO();
       industryDTO.setIndustryId(industryId);
       industryDTO.setIndustryName(industryName);
       industryDTO.setIndustryDescription(industryDescription);
       industryDTO.setCompanyCount(companyCount.intValue());
       industryDTO.setTopCompanies(topCompanies);
-      
+
       return industryDTO;
     }).collect(java.util.stream.Collectors.toList());
   }
@@ -659,7 +662,8 @@ public class DropdownService {
           topCompany.setLogoUrl((String) companyData[2]);
           topCompany.setWebsite((String) companyData[3]);
           topCompany.setHeadquarters((String) companyData[4]);
-          topCompany.setActiveJobCount(companyData[5] == null ? 0 : ((Number) companyData[5]).intValue());
+          topCompany.setActiveJobCount(
+              companyData[5] == null ? 0 : ((Number) companyData[5]).intValue());
           return topCompany;
         })
         .collect(java.util.stream.Collectors.toList());
@@ -670,9 +674,9 @@ public class DropdownService {
    */
   @Transactional(readOnly = true)
   public List<Map<String, String>> autosuggest(String query) {
-      if (query == null || query.trim().length() < 3) {
-          return Collections.emptyList();
-      }
+    if (query == null || query.trim().length() < 3) {
+      return Collections.emptyList();
+    }
     String q = query.trim().toLowerCase();
     List<Map<String, String>> result = new java.util.ArrayList<>();
 

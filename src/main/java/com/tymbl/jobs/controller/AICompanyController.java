@@ -12,6 +12,8 @@ import com.tymbl.jobs.repository.CompanyContentRepository;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.service.CompanyTransactionService;
+import com.tymbl.common.service.CompanyLogoService;
+import com.tymbl.common.service.CompanyWebsiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -62,6 +64,8 @@ public class AICompanyController {
     private final CompanyRepository companyRepository;
     private final CompanyContentRepository companyContentRepository;
     private final CompanyTransactionService companyTransactionService;
+    private final CompanyLogoService companyLogoService;
+    private final CompanyWebsiteService companyWebsiteService;
 
     /**
      * Generate and save companies industry-wise using Gemini
@@ -138,7 +142,7 @@ public class AICompanyController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> processCompanyOperations(
-            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, cleanup")
+            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, cleanup, shortname, fetchLogos, fetchWebsites")
             @RequestParam(required = false) String operations,
             @Parameter(description = "Optional company name to process specific company")
             @RequestParam(required = false) String companyName) {
@@ -154,7 +158,7 @@ public class AICompanyController {
                 
                 // Validate operations
                 List<String> validOperations = Arrays.asList(
-                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup"
+                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup", "shortname", "fetchLogos", "fetchWebsites"
                 );
                 
                 for (String operation : operationsList) {
@@ -167,7 +171,7 @@ public class AICompanyController {
                 }
             } else {
                 // If no operations specified, process all operations
-                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup");
+                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup", "shortname", "fetchLogos", "fetchWebsites");
             }
             
             if (companyName != null && !companyName.trim().isEmpty()) {
@@ -191,6 +195,15 @@ public class AICompanyController {
                             break;
                         case "cleanup":
                             processedOperations.put("cleanup", processCompanyCleanup(companyName));
+                            break;
+                        case "shortname":
+                            processedOperations.put("shortname", processCompanyShortnameGeneration(companyName));
+                            break;
+                        case "fetchLogos":
+                            processedOperations.put("fetchLogos", fetchLogosForCompany(companyName));
+                            break;
+                        case "fetchWebsites":
+                            processedOperations.put("fetchWebsites", fetchWebsitesForCompany(companyName));
                             break;
                     }
                 }
@@ -216,6 +229,15 @@ public class AICompanyController {
                             break;
                         case "cleanup":
                             processedOperations.put("cleanup", processAllCompaniesCleanupInBatches());
+                            break;
+                        case "shortname":
+                            processedOperations.put("shortname", generateShortnamesForAllCompanies());
+                            break;
+                        case "fetchLogos":
+                            processedOperations.put("fetchLogos", fetchLogosForAllCompanies());
+                            break;
+                        case "fetchWebsites":
+                            processedOperations.put("fetchWebsites", fetchWebsitesForAllCompanies());
                             break;
                     }
                 }
@@ -264,30 +286,31 @@ public class AICompanyController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> resetCompanyFlags(
-            @Parameter(description = "Comma-separated list of flags to reset: is_crawled, industry_processed, content_shortened, similar_companies_processed, cleanup_processed")
+            @Parameter(description = "Comma-separated list of flags to reset: is_crawled, industry_processed, content_shortened, similar_companies_processed, cleanup_processed, shortname_generated, logoUrlFetched, websiteFetched")
             @RequestParam String flags,
             @Parameter(description = "Optional company name to reset flags for specific company")
             @RequestParam(required = false) String companyName) {
-        
+
         try {
             List<String> flagsList = Arrays.asList(flags.split(","));
             Map<String, Object> result = new HashMap<>();
-            
+
             // Validate flags
             List<String> validFlags = Arrays.asList(
-                "is_crawled", "industry_processed", "content_shortened", 
-                "similar_companies_processed", "cleanup_processed"
+                "is_crawled", "industry_processed", "content_shortened",
+                "similar_companies_processed", "cleanup_processed", "shortname_generated", "logoUrlFetched", "websiteFetched"
             );
-            
+
             for (String flag : flagsList) {
                 if (!validFlags.contains(flag.trim())) {
                     Map<String, Object> errorResponse = new HashMap<>();
-                    errorResponse.put("error", "Invalid flag: " + flag + ". Valid flags: " + validFlags);
+                    errorResponse.put("error",
+                        "Invalid flag: " + flag + ". Valid flags: " + validFlags);
                     errorResponse.put("status", "ERROR");
                     return ResponseEntity.badRequest().body(errorResponse);
                 }
             }
-            
+
             if (companyName != null && !companyName.trim().isEmpty()) {
                 log.info("Resetting flags for specific company: {}", companyName);
                 result.put("companyName", companyName);
@@ -299,13 +322,13 @@ public class AICompanyController {
                 // Reset flags for all companies
                 resetFlagsForAllCompanies(flagsList);
             }
-            
+
             result.put("resetFlags", flagsList);
             result.put("message", "Flags reset successfully");
             result.put("status", "SUCCESS");
-            
+
             return ResponseEntity.ok(result);
-            
+
         } catch (Exception e) {
             log.error("Error resetting company flags", e);
             Map<String, Object> errorResponse = new HashMap<>();
@@ -315,100 +338,7 @@ public class AICompanyController {
         }
     }
 
-    // ============================================================================
-    // COMPANY SHORTNAME GENERATION ENDPOINTS
-    // ============================================================================
 
-    @PostMapping("/shortnames/generate-for-all")
-    @Operation(
-        summary = "Generate shortnames for all companies using GenAI",
-        description = "Uses Gemini AI to generate commonly used shortnames or nicknames for all companies in the database. Examples: 'Eternal' → 'Zomato', 'International Business Machines' → 'IBM', 'Microsoft' → 'MS'."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Company shortnames generated successfully",
-            content = @Content(
-                examples = @ExampleObject(
-                    value = "{\n" +
-                        "  \"totalCompanies\": 100,\n" +
-                        "  \"totalShortnamesGenerated\": 85,\n" +
-                        "  \"totalErrors\": 15,\n" +
-                        "  \"companyResults\": [\n" +
-                        "    {\n" +
-                        "      \"companyName\": \"Eternal\",\n" +
-                        "      \"success\": true,\n" +
-                        "      \"shortname\": \"Zomato\"\n" +
-                        "    },\n" +
-                        "    {\n" +
-                        "      \"companyName\": \"International Business Machines\",\n" +
-                        "      \"success\": true,\n" +
-                        "      \"shortname\": \"IBM\"\n" +
-                        "    },\n" +
-                        "    {\n" +
-                        "      \"companyName\": \"Google\",\n" +
-                        "      \"success\": true,\n" +
-                        "      \"shortname\": \"Google\"\n" +
-                        "    }\n" +
-                        "  ],\n" +
-                        "  \"message\": \"Company shortname generation completed\"\n" +
-                        "}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<Map<String, Object>> generateShortnamesForAllCompanies() {
-        try {
-            log.info("Starting shortname generation for all companies");
-            
-            // Get all company names from the database
-            List<String> companyNames = companyService.getAllCompanyNames();
-            
-            Map<String, Object> result = companyShortnameService.generateShortnamesForAllCompanies(companyNames);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Error generating shortnames for all companies", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error generating shortnames for all companies: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(errorResponse);
-        }
-    }
-
-    @PostMapping("/shortnames/generate-for-company/{companyName}")
-    @Operation(
-        summary = "Generate shortname for a specific company using GenAI",
-        description = "Uses Gemini AI to generate the commonly used shortname or nickname for a specific company. Examples: 'Eternal' → 'Zomato', 'International Business Machines' → 'IBM'."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Company shortname generated successfully",
-            content = @Content(
-                examples = @ExampleObject(
-                    value = "{\n" +
-                        "  \"success\": true,\n" +
-                        "  \"companyName\": \"Eternal\",\n" +
-                        "  \"shortname\": \"Zomato\"\n" +
-                        "}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<Map<String, Object>> generateShortnameForCompany(@PathVariable String companyName) {
-        try {
-            log.info("Starting shortname generation for company: {}", companyName);
-            Map<String, Object> result = companyShortnameService.generateShortnameForSingleCompany(companyName);
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Error generating shortname for company: {}", companyName, e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error generating shortname for company: " + e.getMessage());
-            errorResponse.put("companyName", companyName);
-            return ResponseEntity.internalServerError().body(errorResponse);
-        }
-    }
 
     // Helper methods for processing operations
     private Map<String, Object> processCompanyCrawl(String companyName) {
@@ -677,6 +607,150 @@ public class AICompanyController {
         }
     }
 
+    private Map<String, Object> processCompanyShortnameGeneration(String companyName) {
+        try {
+            // Check if already processed
+            if (isCompanyShortnameAlreadyGenerated(companyName)) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("processed", false);
+                response.put("message", "Company shortname already generated");
+                return response;
+            }
+
+            // Get company entity
+            Optional<Company> companyOpt = companyRepository.findByName(companyName);
+            if (!companyOpt.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("processed", false);
+                response.put("message", "Company not found: " + companyName);
+                return response;
+            }
+
+            // Perform shortname generation using CompanyTransactionService
+            Map<String, Object> result = companyTransactionService.processCompanyShortnameGenerationInTransaction(companyOpt.get());
+            Map<String, Object> response = new HashMap<>();
+            response.put("processed", true);
+            response.put("message", "Shortname generated successfully");
+            response.put("result", result);
+            return response;
+        } catch (Exception e) {
+            log.error("Error generating shortname for company: {}", companyName, e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("processed", false);
+            response.put("message", "Error generating shortname for company: " + e.getMessage());
+            return response;
+        }
+    }
+
+    private Map<String, Object> generateShortnamesForAllCompanies() {
+        try {
+            log.info("Starting shortname generation for all companies");
+            Map<String, Object> result = companyTransactionService.processAllCompaniesShortnameGenerationInBatches();
+            return result;
+        } catch (Exception e) {
+            log.error("Error generating shortnames for all companies", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error generating shortnames for all companies: " + e.getMessage());
+            return errorResponse;
+        }
+    }
+
+    private Map<String, Object> fetchLogosForCompany(String companyName) {
+        try {
+            // Check if already processed
+            if (isCompanyLogoAlreadyFetched(companyName)) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("processed", false);
+                response.put("message", "Company logo already fetched");
+                return response;
+            }
+
+            // Get company entity
+            Optional<Company> companyOpt = companyRepository.findByName(companyName);
+            if (!companyOpt.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("processed", false);
+                response.put("message", "Company not found: " + companyName);
+                return response;
+            }
+
+            // Perform logo fetching
+            Map<String, Object> result = companyLogoService.fetchLogoForCompany(companyOpt.get());
+            Map<String, Object> response = new HashMap<>();
+            response.put("processed", true);
+            response.put("message", "Logo fetched successfully");
+            response.put("result", result);
+            return response;
+        } catch (Exception e) {
+            log.error("Error fetching logo for company: {}", companyName, e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("processed", false);
+            response.put("message", "Error fetching logo: " + e.getMessage());
+            return response;
+        }
+    }
+
+    private Map<String, Object> fetchLogosForAllCompanies() {
+        try {
+            log.info("Starting logo fetching for all companies");
+            Map<String, Object> result = companyLogoService.fetchLogosForAllCompaniesInBatches();
+            return result;
+        } catch (Exception e) {
+            log.error("Error fetching logos for all companies in batches", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error fetching logos for all companies in batches: " + e.getMessage());
+            return errorResponse;
+        }
+    }
+
+    private Map<String, Object> fetchWebsitesForCompany(String companyName) {
+        try {
+            // Check if already processed
+            if (isCompanyWebsiteAlreadyFetched(companyName)) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("processed", false);
+                response.put("message", "Company website already fetched");
+                return response;
+            }
+
+            // Get company entity
+            Optional<Company> companyOpt = companyRepository.findByName(companyName);
+            if (!companyOpt.isPresent()) {
+                Map<String, Object> response = new HashMap<>();
+                response.put("processed", false);
+                response.put("message", "Company not found: " + companyName);
+                return response;
+            }
+
+            // Perform website fetching
+            Map<String, Object> result = companyWebsiteService.fetchWebsiteForCompany(companyOpt.get());
+            Map<String, Object> response = new HashMap<>();
+            response.put("processed", true);
+            response.put("message", "Website fetched successfully");
+            response.put("result", result);
+            return response;
+        } catch (Exception e) {
+            log.error("Error fetching website for company: {}", companyName, e);
+            Map<String, Object> response = new HashMap<>();
+            response.put("processed", false);
+            response.put("message", "Error fetching website: " + e.getMessage());
+            return response;
+        }
+    }
+
+    private Map<String, Object> fetchWebsitesForAllCompanies() {
+        try {
+            log.info("Starting website fetching for all companies");
+            Map<String, Object> result = companyWebsiteService.fetchWebsitesForAllCompaniesInBatches();
+            return result;
+        } catch (Exception e) {
+            log.error("Error fetching websites for all companies in batches", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error fetching websites for all companies in batches: " + e.getMessage());
+            return errorResponse;
+        }
+    }
+
     // Helper methods for checking processing status
     private boolean isCompanyAlreadyCrawled(String companyName) {
         try {
@@ -789,6 +863,58 @@ public class AICompanyController {
         }
     }
 
+    private boolean isCompanyShortnameAlreadyGenerated(String companyName) {
+        try {
+            Optional<Company> company = companyRepository.findByName(companyName);
+            return company.isPresent() && company.get().isShortnameGenerated();
+        } catch (Exception e) {
+            log.error("Error checking if company shortname is already generated: {}", companyName, e);
+            return false;
+        }
+    }
+
+    private boolean isCompanyLogoAlreadyFetched(String companyName) {
+        try {
+            Optional<Company> company = companyRepository.findByName(companyName);
+            return company.isPresent() && company.get().getLogoUrlFetched() != null && company.get().getLogoUrlFetched() == 1;
+        } catch (Exception e) {
+            log.error("Error checking if company logo is already fetched: {}", companyName, e);
+            return false;
+        }
+    }
+
+    private boolean areAllCompaniesLogosAlreadyFetched() {
+        try {
+            // Check if there are any companies that haven't been processed for logo fetching
+            List<Company> unprocessedCompanies = companyRepository.findByLogoUrlFetched(0);
+            return unprocessedCompanies.isEmpty();
+        } catch (Exception e) {
+            log.error("Error checking if all companies logos are already fetched", e);
+            return false;
+        }
+    }
+
+    private boolean isCompanyWebsiteAlreadyFetched(String companyName) {
+        try {
+            Optional<Company> company = companyRepository.findByName(companyName);
+            return company.isPresent() && company.get().getWebsiteFetched() != null && company.get().getWebsiteFetched() == 1;
+        } catch (Exception e) {
+            log.error("Error checking if company website is already fetched: {}", companyName, e);
+            return false;
+        }
+    }
+
+    private boolean areAllCompaniesWebsitesAlreadyFetched() {
+        try {
+            // Check if there are any companies that haven't been processed for website fetching
+            List<Company> unprocessedCompanies = companyRepository.findByWebsiteFetched(0);
+            return unprocessedCompanies.isEmpty();
+        } catch (Exception e) {
+            log.error("Error checking if all companies websites are already fetched", e);
+            return false;
+        }
+    }
+
     // Helper methods for resetting flags
     private void resetFlagsForCompany(String companyName, List<String> flags) {
         try {
@@ -827,6 +953,21 @@ public class AICompanyController {
                             companyContentRepository.save(content.get());
                             updated = true;
                         }
+                        break;
+                    case "shortname":
+                        // Reset shortname generated flag in Company table
+                        companyEntity.setShortnameGenerated(false);
+                        updated = true;
+                        break;
+                    case "logoUrlFetched":
+                        // Reset logo fetched flag in Company table
+                        companyEntity.setLogoUrlFetched(null); // Set to null to indicate not fetched
+                        updated = true;
+                        break;
+                    case "websiteFetched":
+                        // Reset website fetched flag in Company table
+                        companyEntity.setWebsiteFetched(null); // Set to null to indicate not fetched
+                        updated = true;
                         break;
                     default:
                         log.warn("Unknown flag for reset: {}", flag);
@@ -882,6 +1023,30 @@ public class AICompanyController {
                         companyContentRepository.findAll().forEach(content -> {
                             content.setContentShortened(false);
                             companyContentRepository.save(content);
+                        });
+                        updated = true;
+                        break;
+                    case "shortname":
+                        // Reset all companies' shortname generated flag
+                        companyRepository.findAll().forEach(company -> {
+                            company.setShortnameGenerated(false);
+                            companyRepository.save(company);
+                        });
+                        updated = true;
+                        break;
+                    case "logoUrlFetched":
+                        // Reset all companies' logo fetched flag
+                        companyRepository.findAll().forEach(company -> {
+                            company.setLogoUrlFetched(null); // Set to null to indicate not fetched
+                            companyRepository.save(company);
+                        });
+                        updated = true;
+                        break;
+                    case "websiteFetched":
+                        // Reset all companies' website fetched flag
+                        companyRepository.findAll().forEach(company -> {
+                            company.setWebsiteFetched(null); // Set to null to indicate not fetched
+                            companyRepository.save(company);
                         });
                         updated = true;
                         break;

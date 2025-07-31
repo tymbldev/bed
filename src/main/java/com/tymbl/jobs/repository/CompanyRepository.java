@@ -14,6 +14,7 @@ import java.util.Optional;
 public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByName(String name);
     Optional<Company> findByNameIgnoreCase(String name);
+    List<Company> findAllByNameIgnoreCase(String name);
     boolean existsByName(String name);
     Page<Company> findByIsCrawledFalse(Pageable pageable);
     // Find all companies by primaryIndustryId
@@ -47,6 +48,15 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     // Find companies that haven't been processed for industry detection
     List<Company> findByIndustryProcessedFalse();
     
+    // Find companies that haven't been processed for shortname generation
+    List<Company> findByShortnameGeneratedFalse();
+    
+    // Find companies by shortname (for deduplication)
+    List<Company> findByShortnameIgnoreCase(String shortname);
+    
+    // Find companies that haven't been processed for shortname generation with pagination
+    Page<Company> findByShortnameGeneratedFalse(Pageable pageable);
+    
     // Find companies that haven't been processed for similar company generation and are enabled
     @Query("SELECT c FROM Company c WHERE c.similarCompaniesProcessed = false AND c.primaryIndustryId IS NOT NULL")
     List<Company> findUnprocessedCompaniesWithIndustry();
@@ -61,4 +71,24 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     List<Company> findByCleanupProcessedFalse();
 
     List<Company> findByIsJunkTrue();
+
+    // Find companies that haven't been processed for logo URL fetching
+    List<Company> findByLogoUrlFetched(Integer status);
+    
+    // Find companies that haven't been processed for logo URL fetching with pagination
+    Page<Company> findByLogoUrlFetched(Integer status, Pageable pageable);
+    
+    // Find companies that haven't been processed for website fetching
+    List<Company> findByWebsiteFetched(Integer status);
+    
+    // Find companies that haven't been processed for website fetching with pagination
+    Page<Company> findByWebsiteFetched(Integer status, Pageable pageable);
+    
+    // Reset logo URL fetched flag for all companies
+    @Query("UPDATE Company c SET c.logoUrlFetched = 0")
+    void resetLogoUrlFetchedFlag();
+    
+    // Reset website fetched flag for all companies
+    @Query("UPDATE Company c SET c.websiteFetched = 0")
+    void resetWebsiteFetchedFlag();
 } 

@@ -2,16 +2,21 @@ package com.tymbl.common.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.ArrayList;
@@ -33,6 +38,11 @@ public class CompanyShortnameService {
     @Qualifier("aiServiceRestTemplate")
     private final RestTemplate restTemplate;
 
+    private final CompanyRepository companyRepository;
+
+    // Bean for transactional operations
+    private final CompanyShortnameTransactionService transactionService;
+
     public Map<String, Object> generateShortnamesForAllCompanies(List<String> companyNames) {
         Map<String, Object> result = new HashMap<>();
         List<Map<String, Object>> companyResults = new ArrayList<>();
@@ -41,7 +51,7 @@ public class CompanyShortnameService {
         int totalShortnamesGenerated = 0;
         int totalErrors = 0;
         
-        log.info("Starting shortname generation for {} companies", totalCompanies);
+        log.info("Starting AI-powered shortname generation for {} companies", totalCompanies);
         
         for (String companyName : companyNames) {
             Map<String, Object> companyResult = new HashMap<>();
@@ -76,9 +86,9 @@ public class CompanyShortnameService {
         result.put("totalShortnamesGenerated", totalShortnamesGenerated);
         result.put("totalErrors", totalErrors);
         result.put("companyResults", companyResults);
-        result.put("message", "Shortname generation completed for all companies");
+        result.put("message", "AI-powered shortname generation completed for all companies");
         
-        log.info("Shortname generation completed. Total companies: {}, Total shortnames: {}, Errors: {}", 
+        log.info("AI-powered shortname generation completed. Total companies: {}, Total shortnames: {}, Errors: {}", 
                 totalCompanies, totalShortnamesGenerated, totalErrors);
         
         return result;
@@ -88,7 +98,7 @@ public class CompanyShortnameService {
         Map<String, Object> result = new HashMap<>();
         
         try {
-            log.info("Generating shortname for company: {}", companyName);
+            log.info("Generating AI-powered shortname for company: {}", companyName);
             String shortname = generateShortnameForCompany(companyName);
             
             if (shortname != null && !shortname.trim().isEmpty()) {
@@ -115,7 +125,7 @@ public class CompanyShortnameService {
     private String generateShortnameForCompany(String companyName) {
         try {
             log.info("[Gemini] Generating shortname for company: {}", companyName);
-            String prompt = buildShortnameGenerationPrompt(companyName);
+            String prompt = buildRobustShortnameGenerationPrompt(companyName);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
             Map<String, Object> requestBody = buildRequestBody(prompt);
             
@@ -146,39 +156,48 @@ public class CompanyShortnameService {
         }
     }
 
-    private String buildShortnameGenerationPrompt(String companyName) {
+    /**
+     * Internal method for generating shortnames that can be called by the transaction service
+     */
+    public String generateShortnameForCompanyInternal(String companyName) {
+        return generateShortnameForCompany(companyName);
+    }
+
+    private String buildRobustShortnameGenerationPrompt(String companyName) {
         return String.format(
-            "You are a business and technology expert helping to identify the commonly used shortnames or nicknames for companies. " +
+            "You are a business and technology expert helping to identify the most commonly used and recognized shortnames for companies. " +
             "Given the company name '%s', provide the most widely recognized and commonly used shortname or nickname for this company.\n\n" +
-            "INSTRUCTIONS:\n" +
-            "1. Identify the most popular and widely recognized shortname for the company\n" +
-            "2. Consider how people commonly refer to the company in conversation\n" +
-            "3. Focus on shortnames that are widely known and used in the industry\n" +
-            "4. Prefer official or semi-official shortnames over informal nicknames\n" +
-            "5. If the company doesn't have a widely recognized shortname, return the original name\n\n" +
+            "CRITICAL REQUIREMENTS:\n" +
+            "1. Focus on the CORE company name that people actually use in conversation\n" +
+            "2. Remove ALL legal suffixes, descriptive text, and extra information\n" +
+            "3. Return the shortest, most recognizable version of the company name\n" +
+            "4. Consider how people actually refer to the company in daily conversation\n" +
+            "5. If no widely recognized shortname exists, return the cleaned core name\n\n" +
+            "COMPREHENSIVE PATTERNS TO HANDLE:\n" +
+            "LEGAL SUFFIXES: Remove 'Limited', 'Ltd', 'Ltd.', 'Private Limited', 'Pvt Ltd', 'Incorporated', 'Inc', 'Inc.', 'Corporation', 'Corp', 'Corp.', 'Company', 'Co', 'Co.'\n" +
+            "BUSINESS TYPES: Remove 'Group', 'Grp', 'Holdings', 'Holding', 'Enterprises', 'Enterprise', 'Industries', 'Industry', 'Solutions', 'Solution'\n" +
+            "TECHNOLOGY TERMS: Remove 'Technologies', 'Technology', 'Tech', 'Tech.', 'Systems', 'System', 'Services', 'Service'\n" +
+            "GEOGRAPHIC TERMS: Remove 'International', 'Intl', 'Intl.', 'Global', 'Worldwide', 'World Wide'\n" +
+            "INTERNATIONAL FORMATS: Remove 'PLC', 'LLC', 'AG', 'GmbH', 'SA', 'NV', 'BV', 'AB', 'OY', 'AS', 'KK'\n" +
+            "ASIAN FORMATS: Remove 'Kabushiki Kaisha', 'K.K.', 'Yugen Kaisha', 'Y.K.', 'Godo Kaisha', 'G.K.'\n" +
+            "EUROPEAN FORMATS: Remove 'Societe Anonyme', 'S.A.', 'Societa per Azioni', 'S.p.A.', 'Sociedad Anonima', 'Naamloze Vennootschap', 'N.V.', 'Besloten Vennootschap', 'B.V.'\n" +
+            "PUNCTUATION: Remove trailing periods, commas, semicolons, and other punctuation\n" +
+            "EXTRA TEXT: Remove any additional descriptive text, taglines, or marketing phrases\n\n" +
             "EXAMPLES:\n" +
-            "- 'Zomato' → 'Zomato' (no widely recognized shortname)\n" +
-            "- 'Google' → 'Google' (no widely recognized shortname)\n" +
-            "- 'Microsoft' → 'MS' or 'Microsoft'\n" +
-            "- 'International Business Machines' → 'IBM'\n" +
+            "- 'Zydus Lifesciences Limited' → 'Zydus Lifesciences'\n" +
+            "- 'Microsoft Corporation' → 'Microsoft'\n" +
             "- 'Apple Inc.' → 'Apple'\n" +
-            "- 'Amazon.com' → 'Amazon'\n" +
-            "- 'Netflix' → 'Netflix' (no widely recognized shortname)\n" +
-            "- 'Meta Platforms' → 'Meta'\n" +
+            "- 'Google LLC' → 'Google'\n" +
+            "- 'Amazon.com, Inc.' → 'Amazon'\n" +
+            "- 'Tesla, Inc.' → 'Tesla'\n" +
+            "- 'Netflix, Inc.' → 'Netflix'\n" +
+            "- 'Meta Platforms, Inc.' → 'Meta'\n" +
             "- 'Alphabet Inc.' → 'Alphabet'\n" +
-            "- 'United Parcel Service' → 'UPS'\n" +
-            "- 'Federal Express' → 'FedEx'\n" +
-            "- 'International Business Machines Corporation' → 'IBM'\n" +
-            "- 'General Electric' → 'GE'\n" +
-            "- 'Procter & Gamble' → 'P&G'\n" +
-            "- 'Johnson & Johnson' → 'J&J'\n\n" +
-            "QUALITY REQUIREMENTS:\n" +
-            "- Return only the shortname, no explanations or additional text\n" +
-            "- Use the most widely recognized and commonly used shortname\n" +
-            "- If no widely recognized shortname exists, return the original company name\n" +
-            "- Ensure the shortname is currently in use and relevant\n" +
-            "- Prefer official abbreviations over informal nicknames\n\n" +
-            "Return ONLY the shortname for company '%s':",
+            "- 'NVIDIA Corporation' → 'NVIDIA'\n\n" +
+            "RESPONSE FORMAT:\n" +
+            "Return ONLY the shortname, nothing else. No explanations, no quotes, no additional text.\n\n" +
+            "Company name: %s\n" +
+            "Shortname:",
             companyName
         );
     }
@@ -224,5 +243,85 @@ public class CompanyShortnameService {
         content.put("parts", new Object[]{part});
         contents.put("contents", new Object[]{content});
         return contents;
+    }
+
+    /**
+     * Process all companies shortname generation and deduplication using database pagination
+     */
+    public Map<String, Object> processAllCompaniesShortnameGenerationAndDeduplicationInBatches() {
+        log.info("Starting shortname generation and deduplication for all companies using database pagination");
+        
+        List<Map<String, Object>> companyResults = new ArrayList<>();
+        int totalProcessed = 0;
+        int totalShortnamesGenerated = 0;
+        int totalDeleted = 0;
+        int totalErrors = 0;
+        int batchSize = 10; // Process 10 companies at a time
+        int pageNumber = 0;
+        
+        while (true) {
+            // Fetch companies in batches using database pagination
+            Page<Company> companyPage = companyRepository.findByShortnameGeneratedFalse(
+                PageRequest.of(pageNumber, batchSize)
+            );
+            
+            List<Company> companies = companyPage.getContent();
+            
+            if (companies.isEmpty()) {
+                log.info("No more companies to process. Completed at page: {}", pageNumber);
+                break;
+            }
+            
+            log.info("Processing shortname generation and deduplication batch {} with {} companies", pageNumber + 1, companies.size());
+            
+            for (Company company : companies) {
+                try {
+                    // Use the transaction service to ensure proper transaction handling
+                    Map<String, Object> result = transactionService.processCompanyShortnameGenerationAndDeduplicationInTransaction(company);
+                    companyResults.add(result);
+                    
+                    if ((Boolean) result.get("success")) {
+                        String action = (String) result.get("action");
+                        if ("created".equals(action) || "updated".equals(action)) {
+                            totalShortnamesGenerated++;
+                        } else if ("deleted".equals(action)) {
+                            totalDeleted++;
+                        }
+                        log.info("Successfully processed company: {} (ID: {}) - Action: {}", company.getName(), company.getId(), action);
+                    } else {
+                        totalErrors++;
+                        log.error("Failed to process company: {} (ID: {})", company.getName(), company.getId());
+                    }
+                    
+                    totalProcessed++;
+                    
+                } catch (Exception e) {
+                    totalErrors++;
+                    log.error("Error processing company: {} (ID: {})", company.getName(), company.getId(), e);
+                    
+                    Map<String, Object> errorResult = new HashMap<>();
+                    errorResult.put("companyId", company.getId());
+                    errorResult.put("companyName", company.getName());
+                    errorResult.put("success", false);
+                    errorResult.put("error", "Error processing company: " + e.getMessage());
+                    companyResults.add(errorResult);
+                }
+            }
+            
+            pageNumber++;
+        }
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("totalProcessed", totalProcessed);
+        result.put("totalShortnamesGenerated", totalShortnamesGenerated);
+        result.put("totalDeleted", totalDeleted);
+        result.put("totalErrors", totalErrors);
+        result.put("companyResults", companyResults);
+        result.put("message", "Shortname generation and deduplication completed using database pagination");
+        
+        log.info("Completed shortname generation and deduplication using database pagination. Total processed: {}, Shortnames generated: {}, Deleted: {}, Errors: {}", 
+                totalProcessed, totalShortnamesGenerated, totalDeleted, totalErrors);
+        
+        return result;
     }
 } 

@@ -7,9 +7,11 @@ import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.CompanyContentRepository;
-import com.tymbl.common.service.DropdownService;
-import com.tymbl.common.service.GeminiService;
 import com.tymbl.common.repository.IndustryRepository;
+import com.tymbl.common.service.GeminiService;
+import com.tymbl.common.service.DropdownService;
+import com.tymbl.common.service.CompanyShortnameService;
+import com.tymbl.common.service.CompanyShortnameTransactionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -40,9 +42,11 @@ public class CompanyTransactionService {
     private final CompanyRepository companyRepository;
     private final CompanyContentRepository companyContentRepository;
     private final IndustryRepository industryRepository;
+    private final RestTemplate restTemplate;
+    private final CompanyShortnameService companyShortnameService;
+    private final CompanyShortnameTransactionService companyShortnameTransactionService;
     private final GeminiService geminiService;
     private final DropdownService dropdownService;
-    private final RestTemplate restTemplate;
     
     @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
     private String apiKey;
@@ -499,6 +503,21 @@ public class CompanyTransactionService {
         }
         
         return result;
+    }
+
+    /**
+     * Process company shortname generation in its own transaction
+     */
+    @Transactional
+    public Map<String, Object> processCompanyShortnameGenerationInTransaction(Company company) {
+        return companyShortnameTransactionService.processCompanyShortnameGenerationAndDeduplicationInTransaction(company);
+    }
+
+    /**
+     * Process all companies shortname generation in batches
+     */
+    public Map<String, Object> processAllCompaniesShortnameGenerationInBatches() {
+        return companyShortnameService.processAllCompaniesShortnameGenerationAndDeduplicationInBatches();
     }
 
     // Helper methods
