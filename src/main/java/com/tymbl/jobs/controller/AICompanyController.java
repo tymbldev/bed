@@ -230,7 +230,7 @@ public class AICompanyController {
                         case "cleanup":
                             processedOperations.put("cleanup", processAllCompaniesCleanupInBatches());
                             break;
-                        case "shortname":
+                            case "shortname":
                             processedOperations.put("shortname", generateShortnamesForAllCompanies());
                             break;
                         case "fetchLogos":

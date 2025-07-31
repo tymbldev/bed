@@ -47,7 +47,7 @@ public class JobSearchController {
     @PostMapping("/search")
     @Operation(
         summary = "Search jobs using Elasticsearch",
-        description = "Unified search endpoint that searches jobs using Elasticsearch. Supports keyword search, location filtering, experience filtering, company, designation, and pagination."
+        description = "Unified search endpoint that searches jobs using Elasticsearch. Supports keyword search, location filtering (by ID or name), experience filtering, company, designation, and pagination. City and country can be specified using either IDs (cityId, countryId) or names (cityName, countryName)."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -55,52 +55,32 @@ public class JobSearchController {
             description = "Search completed successfully",
             content = @Content(
                 schema = @Schema(implementation = JobSearchResponse.class),
-                examples = @ExampleObject(
-                    value = "{\n" +
-                          "  \"jobs\": [\n" +
-                          "    {\n" +
-                          "      \"id\": 1,\n" +
-                          "      \"title\": \"Software Engineer\",\n" +
-                          "      \"description\": \"We are looking for a talented software engineer...\",\n" +
-                          "      \"company\": \"Google\",\n" +
-                          "      \"designation\": \"Software Engineer\",\n" +
-                          "      \"minSalary\": 100000,\n" +
-                          "      \"maxSalary\": 150000,\n" +
-                          "      \"minExperience\": 2,\n" +
-                          "      \"maxExperience\": 5,\n" +
-                          "      \"jobType\": \"HYBRID\",\n" +
-                          "      \"cityId\": 1,\n" +
-                          "      \"cityName\": \"Mountain View\",\n" +
-                          "      \"countryId\": 1,\n" +
-                          "      \"countryName\": \"United States\",\n" +
-                          "      \"companyId\": 1,\n" +
-                          "      \"companyName\": \"Google\",\n" +
-                          "      \"designationId\": 1,\n" +
-                          "      \"designationName\": \"Software Engineer\",\n" +
-                          "      \"currencyId\": 1,\n" +
-                          "      \"currencyName\": \"US Dollar\",\n" +
-                          "      \"currencySymbol\": \"$\",\n" +
-                          "      \"postedBy\": 1,\n" +
-                          "      \"active\": true,\n" +
-                          "      \"createdAt\": \"2024-01-01T10:00:00\",\n" +
-                          "      \"updatedAt\": \"2024-01-01T10:00:00\",\n" +
-                          "      \"tags\": [\"Java\", \"Spring\", \"Microservices\"],\n" +
-                          "      \"openingCount\": 5,\n" +
-                          "      \"uniqueUrl\": \"https://careers.google.com/jobs/123\",\n" +
-                          "      \"platform\": \"Google Careers\",\n" +
-                          "      \"approved\": 1,\n" +
-                          "      \"referrerCount\": 2,\n" +
-                          "      \"userRole\": \"VIEWER\",\n" +
-                          "      \"actualPostedBy\": 1,\n" +
-                          "      \"isSuperAdminPosted\": false\n" +
-                          "    }\n" +
-                          "  ],\n" +
-                          "  \"total\": 1,\n" +
-                          "  \"page\": 0,\n" +
-                          "  \"size\": 20,\n" +
-                          "  \"totalPages\": 1\n" +
-                          "}"
-                )
+                examples = {
+                    @ExampleObject(
+                        name = "Search with IDs",
+                        value = "{\n" +
+                              "  \"keywords\": [\"software engineer\", \"java\"],\n" +
+                              "  \"cityId\": 1,\n" +
+                              "  \"countryId\": 1,\n" +
+                              "  \"minExperience\": 2,\n" +
+                              "  \"maxExperience\": 5,\n" +
+                              "  \"page\": 0,\n" +
+                              "  \"size\": 20\n" +
+                              "}"
+                    ),
+                    @ExampleObject(
+                        name = "Search with Names",
+                        value = "{\n" +
+                              "  \"keywords\": [\"python\", \"data scientist\"],\n" +
+                              "  \"cityName\": \"San Francisco\",\n" +
+                              "  \"countryName\": \"United States\",\n" +
+                              "  \"minExperience\": 3,\n" +
+                              "  \"maxExperience\": 7,\n" +
+                              "  \"page\": 0,\n" +
+                              "  \"size\": 10\n" +
+                              "}"
+                    )
+                }
             )
         )
     })

@@ -282,7 +282,10 @@ public class JobService {
             userDesignationId = currentUser.getDesignationId();
         }
         
-        JobSearchResponse response = elasticsearchJobService.searchJobs(request, userDesignationId);
+        // Map city and country names to IDs if provided
+        JobSearchRequest mappedRequest = mapCityAndCountryNamesToIds(request);
+        
+        JobSearchResponse response = elasticsearchJobService.searchJobs(mappedRequest, userDesignationId);
 
         // Populate companyMetaData
         if (response.getJobs() != null && !response.getJobs().isEmpty()) {
@@ -314,6 +317,49 @@ public class JobService {
             response.setCompanyMetaData(companyMetaData);
         }
         return response;
+    }
+
+    /**
+     * Map city and country names to their respective IDs using DropdownService
+     */
+    private JobSearchRequest mapCityAndCountryNamesToIds(JobSearchRequest request) {
+        JobSearchRequest mappedRequest = JobSearchRequest.builder()
+            .keywords(request.getKeywords())
+            .cityId(request.getCityId())
+            .countryId(request.getCountryId())
+            .cityName(request.getCityName())
+            .countryName(request.getCountryName())
+            .companyId(request.getCompanyId())
+            .designationId(request.getDesignationId())
+            .minExperience(request.getMinExperience())
+            .maxExperience(request.getMaxExperience())
+            .page(request.getPage())
+            .size(request.getSize())
+            .build();
+
+        // Map city name to city ID if provided and cityId is not already set
+        if (request.getCityName() != null && !request.getCityName().trim().isEmpty() && request.getCityId() == null) {
+            Long cityId = dropdownService.getCityIdByName(request.getCityName().trim());
+            if (cityId != null) {
+                mappedRequest.setCityId(cityId);
+                logger.debug("Mapped city name '{}' to city ID: {}", request.getCityName(), cityId);
+            } else {
+                logger.warn("Could not find city ID for city name: {}", request.getCityName());
+            }
+        }
+
+        // Map country name to country ID if provided and countryId is not already set
+        if (request.getCountryName() != null && !request.getCountryName().trim().isEmpty() && request.getCountryId() == null) {
+            Long countryId = dropdownService.getCountryIdByName(request.getCountryName().trim());
+            if (countryId != null) {
+                mappedRequest.setCountryId(countryId);
+                logger.debug("Mapped country name '{}' to country ID: {}", request.getCountryName(), countryId);
+            } else {
+                logger.warn("Could not find country ID for country name: {}", request.getCountryName());
+            }
+        }
+
+        return mappedRequest;
     }
 
     /**

@@ -17,6 +17,8 @@ public class JobSearchRequest {
     private List<String> keywords;
     private Long cityId;
     private Long countryId;
+    private String cityName; // Optional: city name to map to cityId
+    private String countryName; // Optional: country name to map to countryId
     private Long companyId; // Optional: filter by company
     private Long designationId; // Optional: filter by designation
     @Min(0)

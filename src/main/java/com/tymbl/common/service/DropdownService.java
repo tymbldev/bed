@@ -236,6 +236,34 @@ public class DropdownService {
     return industry != null ? industry.getId() : null;
   }
 
+  @Transactional(readOnly = true)
+  public Long getCityIdByName(String name) {
+    if (name == null || name.trim().isEmpty()) {
+      return null;
+    }
+
+    try {
+      City city = cityRepository.findByName(name).orElse(null);
+      return city != null ? city.getId() : null;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
+  @Transactional(readOnly = true)
+  public Long getCountryIdByName(String name) {
+    if (name == null || name.trim().isEmpty()) {
+      return null;
+    }
+
+    try {
+      Country country = countryRepository.findByName(name).orElse(null);
+      return country != null ? country.getId() : null;
+    } catch (Exception e) {
+      return null;
+    }
+  }
+
   // Cached methods for enrichment
   @Transactional(readOnly = true)
   public String getDesignationNameById(Long id) {

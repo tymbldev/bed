@@ -11,6 +11,7 @@ import java.util.List;
 public interface CityRepository extends JpaRepository<City, Long> {
     List<City> findByCountryIdOrderByNameAsc(Long countryId);
     List<City> findByNameContainingIgnoreCaseOrderByNameAsc(String name);
+    Optional<City> findByName(String name);
     
     // Find cities that haven't been processed for processed name generation
     List<City> findByProcessedNameGeneratedFalse();

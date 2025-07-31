@@ -345,7 +345,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"keyword\": \"software engineer\",\n  \"page\": 0,\n  \"size\": 20\n}"
+              "raw": "{\n  \"keywords\": [\"software engineer\", \"java\"],\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"cityName\": \"Mountain View\",\n  \"countryName\": \"United States\",\n  \"companyId\": 1,\n  \"designationId\": 1,\n  \"minExperience\": 2,\n  \"maxExperience\": 5,\n  \"page\": 0,\n  \"size\": 20\n}"
             },
             "url": {
               "raw": "{{base_url}}/api/v1/jobsearch/search",
@@ -376,6 +376,401 @@
                 "jobsearch",
                 "1",
                 "referrers"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Search & Autosuggest",
+      "item": [
+        {
+          "name": "Autosuggest (Basic)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/autosuggest?query=google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "autosuggest"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "google"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Autosuggest (Elasticsearch - Companies)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/autosuggest-elasticsearch?keyword=google&entityType=companies&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "autosuggest-elasticsearch"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "google"
+                },
+                {
+                  "key": "entityType",
+                  "value": "companies"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Autosuggest (Elasticsearch - Designations)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/autosuggest-elasticsearch?keyword=software&entityType=designations&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "autosuggest-elasticsearch"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "software"
+                },
+                {
+                  "key": "entityType",
+                  "value": "designations"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Autosuggest (Elasticsearch - Cities)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/autosuggest-elasticsearch?keyword=new&entityType=cities&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "autosuggest-elasticsearch"
+              ],
+              "query": [
+                {
+                  "key": "keyword",
+                  "value": "new"
+                },
+                {
+                  "key": "entityType",
+                  "value": "cities"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Search Jobs (with City/Country Names)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keywords\": [\"python\", \"data scientist\"],\n  \"cityName\": \"San Francisco\",\n  \"countryName\": \"United States\",\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"page\": 0,\n  \"size\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "search"
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Dropdowns",
+      "item": [
+        {
+          "name": "Get All Departments",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "departments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Engineering\",\n  \"description\": \"Software development and engineering\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "departments"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Designations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Designation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Software Engineer\",\n  \"description\": \"Entry-level software development position\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Industries",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/industries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "industries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Industry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Information Technology & Services\",\n  \"description\": \"Technology and IT services industry\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/industries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "industries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Currencies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/currencies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "currencies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Companies",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/companies",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Companies by Industry",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/companies/by-industry/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies",
+                "by-industry",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Designations for Department (AI)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations/generate/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations",
+                "generate",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Designations for All Departments (AI)",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations/generate-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations",
+                "generate-all"
               ]
             }
           }
