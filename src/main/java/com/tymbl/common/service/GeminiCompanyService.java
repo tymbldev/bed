@@ -8,18 +8,9 @@ import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.jobs.entity.Company;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
+import com.tymbl.common.service.AIRestService;
 
 import java.time.Instant;
 import java.util.*;
@@ -30,13 +21,8 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GeminiCompanyService {
 
-  @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-  private String apiKey;
-
-  private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+  private final AIRestService aiRestService;
   private final ObjectMapper objectMapper = new ObjectMapper();
-  @Qualifier("aiServiceRestTemplate")
-  private final RestTemplate restTemplate;
   private final IndustryRepository industryRepository;
   private final CompanyPersistenceService companyPersistenceService;
 
@@ -51,69 +37,24 @@ public class GeminiCompanyService {
             .build();
       }
       String prompt = buildCompanyGenerationPrompt(companyName);
-      Map<String, Object> requestBody = buildRequestBody(prompt);
+      Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
       log.debug("Sending request to Gemini API for company: {}", companyName);
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+      
       try {
-        ResponseEntity<String> response = restTemplate.exchange(
-            GEMINI_API_URL + "?key=" + apiKey,
-            HttpMethod.POST,
-            request,
-            String.class
-        );
-        log.debug("Gemini API response status: {}", response.getStatusCodeValue());
-        if (response.getStatusCodeValue() == 200) {
-          log.info("Successfully received response from Gemini API for company: {}", companyName);
-          return parseGeminiResponseWithJunkDetection(response.getBody(), companyName);
-        } else {
-          log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-          return CompanyGenerationResponse.builder()
-              .success(false)
-              .errorMessage("Gemini API error: " + response.getStatusCodeValue())
-              .build();
-        }
-      } catch (HttpClientErrorException e) {
-        if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-          log.error("Rate limit exceeded for Gemini API. Company: {}", companyName);
-          log.error("Rate limit error details: {}", e.getResponseBodyAsString());
-          throw new RuntimeException("Rate limit exceeded for Gemini API");
-        } else {
-          log.error("HTTP error calling Gemini API for company: {}", companyName, e);
-          return CompanyGenerationResponse.builder()
-              .success(false)
-              .errorMessage("HTTP error: " + e.getMessage())
-              .build();
-        }
-      } catch (ResourceAccessException e) {
-        if (e.getCause() instanceof java.net.SocketTimeoutException) {
-          log.error("Request timeout for Gemini API. Company: {}", companyName, e);
-          throw new RuntimeException("Request timeout for Gemini API", e);
-        } else {
-          log.error("Connection error calling Gemini API for company: {}", companyName, e);
-          return CompanyGenerationResponse.builder()
-              .success(false)
-              .errorMessage("Connection error: " + e.getMessage())
-              .build();
-        }
-      } catch (RuntimeException e) {
-        if (e.getMessage() != null && e.getMessage().contains("timeout")) {
-          log.error("Request timeout for Gemini API. Company: {}", companyName, e);
-          throw e;
-        } else {
-          log.error("Runtime error calling Gemini API for company: {}", companyName, e);
-          return CompanyGenerationResponse.builder()
-              .success(false)
-              .errorMessage("Runtime error: " + e.getMessage())
-              .build();
-        }
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company Generation for " + companyName);
+        return parseGeminiResponseWithJunkDetection(response.getBody(), companyName);
+      } catch (Exception e) {
+        log.error("Error calling Gemini API for company: {}", companyName, e);
+        return CompanyGenerationResponse.builder()
+            .success(false)
+            .errorMessage("Error: " + e.getMessage())
+            .build();
       }
     } catch (Exception e) {
-      log.error("Error calling Gemini API for company: {}", companyName, e);
+      log.error("Error generating company info for: {}", companyName, e);
       return CompanyGenerationResponse.builder()
           .success(false)
-          .errorMessage("Unexpected error: " + e.getMessage())
+          .errorMessage("Error: " + e.getMessage())
           .build();
     }
   }
@@ -127,56 +68,18 @@ public class GeminiCompanyService {
         return new HashMap<>();
       }
       String prompt = buildIndustryDetectionPrompt(companyName, companyDescription, specialties);
-      Map<String, Object> requestBody = buildRequestBody(prompt);
+      Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
       log.debug("Sending request to Gemini API for industry detection: {}", companyName);
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+      
       try {
-        ResponseEntity<String> response = restTemplate.exchange(
-            GEMINI_API_URL + "?key=" + apiKey,
-            HttpMethod.POST,
-            request,
-            String.class
-        );
-        log.debug("Gemini API response status: {}", response.getStatusCodeValue());
-        if (response.getStatusCodeValue() == 200) {
-          log.info("Successfully received response from Gemini API for industry detection: {}",
-              companyName);
-          return parseIndustryResponse(response.getBody());
-        } else {
-          log.error("Gemini API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-          return new HashMap<>();
-        }
-      } catch (HttpClientErrorException e) {
-        if (e.getStatusCode() == HttpStatus.TOO_MANY_REQUESTS) {
-          log.error("Rate limit exceeded for Gemini API. Company: {}", companyName);
-          log.error("Rate limit error details: {}", e.getResponseBodyAsString());
-          throw new RuntimeException("Rate limit exceeded for Gemini API");
-        } else {
-          log.error("HTTP error calling Gemini API for industry detection: {}", companyName, e);
-          return new HashMap<>();
-        }
-      } catch (ResourceAccessException e) {
-        if (e.getCause() instanceof java.net.SocketTimeoutException) {
-          log.error("Request timeout for Gemini API. Company: {}", companyName, e);
-          throw new RuntimeException("Request timeout for Gemini API", e);
-        } else {
-          log.error("Connection error calling Gemini API for industry detection: {}", companyName,
-              e);
-          return new HashMap<>();
-        }
-      } catch (RuntimeException e) {
-        if (e.getMessage() != null && e.getMessage().contains("timeout")) {
-          log.error("Request timeout for Gemini API. Company: {}", companyName, e);
-          throw e;
-        } else {
-          log.error("Runtime error calling Gemini API for industry detection: {}", companyName, e);
-          return new HashMap<>();
-        }
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Industry Detection for " + companyName);
+        return parseIndustryResponse(response.getBody());
+      } catch (Exception e) {
+        log.error("Error calling Gemini API for industry detection: {}", companyName, e);
+        return new HashMap<>();
       }
     } catch (Exception e) {
-      log.error("Error calling Gemini API for industry detection: {}", companyName, e);
+      log.error("Error detecting industries for: {}", companyName, e);
       return new HashMap<>();
     }
   }
@@ -210,24 +113,10 @@ public class GeminiCompanyService {
       prompt.append(
           "IMPORTANT: My system will parse your response as JSON. If you add any note, remark, explanation, or text before or after the array, the process will fail. Do NOT add anything except the JSON array.");
 
-      Map<String, Object> requestBody = buildRequestBody(prompt.toString());
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-      ResponseEntity<String> response = restTemplate.exchange(
-          GEMINI_API_URL + "?key=" + apiKey,
-          HttpMethod.POST,
-          request,
-          String.class
-      );
+      Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt.toString());
+      ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company List Generation for " + industryName);
       Thread.sleep(1000); // Add a delay to avoid hitting rate limits too quickly
-      if (response.getStatusCodeValue() == 200) {
-        return parseCompanyListResponse(response.getBody());
-      } else {
-        log.error("Gemini API error (company list): {} - {}", response.getStatusCodeValue(),
-            response.getBody());
-        return Collections.emptyList();
-      }
+      return parseCompanyListResponse(response.getBody());
     } catch (Exception e) {
       log.error("Error generating company list for industry {}: {}", industryName, e.getMessage(),
           e);
@@ -373,16 +262,7 @@ public class GeminiCompanyService {
     return prompt.toString();
   }
 
-  private Map<String, Object> buildRequestBody(String prompt) {
-    Map<String, Object> requestBody = new HashMap<>();
-    Map<String, Object> contents = new HashMap<>();
-    Map<String, Object> part = new HashMap<>();
-    part.put("text", prompt);
-    Map<String, Object> content = new HashMap<>();
-    content.put("parts", new Object[]{part});
-    contents.put("contents", new Object[]{content});
-    return contents;
-  }
+
 
   private CompanyGenerationResponse parseGeminiResponseWithJunkDetection(String responseBody,
       String companyName) {

@@ -2,63 +2,34 @@ package com.tymbl.common.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tymbl.common.service.AIRestService;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.*;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class GeminiInterviewService {
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
-
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
-    @Qualifier("aiServiceRestTemplate")
-    private final RestTemplate restTemplate;
+    private final AIRestService aiRestService;
 
     public List<Map<String, Object>> generateTopicsForDesignation(String designationName) {
         try {
             log.info("[Gemini] Generating topics for designation: {}", designationName);
             String prompt = buildTopicGenerationPrompt(designationName);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> topics = parseTopicsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} topics for designation: {}", topics.size(), designationName);
-                return topics;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Topic Generation for " + designationName);
+            List<Map<String, Object>> topics = parseTopicsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} topics for designation: {}", topics.size(), designationName);
+            return topics;
         } catch (Exception e) {
             log.error("[Gemini] Error generating topics for designation: {}", designationName, e);
             return new ArrayList<>();
@@ -70,29 +41,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Generating general interview questions for designation: {}, topic: {}, difficulty: {}", designation, topicName, difficultyLevel);
             String prompt = buildGeneralQuestionPrompt(designation, topicName, difficultyLevel, numQuestions);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> questions = parseQuestionsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} general interview questions for designation: {}, topic: {}", questions.size(), designation, topicName);
-                return questions;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "General Questions for " + designation + " - " + topicName);
+            List<Map<String, Object>> questions = parseQuestionsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} general interview questions for designation: {}, topic: {}", questions.size(), designation, topicName);
+            return questions;
         } catch (Exception e) {
             log.error("[Gemini] Error generating general interview questions for designation: {}, topic: {}", designation, topicName, e);
             return new ArrayList<>();
@@ -104,29 +58,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Generating company-specific questions for company: {}, designation: {}, topic: {}", companyName, designation, topicName);
             String prompt = buildCompanySpecificQuestionPrompt(companyName, designation, topicName, difficultyLevel, numQuestions);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> questions = parseQuestionsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} company-specific questions for company: {}, designation: {}, topic: {}", questions.size(), companyName, designation, topicName);
-                return questions;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company Specific Questions for " + companyName + " - " + designation);
+            List<Map<String, Object>> questions = parseQuestionsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} company-specific questions for company: {}, designation: {}, topic: {}", questions.size(), companyName, designation, topicName);
+            return questions;
         } catch (Exception e) {
             log.error("[Gemini] Error generating company-specific questions for company: {}, designation: {}, topic: {}", companyName, designation, topicName, e);
             return new ArrayList<>();
@@ -138,29 +75,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Generating designations for department: {}", departmentName);
             String prompt = buildDesignationGenerationPrompt(departmentName);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> designations = parseDesignationsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} designations for department: {}", designations.size(), departmentName);
-                return designations;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Designations for Department - " + departmentName);
+            List<Map<String, Object>> designations = parseDesignationsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} designations for department: {}", designations.size(), departmentName);
+            return designations;
         } catch (Exception e) {
             log.error("[Gemini] Error generating designations for department: {}", departmentName, e);
             return new ArrayList<>();
@@ -172,29 +92,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Generating comprehensive interview questions for skill: {}", skillName);
             String prompt = buildComprehensiveQuestionPrompt(skillName, numQuestions);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> questions = parseComprehensiveQuestionsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} comprehensive interview questions for skill: {}", questions.size(), skillName);
-                return questions;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Comprehensive Questions for " + skillName);
+            List<Map<String, Object>> questions = parseComprehensiveQuestionsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} comprehensive interview questions for skill: {}", questions.size(), skillName);
+            return questions;
         } catch (Exception e) {
             log.error("[Gemini] Error generating comprehensive questions for skill: {}", skillName, e);
             return new ArrayList<>();
@@ -206,29 +109,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Generating detailed content for question. Skill: {}", skillName);
             String prompt = buildDetailedContentPrompt(skillName, questionSummary);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> content = parseDetailedContentResponse(response.getBody());
-                log.info("[Gemini] Parsed {} detailed content items for skill: {}", content.size(), skillName);
-                return content;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Detailed Content for " + skillName);
+            List<Map<String, Object>> content = parseDetailedContentResponse(response.getBody());
+            log.info("[Gemini] Parsed {} detailed content items for skill: {}", content.size(), skillName);
+            return content;
         } catch (Exception e) {
             log.error("[Gemini] Error generating detailed content for skill: {}", skillName, e);
             return new ArrayList<>();
@@ -240,29 +126,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Generating comprehensive list of tech skills using Gemini");
             String prompt = buildComprehensiveTechSkillsPrompt();
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-
-            if (response.getStatusCodeValue() == 200) {
-                List<Map<String, Object>> skills = parseSkillsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} tech skills", skills.size());
-                return skills;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Comprehensive Tech Skills");
+            List<Map<String, Object>> skills = parseSkillsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} tech skills", skills.size());
+            return skills;
         } catch (Exception e) {
             log.error("[Gemini] Error generating tech skills", e);
             return new ArrayList<>();
@@ -284,20 +153,9 @@ public class GeminiInterviewService {
                     "\n" +
                     "Return as a JSON array of objects with 'topic' and 'description' fields. Example: [{\"topic\":\"Collections\",\"description\":\"Data structures in Java\"}, ...]";
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Topics for Skill - " + skillName);
 
             if (response.getStatusCodeValue() == 200) {
                 JsonNode responseNode = objectMapper.readTree(response.getBody());
@@ -356,26 +214,12 @@ public class GeminiInterviewService {
             prompt.append("These headings will be used as input to a separate prompt for detailed content generation.");
             String promptStr = prompt.toString();
             log.info("[Gemini] Prompt (first 200 chars): {}", promptStr.length() > 200 ? promptStr.substring(0, 200) + "..." : promptStr);
-            Map<String, Object> requestBody = buildRequestBody(promptStr);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            if (response.getStatusCodeValue() == 200) {
-                String responseBody = response.getBody();
-                List<Map<String, Object>> questions = parseQuestionsResponseCustomSeparator(responseBody);
-                log.info("[Gemini] Parsed {} summary question headings for skill: {} and topic: {} (custom separator mode)", questions.size(), skillName, topicName);
-                return questions;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-            }
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(promptStr);
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Questions for Skill and Topic - " + skillName + " - " + topicName);
+            String responseBody = response.getBody();
+            List<Map<String, Object>> questions = parseQuestionsResponseCustomSeparator(responseBody);
+            log.info("[Gemini] Parsed {} summary question headings for skill: {} and topic: {} (custom separator mode)", questions.size(), skillName, topicName);
+            return questions;
         } catch (Exception e) {
             log.error("[Gemini] Error generating summary question headings for skill and topic: {} / {} (custom separator mode)", skillName, topicName, e);
         }
@@ -451,16 +295,7 @@ public class GeminiInterviewService {
                "Include at least 50 skills, covering both popular and niche areas. Use correct spelling and avoid duplicates.";
     }
 
-    private Map<String, Object> buildRequestBody(String prompt) {
-        Map<String, Object> requestBody = new HashMap<>();
-        Map<String, Object> contents = new HashMap<>();
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", prompt);
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", new Object[]{part});
-        contents.put("contents", new Object[]{content});
-        return contents;
-    }
+
 
     private List<Map<String, Object>> parseTopicsResponse(String responseBody) {
         try {
@@ -820,28 +655,12 @@ public class GeminiInterviewService {
             log.info("[Gemini] Shortening {} content (length: {})", contentType, content.length());
             String prompt = buildContentShorteningPrompt(content, contentType);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCodeValue());
-            
-            if (response.getStatusCodeValue() == 200) {
-                String shortenedContent = parseShortenedContentResponse(response.getBody());
-                log.info("[Gemini] Successfully shortened {} content to {} characters", contentType, shortenedContent.length());
-                return shortenedContent;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCodeValue(), response.getBody());
-                return content; // Return original content if API fails
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Content Shortening for " + contentType);
+            String shortenedContent = parseShortenedContentResponse(response.getBody());
+            log.info("[Gemini] Successfully shortened {} content to {} characters", contentType, shortenedContent.length());
+            return shortenedContent;
         } catch (Exception e) {
             log.error("[Gemini] Error shortening {} content", contentType, e);
             return content; // Return original content if there's an error

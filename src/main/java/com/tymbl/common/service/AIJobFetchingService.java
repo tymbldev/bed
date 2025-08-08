@@ -9,34 +9,34 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
+
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AIJobFetchingService {
 
     private final WebScrapingService webScrapingService;
     private final UrlContentRepository urlContentRepository;
-    @Qualifier("aiServiceRestTemplate")
-    private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final AIRestService aiRestService;
 
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
+    public AIJobFetchingService(
+            WebScrapingService webScrapingService,
+            UrlContentRepository urlContentRepository,
+            ObjectMapper objectMapper,
+            AIRestService aiRestService) {
+        this.webScrapingService = webScrapingService;
+        this.urlContentRepository = urlContentRepository;
+        this.objectMapper = objectMapper;
+        this.aiRestService = aiRestService;
+    }
 
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+
 
     /**
      * Fetch jobs for a company using the updated two-step workflow
@@ -255,16 +255,7 @@ public class AIJobFetchingService {
             log.info("Calling Gemini API for job fetching");
             
             Map<String, Object> requestBody = buildRequestBody(prompt);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Job Fetching");
             
             // Log raw Gemini response
             log.info("Gemini API Raw Response - Status: {}, Body: {}", response.getStatusCode(), response.getBody());
@@ -525,16 +516,7 @@ public class AIJobFetchingService {
             );
             
             Map<String, Object> requestBody = buildRequestBody(prompt);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Job Details Extraction");
             
             // Log raw Gemini response for scraping analysis
             log.info("Gemini Scraping Raw Response - Status: {}, Body: {}", response.getStatusCode(), response.getBody());

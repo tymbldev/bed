@@ -1,28 +1,18 @@
 package com.tymbl.jobs.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tymbl.common.repository.IndustryRepository;
+import com.tymbl.common.service.AIRestService;
+import com.tymbl.common.service.CompanyShortnameService;
+import com.tymbl.common.service.CompanyShortnameTransactionService;
+import com.tymbl.common.service.DropdownService;
+import com.tymbl.common.service.GeminiService;
 import com.tymbl.common.util.CrawlingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
-import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.CompanyContentRepository;
-import com.tymbl.common.repository.IndustryRepository;
-import com.tymbl.common.service.GeminiService;
-import com.tymbl.common.service.DropdownService;
-import com.tymbl.common.service.CompanyShortnameService;
-import com.tymbl.common.service.CompanyShortnameTransactionService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-
+import com.tymbl.jobs.repository.CompanyRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +22,12 @@ import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 @Service
@@ -47,11 +43,8 @@ public class CompanyTransactionService {
     private final CompanyShortnameTransactionService companyShortnameTransactionService;
     private final GeminiService geminiService;
     private final DropdownService dropdownService;
-    
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
-    
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
+    private final AIRestService aiRestService;
+    private final ObjectMapper objectMapper;
 
     /**
      * Process company crawling in its own transaction
@@ -225,7 +218,7 @@ public class CompanyTransactionService {
         log.info("Processing company cleanup: {}", company.getName());
 
         String prompt = buildCleanupPrompt(company.getName());
-        String aiResponse = callGeminiAPI(prompt);
+        String aiResponse = callGeminiAPIForCleanup(prompt);
 
         Map<String, Object> result = parseCleanupResponse(aiResponse, company.getName());
         if (result == null || result.isEmpty()) {
@@ -661,11 +654,9 @@ public class CompanyTransactionService {
     /**
      * Call Gemini API for company cleanup analysis
      */
-    private String callGeminiAPI(String prompt) {
+    private String callGeminiAPIForCleanup(String prompt) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-
+            // Build request body with specific configuration for cleanup operations
             Map<String, Object> requestBody = new HashMap<>();
             Map<String, Object> content = new HashMap<>();
 
@@ -686,13 +677,11 @@ public class CompanyTransactionService {
             generationConfig.put("maxOutputTokens", 500);
             requestBody.put("generationConfig", generationConfig);
 
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-            String url = GEMINI_API_URL + "?key=" + apiKey;
-            ResponseEntity<Map> response = restTemplate.postForEntity(url, request, Map.class);
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company Cleanup");
 
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                Map<String, Object> responseBody = response.getBody();
+                // Parse the response to extract text content
+                Map<String, Object> responseBody = objectMapper.readValue(response.getBody(), Map.class);
                 List<Map<String, Object>> candidates = (List<Map<String, Object>>) responseBody.get("candidates");
                 if (candidates != null && !candidates.isEmpty()) {
                     Map<String, Object> candidate = candidates.get(0);
@@ -707,8 +696,8 @@ public class CompanyTransactionService {
             throw new RuntimeException("Invalid response from Gemini API");
 
         } catch (Exception e) {
-            log.error("Error calling Gemini API: {}", e.getMessage());
-            throw new RuntimeException("Failed to call Gemini API: " + e.getMessage());
+            log.error("Error calling Gemini API for cleanup: {}", e.getMessage());
+            throw new RuntimeException("Failed to call Gemini API for cleanup: " + e.getMessage());
         }
     }
 

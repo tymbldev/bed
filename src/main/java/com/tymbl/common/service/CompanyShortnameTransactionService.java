@@ -8,30 +8,18 @@ import java.util.List;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
+import com.tymbl.common.service.AIRestService;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class CompanyShortnameTransactionService {
 
-  @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-  private String apiKey;
-
-  private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
   private final ObjectMapper objectMapper = new ObjectMapper();
-
-  @Qualifier("aiServiceRestTemplate")
-  private final RestTemplate restTemplate;
+  private final AIRestService aiRestService;
 
   private final CompanyRepository companyRepository;
 
@@ -143,32 +131,13 @@ public class CompanyShortnameTransactionService {
       String prompt = buildShortnameGenerationPrompt(companyName);
       log.info("[TransactionService] Prompt (first 200 chars): {}",
           prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-      Map<String, Object> requestBody = buildRequestBody(prompt);
+      Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
 
-      HttpHeaders headers = new HttpHeaders();
-      headers.setContentType(MediaType.APPLICATION_JSON);
-      HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-
-      ResponseEntity<String> response = restTemplate.exchange(
-          GEMINI_API_URL + "?key=" + apiKey,
-          HttpMethod.POST,
-          request,
-          String.class
-      );
-      log.info("[TransactionService] API response status: {}", response.getStatusCode().value());
-      log.info("[TransactionService] API response body length: {}",
-          response.getBody() != null ? response.getBody().length() : 0);
-
-      if (response.getStatusCode().value() == 200) {
-        String shortname = parseShortnameResponse(response.getBody());
-        log.info("[TransactionService] Parsed shortname '{}' for company: {}", shortname,
-            companyName);
-        return shortname;
-      } else {
-        log.error("[TransactionService] API error: {} - {}", response.getStatusCode().value(),
-            response.getBody());
-        return null;
-      }
+      ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Shortname Generation for " + companyName);
+      String shortname = parseShortnameResponse(response.getBody());
+      log.info("[TransactionService] Parsed shortname '{}' for company: {}", shortname,
+          companyName);
+      return shortname;
     } catch (Exception e) {
       log.error("[TransactionService] Error generating shortname for company: {}", companyName, e);
       return null;
@@ -261,17 +230,5 @@ public class CompanyShortnameTransactionService {
     }
   }
 
-  /**
-   * Build request body for GenAI API
-   */
-  private Map<String, Object> buildRequestBody(String prompt) {
-    Map<String, Object> requestBody = new HashMap<>();
-    Map<String, Object> contents = new HashMap<>();
-    Map<String, Object> part = new HashMap<>();
-    part.put("text", prompt);
-    Map<String, Object> content = new HashMap<>();
-    content.put("parts", new Object[]{part});
-    contents.put("contents", new Object[]{content});
-    return contents;
-  }
+
 } 

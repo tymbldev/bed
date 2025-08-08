@@ -5,18 +5,12 @@ import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
+import com.tymbl.common.service.AIRestService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -28,14 +22,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class CompanyLogoService {
 
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
-
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Qualifier("aiServiceRestTemplate")
-    private final RestTemplate restTemplate;
+    private final AIRestService aiRestService;
 
     private final CompanyRepository companyRepository;
 
@@ -172,29 +160,12 @@ public class CompanyLogoService {
             log.info("[Gemini] Generating logo URL for company: {}", companyName);
             String prompt = buildLogoUrlGenerationPrompt(companyName);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCode().value());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCode().value() == 200) {
-                String logoUrl = parseLogoUrlResponse(response.getBody());
-                log.info("[Gemini] Parsed logo URL '{}' for company: {}", logoUrl, companyName);
-                return logoUrl;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCode().value(), response.getBody());
-                return null;
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Logo URL Generation for " + companyName);
+            String logoUrl = parseLogoUrlResponse(response.getBody());
+            log.info("[Gemini] Parsed logo URL '{}' for company: {}", logoUrl, companyName);
+            return logoUrl;
         } catch (Exception e) {
             log.error("[Gemini] Error generating logo URL for company: {}", companyName, e);
             return null;
@@ -286,17 +257,5 @@ public class CompanyLogoService {
         }
     }
 
-    /**
-     * Build request body for GenAI API
-     */
-    private Map<String, Object> buildRequestBody(String prompt) {
-        Map<String, Object> requestBody = new HashMap<>();
-        Map<String, Object> contents = new HashMap<>();
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", prompt);
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", new Object[]{part});
-        contents.put("contents", new Object[]{content});
-        return contents;
-    }
+
 } 

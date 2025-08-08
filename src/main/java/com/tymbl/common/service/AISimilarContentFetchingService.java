@@ -4,15 +4,9 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
+import com.tymbl.common.service.AIRestService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -24,14 +18,8 @@ import java.util.Map;
 @RequiredArgsConstructor
 public class AISimilarContentFetchingService {
 
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
-
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
-
-    @Qualifier("aiServiceRestTemplate")
-    private final RestTemplate restTemplate;
+    private final AIRestService aiRestService;
 
     // ============================================================================
     // SIMILAR DESIGNATIONS METHODS
@@ -42,29 +30,12 @@ public class AISimilarContentFetchingService {
             log.info("[Gemini] Generating similar designations for: {}", designationName);
             String prompt = buildSimilarDesignationsPrompt(designationName);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCode().value());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCode().value() == 200) {
-                List<String> similarDesignations = parseSimilarDesignationsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} similar designations for: {}", similarDesignations.size(), designationName);
-                return similarDesignations;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCode().value(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Similar Designations for " + designationName);
+            List<String> similarDesignations = parseSimilarDesignationsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} similar designations for: {}", similarDesignations.size(), designationName);
+            return similarDesignations;
         } catch (Exception e) {
             log.error("[Gemini] Error generating similar designations for: {}", designationName, e);
             return new ArrayList<>();
@@ -143,29 +114,12 @@ public class AISimilarContentFetchingService {
                     companyName, industry, companySize, specialties, headquarters);
             String prompt = buildEnhancedSimilarCompaniesPrompt(companyName, industry, description, companySize, specialties, headquarters);
             log.info("[Gemini] Enhanced prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCode().value());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCode().value() == 200) {
-                List<String> similarCompanies = parseSimilarCompaniesResponse(response.getBody());
-                log.info("[Gemini] Parsed {} similar companies for: {}", similarCompanies.size(), companyName);
-                return similarCompanies;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCode().value(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Similar Companies for " + companyName);
+            List<String> similarCompanies = parseSimilarCompaniesResponse(response.getBody());
+            log.info("[Gemini] Parsed {} similar companies for: {}", similarCompanies.size(), companyName);
+            return similarCompanies;
         } catch (Exception e) {
             log.error("[Gemini] Error generating similar companies for: {}", companyName, e);
             return new ArrayList<>();
@@ -276,14 +230,5 @@ public class AISimilarContentFetchingService {
     // UTILITY METHODS
     // ============================================================================
 
-    private Map<String, Object> buildRequestBody(String prompt) {
-        Map<String, Object> requestBody = new HashMap<>();
-        Map<String, Object> contents = new HashMap<>();
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", prompt);
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", new Object[]{part});
-        contents.put("contents", new Object[]{content});
-        return contents;
-    }
+
 } 

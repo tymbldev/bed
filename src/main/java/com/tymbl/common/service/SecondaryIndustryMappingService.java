@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
+import com.tymbl.common.service.AIRestService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -26,17 +27,11 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class SecondaryIndustryMappingService {
 
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
-
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final AIRestService aiRestService;
 
     private final SecondaryIndustryMappingRepository secondaryIndustryMappingRepository;
     private final CompanyRepository companyRepository;
-
-    @Qualifier("aiServiceRestTemplate")
-    private final RestTemplate restTemplate;
 
     @Transactional
     public Map<String, Object> processSecondaryIndustries() {
@@ -226,29 +221,12 @@ public class SecondaryIndustryMappingService {
             log.info("[Gemini] Generating mapped name for industry: {}", industryName);
             String prompt = buildMappingPrompt(industryName);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCode().value());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCode().value() == 200) {
-                String mappedName = parseMappedNameResponse(response.getBody());
-                log.info("[Gemini] Generated mapped name '{}' for industry: {}", mappedName, industryName);
-                return mappedName;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCode().value(), response.getBody());
-                return null;
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Secondary Industry Mapping for " + industryName);
+            String mappedName = parseMappedNameResponse(response.getBody());
+            log.info("[Gemini] Generated mapped name '{}' for industry: {}", mappedName, industryName);
+            return mappedName;
         } catch (Exception e) {
             log.error("[Gemini] Error generating mapped name for industry: {}", industryName, e);
             return null;

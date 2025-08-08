@@ -9,17 +9,10 @@ import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.util.DesignationNameCleaner;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.client.RestTemplate;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tymbl.common.service.AIRestService;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -33,13 +26,9 @@ public class DesignationGenerationService {
 
     private final DepartmentRepository departmentRepository;
     private final DesignationRepository designationRepository;
-    private final RestTemplate restTemplate;
     
-    @Value("${gemini.api.key:AIzaSyBseir8xAFoLEFT45w1gT3rn5VbdVwjJNM}")
-    private String apiKey;
-
-    private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private final AIRestService aiRestService;
 
     public Map<String, Object> generateDesignationsForAllDepartments() {
         List<Department> departments = departmentRepository.findAll();
@@ -141,29 +130,12 @@ public class DesignationGenerationService {
             log.info("[Gemini] Generating designations for department: {}", departmentName);
             String prompt = buildDesignationGenerationPrompt(departmentName, departmentDescription);
             log.info("[Gemini] Prompt (first 200 chars): {}", prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
-            Map<String, Object> requestBody = buildRequestBody(prompt);
+            Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
             
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
-            
-            ResponseEntity<String> response = restTemplate.exchange(
-                GEMINI_API_URL + "?key=" + apiKey,
-                HttpMethod.POST,
-                request,
-                String.class
-            );
-            log.info("[Gemini] API response status: {}", response.getStatusCode().value());
-            log.info("[Gemini] API response body length: {}", response.getBody() != null ? response.getBody().length() : 0);
-            
-            if (response.getStatusCode().value() == 200) {
-                List<String> designations = parseDesignationsResponse(response.getBody());
-                log.info("[Gemini] Parsed {} designations for department: {}", designations.size(), departmentName);
-                return designations;
-            } else {
-                log.error("[Gemini] API error: {} - {}", response.getStatusCode().value(), response.getBody());
-                return new ArrayList<>();
-            }
+            ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Designation Generation for " + departmentName);
+            List<String> designations = parseDesignationsResponse(response.getBody());
+            log.info("[Gemini] Parsed {} designations for department: {}", designations.size(), departmentName);
+            return designations;
         } catch (Exception e) {
             log.error("[Gemini] Error generating designations for department: {}", departmentName, e);
             return new ArrayList<>();
@@ -313,16 +285,7 @@ public class DesignationGenerationService {
         return savedCount;
     }
 
-    private Map<String, Object> buildRequestBody(String prompt) {
-        Map<String, Object> requestBody = new HashMap<>();
-        Map<String, Object> contents = new HashMap<>();
-        Map<String, Object> part = new HashMap<>();
-        part.put("text", prompt);
-        Map<String, Object> content = new HashMap<>();
-        content.put("parts", new Object[]{part});
-        contents.put("contents", new Object[]{content});
-        return contents;
-    }
+
 
     /**
      * Process a single department for designation generation
