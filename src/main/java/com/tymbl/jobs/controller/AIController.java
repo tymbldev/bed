@@ -7,7 +7,6 @@ import com.tymbl.common.service.ProcessedNameService;
 
 
 import com.tymbl.common.service.GeminiService;
-import com.tymbl.jobs.service.CompanyCleanupService;
 import com.tymbl.jobs.service.ElasticsearchIndexingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.service.AIJobService;
@@ -55,13 +54,8 @@ public class AIController {
     private final CompanyService companyService;
     private final AIJobService aiJobService;
     private final AIJobFetchingService AIJobFetchingService;
-
     private final ProcessedNameService processedNameService;
-
-
-
     private final GeminiService geminiService;
-    private final CompanyCleanupService companyCleanupService;
     private final ElasticsearchIndexingService elasticsearchIndexingService;
 
     // ============================================================================
@@ -250,7 +244,7 @@ public class AIController {
     @PostMapping("/processed-names/generate-all")
     @Operation(
         summary = "Generate processed names for all unprocessed entities",
-        description = "Generates processed names for countries, cities, companies, and designations that haven't been processed yet. Processed names remove special characters and common suffixes to ensure uniqueness and deduplication."
+        description = "Generates processed names for countries, cities, and designations that haven't been processed yet. Processed names remove special characters and common suffixes to ensure uniqueness and deduplication."
     )
     @ApiResponses(value = {
         @ApiResponse(
@@ -270,12 +264,6 @@ public class AIController {
                         "  \"cities\": {\n" +
                         "    \"total\": 200,\n" +
                         "    \"processed\": 195,\n" +
-                        "    \"errors\": 5,\n" +
-                        "    \"success\": true\n" +
-                        "  },\n" +
-                        "  \"companies\": {\n" +
-                        "    \"total\": 100,\n" +
-                        "    \"processed\": 95,\n" +
                         "    \"errors\": 5,\n" +
                         "    \"success\": true\n" +
                         "  },\n" +
@@ -303,45 +291,6 @@ public class AIController {
             return ResponseEntity.internalServerError().body(errorResponse);
         }
     }
-
-
-
-    @PostMapping("/processed-names/generate-companies")
-    @Operation(
-        summary = "Generate processed names for unprocessed companies",
-        description = "Generates processed names for companies that haven't been processed yet. Processed names remove special characters and common suffixes like .com, pvt ltd, etc. to ensure uniqueness."
-    )
-    @ApiResponses(value = {
-        @ApiResponse(
-            responseCode = "200",
-            description = "Processed names generated successfully for companies",
-            content = @Content(
-                examples = @ExampleObject(
-                    value = "{\n" +
-                        "  \"total\": 100,\n" +
-                        "  \"processed\": 95,\n" +
-                        "  \"errors\": 5,\n" +
-                        "  \"success\": true\n" +
-                        "}"
-                )
-            )
-        ),
-        @ApiResponse(responseCode = "500", description = "Internal server error")
-    })
-    public ResponseEntity<Map<String, Object>> generateProcessedNamesForCompanies() {
-        try {
-            log.info("Starting processed name generation for companies");
-            Map<String, Object> result = processedNameService.generateProcessedNamesForCompanies();
-            return ResponseEntity.ok(result);
-        } catch (Exception e) {
-            log.error("Error generating processed names for companies", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error generating processed names for companies: " + e.getMessage());
-            return ResponseEntity.internalServerError().body(errorResponse);
-        }
-    }
-
-
 
     @PostMapping("/processed-names/remove-duplicates")
     @Operation(
@@ -380,7 +329,7 @@ public class AIController {
     @PostMapping("/processed-names/reset")
     @Operation(
         summary = "Reset processed name generation flag for all entities",
-        description = "Resets the processed_name_generated flag to false for all countries, cities, companies, and designations, allowing reprocessing of processed name generation"
+        description = "Resets the processed_name_generated flag to false for all countries, cities, and designations, allowing reprocessing of processed name generation"
     )
     @ApiResponses(value = {
         @ApiResponse(

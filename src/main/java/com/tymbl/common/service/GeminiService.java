@@ -18,7 +18,7 @@ public class GeminiService {
     // Company-related methods
     public Optional<com.tymbl.jobs.entity.Company> generateCompanyInfo(String companyName) {
         CompanyGenerationResponse response = geminiCompanyService.generateCompanyInfo(companyName);
-        if (response.isSuccess() && !response.isJunkIdentified() && response.getCompany() != null) {
+        if (response.isSuccess() && response.getCompany() != null) {
             return Optional.of(response.getCompany());
         }
         return Optional.empty();

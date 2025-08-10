@@ -7,8 +7,6 @@ import com.tymbl.common.repository.CityRepository;
 import com.tymbl.common.repository.CountryRepository;
 import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.util.DesignationNameCleaner;
-import com.tymbl.jobs.entity.Company;
-import com.tymbl.jobs.repository.CompanyRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,7 +24,6 @@ public class ProcessedNameService {
 
     private final CountryRepository countryRepository;
     private final CityRepository cityRepository;
-    private final CompanyRepository companyRepository;
     private final DesignationRepository designationRepository;
 
     // Cache to track processed names during batch processing
@@ -45,7 +42,6 @@ public class ProcessedNameService {
             // Process each entity type
             Map<String, Object> countriesResult = generateProcessedNamesForCountries();
             Map<String, Object> citiesResult = generateProcessedNamesForCities();
-            Map<String, Object> companiesResult = generateProcessedNamesForCompanies();
             Map<String, Object> designationsResult = generateProcessedNamesForDesignations();
             
             // Compile results
@@ -53,7 +49,6 @@ public class ProcessedNameService {
             result.put("message", "Processed name generation completed");
             result.put("countries", countriesResult);
             result.put("cities", citiesResult);
-            result.put("companies", companiesResult);
             result.put("designations", designationsResult);
             
             // Clear cache after processing
@@ -151,50 +146,6 @@ public class ProcessedNameService {
             
         } catch (Exception e) {
             log.error("Error generating processed names for cities", e);
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-        
-        return result;
-    }
-
-    /**
-     * Generate processed names for companies
-     */
-    @Transactional
-    public Map<String, Object> generateProcessedNamesForCompanies() {
-        Map<String, Object> result = new HashMap<>();
-        
-        try {
-            List<Company> unprocessedCompanies = companyRepository.findByProcessedNameGeneratedFalse();
-            log.info("Found {} unprocessed companies", unprocessedCompanies.size());
-            
-            int processed = 0;
-            int errors = 0;
-            
-            for (Company company : unprocessedCompanies) {
-                try {
-                    String processedName = generateProcessedName(company.getName(), "company");
-                    company.setProcessedName(processedName);
-                    company.setProcessedNameGenerated(true);
-                    companyRepository.save(company);
-                    processed++;
-                    
-                    log.debug("Generated processed name for company: {} -> {}", company.getName(), processedName);
-                    
-                } catch (Exception e) {
-                    log.error("Error processing company: {}", company.getName(), e);
-                    errors++;
-                }
-            }
-            
-            result.put("total", unprocessedCompanies.size());
-            result.put("processed", processed);
-            result.put("errors", errors);
-            result.put("success", true);
-            
-        } catch (Exception e) {
-            log.error("Error generating processed names for companies", e);
             result.put("success", false);
             result.put("error", e.getMessage());
         }
@@ -364,8 +315,6 @@ public class ProcessedNameService {
                 return countryRepository.existsByProcessedName(processedName);
             case "city":
                 return cityRepository.existsByProcessedName(processedName);
-            case "company":
-                return companyRepository.existsByProcessedName(processedName);
             case "designation":
                 return designationRepository.existsByProcessedName(processedName);
             default:
@@ -396,16 +345,6 @@ public class ProcessedNameService {
                         for (int i = 1; i < cities.size(); i++) {
                             cityRepository.delete(cities.get(i));
                             log.info("Deleted duplicate city with processed name: {}", processedName);
-                        }
-                    }
-                    break;
-                case "company":
-                    List<Company> companies = companyRepository.findByProcessedName(processedName);
-                    if (companies.size() > 1) {
-                        // Keep the first one, delete the rest
-                        for (int i = 1; i < companies.size(); i++) {
-                            companyRepository.delete(companies.get(i));
-                            log.info("Deleted duplicate company with processed name: {}", processedName);
                         }
                     }
                     break;
@@ -442,7 +381,6 @@ public class ProcessedNameService {
             // Remove duplicates for each entity type
             totalDuplicatesRemoved += removeDuplicateProcessedNamesForEntity("country");
             totalDuplicatesRemoved += removeDuplicateProcessedNamesForEntity("city");
-            totalDuplicatesRemoved += removeDuplicateProcessedNamesForEntity("company");
             totalDuplicatesRemoved += removeDuplicateProcessedNamesForEntity("designation");
             
             result.put("success", true);
@@ -475,10 +413,6 @@ public class ProcessedNameService {
                 case "city":
                     List<City> cities = cityRepository.findAll();
                     duplicatesRemoved = removeDuplicatesByProcessedName(cities, "city");
-                    break;
-                case "company":
-                    List<Company> companies = companyRepository.findAll();
-                    duplicatesRemoved = removeDuplicatesByProcessedName(companies, "company");
                     break;
                 case "designation":
                     List<Designation> designations = designationRepository.findAll();
@@ -528,8 +462,6 @@ public class ProcessedNameService {
             return ((Country) entity).getProcessedName();
         } else if (entity instanceof City) {
             return ((City) entity).getProcessedName();
-        } else if (entity instanceof Company) {
-            return ((Company) entity).getProcessedName();
         } else if (entity instanceof Designation) {
             return ((Designation) entity).getProcessedName();
         }
@@ -546,9 +478,6 @@ public class ProcessedNameService {
                 break;
             case "city":
                 cityRepository.delete((City) entity);
-                break;
-            case "company":
-                companyRepository.delete((Company) entity);
                 break;
             case "designation":
                 designationRepository.delete((Designation) entity);
@@ -569,7 +498,6 @@ public class ProcessedNameService {
             // Reset flags for all entity types
             countryRepository.resetProcessedNameGeneratedFlag();
             cityRepository.resetProcessedNameGeneratedFlag();
-            companyRepository.resetProcessedNameGeneratedFlag();
             designationRepository.resetProcessedNameGeneratedFlag();
             
             result.put("success", true);

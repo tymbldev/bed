@@ -74,44 +74,17 @@ public class Company {
     @Column(name = "similar_companies_processed", nullable = false)
     private boolean similarCompaniesProcessed = false;
     
-    @Column(name = "processed_name")
-    private String processedName;
-    
-    @Column(name = "processed_name_generated", nullable = false)
-    private boolean processedNameGenerated = false;
-
     @Column(name = "industry_processed", nullable = false)
     private boolean industryProcessed = false;
 
     @Column(name = "junk_identified", nullable = false)
     private boolean junkIdentified = false;
 
-    @Column(name = "shortname")
+    @Column(name = "short_name")
     private String shortname;
-
-    @Column(name = "shortname_generated", nullable = false)
-    private boolean shortnameGenerated = false;
-
-    @Column(name = "logo_url_fetched", nullable = false)
-    private Integer logoUrlFetched = 0; // 0 = not tried, 1 = fetched, 2 = failed
 
     @Column(name = "website_fetched", nullable = false)
     private Integer websiteFetched = 0; // 0 = not tried, 1 = fetched, 2 = failed
-
-    @Column(name = "cleanup_processed", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean cleanupProcessed = false;
-
-    @Column(name = "cleanup_processed_at")
-    private LocalDateTime cleanupProcessedAt;
-
-    @Column(name = "is_junk", columnDefinition = "BOOLEAN DEFAULT FALSE")
-    private Boolean isJunk = false;
-
-    @Column(name = "junk_reason", columnDefinition = "TEXT")
-    private String junkReason;
-
-    @Column(name = "parent_company_name")
-    private String parentCompanyName;
 
     @CreationTimestamp
     private LocalDateTime createdAt;

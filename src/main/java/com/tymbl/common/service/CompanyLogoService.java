@@ -36,22 +36,10 @@ public class CompanyLogoService {
         try {
             log.info("Fetching logo for company: {} (ID: {})", company.getName(), company.getId());
             
-            // Check if already processed
-            if (company.getLogoUrlFetched() != null && company.getLogoUrlFetched() == 1) {
-                result.put("alreadyProcessed", true);
-                result.put("success", true);
-                result.put("message", "Logo already fetched");
-                result.put("logoUrl", company.getLogoUrl());
-                return result;
-            }
-
             // Generate logo URL using AI
             String logoUrl = generateLogoUrlForCompany(company.getName());
             
             if (logoUrl == null || logoUrl.trim().isEmpty()) {
-                company.setLogoUrlFetched(2); // Mark as failed
-                companyRepository.save(company);
-                
                 result.put("success", false);
                 result.put("error", "Failed to generate logo URL");
                 return result;
@@ -59,7 +47,6 @@ public class CompanyLogoService {
             
             // Save the logo URL
             company.setLogoUrl(logoUrl);
-            company.setLogoUrlFetched(1); // Mark as fetched
             companyRepository.save(company);
             
             result.put("success", true);
@@ -72,8 +59,6 @@ public class CompanyLogoService {
             
         } catch (Exception e) {
             log.error("Error fetching logo for company: {} (ID: {})", company.getName(), company.getId(), e);
-            company.setLogoUrlFetched(2); // Mark as failed
-            companyRepository.save(company);
             
             result.put("success", false);
             result.put("error", "Error fetching logo: " + e.getMessage());
@@ -96,8 +81,8 @@ public class CompanyLogoService {
         int pageNumber = 0;
         
         while (true) {
-            // Fetch companies that haven't been processed for logo fetching (status = 0 or null)
-            Page<Company> companyPage = companyRepository.findByLogoUrlFetched(0, PageRequest.of(pageNumber, batchSize));
+            // Fetch companies that don't have logos yet
+            Page<Company> companyPage = companyRepository.findAll(PageRequest.of(pageNumber, batchSize));
             
             List<Company> companies = companyPage.getContent();
             
@@ -109,6 +94,11 @@ public class CompanyLogoService {
             log.info("Processing logo fetching batch {} with {} companies", pageNumber + 1, companies.size());
             
             for (Company company : companies) {
+                // Skip companies that already have logos
+                if (company.getLogoUrl() != null && !company.getLogoUrl().trim().isEmpty()) {
+                    continue;
+                }
+                
                 try {
                     Map<String, Object> result = fetchLogoForCompany(company);
                     companyResults.add(result);

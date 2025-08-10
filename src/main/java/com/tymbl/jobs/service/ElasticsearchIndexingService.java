@@ -421,10 +421,6 @@ public class ElasticsearchIndexingService {
         doc.put("primaryIndustryId", company.getPrimaryIndustryId());
         doc.put("secondaryIndustries", company.getSecondaryIndustries());
         doc.put("shortname", company.getShortname());
-        doc.put("processedName", company.getProcessedName());
-        doc.put("isJunk", company.getIsJunk());
-        doc.put("junkReason", company.getJunkReason());
-        doc.put("parentCompanyName", company.getParentCompanyName());
         
         // Add industry name
         if (company.getPrimaryIndustryId() != null) {
@@ -451,7 +447,6 @@ public class ElasticsearchIndexingService {
         StringBuilder searchableText = new StringBuilder();
         if (company.getName() != null) searchableText.append(company.getName()).append(" ");
         if (company.getShortname() != null) searchableText.append(company.getShortname()).append(" ");
-        if (company.getProcessedName() != null) searchableText.append(company.getProcessedName()).append(" ");
         if (company.getDescription() != null) searchableText.append(company.getDescription()).append(" ");
         if (company.getSpecialties() != null) searchableText.append(company.getSpecialties()).append(" ");
         if (company.getHeadquarters() != null) searchableText.append(company.getHeadquarters()).append(" ");

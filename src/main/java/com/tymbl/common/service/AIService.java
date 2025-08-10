@@ -80,13 +80,13 @@ public class AIService {
     }
     
     /**
-     * Generate company information with junk detection using Gemini AI.
+     * Generate company information using Gemini AI.
      *
      * @param companyName The name of the company
-     * @return CompanyGenerationResponse containing the generated company information and junk detection status
+     * @return CompanyGenerationResponse containing the generated company information
      */
     public CompanyGenerationResponse generateCompanyInfoWithJunkDetection(String companyName) {
-        log.info("Starting AI-powered company information generation with junk detection for: {}", companyName);
+        log.info("Starting AI-powered company information generation for: {}", companyName);
 
         // Check if crawling is disabled
         if (crawlingDisabled.get()) {
@@ -100,11 +100,11 @@ public class AIService {
         // Try Gemini (unless disabled or threshold is 0)
         if (!geminiDisabled.get() && geminiFailureThreshold > 0) {
             try {
-                log.info("Attempting to generate company info with junk detection using Gemini AI for: {}", companyName);
+                log.info("Attempting to generate company info using Gemini AI for: {}", companyName);
                 CompanyGenerationResponse geminiResult = geminiService.generateCompanyInfoWithJunkDetection(companyName);
 
                 if (geminiResult.isSuccess()) {
-                    log.info("Successfully generated company info with junk detection using Gemini AI for: {}", companyName);
+                    log.info("Successfully generated company info using Gemini AI for: {}", companyName);
                     geminiFailureCount.set(0); // reset on success
                     return geminiResult;
                 } else {

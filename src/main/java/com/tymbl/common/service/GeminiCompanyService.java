@@ -281,28 +281,13 @@ public class GeminiCompanyService {
             try {
               JsonNode companyData = objectMapper.readTree(jsonText);
 
-              // Check if this is a junk response
-              if (companyData.has("junk_identified") && companyData.get("junk_identified")
-                  .asBoolean()) {
-                String junkReason = companyData.has("junk_reason") ?
-                    companyData.get("junk_reason").asText() : "Invalid company name";
-                log.info("Company '{}' identified as junk: {}", companyName, junkReason);
-                return CompanyGenerationResponse.builder()
-                    .success(true)
-                    .junkIdentified(true)
-                    .junkReason(junkReason)
-                    .build();
-              }
-
               // Process as valid company
               Optional<Company> companyOpt = companyPersistenceService.mapJsonToCompany(companyName,
                   companyData);
               if (companyOpt.isPresent()) {
                 Company company = companyOpt.get();
-                company.setJunkIdentified(false); // Ensure it's marked as not junk
                 return CompanyGenerationResponse.builder()
                     .success(true)
-                    .junkIdentified(false)
                     .company(company)
                     .build();
               } else {

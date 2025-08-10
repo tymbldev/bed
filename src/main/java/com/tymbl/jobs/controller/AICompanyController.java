@@ -2,9 +2,8 @@ package com.tymbl.jobs.controller;
 
 import com.tymbl.jobs.service.AIJobService;
 import com.tymbl.jobs.service.CompanyService;
-import com.tymbl.jobs.service.CompanyCleanupService;
 import com.tymbl.jobs.service.CompanyCrawlerService;
-import com.tymbl.common.service.CompanyShortnameService;
+
 import com.tymbl.common.service.AIJobFetchingService;
 import com.tymbl.jobs.dto.CompanyIndustryResponse;
 import com.tymbl.jobs.repository.CompanyRepository;
@@ -59,8 +58,6 @@ public class AICompanyController {
     private final CompanyService companyService;
     private final AIJobService aiJobService;
     private final AIJobFetchingService AIJobFetchingService;
-    private final CompanyCleanupService companyCleanupService;
-    private final CompanyShortnameService companyShortnameService;
     private final CompanyRepository companyRepository;
     private final CompanyContentRepository companyContentRepository;
     private final CompanyTransactionService companyTransactionService;
@@ -142,7 +139,7 @@ public class AICompanyController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> processCompanyOperations(
-            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, cleanup, shortname, fetchLogos, fetchWebsites")
+            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, cleanup, fetchLogos, fetchWebsites")
             @RequestParam(required = false) String operations,
             @Parameter(description = "Optional company name to process specific company")
             @RequestParam(required = false) String companyName) {
@@ -158,7 +155,7 @@ public class AICompanyController {
                 
                 // Validate operations
                 List<String> validOperations = Arrays.asList(
-                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup", "shortname", "fetchLogos", "fetchWebsites"
+                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "fetchLogos", "fetchWebsites"
                 );
                 
                 for (String operation : operationsList) {
@@ -171,7 +168,7 @@ public class AICompanyController {
                 }
             } else {
                 // If no operations specified, process all operations
-                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "cleanup", "shortname", "fetchLogos", "fetchWebsites");
+                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "fetchLogos", "fetchWebsites");
             }
             
             if (companyName != null && !companyName.trim().isEmpty()) {
@@ -192,12 +189,6 @@ public class AICompanyController {
                             break;
                         case "similarCompanies":
                             processedOperations.put("similarCompanies", processCompanySimilarCompanies(companyName));
-                            break;
-                        case "cleanup":
-                            processedOperations.put("cleanup", processCompanyCleanup(companyName));
-                            break;
-                        case "shortname":
-                            processedOperations.put("shortname", processCompanyShortnameGeneration(companyName));
                             break;
                         case "fetchLogos":
                             processedOperations.put("fetchLogos", fetchLogosForCompany(companyName));
@@ -226,12 +217,6 @@ public class AICompanyController {
                             break;
                         case "similarCompanies":
                             processedOperations.put("similarCompanies", processAllCompaniesSimilarCompaniesInBatches());
-                            break;
-                        case "cleanup":
-                            processedOperations.put("cleanup", processAllCompaniesCleanupInBatches());
-                            break;
-                            case "shortname":
-                            processedOperations.put("shortname", generateShortnamesForAllCompanies());
                             break;
                         case "fetchLogos":
                             processedOperations.put("fetchLogos", fetchLogosForAllCompanies());
@@ -286,7 +271,7 @@ public class AICompanyController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> resetCompanyFlags(
-            @Parameter(description = "Comma-separated list of flags to reset: is_crawled, industry_processed, content_shortened, similar_companies_processed, cleanup_processed, shortname_generated, logoUrlFetched, websiteFetched")
+            @Parameter(description = "Comma-separated list of flags to reset: is_crawled, industry_processed, content_shortened, similar_companies_processed, websiteFetched")
             @RequestParam String flags,
             @Parameter(description = "Optional company name to reset flags for specific company")
             @RequestParam(required = false) String companyName) {
@@ -298,7 +283,7 @@ public class AICompanyController {
             // Validate flags
             List<String> validFlags = Arrays.asList(
                 "is_crawled", "industry_processed", "content_shortened",
-                "similar_companies_processed", "cleanup_processed", "shortname_generated", "logoUrlFetched", "websiteFetched"
+                "similar_companies_processed", "websiteFetched"
             );
 
             for (String flag : flagsList) {
@@ -513,109 +498,6 @@ public class AICompanyController {
                 response.put("message", "Company similar companies already processed");
                 return response;
             }
-            
-            // Perform similar companies generation - need to find company first
-            // For now, return a placeholder response
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", false);
-            response.put("message", "Similar companies generation for specific company not implemented yet");
-            return response;
-        } catch (Exception e) {
-            log.error("Error generating similar companies for company: {}", companyName, e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", false);
-            response.put("message", "Error generating similar companies: " + e.getMessage());
-            return response;
-        }
-    }
-
-    private Map<String, Object> processAllCompaniesSimilarCompaniesInBatches() {
-        try {
-            // Check if already processed
-            if (areAllCompaniesSimilarCompaniesAlreadyProcessed()) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("processed", false);
-                response.put("message", "All companies similar companies already processed");
-                return response;
-            }
-            
-            // Perform similar companies generation for all companies in batches
-            Map<String, Object> result = aiJobService.generateSimilarCompaniesForAllInBatches();
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", true);
-            response.put("message", "All companies similar companies generated successfully");
-            response.put("result", result);
-            return response;
-        } catch (Exception e) {
-            log.error("Error generating similar companies for all companies in batches", e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", false);
-            response.put("message", "Error generating similar companies for all companies in batches: " + e.getMessage());
-            return response;
-        }
-    }
-
-    private Map<String, Object> processCompanyCleanup(String companyName) {
-        try {
-            // Check if already processed
-            if (isCompanyCleanupAlreadyProcessed(companyName)) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("processed", false);
-                response.put("message", "Company cleanup already processed");
-                return response;
-            }
-            
-            // Perform cleanup
-            Map<String, Object> result = companyTransactionService.processCompanyByName(companyName);
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", true);
-            response.put("message", "Cleanup completed successfully");
-            response.put("result", result);
-            return response;
-        } catch (Exception e) {
-            log.error("Error cleaning up company: {}", companyName, e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", false);
-            response.put("message", "Error cleaning up company: " + e.getMessage());
-            return response;
-        }
-    }
-
-    private Map<String, Object> processAllCompaniesCleanupInBatches() {
-        try {
-            // Check if already processed
-            if (areAllCompaniesCleanupAlreadyProcessed()) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("processed", false);
-                response.put("message", "All companies cleanup already processed");
-                return response;
-            }
-            
-            // Perform cleanup for all companies in batches
-            Map<String, Object> result = companyCleanupService.processAllCompaniesInBatches();
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", true);
-            response.put("message", "All companies cleanup completed successfully");
-            response.put("result", result);
-            return response;
-        } catch (Exception e) {
-            log.error("Error cleaning up all companies in batches", e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", false);
-            response.put("message", "Error cleaning up all companies in batches: " + e.getMessage());
-            return response;
-        }
-    }
-
-    private Map<String, Object> processCompanyShortnameGeneration(String companyName) {
-        try {
-            // Check if already processed
-            if (isCompanyShortnameAlreadyGenerated(companyName)) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("processed", false);
-                response.put("message", "Company shortname already generated");
-                return response;
-            }
 
             // Get company entity
             Optional<Company> companyOpt = companyRepository.findByName(companyName);
@@ -626,31 +508,31 @@ public class AICompanyController {
                 return response;
             }
 
-            // Perform shortname generation using CompanyTransactionService
-            Map<String, Object> result = companyTransactionService.processCompanyShortnameGenerationInTransaction(companyOpt.get());
+            // Perform similar companies generation
+            Map<String, Object> result = companyTransactionService.processSimilarCompaniesGenerationInTransaction(companyOpt.get());
             Map<String, Object> response = new HashMap<>();
             response.put("processed", true);
-            response.put("message", "Shortname generated successfully");
+            response.put("message", "Similar companies generated successfully");
             response.put("result", result);
             return response;
         } catch (Exception e) {
-            log.error("Error generating shortname for company: {}", companyName, e);
+            log.error("Error generating similar companies for company: {}", companyName, e);
             Map<String, Object> response = new HashMap<>();
             response.put("processed", false);
-            response.put("message", "Error generating shortname for company: " + e.getMessage());
+            response.put("message", "Error generating similar companies for company: " + e.getMessage());
             return response;
         }
     }
 
-    private Map<String, Object> generateShortnamesForAllCompanies() {
+    private Map<String, Object> processAllCompaniesSimilarCompaniesInBatches() {
         try {
-            log.info("Starting shortname generation for all companies");
-            Map<String, Object> result = companyTransactionService.processAllCompaniesShortnameGenerationInBatches();
+            log.info("Starting similar companies generation for all companies");
+            Map<String, Object> result = companyTransactionService.processAllCompaniesSimilarCompaniesGenerationInBatches();
             return result;
         } catch (Exception e) {
-            log.error("Error generating shortnames for all companies", e);
+            log.error("Error generating similar companies for all companies in batches", e);
             Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error generating shortnames for all companies: " + e.getMessage());
+            errorResponse.put("error", "Error generating similar companies for all companies in batches: " + e.getMessage());
             return errorResponse;
         }
     }
@@ -842,48 +724,6 @@ public class AICompanyController {
         }
     }
 
-    private boolean isCompanyCleanupAlreadyProcessed(String companyName) {
-        try {
-            Optional<Company> company = companyRepository.findByName(companyName);
-            return company.isPresent() && Boolean.TRUE.equals(company.get().getCleanupProcessed());
-        } catch (Exception e) {
-            log.error("Error checking if company cleanup is already processed: {}", companyName, e);
-            return false;
-        }
-    }
-
-    private boolean areAllCompaniesCleanupAlreadyProcessed() {
-        try {
-            // Check if there are any companies that haven't been processed for cleanup
-            List<Company> unprocessedCompanies = companyRepository.findByCleanupProcessedFalse();
-            return unprocessedCompanies.isEmpty();
-        } catch (Exception e) {
-            log.error("Error checking if all companies cleanup are already processed", e);
-            return false;
-        }
-    }
-
-    private boolean isCompanyShortnameAlreadyGenerated(String companyName) {
-        try {
-            Optional<Company> company = companyRepository.findByName(companyName);
-            return company.isPresent() && company.get().isShortnameGenerated();
-        } catch (Exception e) {
-            log.error("Error checking if company shortname is already generated: {}", companyName, e);
-            return false;
-        }
-    }
-
-    private boolean isCompanyLogoAlreadyFetched(String companyName) {
-        try {
-            Optional<Company> company = companyRepository.findByName(companyName);
-            return company.isPresent() && company.get().getLogoUrlFetched() != null && company.get().getLogoUrlFetched() == 1;
-        } catch (Exception e) {
-            log.error("Error checking if company logo is already fetched: {}", companyName, e);
-            return false;
-        }
-    }
-
-
     private boolean isCompanyWebsiteAlreadyFetched(String companyName) {
         try {
             Optional<Company> company = companyRepository.findByName(companyName);
@@ -894,6 +734,16 @@ public class AICompanyController {
         }
     }
 
+    private boolean isCompanyLogoAlreadyFetched(String companyName) {
+        try {
+            Optional<Company> company = companyRepository.findByName(companyName);
+            // Since there's no logoFetched field, we'll check if logoUrl is present
+            return company.isPresent() && company.get().getLogoUrl() != null && !company.get().getLogoUrl().trim().isEmpty();
+        } catch (Exception e) {
+            log.error("Error checking if company logo is already fetched: {}", companyName, e);
+            return false;
+        }
+    }
 
     // Helper methods for resetting flags
     private void resetFlagsForCompany(String companyName, List<String> flags) {
@@ -921,10 +771,6 @@ public class AICompanyController {
                         companyEntity.setSimilarCompaniesProcessed(false);
                         updated = true;
                         break;
-                    case "cleanup_processed":
-                        companyEntity.setCleanupProcessed(false);
-                        updated = true;
-                        break;
                     case "content_shortened":
                         // Reset content shortened flag in CompanyContent table
                         Optional<CompanyContent> content = companyContentRepository.findByCompanyId(companyEntity.getId());
@@ -933,16 +779,6 @@ public class AICompanyController {
                             companyContentRepository.save(content.get());
                             updated = true;
                         }
-                        break;
-                    case "shortname":
-                        // Reset shortname generated flag in Company table
-                        companyEntity.setShortnameGenerated(false);
-                        updated = true;
-                        break;
-                    case "logoUrlFetched":
-                        // Reset logo fetched flag in Company table
-                        companyEntity.setLogoUrlFetched(null); // Set to null to indicate not fetched
-                        updated = true;
                         break;
                     case "websiteFetched":
                         // Reset website fetched flag in Company table
@@ -990,35 +826,11 @@ public class AICompanyController {
                         });
                         updated = true;
                         break;
-                    case "cleanup_processed":
-                        // Reset all companies' cleanup processed flag
-                        companyRepository.findAll().forEach(company -> {
-                            company.setCleanupProcessed(false);
-                            companyRepository.save(company);
-                        });
-                        updated = true;
-                        break;
                     case "content_shortened":
                         // Reset all companies' content shortened flag
                         companyContentRepository.findAll().forEach(content -> {
                             content.setContentShortened(false);
                             companyContentRepository.save(content);
-                        });
-                        updated = true;
-                        break;
-                    case "shortname":
-                        // Reset all companies' shortname generated flag
-                        companyRepository.findAll().forEach(company -> {
-                            company.setShortnameGenerated(false);
-                            companyRepository.save(company);
-                        });
-                        updated = true;
-                        break;
-                    case "logoUrlFetched":
-                        // Reset all companies' logo fetched flag
-                        companyRepository.findAll().forEach(company -> {
-                            company.setLogoUrlFetched(null); // Set to null to indicate not fetched
-                            companyRepository.save(company);
                         });
                         updated = true;
                         break;

@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CompanyGenerationResponse {
     private Company company;
-    private boolean junkIdentified;
-    private String junkReason;
     private boolean success;
     private String errorMessage;
 } 
