@@ -38,7 +38,7 @@ public class GeminiCompanyService {
       }
       String prompt = buildCompanyGenerationPrompt(companyName);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
-      log.debug("Sending request to Gemini API for company: {}", companyName);
+      log.info("Sending request to Gemini API for company: {}", companyName);
       
       try {
         ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company Generation for " + companyName);
@@ -69,7 +69,7 @@ public class GeminiCompanyService {
       }
       String prompt = buildIndustryDetectionPrompt(companyName, companyDescription, specialties);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
-      log.debug("Sending request to Gemini API for industry detection: {}", companyName);
+      log.info("Sending request to Gemini API for industry detection: {}", companyName);
       
       try {
         ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Industry Detection for " + companyName);
@@ -172,10 +172,8 @@ public class GeminiCompanyService {
         "  \"culture\": \"[company culture description]\",\n" +
         "  \"specialties\": \"[company specialties and focus areas]\",\n" +
         "  \"company_size\": \"[employee count and company scale]\",\n" +
-        "  \"headquarters\": \"[company headquarters location]\",\n" +
         "  \"career_page_url\": \"[valid URL or null]\",\n" +
         "  \"website\": \"[valid URL or null]\",\n" +
-        "  \"logo_url\": \"[valid Company Logo URL or null]\",\n" +
         "  \"linkedin_url\": \"[valid URL or null]\"\n" +
         "}\n\n" +
         "IMPORTANT RULES:\n" +
@@ -275,9 +273,9 @@ public class GeminiCompanyService {
           JsonNode parts = content.get("parts");
           if (parts != null && parts.isArray() && parts.size() > 0) {
             String generatedText = parts.get(0).get("text").asText();
-            log.debug("Raw generated text from Gemini: {}", generatedText);
+            log.info("Raw generated text from Gemini: {}", generatedText);
             String jsonText = extractJsonFromText(generatedText);
-            log.debug("Extracted JSON text: {}", jsonText);
+            log.info("Extracted JSON text: {}", jsonText);
             try {
               JsonNode companyData = objectMapper.readTree(jsonText);
 
@@ -330,9 +328,9 @@ public class GeminiCompanyService {
           JsonNode parts = content.get("parts");
           if (parts != null && parts.isArray() && parts.size() > 0) {
             String generatedText = parts.get(0).get("text").asText();
-            log.debug("Raw generated text from Gemini: {}", generatedText);
+            log.info("Raw generated text from Gemini: {}", generatedText);
             String jsonText = extractJsonFromText(generatedText);
-            log.debug("Extracted JSON text: {}", jsonText);
+            log.info("Extracted JSON text: {}", jsonText);
             try {
               JsonNode industryData = objectMapper.readTree(jsonText);
               return mapJsonToIndustries(industryData);
@@ -437,7 +435,7 @@ public class GeminiCompanyService {
         allIndustries.addAll(secondaryIndustries);
         industries.put("industries", allIndustries);
 
-        log.debug("Parsed industry data - Primary: {}, Secondary: {}", primaryIndustry,
+        log.info("Parsed industry data - Primary: {}, Secondary: {}", primaryIndustry,
             secondaryIndustries);
       } else if (industryData.isArray()) {
         // Handle old array format for backward compatibility

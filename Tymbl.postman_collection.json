@@ -1254,7 +1254,7 @@
               "raw": "{\n  \"note\": \"Processes only crawl and detectIndustries for all companies\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,detectIndustries,fetchLogos,fetchWebsites",
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,detectIndustries,fetchWebsites",
               "host": [
                 "{{base_url}}"
               ],
@@ -1268,7 +1268,7 @@
               "query": [
                 {
                   "key": "operations",
-                  "value": "crawl,detectIndustries,fetchLogos,fetchWebsites"
+                  "value": "crawl,detectIndustries,fetchWebsites"
                 }
               ]
             }
@@ -1324,7 +1324,7 @@
               "raw": "{\n  \"note\": \"Processes only crawl and cleanup for specific company\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,cleanup,fetchLogos,fetchWebsites&companyName=Google",
+              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=crawl,cleanup,fetchWebsites&companyName=Google",
               "host": [
                 "{{base_url}}"
               ],
@@ -1338,7 +1338,7 @@
               "query": [
                 {
                   "key": "operations",
-                  "value": "crawl,cleanup,fetchLogos,fetchWebsites"
+                  "value": "crawl,cleanup,fetchWebsites"
                 },
                 {
                   "key": "companyName",
@@ -1363,7 +1363,7 @@
               "raw": "{\n  \"note\": \"Resets flags for all companies\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,shortname_generated,logoUrlFetched,websiteFetched",
+              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,logoUrlFetched,websiteFetched",
               "host": [
                 "{{base_url}}"
               ],
@@ -1377,7 +1377,7 @@
               "query": [
                 {
                   "key": "flags",
-                  "value": "is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,shortname_generated,logoUrlFetched,websiteFetched"
+                  "value": "is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,logoUrlFetched,websiteFetched"
                 }
               ]
             }
@@ -1413,141 +1413,6 @@
                 {
                   "key": "flags",
                   "value": "is_crawled,industry_processed,logoUrlFetched,websiteFetched"
-                },
-                {
-                  "key": "companyName",
-                  "value": "Google"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Generate Shortnames for All Companies",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Generates shortnames for all companies using AI\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-all",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "companies",
-                "shortnames",
-                "generate-for-all"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Generate Shortname for Specific Company",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Generates shortname for specific company using AI\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/shortnames/generate-for-company/Google",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "companies",
-                "shortnames",
-                "generate-for-company",
-                "Google"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Fetch Logos for All Companies",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Fetches logos for all companies using AI\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=fetchLogos",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "companies",
-                "process"
-              ],
-              "query": [
-                {
-                  "key": "operations",
-                  "value": "fetchLogos"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Fetch Logo for Specific Company",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Fetches logo for specific company using AI\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/process?operations=fetchLogos&companyName=Google",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "companies",
-                "process"
-              ],
-              "query": [
-                {
-                  "key": "operations",
-                  "value": "fetchLogos"
                 },
                 {
                   "key": "companyName",

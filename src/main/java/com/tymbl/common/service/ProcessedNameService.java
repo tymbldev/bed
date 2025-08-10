@@ -87,7 +87,7 @@ public class ProcessedNameService {
                     countryRepository.save(country);
                     processed++;
                     
-                    log.debug("Generated processed name for country: {} -> {}", country.getName(), processedName);
+                    log.info("Generated processed name for country: {} -> {}", country.getName(), processedName);
                     
                 } catch (Exception e) {
                     log.error("Error processing country: {}", country.getName(), e);
@@ -131,7 +131,7 @@ public class ProcessedNameService {
                     cityRepository.save(city);
                     processed++;
                     
-                    log.debug("Generated processed name for city: {} -> {}", city.getName(), processedName);
+                    log.info("Generated processed name for city: {} -> {}", city.getName(), processedName);
                     
                 } catch (Exception e) {
                     log.error("Error processing city: {}", city.getName(), e);
@@ -178,7 +178,7 @@ public class ProcessedNameService {
                         designation.setName(cleanedName);
                         designationRepository.save(designation);
                         cleaned++;
-                        log.debug("Cleaned designation name: '{}' -> '{}'", originalName, cleanedName);
+                        log.info("Cleaned designation name: '{}' -> '{}'", originalName, cleanedName);
                     }
                     
                     String processedName = generateProcessedName(designation.getName(), "designation");
@@ -187,7 +187,7 @@ public class ProcessedNameService {
                     designationRepository.save(designation);
                     processed++;
                     
-                    log.debug("Generated processed name for designation: {} -> {}", designation.getName(), processedName);
+                    log.info("Generated processed name for designation: {} -> {}", designation.getName(), processedName);
                     
                 } catch (Exception e) {
                     log.error("Error processing designation: {}", designation.getName(), e);
@@ -442,7 +442,7 @@ public class ProcessedNameService {
                     // This is a duplicate, remove it
                     deleteEntity(entity, entityType);
                     duplicatesRemoved++;
-                    log.debug("Removed duplicate {} with processed name: {}", entityType, processedName);
+                    log.info("Removed duplicate {} with processed name: {}", entityType, processedName);
                 } else {
                     // First occurrence, keep it
                     uniqueProcessedNames.put(processedName, entity);

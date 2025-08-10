@@ -11,7 +11,7 @@ import com.tymbl.jobs.repository.CompanyContentRepository;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.service.CompanyTransactionService;
-import com.tymbl.common.service.CompanyLogoService;
+
 import com.tymbl.common.service.CompanyWebsiteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -61,7 +61,7 @@ public class AICompanyController {
     private final CompanyRepository companyRepository;
     private final CompanyContentRepository companyContentRepository;
     private final CompanyTransactionService companyTransactionService;
-    private final CompanyLogoService companyLogoService;
+
     private final CompanyWebsiteService companyWebsiteService;
 
     /**
@@ -139,7 +139,7 @@ public class AICompanyController {
         @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     public ResponseEntity<Map<String, Object>> processCompanyOperations(
-            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, cleanup, fetchLogos, fetchWebsites")
+            @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, fetchWebsites")
             @RequestParam(required = false) String operations,
             @Parameter(description = "Optional company name to process specific company")
             @RequestParam(required = false) String companyName) {
@@ -155,7 +155,7 @@ public class AICompanyController {
                 
                 // Validate operations
                 List<String> validOperations = Arrays.asList(
-                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "fetchLogos", "fetchWebsites"
+                    "crawl", "detectIndustries", "shortenContent", "similarCompanies", "fetchWebsites"
                 );
                 
                 for (String operation : operationsList) {
@@ -168,7 +168,7 @@ public class AICompanyController {
                 }
             } else {
                 // If no operations specified, process all operations
-                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "fetchLogos", "fetchWebsites");
+                operationsList = Arrays.asList("crawl", "detectIndustries", "shortenContent", "similarCompanies", "fetchWebsites");
             }
             
             if (companyName != null && !companyName.trim().isEmpty()) {
@@ -190,9 +190,7 @@ public class AICompanyController {
                         case "similarCompanies":
                             processedOperations.put("similarCompanies", processCompanySimilarCompanies(companyName));
                             break;
-                        case "fetchLogos":
-                            processedOperations.put("fetchLogos", fetchLogosForCompany(companyName));
-                            break;
+                        
                         case "fetchWebsites":
                             processedOperations.put("fetchWebsites", fetchWebsitesForCompany(companyName));
                             break;
@@ -218,9 +216,7 @@ public class AICompanyController {
                         case "similarCompanies":
                             processedOperations.put("similarCompanies", processAllCompaniesSimilarCompaniesInBatches());
                             break;
-                        case "fetchLogos":
-                            processedOperations.put("fetchLogos", fetchLogosForAllCompanies());
-                            break;
+                        
                         case "fetchWebsites":
                             processedOperations.put("fetchWebsites", fetchWebsitesForAllCompanies());
                             break;
@@ -537,53 +533,9 @@ public class AICompanyController {
         }
     }
 
-    private Map<String, Object> fetchLogosForCompany(String companyName) {
-        try {
-            // Check if already processed
-            if (isCompanyLogoAlreadyFetched(companyName)) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("processed", false);
-                response.put("message", "Company logo already fetched");
-                return response;
-            }
 
-            // Get company entity
-            Optional<Company> companyOpt = companyRepository.findByName(companyName);
-            if (!companyOpt.isPresent()) {
-                Map<String, Object> response = new HashMap<>();
-                response.put("processed", false);
-                response.put("message", "Company not found: " + companyName);
-                return response;
-            }
 
-            // Perform logo fetching
-            Map<String, Object> result = companyLogoService.fetchLogoForCompany(companyOpt.get());
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", true);
-            response.put("message", "Logo fetched successfully");
-            response.put("result", result);
-            return response;
-        } catch (Exception e) {
-            log.error("Error fetching logo for company: {}", companyName, e);
-            Map<String, Object> response = new HashMap<>();
-            response.put("processed", false);
-            response.put("message", "Error fetching logo: " + e.getMessage());
-            return response;
-        }
-    }
 
-    private Map<String, Object> fetchLogosForAllCompanies() {
-        try {
-            log.info("Starting logo fetching for all companies");
-            Map<String, Object> result = companyLogoService.fetchLogosForAllCompaniesInBatches();
-            return result;
-        } catch (Exception e) {
-            log.error("Error fetching logos for all companies in batches", e);
-            Map<String, Object> errorResponse = new HashMap<>();
-            errorResponse.put("error", "Error fetching logos for all companies in batches: " + e.getMessage());
-            return errorResponse;
-        }
-    }
 
     private Map<String, Object> fetchWebsitesForCompany(String companyName) {
         try {
@@ -734,16 +686,7 @@ public class AICompanyController {
         }
     }
 
-    private boolean isCompanyLogoAlreadyFetched(String companyName) {
-        try {
-            Optional<Company> company = companyRepository.findByName(companyName);
-            // Since there's no logoFetched field, we'll check if logoUrl is present
-            return company.isPresent() && company.get().getLogoUrl() != null && !company.get().getLogoUrl().trim().isEmpty();
-        } catch (Exception e) {
-            log.error("Error checking if company logo is already fetched: {}", companyName, e);
-            return false;
-        }
-    }
+
 
     // Helper methods for resetting flags
     private void resetFlagsForCompany(String companyName, List<String> flags) {

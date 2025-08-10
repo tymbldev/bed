@@ -68,7 +68,7 @@ public class CompanyNameCleaner {
 
         // Log if significant cleaning was done
         if (!companyName.equals(cleaned)) {
-            log.debug("Cleaned company name: '{}' -> '{}'", companyName, cleaned);
+            log.info("Cleaned company name: '{}' -> '{}'", companyName, cleaned);
         }
 
         return cleaned;

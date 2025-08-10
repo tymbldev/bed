@@ -33,7 +33,7 @@ public class ExecutionTimeLoggerAspect {
                 log.warn("Slow method execution detected - {}.{} took {} ms", 
                     className, methodName, executionTime);
             } else {
-                log.debug("Method execution - {}.{} took {} ms", 
+                log.info("Method execution - {}.{} took {} ms", 
                     className, methodName, executionTime);
             }
         }

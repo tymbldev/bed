@@ -282,9 +282,9 @@ public class CityGenerationService {
                     City city = new City(cityName, country);
                     cityRepository.save(city);
                     savedCount++;
-                    log.debug("Saved city: {} for country: {}", cityName, country.getName());
-                } else {
-                    log.debug("City already exists: {} for country: {}", cityName, country.getName());
+                            log.info("Saved city: {} for country: {}", cityName, country.getName());
+      } else {
+        log.info("City already exists: {} for country: {}", cityName, country.getName());
                 }
             } catch (Exception e) {
                 errorCount++;

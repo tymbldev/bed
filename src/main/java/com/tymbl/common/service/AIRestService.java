@@ -1,9 +1,14 @@
 package com.tymbl.common.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tymbl.common.entity.AiDumper;
+import com.tymbl.common.repository.AiDumperRepository;
 import java.util.HashMap;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -37,8 +42,10 @@ public class AIRestService {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
     private final RestTemplate restTemplate;
+    private final AiDumperRepository aiDumperRepository;
 
-    public AIRestService() {
+    public AIRestService(AiDumperRepository aiDumperRepository) {
+        this.aiDumperRepository = aiDumperRepository;
         this.restTemplate = createRestTemplate();
     }
 
@@ -58,7 +65,7 @@ public class AIRestService {
             try {
                 org.springframework.http.client.ClientHttpResponse response = execution.execute(request, body);
                 long duration = System.currentTimeMillis() - startTime;
-                log.debug("AI Service request completed in {}ms", duration);
+                log.info("AI Service request completed in {}ms", duration);
                 return response;
             } catch (Exception e) {
                 long duration = System.currentTimeMillis() - startTime;
@@ -82,9 +89,9 @@ public class AIRestService {
     public ResponseEntity<String> callGeminiAPI(Map<String, Object> requestBody, String operationName) {
         String url = GEMINI_API_URL + "?key=" + geminiApiKey;
         
-        log.debug("Making Gemini API call for operation: {}", operationName);
-        log.debug("Request URL: {}", GEMINI_API_URL + "?key=***");
-        log.debug("Request body: {}", requestBody);
+        log.info("Making Gemini API call for operation: {}", operationName);
+        log.info("Request URL: {}", GEMINI_API_URL + "?key=***");
+        log.info("Request body: {}", requestBody);
         
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -104,8 +111,15 @@ public class AIRestService {
             log.info("Gemini API call completed for operation: {} - Status: {} - Duration: {}ms", 
                     operationName, response.getStatusCodeValue(), duration);
             
+            // Log to database
+            try {
+                logToDatabase(operationName, requestBody, response.getBody(), response.getStatusCodeValue() == 200);
+            } catch (Exception e) {
+                log.warn("Failed to log to database for operation: {}", operationName, e);
+            }
+            
             if (response.getStatusCodeValue() == 200) {
-                log.debug("Successful response from Gemini API for operation: {}", operationName);
+                log.info("Successful response from Gemini API for operation: {}", operationName);
                 return response;
             } else {
                 log.error("Gemini API error for operation: {} - Status: {} - Body: {}", 
@@ -195,5 +209,79 @@ public class AIRestService {
      */
     public String getGeminiApiUrl() {
         return GEMINI_API_URL;
+    }
+
+    /**
+     * Logs the Gemini API call details to the database
+     * @param operationName The name of the operation
+     * @param requestBody The request body sent to Gemini
+     * @param responseBody The response body from Gemini
+     * @param isSuccess Whether the call was successful
+     */
+    private void logToDatabase(String operationName, Map<String, Object> requestBody, String responseBody, boolean isSuccess) {
+        try {
+            AiDumper aiDumper = new AiDumper();
+            aiDumper.setOperationName(operationName);
+            try {
+                aiDumper.setRequestBody(objectMapper.writeValueAsString(requestBody));
+            } catch (JsonProcessingException e) {
+                log.warn("Failed to serialize request body for operation: {}", operationName, e);
+                aiDumper.setRequestBody("Error serializing request body: " + e.getMessage());
+            }
+            aiDumper.setResponseBody(responseBody);
+            
+            // Parse response to extract metadata
+            if (responseBody != null && !responseBody.trim().isEmpty()) {
+                try {
+                    JsonNode responseNode = objectMapper.readTree(responseBody);
+                    
+                    // Extract model version
+                    if (responseNode.has("modelVersion")) {
+                        aiDumper.setModelVersion(responseNode.get("modelVersion").asText());
+                    }
+                    
+                    // Extract usage metadata
+                    if (responseNode.has("usageMetadata")) {
+                        JsonNode usageMetadata = responseNode.get("usageMetadata");
+                        if (usageMetadata.has("promptTokenCount")) {
+                            aiDumper.setPromptTokenCount(usageMetadata.get("promptTokenCount").asInt());
+                        }
+                        if (usageMetadata.has("candidatesTokenCount")) {
+                            aiDumper.setCandidatesTokenCount(usageMetadata.get("candidatesTokenCount").asInt());
+                        }
+                        if (usageMetadata.has("totalTokenCount")) {
+                            aiDumper.setTotalTokenCount(usageMetadata.get("totalTokenCount").asInt());
+                        }
+                    }
+                    
+                    // Extract response ID
+                    if (responseNode.has("responseId")) {
+                        aiDumper.setResponseId(responseNode.get("responseId").asText());
+                    }
+                    
+                    // Extract candidate information
+                    if (responseNode.has("candidates") && responseNode.get("candidates").isArray() && 
+                        responseNode.get("candidates").size() > 0) {
+                        JsonNode candidate = responseNode.get("candidates").get(0);
+                        if (candidate.has("finishReason")) {
+                            aiDumper.setFinishReason(candidate.get("finishReason").asText());
+                        }
+                        if (candidate.has("avgLogprobs")) {
+                            aiDumper.setAvgLogprobs(candidate.get("avgLogprobs").asDouble());
+                        }
+                    }
+                    
+                } catch (Exception e) {
+                    log.warn("Failed to parse response metadata for operation: {}", operationName, e);
+                }
+            }
+            
+            aiDumperRepository.save(aiDumper);
+            log.info("Successfully logged Gemini API call to database for operation: {}", operationName);
+            
+        } catch (Exception e) {
+            log.error("Failed to log Gemini API call to database for operation: {}", operationName, e);
+            throw e;
+        }
     }
 } 

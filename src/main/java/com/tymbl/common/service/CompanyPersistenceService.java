@@ -60,13 +60,7 @@ public class CompanyPersistenceService {
             } else {
                 aiError = true;
             }
-            String logoUrl = getStringValue(companyData, "logo_url");
-            if (!containsWebSearchPlaceholder(logoUrl) && isValidUrl(logoUrl)) {
-                company.setLogoUrl(logoUrl);
-            } else {
-                company.setLogoUrl("");
-                aiError = true;
-            }
+
             String website = getStringValue(companyData, "website");
             if (!containsWebSearchPlaceholder(website) && isValidUrl(website)) {
                 company.setWebsite(website);
@@ -110,12 +104,7 @@ public class CompanyPersistenceService {
             } else {
                 aiError = true;
             }
-            String headquarters = getStringValue(companyData, "headquarters");
-            if (!containsWebSearchPlaceholder(headquarters)) {
-                company.setHeadquarters(headquarters);
-            } else {
-                aiError = true;
-            }
+
             String linkedinUrl = getStringValue(companyData, "linkedin_url");
             if (!containsWebSearchPlaceholder(linkedinUrl) && isValidUrl(linkedinUrl)) {
                 company.setLinkedinUrl(linkedinUrl);

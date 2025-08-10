@@ -269,9 +269,9 @@ public class DesignationGenerationService {
                     designation.setEnabled(true);
                     designationRepository.save(designation);
                     savedCount++;
-                    log.debug("Saved designation: {} for department: {}", cleanedDesignationName, department.getName());
-                } else {
-                    log.debug("Designation already exists: {} for department: {}", cleanedDesignationName, department.getName());
+                            log.info("Saved designation: {} for department: {}", cleanedDesignationName, department.getName());
+      } else {
+        log.info("Designation already exists: {} for department: {}", cleanedDesignationName, department.getName());
                 }
             } catch (Exception e) {
                 errorCount++;

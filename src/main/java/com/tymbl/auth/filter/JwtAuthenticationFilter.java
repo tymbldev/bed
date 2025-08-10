@@ -96,7 +96,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
-                    log.debug("Authentication successful for user: {}", userEmail);
+                    log.info("Authentication successful for user: {}", userEmail);
                 } else {
                     response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     response.getWriter().write("{\"status\": 401, \"message\": \"Invalid or expired token\"}");

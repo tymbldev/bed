@@ -29,7 +29,7 @@ public class NotificationScheduler {
             List<Notification> pendingNotifications = notificationService.getPendingNotifications();
             
             if (pendingNotifications.isEmpty()) {
-                log.debug("No pending notifications to send");
+                log.info("No pending notifications to send");
                 return;
             }
             

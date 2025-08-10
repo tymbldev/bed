@@ -68,7 +68,7 @@ public class DesignationNameCleaner {
 
         // Log if significant cleaning was done
         if (!designationName.equals(cleaned)) {
-            log.debug("Cleaned designation name: '{}' -> '{}'", designationName, cleaned);
+            log.info("Cleaned designation name: '{}' -> '{}'", designationName, cleaned);
         }
 
         return cleaned;
