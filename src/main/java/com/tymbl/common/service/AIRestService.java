@@ -220,6 +220,10 @@ public class AIRestService {
      */
     private void logToDatabase(String operationName, Map<String, Object> requestBody, String responseBody, boolean isSuccess) {
         try {
+            if(!isSuccess){
+                log.warn("Not Logging Gemini API call to database for operation: {} - Call was not successful", operationName);
+                return;
+            }
             AiDumper aiDumper = new AiDumper();
             aiDumper.setOperationName(operationName);
             try {
