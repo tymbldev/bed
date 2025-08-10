@@ -24,7 +24,7 @@ public class CompanyPersistenceService {
     @Transactional
     public Optional<Company> mapJsonToCompany(String companyName,JsonNode companyData) {
         try {
-            Company company;
+            Company company = new Company();
             CompanyContent companyContent = new CompanyContent();
             boolean aiError = false;
             
@@ -36,22 +36,16 @@ public class CompanyPersistenceService {
             }
             
             // Check if company already exists by name
-            Optional<Company> existingCompany = companyRepository.findByName(cleanedName);
+            Optional<Company> existingCompany = companyRepository.findByName(companyName);
             if (existingCompany.isPresent()) {
                 company = existingCompany.get();
                 log.info("Found existing company with name: {}, updating details", cleanedName);
                 if (containsWebSearchPlaceholder(cleanedName)) {
                     aiError = true;
                 }
-            } else {
-                company = new Company();
-                company.setName(cleanedName);
-                if (!containsWebSearchPlaceholder(cleanedName)) {
-                    company.setName(cleanedName);
-                } else {
-                    aiError = true;
-                }
+            } else{
                 log.info("Creating new company with name: {}", cleanedName);
+                return Optional.empty();
             }
 
             String description = getStringValue(companyData, "description");
