@@ -374,12 +374,57 @@ public class CompanyTransactionService {
     }
 
     private String shortenContent(String content) {
-        // Simple content shortening logic - can be enhanced with AI
+        // Check if content needs shortening - keep existing condition
         if (content == null || content.length() <= 500) {
             return content;
         }
         
-        // Truncate to 500 characters and add ellipsis
-        return content.substring(0, 497) + "...";
+        // Use intelligent AI-powered content shortening
+        try {
+            log.info("Using AI-powered content shortening for content of length: {}", content.length());
+            return geminiService.shortenContentIntelligently(content, "company content");
+        } catch (Exception e) {
+            log.error("Error in AI content shortening, falling back to smart truncation", e);
+            // Fallback to smart truncation if AI fails
+            return smartTruncateContent(content, 500);
+        }
+    }
+    
+    /**
+     * Smart truncation fallback that tries to break at sentence boundaries
+     */
+    private String smartTruncateContent(String content, int minLength) {
+        if (content == null || content.length() <= minLength) {
+            return content;
+        }
+        
+        // Try to find a good sentence boundary around the target length
+        int targetLength = Math.max(minLength, 500);
+        int searchStart = Math.min(targetLength, content.length() - 50);
+        int searchEnd = Math.min(targetLength + 200, content.length());
+        
+        // Look for sentence endings (.!?) in the search range
+        int bestBreakPoint = -1;
+        for (int i = searchStart; i < searchEnd; i++) {
+            if (i < content.length() && ".!?".indexOf(content.charAt(i)) != -1) {
+                bestBreakPoint = i + 1;
+                break;
+            }
+        }
+        
+        // If no good sentence boundary found, use the target length
+        if (bestBreakPoint == -1 || bestBreakPoint < minLength) {
+            bestBreakPoint = Math.max(minLength, content.length());
+        }
+        
+        String truncated = content.substring(0, bestBreakPoint).trim();
+        
+        // Add ellipsis only if we actually truncated
+        if (bestBreakPoint < content.length()) {
+            truncated += "...";
+        }
+        
+        log.info("Smart truncation: shortened content from {} to {} characters", content.length(), truncated.length());
+        return truncated;
     }
 } 

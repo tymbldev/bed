@@ -172,7 +172,7 @@ public class AIJobService {
         
         // Shorten about us content if original exists
         if (companyContent.getAboutUsOriginal() != null && !companyContent.getAboutUsOriginal().trim().isEmpty()) {
-            String shortenedAboutUs = geminiService.shortenContent(companyContent.getAboutUsOriginal(), "about us");
+            String shortenedAboutUs = geminiService.shortenContentIntelligently(companyContent.getAboutUsOriginal(), "about us");
             if (shortenedAboutUs != null && !shortenedAboutUs.trim().isEmpty()) {
                 company.setAboutUs(shortenedAboutUs);
                 aboutUsShortened = true;
@@ -182,7 +182,7 @@ public class AIJobService {
         
         // Shorten culture content if original exists
         if (companyContent.getCultureOriginal() != null && !companyContent.getCultureOriginal().trim().isEmpty()) {
-            String shortenedCulture = geminiService.shortenContent(companyContent.getCultureOriginal(), "culture");
+            String shortenedCulture = geminiService.shortenContentIntelligently(companyContent.getCultureOriginal(), "culture");
             if (shortenedCulture != null && !shortenedCulture.trim().isEmpty()) {
                 company.setCulture(shortenedCulture);
                 cultureShortened = true;

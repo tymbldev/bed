@@ -124,6 +124,144 @@ public class GeminiCompanyService {
     }
   }
 
+  /**
+   * Intelligently shorten content using GenAI while maintaining minimum 500 characters
+   * and ensuring all important information is covered
+   *
+   * @param content The content to shorten
+   * @param contentType The type of content (e.g., "about us", "culture", "description")
+   * @return Shortened content with minimum 500 characters
+   */
+  public String shortenContentIntelligently(String content, String contentType) {
+    try {
+      log.info("Starting intelligent content shortening for {} content (length: {})", contentType, content != null ? content.length() : 0);
+      
+      // Check if content needs shortening
+      if (content == null || content.length() <= 500) {
+        log.info("Content is already within 500 character limit, returning as is");
+        return content;
+      }
+      
+      String prompt = buildIntelligentShorteningPrompt(content, contentType);
+      Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
+      
+      log.info("Sending request to Gemini API for intelligent content shortening: {}", contentType);
+      
+      try {
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Intelligent Content Shortening for " + contentType);
+        String shortenedContent = parseIntelligentShorteningResponse(response.getBody());
+        
+        // Ensure minimum 500 characters
+        if (shortenedContent != null && shortenedContent.length() >= 500) {
+          log.info("Successfully shortened {} content to {} characters", contentType, shortenedContent.length());
+          return shortenedContent;
+        } else {
+          log.warn("AI-shortened content is too short ({} chars), falling back to smart truncation", 
+                   shortenedContent != null ? shortenedContent.length() : 0);
+          return smartTruncateContent(content, 500);
+        }
+        
+      } catch (Exception e) {
+        log.error("Error calling Gemini API for content shortening: {}", contentType, e);
+        log.info("Falling back to smart truncation for content shortening");
+        return smartTruncateContent(content, 500);
+      }
+      
+    } catch (Exception e) {
+      log.error("Error in intelligent content shortening for: {}", contentType, e);
+      log.info("Falling back to smart truncation for content shortening");
+      return smartTruncateContent(content, 500);
+    }
+  }
+
+  /**
+   * Build prompt for intelligent content shortening
+   */
+  private String buildIntelligentShorteningPrompt(String content, String contentType) {
+    return String.format(
+      "You are an expert content editor specializing in %s content. Your task is to intelligently shorten the following content while maintaining ALL important information.\n\n" +
+      "REQUIREMENTS:\n" +
+      "1. MINIMUM LENGTH: The shortened content MUST be at least 500 characters long\n" +
+      "2. COMPREHENSIVE: Cover ALL key points, facts, and important details from the original\n" +
+      "3. NATURAL: Maintain natural, flowing language - don't just truncate sentences\n" +
+      "4. STRUCTURED: Organize information logically with proper paragraphs\n" +
+      "5. PROFESSIONAL: Keep the tone and style appropriate for %s content\n\n" +
+      "TECHNIQUES TO USE:\n" +
+      "- Combine related sentences where possible\n" +
+      "- Remove redundant phrases while keeping unique information\n" +
+      "- Use more concise language without losing meaning\n" +
+      "- Maintain all specific names, numbers, and technical details\n" +
+      "- Preserve the emotional impact and key messaging\n\n" +
+      "IMPORTANT: If you cannot shorten to at least 500 characters while maintaining all important information, return the original content unchanged.\n\n" +
+      "Original %s content:\n%s\n\n" +
+      "Shortened version (minimum 500 characters, covering all important information):",
+      contentType, contentType, contentType, content
+    );
+  }
+
+  /**
+   * Parse the intelligent shortening response from Gemini
+   */
+  private String parseIntelligentShorteningResponse(String responseBody) {
+    try {
+      JsonNode responseNode = objectMapper.readTree(responseBody);
+      JsonNode candidates = responseNode.get("candidates");
+      if (candidates != null && candidates.isArray() && candidates.size() > 0) {
+        JsonNode content = candidates.get(0).get("content");
+        if (content != null) {
+          JsonNode parts = content.get("parts");
+          if (parts != null && parts.isArray() && parts.size() > 0) {
+            String generatedText = parts.get(0).get("text").asText();
+            return generatedText.trim();
+          }
+        }
+      }
+      log.error("Unexpected Gemini API response structure for intelligent content shortening: {}", responseBody);
+      return null;
+    } catch (Exception e) {
+      log.error("Error parsing Gemini response for intelligent content shortening", e);
+      return null;
+    }
+  }
+
+  /**
+   * Smart truncation fallback that tries to break at sentence boundaries
+   */
+  private String smartTruncateContent(String content, int minLength) {
+    if (content == null || content.length() <= minLength) {
+      return content;
+    }
+    
+    // Try to find a good sentence boundary around the target length
+    int targetLength = Math.max(minLength, 500);
+    int searchStart = Math.min(targetLength, content.length() - 50);
+    int searchEnd = Math.min(targetLength + 200, content.length());
+    
+    // Look for sentence endings (.!?) in the search range
+    int bestBreakPoint = -1;
+    for (int i = searchStart; i < searchEnd; i++) {
+      if (i < content.length() && ".!?".indexOf(content.charAt(i)) != -1) {
+        bestBreakPoint = i + 1;
+        break;
+      }
+    }
+    
+    // If no good sentence boundary found, use the target length
+    if (bestBreakPoint == -1 || bestBreakPoint < minLength) {
+      bestBreakPoint = Math.max(minLength, content.length());
+    }
+    
+    String truncated = content.substring(0, bestBreakPoint).trim();
+    
+    // Add ellipsis only if we actually truncated
+    if (bestBreakPoint < content.length()) {
+      truncated += "...";
+    }
+    
+    log.info("Smart truncation: shortened content from {} to {} characters", content.length(), truncated.length());
+    return truncated;
+  }
+
   private String buildCompanyGenerationPrompt(String companyName) {
     return "Analyze the company name '" + companyName
         + "' and determine if it's a valid, real company name.\n\n" +

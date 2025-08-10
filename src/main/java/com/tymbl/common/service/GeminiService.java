@@ -83,6 +83,11 @@ public class GeminiService {
         return geminiInterviewService.shortenContent(content, contentType);
     }
     
+    // Intelligent content shortening method with minimum 500 characters
+    public String shortenContentIntelligently(String content, String contentType) {
+        return geminiCompanyService.shortenContentIntelligently(content, contentType);
+    }
+    
     // Similar designation generation method
     public List<String> generateSimilarDesignations(String designationName) {
         return aiSimilarContentFetchingService.generateSimilarDesignations(designationName);
