@@ -22,9 +22,8 @@ import org.springframework.web.client.RestTemplate;
 public class AIRestService {
 
     private static final String GEMINI_API_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent";
-    private static final String DEFAULT_GEMINI_API_KEY = "AIzaSyDbvopEA7gEdDk_JmT3uH1ufgJteHcz2RA";
 
-    @Value("${gemini.api.key:" + DEFAULT_GEMINI_API_KEY + "}")
+    @Value("${gemini.api.key:NA}")
     private String geminiApiKey;
 
     @Value("${ai.service.connection.timeout:30000}")
