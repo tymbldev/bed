@@ -68,9 +68,14 @@ public class ElasticsearchIndexingService {
       log.info("Found {} companies to index", companies.size());
 
       BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
+      log.info("Building bulk request for {} companies", companies.size());
 
       for (Company company : companies) {
+        log.info("Building document for company: {} (ID: {})", company.getName(), company.getId());
         Map<String, Object> companyDoc = buildCompanyDocument(company);
+        log.info("Company document built successfully for: {} - Document size: {} fields", 
+            company.getName(), companyDoc.size());
+        
         bulkRequest.operations(op -> op
             .index(idx -> idx
                 .index(COMPANIES_INDEX)
@@ -80,7 +85,10 @@ public class ElasticsearchIndexingService {
         );
       }
 
+      log.info("Executing bulk request to Elasticsearch for {} companies", companies.size());
       BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
+      log.info("Bulk request completed. Response received: {} items, Errors: {}", 
+          response.items().size(), response.errors());
 
       int successCount = 0;
       int failureCount = 0;
@@ -92,6 +100,7 @@ public class ElasticsearchIndexingService {
                 .collect(Collectors.joining(", ")));
       } else {
         successCount = companies.size();
+        log.info("All {} companies indexed successfully", successCount);
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -125,9 +134,14 @@ public class ElasticsearchIndexingService {
       log.info("Found {} designations to index", designations.size());
 
       BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
+      log.info("Building bulk request for {} designations", designations.size());
 
       for (Designation designation : designations) {
+        log.info("Building document for designation: {} (ID: {})", designation.getName(), designation.getId());
         Map<String, Object> designationDoc = buildDesignationDocument(designation);
+        log.info("Designation document built successfully for: {} - Document size: {} fields, Department: {}", 
+            designation.getName(), designationDoc.size(), designationDoc.get("departmentName"));
+        
         bulkRequest.operations(op -> op
             .index(idx -> idx
                 .index(DESIGNATIONS_INDEX)
@@ -137,7 +151,10 @@ public class ElasticsearchIndexingService {
         );
       }
 
+      log.info("Executing bulk request to Elasticsearch for {} designations", designations.size());
       BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
+      log.info("Bulk request completed. Response received: {} items, Errors: {}", 
+          response.items().size(), response.errors());
 
       int successCount = 0;
       int failureCount = 0;
@@ -149,6 +166,7 @@ public class ElasticsearchIndexingService {
                 .collect(Collectors.joining(", ")));
       } else {
         successCount = designations.size();
+        log.info("All {} designations indexed successfully", successCount);
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -182,9 +200,14 @@ public class ElasticsearchIndexingService {
       log.info("Found {} cities to index", cities.size());
 
       BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
+      log.info("Building bulk request for {} cities", cities.size());
 
       for (City city : cities) {
+        log.info("Building document for city: {} (ID: {})", city.getName(), city.getId());
         Map<String, Object> cityDoc = buildCityDocument(city);
+        log.info("City document built successfully for: {} - Document size: {} fields, Country ID: {}", 
+            city.getName(), cityDoc.size(), cityDoc.get("countryId"));
+        
         bulkRequest.operations(op -> op
             .index(idx -> idx
                 .index(CITIES_INDEX)
@@ -194,7 +217,10 @@ public class ElasticsearchIndexingService {
         );
       }
 
+      log.info("Executing bulk request to Elasticsearch for {} cities", cities.size());
       BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
+      log.info("Bulk request completed. Response received: {} items, Errors: {}", 
+          response.items().size(), response.errors());
 
       int successCount = 0;
       int failureCount = 0;
@@ -206,6 +232,7 @@ public class ElasticsearchIndexingService {
                 .collect(Collectors.joining(", ")));
       } else {
         successCount = cities.size();
+        log.info("All {} cities indexed successfully", successCount);
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -238,9 +265,14 @@ public class ElasticsearchIndexingService {
       log.info("Found {} skills to index", skills.size());
 
       BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
+      log.info("Building bulk request for {} skills", skills.size());
 
       for (Skill skill : skills) {
+        log.info("Building document for skill: {} (ID: {})", skill.getName(), skill.getId());
         Map<String, Object> skillDoc = buildSkillDocument(skill);
+        log.info("Skill document built successfully for: {} - Document size: {} fields, Category: {}, Similar Skills: {}", 
+            skill.getName(), skillDoc.size(), skillDoc.get("category"), skillDoc.get("similarSkillsByName"));
+        
         bulkRequest.operations(op -> op
             .index(idx -> idx
                 .index(SKILLS_INDEX)
@@ -250,7 +282,10 @@ public class ElasticsearchIndexingService {
         );
       }
 
+      log.info("Executing bulk request to Elasticsearch for {} skills", skills.size());
       BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
+      log.info("Bulk request completed. Response received: {} items, Errors: {}", 
+          response.items().size(), response.errors());
 
       int successCount = 0;
       int failureCount = 0;
@@ -262,6 +297,7 @@ public class ElasticsearchIndexingService {
                 .collect(Collectors.joining(", ")));
       } else {
         successCount = skills.size();
+        log.info("All {} skills indexed successfully", successCount);
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -287,15 +323,23 @@ public class ElasticsearchIndexingService {
    */
   public void syncSkillToElasticsearch(Skill skill) {
     try {
+      log.info("Starting to sync skill to Elasticsearch: {} (ID: {})", skill.getName(), skill.getId());
+      
       Map<String, Object> skillDocument = buildSkillDocument(skill);
+      log.info("Skill document built successfully for: {} - Document size: {} fields", 
+          skill.getName(), skillDocument.size());
 
       IndexRequest<Map<String, Object>> indexRequest = IndexRequest.of(i -> i
           .index(SKILLS_INDEX)
           .id(skill.getId().toString())
           .document(skillDocument)
       );
+      log.info("Index request prepared for skill: {} to index: {}", skill.getName(), SKILLS_INDEX);
 
+      log.info("Executing index request to Elasticsearch for skill: {}", skill.getName());
       IndexResponse response = elasticsearchClient.index(indexRequest);
+      log.info("Index request completed for skill: {} - Result: {}, Document ID: {}", 
+          skill.getName(), response.result().name(), response.id());
 
       log.info("Successfully synced skill {} to Elasticsearch with result: {}",
           skill.getId(), response.result().name());
@@ -315,7 +359,10 @@ public class ElasticsearchIndexingService {
 
     try {
       // Check if index exists
+      log.info("Checking if index {} exists", indexName);
       boolean indexExists = elasticsearchClient.indices().exists(e -> e.index(indexName)).value();
+      log.info("Index {} exists: {}", indexName, indexExists);
+      
       if (!indexExists) {
         log.info("Index {} does not exist, nothing to delete", indexName);
         Map<String, Object> result = new HashMap<>();
@@ -326,10 +373,13 @@ public class ElasticsearchIndexingService {
       }
 
       // Delete all documents using match_all query
+      log.info("Executing delete by query for all documents in index: {}", indexName);
       DeleteByQueryResponse deleteResponse = elasticsearchClient.deleteByQuery(d -> d
           .index(indexName)
           .query(q -> q.matchAll(m -> m))
       );
+      log.info("Delete by query completed for index: {} - Documents deleted: {}", 
+          indexName, deleteResponse.deleted());
 
       Map<String, Object> result = new HashMap<>();
       result.put("indexName", indexName);
@@ -355,9 +405,16 @@ public class ElasticsearchIndexingService {
   public Map<String, Object> deleteAllDocumentsFromAllIndices() {
     log.info("Starting to delete all documents from all indices");
 
+    log.info("Deleting documents from companies index: {}", COMPANIES_INDEX);
     Map<String, Object> companiesDeleteResult = deleteAllDocumentsFromIndex(COMPANIES_INDEX);
+    
+    log.info("Deleting documents from designations index: {}", DESIGNATIONS_INDEX);
     Map<String, Object> designationsDeleteResult = deleteAllDocumentsFromIndex(DESIGNATIONS_INDEX);
+    
+    log.info("Deleting documents from cities index: {}", CITIES_INDEX);
     Map<String, Object> citiesDeleteResult = deleteAllDocumentsFromIndex(CITIES_INDEX);
+    
+    log.info("Deleting documents from skills index: {}", SKILLS_INDEX);
     Map<String, Object> skillsDeleteResult = deleteAllDocumentsFromIndex(SKILLS_INDEX);
 
     Map<String, Object> result = new HashMap<>();
@@ -367,7 +424,11 @@ public class ElasticsearchIndexingService {
     result.put("skills", skillsDeleteResult);
     result.put("message", "All documents deleted from all indices");
 
-    log.info("All documents deletion completed");
+    log.info("All documents deletion completed - Companies: {}, Designations: {}, Cities: {}, Skills: {}", 
+        companiesDeleteResult.get("documentsDeleted"), 
+        designationsDeleteResult.get("documentsDeleted"),
+        citiesDeleteResult.get("documentsDeleted"), 
+        skillsDeleteResult.get("documentsDeleted"));
     return result;
   }
 
@@ -382,10 +443,17 @@ public class ElasticsearchIndexingService {
     // First, delete all existing documents from all indices
     log.info("Step 1: Deleting all existing documents from Elasticsearch indices");
     Map<String, Object> deleteResult = deleteAllDocumentsFromAllIndices();
+    log.info("Cleanup completed - Total documents deleted: {}", 
+        ((Number) deleteResult.get("companies")).intValue() + 
+        ((Number) deleteResult.get("designations")).intValue() + 
+        ((Number) deleteResult.get("cities")).intValue() + 
+        ((Number) deleteResult.get("skills")).intValue());
 
     // Wait a moment for deletion to complete
+    log.info("Waiting 10 seconds for deletion operations to complete...");
     try {
       Thread.sleep(10000);
+      log.info("Wait period completed, proceeding with re-indexing");
     } catch (InterruptedException e) {
       Thread.currentThread().interrupt();
       log.warn("Thread interrupted during deletion wait");
@@ -393,10 +461,26 @@ public class ElasticsearchIndexingService {
 
     // Then, re-index all entities
     log.info("Step 2: Re-indexing all entities to Elasticsearch");
+    
+    log.info("Starting companies re-indexing...");
     Map<String, Object> companiesResult = indexAllCompanies();
+    log.info("Companies re-indexing completed - Success: {}, Failures: {}", 
+        companiesResult.get("indexedSuccessfully"), companiesResult.get("failedToIndex"));
+    
+    log.info("Starting designations re-indexing...");
     Map<String, Object> designationsResult = indexAllDesignations();
+    log.info("Designations re-indexing completed - Success: {}, Failures: {}", 
+        designationsResult.get("indexedSuccessfully"), designationsResult.get("failedToIndex"));
+    
+    log.info("Starting cities re-indexing...");
     Map<String, Object> citiesResult = indexAllCities();
+    log.info("Cities re-indexing completed - Success: {}, Failures: {}", 
+        citiesResult.get("indexedSuccessfully"), citiesResult.get("failedToIndex"));
+    
+    log.info("Starting skills re-indexing...");
     Map<String, Object> skillsResult = indexAllSkills();
+    log.info("Skills re-indexing completed - Success: {}, Failures: {}", 
+        skillsResult.get("indexedSuccessfully"), skillsResult.get("failedToIndex"));
 
     Map<String, Object> result = new HashMap<>();
     result.put("cleanup", deleteResult);
@@ -406,7 +490,18 @@ public class ElasticsearchIndexingService {
     result.put("skills", skillsResult);
     result.put("message", "All entities re-indexed to Elasticsearch after cleanup");
 
-    log.info("All entities re-indexing completed after cleanup");
+    int totalIndexed = ((Number) companiesResult.get("indexedSuccessfully")).intValue() + 
+                       ((Number) designationsResult.get("indexedSuccessfully")).intValue() + 
+                       ((Number) citiesResult.get("indexedSuccessfully")).intValue() + 
+                       ((Number) skillsResult.get("indexedSuccessfully")).intValue();
+    
+    int totalFailures = ((Number) companiesResult.get("failedToIndex")).intValue() + 
+                        ((Number) designationsResult.get("failedToIndex")).intValue() + 
+                        ((Number) citiesResult.get("failedToIndex")).intValue() + 
+                        ((Number) skillsResult.get("failedToIndex")).intValue();
+    
+    log.info("All entities re-indexing completed after cleanup - Total indexed: {}, Total failures: {}", 
+        totalIndexed, totalFailures);
 
     return result;
   }
@@ -420,11 +515,14 @@ public class ElasticsearchIndexingService {
 
     try {
       String indexName = getIndexName(entityType);
+      log.info("Resolved entity type '{}' to index name: '{}'", entityType, indexName);
+      
       if (indexName == null) {
         log.error("Invalid entity type: {}", entityType);
         return Collections.emptyList();
       }
 
+      log.info("Building search request for index: {} with keyword: '{}'", indexName, keyword);
       SearchRequest searchRequest = SearchRequest.of(s -> s
           .index(indexName)
           .query(Query.of(q -> q
@@ -437,10 +535,15 @@ public class ElasticsearchIndexingService {
           .sort(sort -> sort.field(f -> f.field("_score").order(SortOrder.Desc)))
           .size(limit)
       );
+      log.info("Search request built successfully for index: {} with limit: {}", indexName, limit);
 
+      log.info("Executing search request to Elasticsearch...");
       SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
+      log.info("Search response received - Total hits: {}, Max score: {}", 
+          response.hits().total().value(), response.hits().maxScore());
 
       List<Map<String, Object>> results = new ArrayList<>();
+      log.info("Processing {} search hits for autosuggest results", response.hits().hits().size());
 
       for (Hit<Map> hit : response.hits().hits()) {
         Map<String, Object> source = hit.source();
@@ -470,7 +573,8 @@ public class ElasticsearchIndexingService {
         results.add(result);
       }
 
-      log.info("Found {} autosuggest results for keyword: '{}'", results.size(), keyword);
+      log.info("Found {} autosuggest results for keyword: '{}' in index: '{}'", 
+          results.size(), keyword, indexName);
       return results;
 
     } catch (Exception e) {
@@ -485,24 +589,33 @@ public class ElasticsearchIndexingService {
    */
   public void updateCompanyJobCount(Long companyId) {
     try {
+      log.info("Starting job count update for company ID: {}", companyId);
+      
       Company company = companyRepository.findById(companyId).orElse(null);
       if (company == null) {
         log.warn("Company not found for job count update: {}", companyId);
         return;
       }
+      log.info("Found company: {} (ID: {}) for job count update", company.getName(), companyId);
 
+      log.info("Counting active jobs for company: {}", company.getName());
       long jobCount = jobRepository.countByCompanyIdAndActiveTrue(companyId);
+      log.info("Found {} active jobs for company: {}", jobCount, company.getName());
 
       Map<String, Object> updateDoc = new HashMap<>();
       updateDoc.put("jobCount", jobCount);
+      log.info("Prepared update document for company: {} - Job count: {}", company.getName(), jobCount);
 
+      log.info("Executing update request to Elasticsearch for company: {} in index: {}", 
+          company.getName(), COMPANIES_INDEX);
       elasticsearchClient.update(u -> u
               .index(COMPANIES_INDEX)
               .id(companyId.toString())
               .doc(updateDoc)
           , Map.class);
 
-      log.info("Updated job count for company {} to {}", companyId, jobCount);
+      log.info("Successfully updated job count for company {} (ID: {}) to {} in Elasticsearch", 
+          company.getName(), companyId, jobCount);
 
     } catch (Exception e) {
       log.error("Error updating job count for company {} in Elasticsearch", companyId, e);
@@ -516,11 +629,16 @@ public class ElasticsearchIndexingService {
       String secondaryIndustryName,
       int page, int size) {
     try {
+      log.info("Starting company search with filters - Location: '{}', Industry: '{}', Secondary Industry: '{}', Page: {}, Size: {}", 
+          location, industryName, secondaryIndustryName, page, size);
+      
       // Build the query
       BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+      log.info("Building boolean query for company search");
 
       // Location filter (headquarters)
       if (location != null && !location.trim().isEmpty()) {
+        log.info("Adding location filter: '{}'", location.trim());
         boolQueryBuilder.must(Query.of(q -> q
             .match(MatchQuery.of(m -> m
                 .field("headquarters")
@@ -532,6 +650,7 @@ public class ElasticsearchIndexingService {
 
       // Industry name filter
       if (industryName != null && !industryName.trim().isEmpty()) {
+        log.info("Adding primary industry filter: '{}'", industryName.trim());
         boolQueryBuilder.must(Query.of(q -> q
             .match(MatchQuery.of(m -> m
                 .field("primaryIndustryName")
@@ -543,6 +662,7 @@ public class ElasticsearchIndexingService {
 
       // Secondary industry filter
       if (secondaryIndustryName != null && !secondaryIndustryName.trim().isEmpty()) {
+        log.info("Adding secondary industry filter: '{}'", secondaryIndustryName.trim());
         boolQueryBuilder.must(Query.of(q -> q
             .match(MatchQuery.of(m -> m
                 .field("secondaryIndustries")
@@ -552,6 +672,7 @@ public class ElasticsearchIndexingService {
         ));
       }
 
+      log.info("Building search request for companies index with pagination - Page: {}, Size: {}", page, size);
       // Build search request with sorting by job count
       SearchRequest searchRequest = SearchRequest.of(s -> s
           .index(COMPANIES_INDEX)
@@ -561,10 +682,15 @@ public class ElasticsearchIndexingService {
           .from(page * size)
           .size(size)
       );
+      log.info("Search request built successfully for companies index");
 
+      log.info("Executing search request to Elasticsearch...");
       SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
+      log.info("Search response received - Total hits: {}, Max score: {}, Current page results: {}", 
+          response.hits().total().value(), response.hits().maxScore(), response.hits().hits().size());
 
       List<Map<String, Object>> companies = new ArrayList<>();
+      log.info("Processing {} search hits for company results", response.hits().hits().size());
       for (Hit<Map> hit : response.hits().hits()) {
         Map<String, Object> source = hit.source();
         Map<String, Object> company = new HashMap<>(source);
@@ -578,6 +704,9 @@ public class ElasticsearchIndexingService {
       result.put("page", page);
       result.put("size", size);
       result.put("totalPages", (int) Math.ceil((double) response.hits().total().value() / size));
+
+      log.info("Company search completed successfully - Found {} companies, Total: {}, Page: {}/{}, Size: {}", 
+          companies.size(), response.hits().total().value(), page + 1, result.get("totalPages"), size);
 
       return result;
 
@@ -593,10 +722,11 @@ public class ElasticsearchIndexingService {
    * Build company document for Elasticsearch
    */
   private Map<String, Object> buildCompanyDocument(Company company) {
+    log.info("Building Elasticsearch document for company: {} (ID: {})", company.getName(), company.getId());
+    
     Map<String, Object> doc = new HashMap<>();
     doc.put("id", company.getId());
     doc.put("name", company.getName());
-    doc.put("description", company.getDescription());
     doc.put("website", company.getWebsite());
     doc.put("logoUrl", company.getLogoUrl());
     doc.put("headquarters", company.getHeadquarters());
@@ -604,57 +734,66 @@ public class ElasticsearchIndexingService {
     doc.put("specialties", company.getSpecialties());
     doc.put("linkedinUrl", company.getLinkedinUrl());
     doc.put("careerPageUrl", company.getCareerPageUrl());
-    doc.put("aboutUs", company.getAboutUs());
-    doc.put("culture", company.getCulture());
-    doc.put("mission", company.getMission());
-    doc.put("vision", company.getVision());
     doc.put("primaryIndustryId", company.getPrimaryIndustryId());
     doc.put("secondaryIndustries", company.getSecondaryIndustries());
     doc.put("shortname", company.getShortname());
 
+    log.info("Basic company fields added for: {} - Fields: {}", company.getName(), doc.size());
+
     // Add industry name
     if (company.getPrimaryIndustryId() != null) {
       try {
+        log.info("Fetching industry name for company: {} - Industry ID: {}", company.getName(), company.getPrimaryIndustryId());
         Industry industry = industryRepository.findById(company.getPrimaryIndustryId())
             .orElse(null);
         if (industry != null) {
           doc.put("primaryIndustryName", industry.getName());
+          log.info("Industry name added for company: {} - Industry: {}", company.getName(), industry.getName());
+        } else {
+          log.info("Industry not found for company: {} - Industry ID: {}", company.getName(), company.getPrimaryIndustryId());
         }
       } catch (Exception e) {
         log.warn("Could not fetch industry name for company {}: {}", company.getId(),
             e.getMessage());
       }
+    } else {
+      log.info("No primary industry ID for company: {}", company.getName());
     }
 
     // Add job count
     try {
+      log.info("Counting active jobs for company: {}", company.getName());
       long jobCount = jobRepository.countByCompanyIdAndActiveTrue(company.getId());
       doc.put("jobCount", jobCount);
+      log.info("Job count added for company: {} - Active jobs: {}", company.getName(), jobCount);
     } catch (Exception e) {
       log.warn("Could not fetch job count for company {}: {}", company.getId(), e.getMessage());
       doc.put("jobCount", 0L);
+      log.info("Default job count (0) set for company: {}", company.getName());
     }
 
     // Add searchable text
     StringBuilder searchableText = new StringBuilder();
-      if (company.getName() != null) {
-          searchableText.append(company.getName()).append(" ");
-      }
-      if (company.getShortname() != null) {
-          searchableText.append(company.getShortname()).append(" ");
-      }
-      if (company.getDescription() != null) {
-          searchableText.append(company.getDescription()).append(" ");
-      }
-      if (company.getSpecialties() != null) {
-          searchableText.append(company.getSpecialties()).append(" ");
-      }
-      if (company.getHeadquarters() != null) {
-          searchableText.append(company.getHeadquarters()).append(" ");
-      }
-      if (company.getSecondaryIndustries() != null) {
-          searchableText.append(company.getSecondaryIndustries()).append(" ");
-      }
+    log.info("Building searchable text for company: {}", company.getName());
+    
+    if (company.getName() != null) {
+        searchableText.append(company.getName()).append(" ");
+    }
+    if (company.getShortname() != null) {
+        searchableText.append(company.getShortname()).append(" ");
+    }
+    if (company.getDescription() != null) {
+        searchableText.append(company.getDescription()).append(" ");
+    }
+    if (company.getSpecialties() != null) {
+        searchableText.append(company.getSpecialties()).append(" ");
+    }
+    if (company.getHeadquarters() != null) {
+        searchableText.append(company.getHeadquarters()).append(" ");
+    }
+    if (company.getSecondaryIndustries() != null) {
+        searchableText.append(company.getSecondaryIndustries()).append(" ");
+    }
 
     // Add industry name to searchable text
     if (doc.containsKey("primaryIndustryName")) {
@@ -662,6 +801,10 @@ public class ElasticsearchIndexingService {
     }
 
     doc.put("searchableText", searchableText.toString().trim());
+    log.info("Searchable text built for company: {} - Length: {} characters", 
+        company.getName(), searchableText.length());
+
+    log.info("Company document built successfully for: {} - Total fields: {}", company.getName(), doc.size());
 
     return doc;
   }
@@ -670,6 +813,8 @@ public class ElasticsearchIndexingService {
    * Build skill document for Elasticsearch
    */
   private Map<String, Object> buildSkillDocument(Skill skill) {
+    log.info("Building Elasticsearch document for skill: {} (ID: {})", skill.getName(), skill.getId());
+    
     Map<String, Object> doc = new HashMap<>();
     doc.put("id", skill.getId());
     doc.put("name", skill.getName());
@@ -682,22 +827,30 @@ public class ElasticsearchIndexingService {
     doc.put("similarSkillsById", skill.getSimilarSkillsById());
     doc.put("similarSkillsProcessed", skill.isSimilarSkillsProcessed());
 
+    log.info("Basic skill fields added for: {} - Fields: {}", skill.getName(), doc.size());
+
     // Add searchable text
     StringBuilder searchableText = new StringBuilder();
-      if (skill.getName() != null) {
-          searchableText.append(skill.getName()).append(" ");
-      }
-      if (skill.getDescription() != null) {
-          searchableText.append(skill.getDescription()).append(" ");
-      }
-      if (skill.getCategory() != null) {
-          searchableText.append(skill.getCategory()).append(" ");
-      }
-      if (skill.getSimilarSkillsByName() != null) {
-          searchableText.append(skill.getSimilarSkillsByName()).append(" ");
-      }
+    log.info("Building searchable text for skill: {}", skill.getName());
+    
+    if (skill.getName() != null) {
+        searchableText.append(skill.getName()).append(" ");
+    }
+    if (skill.getDescription() != null) {
+        searchableText.append(skill.getDescription()).append(" ");
+    }
+    if (skill.getCategory() != null) {
+        searchableText.append(skill.getCategory()).append(" ");
+    }
+    if (skill.getSimilarSkillsByName() != null) {
+        searchableText.append(skill.getSimilarSkillsByName()).append(" ");
+    }
 
     doc.put("searchableText", searchableText.toString().trim());
+    log.info("Searchable text built for skill: {} - Length: {} characters", 
+        skill.getName(), searchableText.length());
+
+    log.info("Skill document built successfully for: {} - Total fields: {}", skill.getName(), doc.size());
 
     return doc;
   }
@@ -706,6 +859,8 @@ public class ElasticsearchIndexingService {
    * Build designation document for Elasticsearch
    */
   private Map<String, Object> buildDesignationDocument(Designation designation) {
+    log.info("Building Elasticsearch document for designation: {} (ID: {})", designation.getName(), designation.getId());
+    
     Map<String, Object> doc = new HashMap<>();
     doc.put("id", designation.getId());
     doc.put("name", designation.getName());
@@ -719,31 +874,41 @@ public class ElasticsearchIndexingService {
     doc.put("departmentId", designation.getDepartmentId());
     doc.put("departmentAssigned", designation.isDepartmentAssigned());
 
+    log.info("Basic designation fields added for: {} - Fields: {}", designation.getName(), doc.size());
+
     // Add department name if available
     if (designation.getDepartmentId() != null) {
       try {
+        log.info("Fetching department name for designation: {} - Department ID: {}", designation.getName(), designation.getDepartmentId());
         Department department = departmentRepository.findById(designation.getDepartmentId())
             .orElse(null);
         if (department != null) {
           doc.put("departmentName", department.getName());
+          log.info("Department name added for designation: {} - Department: {}", designation.getName(), department.getName());
+        } else {
+          log.info("Department not found for designation: {} - Department ID: {}", designation.getName(), designation.getDepartmentId());
         }
       } catch (Exception e) {
         log.warn("Could not fetch department name for designation {}: {}", designation.getId(),
             e.getMessage());
       }
+    } else {
+      log.info("No department ID for designation: {}", designation.getName());
     }
 
     // Add searchable text
     StringBuilder searchableText = new StringBuilder();
-      if (designation.getName() != null) {
-          searchableText.append(designation.getName()).append(" ");
-      }
-      if (designation.getProcessedName() != null) {
-          searchableText.append(designation.getProcessedName()).append(" ");
-      }
-      if (designation.getSimilarDesignationsByName() != null) {
-          searchableText.append(designation.getSimilarDesignationsByName()).append(" ");
-      }
+    log.info("Building searchable text for designation: {}", designation.getName());
+    
+    if (designation.getName() != null) {
+        searchableText.append(designation.getName()).append(" ");
+    }
+    if (designation.getProcessedName() != null) {
+        searchableText.append(designation.getProcessedName()).append(" ");
+    }
+    if (designation.getSimilarDesignationsByName() != null) {
+        searchableText.append(designation.getSimilarDesignationsByName()).append(" ");
+    }
 
     // Add department name to searchable text
     if (doc.containsKey("departmentName")) {
@@ -751,6 +916,10 @@ public class ElasticsearchIndexingService {
     }
 
     doc.put("searchableText", searchableText.toString().trim());
+    log.info("Searchable text built for designation: {} - Length: {} characters", 
+        designation.getName(), searchableText.length());
+
+    log.info("Designation document built successfully for: {} - Total fields: {}", designation.getName(), doc.size());
 
     return doc;
   }
@@ -759,6 +928,8 @@ public class ElasticsearchIndexingService {
    * Build city document for Elasticsearch
    */
   private Map<String, Object> buildCityDocument(City city) {
+    log.info("Building Elasticsearch document for city: {} (ID: {})", city.getName(), city.getId());
+    
     Map<String, Object> doc = new HashMap<>();
     doc.put("id", city.getId());
     doc.put("name", city.getName());
@@ -767,19 +938,27 @@ public class ElasticsearchIndexingService {
     doc.put("processedName", city.getProcessedName());
     doc.put("processedNameGenerated", city.isProcessedNameGenerated());
 
+    log.info("Basic city fields added for: {} - Fields: {}", city.getName(), doc.size());
+
     // Add searchable text
     StringBuilder searchableText = new StringBuilder();
-      if (city.getName() != null) {
-          searchableText.append(city.getName()).append(" ");
-      }
-      if (city.getProcessedName() != null) {
-          searchableText.append(city.getProcessedName()).append(" ");
-      }
-      if (city.getZipCode() != null) {
-          searchableText.append(city.getZipCode()).append(" ");
-      }
+    log.info("Building searchable text for city: {}", city.getName());
+    
+    if (city.getName() != null) {
+        searchableText.append(city.getName()).append(" ");
+    }
+    if (city.getProcessedName() != null) {
+        searchableText.append(city.getProcessedName()).append(" ");
+    }
+    if (city.getZipCode() != null) {
+        searchableText.append(city.getZipCode()).append(" ");
+    }
 
     doc.put("searchableText", searchableText.toString().trim());
+    log.info("Searchable text built for city: {} - Length: {} characters", 
+        city.getName(), searchableText.length());
+
+    log.info("City document built successfully for: {} - Total fields: {}", city.getName(), doc.size());
 
     return doc;
   }
