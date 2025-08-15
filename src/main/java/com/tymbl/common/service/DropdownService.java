@@ -67,6 +67,30 @@ public class DropdownService {
   private final Map<Long, String> currencySymbolCache = new ConcurrentHashMap<>();
   private List<com.tymbl.jobs.entity.Company> companyList = new ArrayList<>();
 
+  // Cache for industry statistics and companies by industry
+  private final Map<String, List<IndustryWiseCompaniesDTO>> industryStatisticsCache = new ConcurrentHashMap<>();
+  private final Map<Long, List<IndustryWiseCompaniesDTO.TopCompanyDTO>> companiesByIndustryCache = new ConcurrentHashMap<>();
+  private final Map<String, Long> industryStatisticsCacheTimestamp = new ConcurrentHashMap<>();
+  private final Map<Long, Long> companiesByIndustryCacheTimestamp = new ConcurrentHashMap<>();
+  
+  // Cache TTL in milliseconds (30 minutes)
+  private static final long CACHE_TTL = 30 * 60 * 1000L;
+
+  /**
+   * Check if cache entry is expired
+   */
+  private boolean isCacheExpired(Long timestamp) {
+    return timestamp == null || (System.currentTimeMillis() - timestamp) > CACHE_TTL;
+  }
+
+  /**
+   * Check if cache entry is expired (for string keys)
+   */
+  private boolean isCacheExpired(String timestamp) {
+    Long ts = industryStatisticsCacheTimestamp.get(timestamp);
+    return ts == null || (System.currentTimeMillis() - ts) > CACHE_TTL;
+  }
+
   // Entity caches for full objects
   private final Map<Long, Department> departmentEntityCache = new ConcurrentHashMap<>();
   private final Map<Long, Location> locationEntityCache = new ConcurrentHashMap<>();
@@ -433,13 +457,13 @@ public class DropdownService {
       // Sort by rank first (lower rank values come first), then by "other" logic
       industries.sort((i1, i2) -> {
         // First, sort by rank (lower rank values come first)
-        Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
-        Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
-
+        Integer rank1 = i1.getRank() != null ? i1.getRank() : Integer.MAX_VALUE;
+        Integer rank2 = i2.getRank() != null ? i2.getRank() : Integer.MAX_VALUE;
+        
         if (!rank1.equals(rank2)) {
           return rank1.compareTo(rank2);
         }
-
+        
         // If ranks are equal, then sort by "other" logic
         boolean i1HasOther = i1.getName().toLowerCase().contains("other");
         boolean i2HasOther = i2.getName().toLowerCase().contains("other");
@@ -458,18 +482,10 @@ public class DropdownService {
 
     // Fallback to database if cache is empty
     log.warn("Industry cache is empty, falling back to database");
-    List<Industry> industries = industryRepository.findAll();
-    // Sort by rank first (lower rank values come first), then by "other" logic
+    List<Industry> industries = industryRepository.findAllByOrderByRankAsc();
+    // Sort by "other" logic, then alphabetically for industries with same rank
     industries.sort((i1, i2) -> {
-      // First, sort by rank (lower rank values come first)
-      Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
-      Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
-
-      if (!rank1.equals(rank2)) {
-        return rank1.compareTo(rank2);
-      }
-
-      // If ranks are equal, then sort by "other" logic
+      // Sort by "other" logic
       boolean i1HasOther = i1.getName().toLowerCase().contains("other");
       boolean i2HasOther = i2.getName().toLowerCase().contains("other");
       if (i1HasOther && !i2HasOther) {
@@ -770,6 +786,48 @@ public class DropdownService {
     currencyNameCache.clear();
     currencySymbolCache.clear();
     companyList.clear();
+    
+    // Clear industry statistics and companies by industry caches
+    industryStatisticsCache.clear();
+    companiesByIndustryCache.clear();
+    industryStatisticsCacheTimestamp.clear();
+    companiesByIndustryCacheTimestamp.clear();
+  }
+
+  /**
+   * Clear only industry-related caches (useful when industry data changes)
+   */
+  public void clearIndustryCaches() {
+    log.info("Clearing industry-related caches...");
+    industryStatisticsCache.clear();
+    companiesByIndustryCache.clear();
+    industryStatisticsCacheTimestamp.clear();
+    companiesByIndustryCacheTimestamp.clear();
+  }
+
+  /**
+   * Get cache statistics for monitoring
+   */
+  public Map<String, Object> getCacheStatistics() {
+    Map<String, Object> stats = new HashMap<>();
+    stats.put("designationCacheSize", designationCache.size());
+    stats.put("departmentCacheSize", departmentCache.size());
+    stats.put("countryCacheSize", countryCache.size());
+    stats.put("cityCacheSize", cityCache.size());
+    stats.put("industryCacheSize", industryCache.size());
+    stats.put("companyNameCacheSize", companyNameCache.size());
+    stats.put("currencyNameCacheSize", currencyNameCache.size());
+    stats.put("currencySymbolCacheSize", currencySymbolCache.size());
+    stats.put("industryStatisticsCacheSize", industryStatisticsCache.size());
+    stats.put("companiesByIndustryCacheSize", companiesByIndustryCache.size());
+    stats.put("companyListSize", companyList.size());
+    
+    // Calculate cache hit rates if available
+    long totalRequests = 0;
+    long cacheHits = 0;
+    // Note: This is a simplified approach. In production, you might want more sophisticated metrics
+    
+    return stats;
   }
 
   /**
@@ -1029,6 +1087,16 @@ public class DropdownService {
   // Industry statistics method
   @Transactional(readOnly = true)
   public List<IndustryWiseCompaniesDTO> getIndustryStatistics() {
+    // Check cache first
+    String cacheKey = "industry_statistics";
+    List<IndustryWiseCompaniesDTO> cachedResult = industryStatisticsCache.get(cacheKey);
+    if (cachedResult != null && !isCacheExpired(cacheKey)) {
+      log.debug("Returning industry statistics from cache");
+      return cachedResult;
+    }
+
+    log.debug("Cache miss for industry statistics, fetching from database");
+    
     List<Object[]> industryStats = industryCacheService.getIndustryStatistics();
     List<Object[]> jobCounts = industryRepository.getActiveJobCountsForAllIndustries();
     Map<Long, Long> industryJobCountMap = new java.util.HashMap<>();
@@ -1066,7 +1134,7 @@ public class DropdownService {
       industryDTO.setIndustryId(industryId);
       industryDTO.setIndustryName(industryName);
       industryDTO.setIndustryDescription(industryDescription);
-      industryDTO.setRankOrder(rankOrder);
+      industryDTO.setRankOrder(rankOrder);  // New field
       industryDTO.setCompanyCount(companyCount.intValue());
       industryDTO.setTopCompanies(topCompanies);
 
@@ -1078,11 +1146,11 @@ public class DropdownService {
       // First, sort by rank (lower rank values come first)
       Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
       Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
-
+      
       if (!rank1.equals(rank2)) {
         return rank1.compareTo(rank2);
       }
-
+      
       // If ranks are equal, then sort by "other" logic
       boolean i1HasOther = i1.getIndustryName().toLowerCase().contains("other");
       boolean i2HasOther = i2.getIndustryName().toLowerCase().contains("other");
@@ -1097,13 +1165,27 @@ public class DropdownService {
       return i1.getIndustryName().compareToIgnoreCase(i2.getIndustryName());
     });
 
+    // Cache the result
+    industryStatisticsCache.put(cacheKey, result);
+    industryStatisticsCacheTimestamp.put(cacheKey, System.currentTimeMillis());
+    log.debug("Cached industry statistics, cache size: {}", industryStatisticsCache.size());
+
     return result;
   }
 
   @Transactional(readOnly = true)
   public List<IndustryWiseCompaniesDTO.TopCompanyDTO> getCompaniesByIndustry(Long industryId) {
+    // Check cache first
+    List<IndustryWiseCompaniesDTO.TopCompanyDTO> cachedResult = companiesByIndustryCache.get(industryId);
+    if (cachedResult != null && !isCacheExpired(companiesByIndustryCacheTimestamp.get(industryId))) {
+      log.debug("Returning companies for industry {} from cache", industryId);
+      return cachedResult;
+    }
+
+    log.debug("Cache miss for companies by industry {}, fetching from database", industryId);
+    
     List<Object[]> companiesData = industryCacheService.getTopCompaniesByIndustry(industryId);
-    return companiesData.stream()
+    List<IndustryWiseCompaniesDTO.TopCompanyDTO> result = companiesData.stream()
         .map(companyData -> {
           Long companyId = companyData[0] == null ? null : ((Number) companyData[0]).longValue();
           IndustryWiseCompaniesDTO.TopCompanyDTO topCompany = new IndustryWiseCompaniesDTO.TopCompanyDTO();
@@ -1117,6 +1199,13 @@ public class DropdownService {
           return topCompany;
         })
         .collect(java.util.stream.Collectors.toList());
+
+    // Cache the result
+    companiesByIndustryCache.put(industryId, result);
+    companiesByIndustryCacheTimestamp.put(industryId, System.currentTimeMillis());
+    log.debug("Cached companies for industry {}, cache size: {}", industryId, companiesByIndustryCache.size());
+
+    return result;
   }
 
   /**

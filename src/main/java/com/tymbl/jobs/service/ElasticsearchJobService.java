@@ -214,7 +214,9 @@ public class ElasticsearchJobService {
     document.put("title", job.getTitle());
     document.put("description", job.getDescription());
     document.put("cityId", job.getCityId());
+    document.put("cityName", job.getCityName());
     document.put("countryId", job.getCountryId());
+    document.put("countryName", job.getCountryName());
     document.put("designationId", job.getDesignationId());
     document.put("minSalary", job.getMinSalary());
     document.put("maxSalary", job.getMaxSalary());
@@ -225,6 +227,7 @@ public class ElasticsearchJobService {
     document.put("companyId", job.getCompanyId());
     document.put("postedById", job.getPostedById());
     document.put("active", job.isActive());
+
 
     // Convert LocalDateTime to Date to avoid Jackson serialization issues
     if (job.getCreatedAt() != null) {
@@ -275,18 +278,11 @@ public class ElasticsearchJobService {
       }
 
     // Add city and country names
-    if (job.getCityId() != null) {
-      String cityName = dropdownService.getCityNameById(job.getCityId());
-        if (cityName != null) {
-            searchableText.append(cityName).append(" ");
-        }
+    if (job.getCityName() != null) {
+        searchableText.append(job.getCityName()).append(" ");
     }
-
-    if (job.getCountryId() != null) {
-      String countryName = dropdownService.getCountryNameById(job.getCountryId());
-        if (countryName != null) {
-            searchableText.append(countryName).append(" ");
-        }
+    if (job.getCountryName() != null) {
+        searchableText.append(job.getCountryName()).append(" ");
     }
 
     document.put("searchableText", searchableText.toString().trim());

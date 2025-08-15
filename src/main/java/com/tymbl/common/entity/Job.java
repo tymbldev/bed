@@ -56,8 +56,14 @@ public class Job {
   @Column(name = "city_id")
   private Long cityId;
 
+  @Column(name = "city_name")
+  private String cityName;
+
   @Column(name = "country_id")
   private Long countryId;
+
+  @Column(name = "country_name")
+  private String countryName;
 
   @Column(name = "designation_id")
   private Long designationId;

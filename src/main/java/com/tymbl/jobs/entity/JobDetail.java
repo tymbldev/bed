@@ -39,6 +39,18 @@ public class JobDetail {
   @Column(name = "locations", columnDefinition = "TEXT")
   private String locations;
 
+  @Column(name = "city_id")
+  private Long cityId;
+
+  @Column(name = "city_name")
+  private String cityName;
+
+  @Column(name = "country_id")
+  private Long countryId;
+
+  @Column(name = "country_name")
+  private String countryName;
+
   @Column(name = "minimum_experience")
   private Integer minimumExperience;
 
@@ -168,6 +180,38 @@ public class JobDetail {
 
   public void setLocations(String locations) {
     this.locations = locations;
+  }
+
+  public Long getCityId() {
+    return cityId;
+  }
+
+  public void setCityId(Long cityId) {
+    this.cityId = cityId;
+  }
+
+  public String getCityName() {
+    return cityName;
+  }
+
+  public void setCityName(String cityName) {
+    this.cityName = cityName;
+  }
+
+  public Long getCountryId() {
+    return countryId;
+  }
+
+  public void setCountryId(Long countryId) {
+    this.countryId = countryId;
+  }
+
+  public String getCountryName() {
+    return countryName;
+  }
+
+  public void setCountryName(String countryName) {
+    this.countryName = countryName;
   }
 
   public Integer getMinimumExperience() {

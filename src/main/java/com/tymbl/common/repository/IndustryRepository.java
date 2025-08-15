@@ -15,11 +15,11 @@ public interface IndustryRepository extends JpaRepository<Industry, Long> {
 
   boolean existsByName(String name);
 
-  @Query(value = "SELECT i.id, i.name, i.description, i.rank_order, COUNT(c.id) as companyCount " +
+  @Query(value = "SELECT i.id, i.name, i.description, i.rank, COUNT(c.id) as companyCount " +
       "FROM industries i " +
       "LEFT JOIN companies c ON c.primary_industry_id = i.id " +
-      "GROUP BY i.id, i.name, i.description, i.rank_order " +
-      "ORDER BY i.rank_order ASC, companyCount DESC", nativeQuery = true)
+      "GROUP BY i.id, i.name, i.description, i.rank " +
+      "ORDER BY i.rank ASC, companyCount DESC", nativeQuery = true)
   List<Object[]> getIndustryStatistics();
 
   @Query(value =
@@ -49,9 +49,7 @@ public interface IndustryRepository extends JpaRepository<Industry, Long> {
   )
   List<Object[]> getActiveJobCountsForAllIndustries();
 
-  // Find industries ordered by rank
-  List<Industry> findAllByOrderByRankOrderAsc();
+  // Add method to find all industries ordered by rank
+  List<Industry> findAllByOrderByRankAsc();
 
-  // Find industry by rank order
-  Optional<Industry> findByRankOrder(Integer rankOrder);
 } 

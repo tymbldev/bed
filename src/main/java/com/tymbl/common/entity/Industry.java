@@ -27,8 +27,8 @@ public class Industry {
 
   private String description;
 
-  @Column(name = "rank_order")
-  private Integer rankOrder;
+  @Column(name = "rank")
+  private Integer rank;
 
   public Industry(String name) {
     this.name = name;
@@ -39,11 +39,12 @@ public class Industry {
     this.description = description;
   }
 
-  public Industry(String name, String description, Integer rankOrder) {
+  public Industry(String name, String description, Integer rank) {
     this.name = name;
     this.description = description;
-    this.rankOrder = rankOrder;
+    this.rank = rank;
   }
+
 
   @Override
   public boolean equals(Object o) {

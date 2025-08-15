@@ -9,7 +9,8 @@ public class IndustryWiseCompaniesDTO {
   private Long industryId;
   private String industryName; // Dropdown value for industryId
   private String industryDescription;
-  private Integer rankOrder;
+  private Integer rankOrder; // New field for industry ranking
+
   private Integer companyCount;
   private List<TopCompanyDTO> topCompanies;
 

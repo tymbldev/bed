@@ -55,6 +55,7 @@ public class ElasticsearchIndexingService {
   private static final String DESIGNATIONS_INDEX = "designations";
   private static final String CITIES_INDEX = "cities";
   private static final String SKILLS_INDEX = "skills";
+  private static final String JOBS_INDEX = "jobs";
 
   /**
    * Index all companies to Elasticsearch
@@ -319,6 +320,71 @@ public class ElasticsearchIndexingService {
   }
 
   /**
+   * Index all jobs to Elasticsearch
+   */
+  @Transactional(readOnly = true)
+  public Map<String, Object> indexAllJobs() {
+    log.info("Starting to index all jobs to Elasticsearch");
+
+    try {
+      List<com.tymbl.common.entity.Job> jobs = jobRepository.findAll();
+      log.info("Found {} jobs to index", jobs.size());
+
+      BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
+      log.info("Building bulk request for {} jobs", jobs.size());
+
+      for (com.tymbl.common.entity.Job job : jobs) {
+        log.info("Building document for job: {} (ID: {})", job.getTitle(), job.getId());
+        Map<String, Object> jobDoc = buildJobDocument(job);
+        log.info("Job document built successfully for: {} - Document size: {} fields, City: {}, Country: {}", 
+            job.getTitle(), jobDoc.size(), jobDoc.get("cityName"), jobDoc.get("countryName"));
+        
+        bulkRequest.operations(op -> op
+            .index(idx -> idx
+                .index(JOBS_INDEX)
+                .id(job.getId().toString())
+                .document(jobDoc)
+            )
+        );
+      }
+
+      log.info("Executing bulk request to Elasticsearch for {} jobs", jobs.size());
+      BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
+      log.info("Bulk request completed. Response received: {} items, Errors: {}", 
+          response.items().size(), response.errors());
+
+      int successCount = 0;
+      int failureCount = 0;
+
+      if (response.errors()) {
+        failureCount = response.items().size();
+        log.error("Failed to index jobs: {}",
+            response.items().stream().map(item -> item.error().reason())
+                .collect(Collectors.joining(", ")));
+      } else {
+        successCount = jobs.size();
+        log.info("All {} jobs indexed successfully", successCount);
+      }
+
+      Map<String, Object> result = new HashMap<>();
+      result.put("totalJobs", jobs.size());
+      result.put("indexedSuccessfully", successCount);
+      result.put("failedToIndex", failureCount);
+      result.put("message", "Job indexing completed");
+
+      log.info("Job indexing completed - Success: {}, Failures: {}", successCount, failureCount);
+
+      return result;
+
+    } catch (Exception e) {
+      log.error("Error indexing jobs to Elasticsearch", e);
+      Map<String, Object> error = new HashMap<>();
+      error.put("error", "Failed to index jobs: " + e.getMessage());
+      return error;
+    }
+  }
+
+  /**
    * Sync a skill to Elasticsearch (save or update) Does not fail the main transaction if ES fails
    */
   public void syncSkillToElasticsearch(Skill skill) {
@@ -417,18 +483,23 @@ public class ElasticsearchIndexingService {
     log.info("Deleting documents from skills index: {}", SKILLS_INDEX);
     Map<String, Object> skillsDeleteResult = deleteAllDocumentsFromIndex(SKILLS_INDEX);
 
+    log.info("Deleting documents from jobs index: {}", JOBS_INDEX);
+    Map<String, Object> jobsDeleteResult = deleteAllDocumentsFromIndex(JOBS_INDEX);
+
     Map<String, Object> result = new HashMap<>();
     result.put("companies", companiesDeleteResult);
     result.put("designations", designationsDeleteResult);
     result.put("cities", citiesDeleteResult);
     result.put("skills", skillsDeleteResult);
+    result.put("jobs", jobsDeleteResult);
     result.put("message", "All documents deleted from all indices");
 
-    log.info("All documents deletion completed - Companies: {}, Designations: {}, Cities: {}, Skills: {}", 
+    log.info("All documents deletion completed - Companies: {}, Designations: {}, Cities: {}, Skills: {}, Jobs: {}", 
         companiesDeleteResult.get("documentsDeleted"), 
         designationsDeleteResult.get("documentsDeleted"),
         citiesDeleteResult.get("documentsDeleted"), 
-        skillsDeleteResult.get("documentsDeleted"));
+        skillsDeleteResult.get("documentsDeleted"),
+        jobsDeleteResult.get("documentsDeleted"));
     return result;
   }
 
@@ -477,23 +548,31 @@ public class ElasticsearchIndexingService {
     log.info("Skills re-indexing completed - Success: {}, Failures: {}", 
         skillsResult.get("indexedSuccessfully"), skillsResult.get("failedToIndex"));
 
+    log.info("Starting jobs re-indexing...");
+    Map<String, Object> jobsResult = indexAllJobs();
+    log.info("Jobs re-indexing completed - Success: {}, Failures: {}", 
+        jobsResult.get("indexedSuccessfully"), jobsResult.get("failedToIndex"));
+
     Map<String, Object> result = new HashMap<>();
     result.put("cleanup", deleteResult);
     result.put("companies", companiesResult);
     result.put("designations", designationsResult);
     result.put("cities", citiesResult);
     result.put("skills", skillsResult);
+    result.put("jobs", jobsResult);
     result.put("message", "All entities re-indexed to Elasticsearch after cleanup");
 
     int totalIndexed = ((Number) companiesResult.get("indexedSuccessfully")).intValue() + 
                        ((Number) designationsResult.get("indexedSuccessfully")).intValue() + 
                        ((Number) citiesResult.get("indexedSuccessfully")).intValue() + 
-                       ((Number) skillsResult.get("indexedSuccessfully")).intValue();
+                       ((Number) skillsResult.get("indexedSuccessfully")).intValue() +
+                       ((Number) jobsResult.get("indexedSuccessfully")).intValue();
     
     int totalFailures = ((Number) companiesResult.get("failedToIndex")).intValue() + 
                         ((Number) designationsResult.get("failedToIndex")).intValue() + 
                         ((Number) citiesResult.get("failedToIndex")).intValue() + 
-                        ((Number) skillsResult.get("failedToIndex")).intValue();
+                        ((Number) skillsResult.get("failedToIndex")).intValue() +
+                        ((Number) jobsResult.get("failedToIndex")).intValue();
     
     log.info("All entities re-indexing completed after cleanup - Total indexed: {}, Total failures: {}", 
         totalIndexed, totalFailures);
@@ -959,6 +1038,98 @@ public class ElasticsearchIndexingService {
   }
 
   /**
+   * Build job document for Elasticsearch
+   */
+  private Map<String, Object> buildJobDocument(com.tymbl.common.entity.Job job) {
+    log.info("Building Elasticsearch document for job: {} (ID: {})", job.getTitle(), job.getId());
+    
+    Map<String, Object> doc = new HashMap<>();
+    doc.put("id", job.getId());
+    doc.put("title", job.getTitle());
+    doc.put("description", job.getDescription());
+    doc.put("cityId", job.getCityId());
+    doc.put("cityName", job.getCityName());
+    doc.put("countryId", job.getCountryId());
+    doc.put("countryName", job.getCountryName());
+    doc.put("designationId", job.getDesignationId());
+    doc.put("designation", job.getDesignation());
+    doc.put("minSalary", job.getMinSalary());
+    doc.put("maxSalary", job.getMaxSalary());
+    doc.put("minExperience", job.getMinExperience());
+    doc.put("maxExperience", job.getMaxExperience());
+    doc.put("jobType", job.getJobType() != null ? job.getJobType().name() : null);
+    doc.put("currencyId", job.getCurrencyId());
+    doc.put("companyId", job.getCompanyId());
+    doc.put("company", job.getCompany());
+    doc.put("postedById", job.getPostedById());
+    doc.put("active", job.isActive());
+    doc.put("openingCount", job.getOpeningCount());
+    doc.put("uniqueUrl", job.getUniqueUrl());
+    doc.put("platform", job.getPlatform());
+    doc.put("approved", job.getApproved());
+
+    log.info("Basic job fields added for: {} - Fields: {}", job.getTitle(), doc.size());
+
+    // Add skills and tags
+    if (job.getSkillIds() != null && !job.getSkillIds().isEmpty()) {
+      doc.put("skillIds", job.getSkillIds());
+      log.info("Skill IDs added for job: {} - Skills: {}", job.getTitle(), job.getSkillIds().size());
+    }
+    
+    if (job.getTags() != null && !job.getTags().isEmpty()) {
+      doc.put("tags", job.getTags());
+      log.info("Tags added for job: {} - Tags: {}", job.getTitle(), job.getTags().size());
+    }
+
+    // Add timestamps (converted to avoid Jackson issues)
+    if (job.getCreatedAt() != null) {
+      doc.put("createdAt", java.sql.Timestamp.valueOf(job.getCreatedAt()));
+    }
+    if (job.getUpdatedAt() != null) {
+      doc.put("updatedAt", java.sql.Timestamp.valueOf(job.getUpdatedAt()));
+    }
+
+    // Build searchable text
+    StringBuilder searchableText = new StringBuilder();
+    log.info("Building searchable text for job: {}", job.getTitle());
+    
+    if (job.getTitle() != null) {
+        searchableText.append(job.getTitle()).append(" ");
+    }
+    if (job.getDescription() != null) {
+        searchableText.append(job.getDescription()).append(" ");
+    }
+    if (job.getDesignation() != null) {
+        searchableText.append(job.getDesignation()).append(" ");
+    }
+    if (job.getCompany() != null) {
+        searchableText.append(job.getCompany()).append(" ");
+    }
+    if (job.getCityName() != null) {
+        searchableText.append(job.getCityName()).append(" ");
+    }
+    if (job.getCountryName() != null) {
+        searchableText.append(job.getCountryName()).append(" ");
+    }
+    if (job.getTags() != null && !job.getTags().isEmpty()) {
+        searchableText.append(String.join(" ", job.getTags())).append(" ");
+    }
+    if (job.getPlatform() != null) {
+        searchableText.append(job.getPlatform()).append(" ");
+    }
+    if (job.getJobType() != null) {
+        searchableText.append(job.getJobType().name()).append(" ");
+    }
+
+    doc.put("searchableText", searchableText.toString().trim());
+    log.info("Searchable text built for job: {} - Length: {} characters", 
+        job.getTitle(), searchableText.length());
+
+    log.info("Job document built successfully for: {} - Total fields: {}", job.getTitle(), doc.size());
+    return doc;
+  }
+
+  /**
    * Get index name based on entity type
    */
   private String getIndexName(String entityType) {
@@ -975,6 +1146,9 @@ public class ElasticsearchIndexingService {
       case "skill":
       case "skills":
         return SKILLS_INDEX;
+      case "job":
+      case "jobs":
+        return JOBS_INDEX;
       default:
         return null;
     }
