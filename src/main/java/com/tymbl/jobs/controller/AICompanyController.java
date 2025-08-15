@@ -44,7 +44,7 @@ import org.springframework.data.domain.PageRequest;
         RequestMethod.POST, 
         RequestMethod.PUT, 
         RequestMethod.DELETE, 
-        RequestMethod.OPTIONS, 
+        RequestMethod.OPTIONS,
         RequestMethod.PATCH
     }
 )

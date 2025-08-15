@@ -47,6 +47,7 @@ public class DropdownService {
   private final IndustryRepository industryRepository;
   private final CompanyRepository companyRepository;
   private final CurrencyRepository currencyRepository;
+  private final IndustryCacheService industryCacheService;
 
   @Qualifier("taskExecutor")
   private final Executor taskExecutor;
@@ -107,7 +108,16 @@ public class DropdownService {
   // Department methods
   @Transactional(readOnly = true)
   public List<Department> getAllDepartments() {
-    return departmentRepository.findAll();
+    List<Department> departments = departmentRepository.findAll();
+    // Sort so that entries with "other" in the name come last
+    departments.sort((d1, d2) -> {
+      boolean d1HasOther = d1.getName().toLowerCase().contains("other");
+      boolean d2HasOther = d2.getName().toLowerCase().contains("other");
+      if (d1HasOther && !d2HasOther) return 1;
+      if (!d1HasOther && d2HasOther) return -1;
+      return d1.getName().compareToIgnoreCase(d2.getName());
+    });
+    return departments;
   }
 
   @Transactional
@@ -128,7 +138,16 @@ public class DropdownService {
   // Location methods
   @Transactional(readOnly = true)
   public List<Location> getAllLocations() {
-    return locationRepository.findAll();
+    List<Location> locations = locationRepository.findAll();
+    // Sort so that entries with "other" in the name come last
+    locations.sort((l1, l2) -> {
+      boolean l1HasOther = l1.getCity().toLowerCase().contains("other");
+      boolean l2HasOther = l2.getCity().toLowerCase().contains("other");
+      if (l1HasOther && !l2HasOther) return 1;
+      if (!l1HasOther && l2HasOther) return -1;
+      return l1.getCity().compareToIgnoreCase(l2.getCity());
+    });
+    return locations;
   }
 
   @Transactional
@@ -149,7 +168,16 @@ public class DropdownService {
   // Designation methods
   @Transactional(readOnly = true)
   public List<Designation> getAllDesignations() {
-    return designationRepository.findAll();
+    List<Designation> designations = designationRepository.findAll();
+    // Sort so that entries with "other" in the name come last
+    designations.sort((d1, d2) -> {
+      boolean d1HasOther = d1.getName().toLowerCase().contains("other");
+      boolean d2HasOther = d2.getName().toLowerCase().contains("other");
+      if (d1HasOther && !d2HasOther) return 1;
+      if (!d1HasOther && d2HasOther) return -1;
+      return d1.getName().compareToIgnoreCase(d2.getName());
+    });
+    return designations;
   }
 
   @Transactional
@@ -179,7 +207,16 @@ public class DropdownService {
   // Country methods
   @Transactional(readOnly = true)
   public List<Country> getAllCountries() {
-    return countryRepository.findAll();
+    List<Country> countries = countryRepository.findAll();
+    // Sort so that entries with "other" in the name come last
+    countries.sort((c1, c2) -> {
+      boolean c1HasOther = c1.getName().toLowerCase().contains("other");
+      boolean c2HasOther = c2.getName().toLowerCase().contains("other");
+      if (c1HasOther && !c2HasOther) return 1;
+      if (!c1HasOther && c2HasOther) return -1;
+      return c1.getName().compareToIgnoreCase(c2.getName());
+    });
+    return countries;
   }
 
   @Transactional(readOnly = true)
@@ -191,7 +228,16 @@ public class DropdownService {
   // City methods
   @Transactional(readOnly = true)
   public List<City> getAllCities() {
-    return cityRepository.findAll();
+    List<City> cities = cityRepository.findAll();
+    // Sort so that entries with "other" in the name come last
+    cities.sort((c1, c2) -> {
+      boolean c1HasOther = c1.getName().toLowerCase().contains("other");
+      boolean c2HasOther = c2.getName().toLowerCase().contains("other");
+      if (c1HasOther && !c2HasOther) return 1;
+      if (!c1HasOther && c2HasOther) return -1;
+      return c1.getName().compareToIgnoreCase(c2.getName());
+    });
+    return cities;
   }
 
   @Transactional(readOnly = true)
@@ -203,7 +249,27 @@ public class DropdownService {
   // Industry methods
   @Transactional(readOnly = true)
   public List<Industry> getAllIndustries() {
-    return industryRepository.findAll();
+    List<Industry> industries = industryRepository.findAll();
+    // Sort by rank first (lower rank values come first), then by "other" logic
+    industries.sort((i1, i2) -> {
+      // First, sort by rank (lower rank values come first)
+      Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
+      Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
+      
+      if (!rank1.equals(rank2)) {
+        return rank1.compareTo(rank2);
+      }
+      
+      // If ranks are equal, then sort by "other" logic
+      boolean i1HasOther = i1.getName().toLowerCase().contains("other");
+      boolean i2HasOther = i2.getName().toLowerCase().contains("other");
+      if (i1HasOther && !i2HasOther) return 1;
+      if (!i1HasOther && i2HasOther) return -1;
+      
+      // If both have "other" or both don't have "other", sort alphabetically
+      return i1.getName().compareToIgnoreCase(i2.getName());
+    });
+    return industries;
   }
 
   @Transactional
@@ -645,7 +711,7 @@ public class DropdownService {
   // Industry statistics method
   @Transactional(readOnly = true)
   public List<IndustryWiseCompaniesDTO> getIndustryStatistics() {
-    List<Object[]> industryStats = industryRepository.getIndustryStatistics();
+    List<Object[]> industryStats = industryCacheService.getIndustryStatistics();
     List<Object[]> jobCounts = industryRepository.getActiveJobCountsForAllIndustries();
     Map<Long, Long> industryJobCountMap = new java.util.HashMap<>();
     for (Object[] row : jobCounts) {
@@ -659,7 +725,8 @@ public class DropdownService {
       Long industryId = stat[0] == null ? null : ((Number) stat[0]).longValue();
       String industryName = (String) stat[1];
       String industryDescription = (String) stat[2];
-      Long companyCount = stat[3] == null ? 0L : ((Number) stat[3]).longValue();
+      Integer rankOrder = stat[3] == null ? null : ((Number) stat[3]).intValue();
+      Long companyCount = stat[4] == null ? 0L : ((Number) stat[4]).longValue();
       List<Object[]> topCompaniesData = industryRepository.getTopCompaniesByIndustry(industryId);
       List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = topCompaniesData.stream()
           .map(companyData -> {
@@ -681,6 +748,7 @@ public class DropdownService {
       industryDTO.setIndustryId(industryId);
       industryDTO.setIndustryName(industryName);
       industryDTO.setIndustryDescription(industryDescription);
+      industryDTO.setRankOrder(rankOrder);
       industryDTO.setCompanyCount(companyCount.intValue());
       industryDTO.setTopCompanies(topCompanies);
 
@@ -690,7 +758,7 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public List<IndustryWiseCompaniesDTO.TopCompanyDTO> getCompaniesByIndustry(Long industryId) {
-    List<Object[]> companiesData = industryRepository.getTopCompaniesByIndustry(industryId);
+    List<Object[]> companiesData = industryCacheService.getTopCompaniesByIndustry(industryId);
     return companiesData.stream()
         .map(companyData -> {
           Long companyId = companyData[0] == null ? null : ((Number) companyData[0]).longValue();

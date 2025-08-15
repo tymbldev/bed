@@ -713,16 +713,8 @@ public class DropdownController {
         }
     }
 
-    @GetMapping("/autosuggest")
-    @Operation(summary = "Autosuggest for company, designation, and tag", description = "Suggests company names, designation names, or tags matching the query (min 3 chars). Returns a list of {keyword, type}.")
-    @ApiResponses(value = {
-        @ApiResponse(responseCode = "200", description = "Suggestions found")
-    })
-    public ResponseEntity<List<Map<String, String>>> autosuggest(@RequestParam("query") String query) {
-        return ResponseEntity.ok(dropdownService.autosuggest(query));
-    }
 
-    @GetMapping("/autosuggest-elasticsearch")
+    @GetMapping("/autosuggest")
     @Operation(
         summary = "Elasticsearch-powered autosuggest for companies, designations, and cities",
         description = "Uses Elasticsearch to provide fast autosuggest functionality for companies, designations, and cities. Requires keyword (min 2 chars) and entity type (companies, designations, or cities)."

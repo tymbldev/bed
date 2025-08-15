@@ -5,6 +5,7 @@ import com.tymbl.common.service.DesignationGenerationService;
 import com.tymbl.common.service.ProcessedNameService;
 import com.tymbl.common.service.SecondaryIndustryMappingService;
 import com.tymbl.jobs.service.AIJobService;
+import com.tymbl.jobs.service.ElasticsearchIndexingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,6 +37,7 @@ public class AIDropdownController {
     private final ProcessedNameService processedNameService;
     private final SecondaryIndustryMappingService secondaryIndustryMappingService;
     private final AIJobService aiJobService;
+    private final ElasticsearchIndexingService elasticsearchIndexingService;
 
     // ============================================================================
     // DESIGNATION GENERATION ENDPOINTS
@@ -751,4 +753,37 @@ public class AIDropdownController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
         }
     }
-} 
+
+    // ============================================================================
+
+    @PostMapping("/elasticsearch/index-all-entities")
+    @Operation(
+        summary = "Re-index all entities to Elasticsearch with cleanup",
+        description = "First deletes all existing documents from Elasticsearch indices (companies, designations, cities), " +
+                     "then re-indexes all entities fresh. This ensures a clean, up-to-date search index."
+    )
+    @ApiResponses(value = {
+        @ApiResponse(
+            responseCode = "200",
+            description = "All entities successfully re-indexed to Elasticsearch after cleanup",
+            content = @Content(
+                examples = @ExampleObject(
+                    value = "{\"status\":\"SUCCESS\",\"message\":\"All entities re-indexed to Elasticsearch after cleanup\"}"
+                )
+            )
+        ),
+        @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    public ResponseEntity<Map<String, Object>> indexAllEntitiesToElasticsearch() {
+        try {
+            log.info("Starting to re-index all entities to Elasticsearch with cleanup");
+            Map<String, Object> result = elasticsearchIndexingService.indexAllEntities();
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            log.error("Error re-indexing all entities to Elasticsearch", e);
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("error", "Error re-indexing all entities to Elasticsearch: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
+    }
+}

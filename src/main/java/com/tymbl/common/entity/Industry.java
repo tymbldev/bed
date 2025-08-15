@@ -23,6 +23,9 @@ public class Industry {
     
     private String description;
     
+    @Column(name = "rank_order")
+    private Integer rankOrder;
+    
     public Industry(String name) {
         this.name = name;
     }
@@ -30,6 +33,12 @@ public class Industry {
     public Industry(String name, String description) {
         this.name = name;
         this.description = description;
+    }
+    
+    public Industry(String name, String description, Integer rankOrder) {
+        this.name = name;
+        this.description = description;
+        this.rankOrder = rankOrder;
     }
     
     @Override

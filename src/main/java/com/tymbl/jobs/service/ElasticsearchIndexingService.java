@@ -3,6 +3,7 @@ package com.tymbl.jobs.service;
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
 import co.elastic.clients.elasticsearch.core.BulkRequest;
 import co.elastic.clients.elasticsearch.core.BulkResponse;
+import co.elastic.clients.elasticsearch.core.DeleteByQueryResponse;
 import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
@@ -207,23 +208,99 @@ public class ElasticsearchIndexingService {
     }
 
     /**
+     * Delete all documents from a specific index
+     */
+    public Map<String, Object> deleteAllDocumentsFromIndex(String indexName) {
+        log.info("Starting to delete all documents from index: {}", indexName);
+        
+        try {
+            // Check if index exists
+            boolean indexExists = elasticsearchClient.indices().exists(e -> e.index(indexName)).value();
+            if (!indexExists) {
+                log.info("Index {} does not exist, nothing to delete", indexName);
+                Map<String, Object> result = new HashMap<>();
+                result.put("indexName", indexName);
+                result.put("documentsDeleted", 0);
+                result.put("message", "Index does not exist, nothing to delete");
+                return result;
+            }
+
+            // Delete all documents using match_all query
+            DeleteByQueryResponse deleteResponse = elasticsearchClient.deleteByQuery(d -> d
+                .index(indexName)
+                .query(q -> q.matchAll(m -> m))
+            );
+
+            Map<String, Object> result = new HashMap<>();
+            result.put("indexName", indexName);
+            result.put("documentsDeleted", deleteResponse.deleted());
+            result.put("message", "All documents deleted from index: " + indexName);
+            
+            log.info("Successfully deleted {} documents from index: {}", deleteResponse.deleted(), indexName);
+            return result;
+            
+        } catch (Exception e) {
+            log.error("Error deleting documents from index: {}", indexName, e);
+            Map<String, Object> error = new HashMap<>();
+            error.put("error", "Failed to delete documents from index " + indexName + ": " + e.getMessage());
+            return error;
+        }
+    }
+
+    /**
+     * Delete all documents from all indices before re-indexing
+     */
+    public Map<String, Object> deleteAllDocumentsFromAllIndices() {
+        log.info("Starting to delete all documents from all indices");
+        
+        Map<String, Object> companiesDeleteResult = deleteAllDocumentsFromIndex(COMPANIES_INDEX);
+        Map<String, Object> designationsDeleteResult = deleteAllDocumentsFromIndex(DESIGNATIONS_INDEX);
+        Map<String, Object> citiesDeleteResult = deleteAllDocumentsFromIndex(CITIES_INDEX);
+        
+        Map<String, Object> result = new HashMap<>();
+        result.put("companies", companiesDeleteResult);
+        result.put("designations", designationsDeleteResult);
+        result.put("cities", citiesDeleteResult);
+        result.put("message", "All documents deleted from all indices");
+        
+        log.info("All documents deletion completed");
+        return result;
+    }
+
+    /**
      * Index all entities (companies, designations, cities) to Elasticsearch
+     * First deletes all existing documents, then re-indexes everything fresh
      */
     @Transactional(readOnly = true)
     public Map<String, Object> indexAllEntities() {
-        log.info("Starting to index all entities to Elasticsearch");
+        log.info("Starting to index all entities to Elasticsearch with cleanup");
         
+        // First, delete all existing documents from all indices
+        log.info("Step 1: Deleting all existing documents from Elasticsearch indices");
+        Map<String, Object> deleteResult = deleteAllDocumentsFromAllIndices();
+        
+        // Wait a moment for deletion to complete
+        try {
+            Thread.sleep(10000);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            log.warn("Thread interrupted during deletion wait");
+        }
+        
+        // Then, re-index all entities
+        log.info("Step 2: Re-indexing all entities to Elasticsearch");
         Map<String, Object> companiesResult = indexAllCompanies();
         Map<String, Object> designationsResult = indexAllDesignations();
         Map<String, Object> citiesResult = indexAllCities();
         
         Map<String, Object> result = new HashMap<>();
+        result.put("cleanup", deleteResult);
         result.put("companies", companiesResult);
         result.put("designations", designationsResult);
         result.put("cities", citiesResult);
-        result.put("message", "All entities indexed to Elasticsearch");
+        result.put("message", "All entities re-indexed to Elasticsearch after cleanup");
         
-        log.info("All entities indexing completed");
+        log.info("All entities re-indexing completed after cleanup");
         
         return result;
     }
