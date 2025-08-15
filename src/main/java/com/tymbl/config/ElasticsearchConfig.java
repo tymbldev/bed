@@ -14,29 +14,29 @@ import org.springframework.context.annotation.Configuration;
 public class ElasticsearchConfig {
 
     @Value("${elasticsearch.host:localhost}")
-    private String host;
+  private String host;
 
-    @Value("${elasticsearch.port:9200}")
-    private int port;
+  @Value("${elasticsearch.port:9200}")
+  private int port;
 
-    @Value("${elasticsearch.scheme:http}")
-    private String scheme;
+  @Value("${elasticsearch.scheme:http}")
+  private String scheme;
 
-    @Bean
-    public RestClient restClient() {
-        return RestClient.builder(
-            new HttpHost(host, port, scheme)
-        ).build();
-    }
+  @Bean
+  public RestClient restClient() {
+    return RestClient.builder(
+        new HttpHost(host, port, scheme)
+    ).build();
+  }
 
-    @Bean
-    public ElasticsearchTransport elasticsearchTransport(RestClient restClient) {
-        return new RestClientTransport(
-            restClient, new JacksonJsonpMapper());
-    }
+  @Bean
+  public ElasticsearchTransport elasticsearchTransport(RestClient restClient) {
+    return new RestClientTransport(
+        restClient, new JacksonJsonpMapper());
+  }
 
-    @Bean
-    public ElasticsearchClient elasticsearchClient(ElasticsearchTransport transport) {
-        return new ElasticsearchClient(transport);
-    }
+  @Bean
+  public ElasticsearchClient elasticsearchClient(ElasticsearchTransport transport) {
+    return new ElasticsearchClient(transport);
+  }
 } 

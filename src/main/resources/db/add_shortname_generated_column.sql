@@ -1,14 +1,13 @@
--- Add shortname_generated column to companies table
--- This script adds a column to track whether a shortname has been generated for each company
+-- Add department_id column to designations table
+ALTER TABLE designations ADD COLUMN IF NOT EXISTS department_id BIGINT;
 
--- Add shortname_generated column
-ALTER TABLE companies ADD COLUMN IF NOT EXISTS shortname_generated BOOLEAN DEFAULT FALSE;
+-- Add foreign key constraint to departments table
+ALTER TABLE designations 
+ADD CONSTRAINT fk_designations_department 
+FOREIGN KEY (department_id) REFERENCES departments(id);
 
--- Create index for better performance when querying unprocessed companies
-CREATE INDEX IF NOT EXISTS idx_companies_shortname_generated ON companies(shortname_generated);
+-- Add index for better performance
+CREATE INDEX IF NOT EXISTS idx_designations_department_id ON designations(department_id);
 
--- Update existing companies to have shortname_generated = false
-UPDATE companies SET shortname_generated = FALSE WHERE shortname_generated IS NULL;
-
--- Add comment for documentation
-COMMENT ON COLUMN companies.shortname_generated IS 'Flag to track if shortname has been generated for the company'; 
+-- Add a flag to track if department has been assigned
+ALTER TABLE designations ADD COLUMN IF NOT EXISTS department_assigned BOOLEAN DEFAULT FALSE;

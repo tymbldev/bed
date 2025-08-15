@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyDesignationDTO {
-    private Long id;
-    private String name;
-    private Long companyId;
-    private String companyName;
-    private List<SkillDTO> skills;
+
+  private Long id;
+  private String name;
+  private Long companyId;
+  private String companyName;
+  private List<SkillDTO> skills;
 } 

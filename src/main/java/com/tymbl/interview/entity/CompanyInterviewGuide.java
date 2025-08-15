@@ -19,33 +19,34 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Entity
 @Table(name = "company_interview_guides")
 public class CompanyInterviewGuide {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(nullable = false)
-    private String title;
+  @ManyToOne
+  @JoinColumn(name = "company_id", nullable = false)
+  private Company company;
 
-    @Column(columnDefinition = "TEXT")
-    private String content;
+  @Column(nullable = false)
+  private String title;
 
-    private String section;
+  @Column(columnDefinition = "TEXT")
+  private String content;
 
-    @UpdateTimestamp
-    @Column(name = "updated_at", nullable = false)
-    private LocalDateTime updatedAt;
+  private String section;
 
-    @PrePersist
-    public void onCreate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @UpdateTimestamp
+  @Column(name = "updated_at", nullable = false)
+  private LocalDateTime updatedAt;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @PrePersist
+  public void onCreate() {
+    updatedAt = LocalDateTime.now();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
 } 

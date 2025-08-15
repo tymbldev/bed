@@ -1,11 +1,18 @@
 package com.tymbl.interview.entity;
 
-import javax.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import java.time.LocalDateTime;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.PreUpdate;
+import javax.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import java.time.LocalDateTime;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
@@ -14,72 +21,73 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "interview_questions")
 public class InterviewQuestion {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(name = "skill_id", nullable = false)
-    private Long skillId;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Column(name = "skill_name", nullable = false)
-    private String skillName;
+  @Column(name = "skill_id", nullable = false)
+  private Long skillId;
 
-    @Column(name = "topic_id")
-    private Long topicId;
+  @Column(name = "skill_name", nullable = false)
+  private String skillName;
 
-    @Column(name = "topic_name")
-    private String topicName;
+  @Column(name = "topic_id")
+  private Long topicId;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String question;
+  @Column(name = "topic_name")
+  private String topicName;
 
-    @Column(columnDefinition = "LONGTEXT")
-    private String answer;
+  @Column(nullable = false, columnDefinition = "TEXT")
+  private String question;
 
-    @Column(name = "summary_answer", columnDefinition = "TEXT")
-    private String summaryAnswer;
+  @Column(columnDefinition = "LONGTEXT")
+  private String answer;
 
-    @Column(name = "difficulty_level")
-    private String difficultyLevel;
+  @Column(name = "summary_answer", columnDefinition = "TEXT")
+  private String summaryAnswer;
 
-    @Column(name = "question_type")
-    private String questionType;
+  @Column(name = "difficulty_level")
+  private String difficultyLevel;
 
-    @Column(name = "tags")
-    private String tags;
+  @Column(name = "question_type")
+  private String questionType;
 
-    @Column(name = "html_content", columnDefinition = "LONGTEXT")
-    private String htmlContent;
+  @Column(name = "tags")
+  private String tags;
 
-    @Column(name = "code_examples", columnDefinition = "LONGTEXT")
-    private String codeExamples;
+  @Column(name = "html_content", columnDefinition = "LONGTEXT")
+  private String htmlContent;
 
-    @Column(name = "java_code", columnDefinition = "LONGTEXT")
-    private String javaCode;
+  @Column(name = "code_examples", columnDefinition = "LONGTEXT")
+  private String codeExamples;
 
-    @Column(name = "python_code", columnDefinition = "LONGTEXT")
-    private String pythonCode;
+  @Column(name = "java_code", columnDefinition = "LONGTEXT")
+  private String javaCode;
 
-    @Column(name = "cpp_code", columnDefinition = "LONGTEXT")
-    private String cppCode;
+  @Column(name = "python_code", columnDefinition = "LONGTEXT")
+  private String pythonCode;
 
-    @Column(name = "coding")
-    private Boolean coding;
+  @Column(name = "cpp_code", columnDefinition = "LONGTEXT")
+  private String cppCode;
 
-    @Column(name = "created_at")
-    private LocalDateTime createdAt;
+  @Column(name = "coding")
+  private Boolean coding;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+  @Column(name = "created_at")
+  private LocalDateTime createdAt;
 
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
+  @Column(name = "updated_at")
+  private LocalDateTime updatedAt;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    createdAt = LocalDateTime.now();
+    updatedAt = LocalDateTime.now();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
 } 

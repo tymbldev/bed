@@ -9,13 +9,13 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @EnableCaching
 public class CacheConfig {
-    
-    @Bean
-    public CacheManager cacheManager() {
-        ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
-        cacheManager.setCacheNames(
-            java.util.Arrays.asList("industryStatistics", "topCompaniesByIndustry")
-        );
-        return cacheManager;
-    }
+
+  @Bean
+  public CacheManager cacheManager() {
+    ConcurrentMapCacheManager cacheManager = new ConcurrentMapCacheManager();
+    cacheManager.setCacheNames(
+        java.util.Arrays.asList("industryStatistics", "topCompaniesByIndustry")
+    );
+    return cacheManager;
+  }
 }

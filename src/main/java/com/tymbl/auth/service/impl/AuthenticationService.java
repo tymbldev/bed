@@ -22,119 +22,120 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
-    private final UserRepository userRepository;
-    private final EmailService emailService;
-    private final LinkedInService linkedInService;
+  private final AuthenticationManager authenticationManager;
+  private final JwtService jwtService;
+  private final UserRepository userRepository;
+  private final EmailService emailService;
+  private final LinkedInService linkedInService;
 
-    
-    public AuthResponse login(LoginRequest request) {
-        try {
-            Authentication authentication = authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
-            );
 
-            User user = userRepository.findByEmail(authentication.getName())
-                    .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + request.getEmail()));
-            
-            String token = jwtService.generateToken(user);
+  public AuthResponse login(LoginRequest request) {
+    try {
+      Authentication authentication = authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
+      );
 
-            return AuthResponse.builder()
-                    .token(token)
-                    .email(user.getEmail())
-                    .firstName(user.getFirstName())
-                    .lastName(user.getLastName())
-                    .role(user.getRole().name())
-                    .emailVerified(user.isEmailVerified())
-                    .build();
-        } catch (BadCredentialsException e) {
-            throw new BadCredentialsException("Invalid email or password");
-        } catch (UsernameNotFoundException e) {
-            throw new UsernameNotFoundException("User not found with email: " + request.getEmail());
-        } catch (Exception e) {
-            throw new RuntimeException("Authentication failed: " + e.getMessage());
-        }
+      User user = userRepository.findByEmail(authentication.getName())
+          .orElseThrow(() -> new UsernameNotFoundException(
+              "User not found with email: " + request.getEmail()));
+
+      String token = jwtService.generateToken(user);
+
+      return AuthResponse.builder()
+          .token(token)
+          .email(user.getEmail())
+          .firstName(user.getFirstName())
+          .lastName(user.getLastName())
+          .role(user.getRole().name())
+          .emailVerified(user.isEmailVerified())
+          .build();
+    } catch (BadCredentialsException e) {
+      throw new BadCredentialsException("Invalid email or password");
+    } catch (UsernameNotFoundException e) {
+      throw new UsernameNotFoundException("User not found with email: " + request.getEmail());
+    } catch (Exception e) {
+      throw new RuntimeException("Authentication failed: " + e.getMessage());
+    }
+  }
+
+
+  @Transactional
+  public void verifyEmailToken(String token) {
+    User user = userRepository.findByEmailVerificationToken(token)
+        .orElseThrow(() -> new RuntimeException("Invalid verification token"));
+
+    if (user.isEmailVerified()) {
+      throw new RuntimeException("Email is already verified");
     }
 
-    
-    @Transactional
-    public void verifyEmailToken(String token) {
-        User user = userRepository.findByEmailVerificationToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid verification token"));
+    user.setEmailVerified(true);
+    user.setEmailVerificationToken(null);
+    userRepository.save(user);
+  }
 
-        if (user.isEmailVerified()) {
-            throw new RuntimeException("Email is already verified");
-        }
 
-        user.setEmailVerified(true);
-        user.setEmailVerificationToken(null);
-        userRepository.save(user);
+  @Transactional
+  public void initiatePasswordReset(String email) throws javax.mail.MessagingException {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    String resetToken = UUID.randomUUID().toString();
+    user.setPasswordResetToken(resetToken);
+    user.setPasswordResetTokenExpiry(System.currentTimeMillis() + 3600000); // 1 hour
+    userRepository.save(user);
+
+    emailService.sendPasswordResetEmail(user.getEmail(), resetToken);
+  }
+
+
+  @Transactional
+  public void resetPassword(String token, String newPassword) {
+    User user = userRepository.findByPasswordResetToken(token)
+        .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+
+    if (user.getPasswordResetTokenExpiry() < System.currentTimeMillis()) {
+      throw new RuntimeException("Reset token has expired");
     }
 
-    
-    @Transactional
-    public void initiatePasswordReset(String email) throws javax.mail.MessagingException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    user.setPassword(newPassword);
+    user.setPasswordResetToken(null);
+    user.setPasswordResetTokenExpiry(null);
+    userRepository.save(user);
+  }
 
-        String resetToken = UUID.randomUUID().toString();
-        user.setPasswordResetToken(resetToken);
-        user.setPasswordResetTokenExpiry(System.currentTimeMillis() + 3600000); // 1 hour
-        userRepository.save(user);
 
-        emailService.sendPasswordResetEmail(user.getEmail(), resetToken);
+  @Transactional
+  public void resendVerificationEmail(String email) throws MessagingException {
+    User user = userRepository.findByEmail(email)
+        .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+
+    if (user.isEmailVerified()) {
+      throw new RuntimeException("Email is already verified");
     }
 
-    
-    @Transactional
-    public void resetPassword(String token, String newPassword) {
-        User user = userRepository.findByPasswordResetToken(token)
-                .orElseThrow(() -> new RuntimeException("Invalid reset token"));
+    String verificationToken = UUID.randomUUID().toString();
+    user.setEmailVerificationToken(verificationToken);
+    userRepository.save(user);
 
-        if (user.getPasswordResetTokenExpiry() < System.currentTimeMillis()) {
-            throw new RuntimeException("Reset token has expired");
-        }
+    emailService.sendVerificationEmail(user.getEmail(), verificationToken);
+  }
 
-        user.setPassword(newPassword);
-        user.setPasswordResetToken(null);
-        user.setPasswordResetTokenExpiry(null);
-        userRepository.save(user);
-    }
+  public AuthResponse loginWithLinkedIn(String accessToken) {
+    User user = linkedInService.validateAndLogin(accessToken);
 
-    
-    @Transactional
-    public void resendVerificationEmail(String email) throws MessagingException {
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    Authentication authentication = new UsernamePasswordAuthenticationToken(
+        user.getEmail(), null, user.getAuthorities());
 
-        if (user.isEmailVerified()) {
-            throw new RuntimeException("Email is already verified");
-        }
+    String token = jwtService.generateToken(user);
 
-        String verificationToken = UUID.randomUUID().toString();
-        user.setEmailVerificationToken(verificationToken);
-        userRepository.save(user);
-
-        emailService.sendVerificationEmail(user.getEmail(), verificationToken);
-    }
-
-    public AuthResponse loginWithLinkedIn(String accessToken) {
-        User user = linkedInService.validateAndLogin(accessToken);
-        
-        Authentication authentication = new UsernamePasswordAuthenticationToken(
-            user.getEmail(), null, user.getAuthorities());
-        
-        String token = jwtService.generateToken(user);
-
-        return AuthResponse.builder()
-            .token(token)
-            .email(user.getEmail())
-            .firstName(user.getFirstName())
-            .lastName(user.getLastName())
-            .role(user.getRole().name())
-            .emailVerified(user.isEmailVerified())
-            .build();
-    }
+    return AuthResponse.builder()
+        .token(token)
+        .email(user.getEmail())
+        .firstName(user.getFirstName())
+        .lastName(user.getLastName())
+        .role(user.getRole().name())
+        .emailVerified(user.isEmailVerified())
+        .build();
+  }
 
 } 

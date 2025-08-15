@@ -10,12 +10,12 @@ import com.tymbl.common.entity.Industry;
 import com.tymbl.common.entity.Location;
 import com.tymbl.common.repository.CityRepository;
 import com.tymbl.common.repository.CountryRepository;
+import com.tymbl.common.repository.CurrencyRepository;
 import com.tymbl.common.repository.DepartmentRepository;
 import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.IndustryRepository;
-import com.tymbl.common.repository.CurrencyRepository;
-import com.tymbl.common.util.DesignationNameCleaner;
 import com.tymbl.common.repository.LocationRepository;
+import com.tymbl.common.util.DesignationNameCleaner;
 import com.tymbl.jobs.repository.CompanyRepository;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -66,7 +66,7 @@ public class DropdownService {
   private final Map<Long, String> currencyNameCache = new ConcurrentHashMap<>();
   private final Map<Long, String> currencySymbolCache = new ConcurrentHashMap<>();
   private List<com.tymbl.jobs.entity.Company> companyList = new ArrayList<>();
-  
+
   // Entity caches for full objects
   private final Map<Long, Department> departmentEntityCache = new ConcurrentHashMap<>();
   private final Map<Long, Location> locationEntityCache = new ConcurrentHashMap<>();
@@ -125,13 +125,17 @@ public class DropdownService {
       departments.sort((d1, d2) -> {
         boolean d1HasOther = d1.getName().toLowerCase().contains("other");
         boolean d2HasOther = d2.getName().toLowerCase().contains("other");
-        if (d1HasOther && !d2HasOther) return 1;
-        if (!d1HasOther && d2HasOther) return -1;
+        if (d1HasOther && !d2HasOther) {
+          return 1;
+        }
+        if (!d1HasOther && d2HasOther) {
+          return -1;
+        }
         return d1.getName().compareToIgnoreCase(d2.getName());
       });
       return departments;
     }
-    
+
     // Fallback to database if cache is empty
     log.warn("Department cache is empty, falling back to database");
     List<Department> departments = departmentRepository.findAll();
@@ -139,8 +143,12 @@ public class DropdownService {
     departments.sort((d1, d2) -> {
       boolean d1HasOther = d1.getName().toLowerCase().contains("other");
       boolean d2HasOther = d2.getName().toLowerCase().contains("other");
-      if (d1HasOther && !d2HasOther) return 1;
-      if (!d1HasOther && d2HasOther) return -1;
+      if (d1HasOther && !d2HasOther) {
+        return 1;
+      }
+      if (!d1HasOther && d2HasOther) {
+        return -1;
+      }
       return d1.getName().compareToIgnoreCase(d2.getName());
     });
     return departments;
@@ -153,13 +161,13 @@ public class DropdownService {
           "Department with name '" + department.getName() + "' already exists");
     }
     Department savedDepartment = departmentRepository.save(department);
-    
+
     // Update cache
     if (savedDepartment.getId() != null && savedDepartment.getName() != null) {
       departmentCache.put(savedDepartment.getId(), savedDepartment.getName());
       departmentEntityCache.put(savedDepartment.getId(), savedDepartment);
     }
-    
+
     return savedDepartment;
   }
 
@@ -170,7 +178,7 @@ public class DropdownService {
     if (department != null) {
       return department;
     }
-    
+
     // Fallback to database if not in cache
     log.warn("Department with ID {} not found in cache, falling back to database", id);
     return departmentRepository.findById(id)
@@ -187,13 +195,17 @@ public class DropdownService {
       locations.sort((l1, l2) -> {
         boolean l1HasOther = l1.getCity().toLowerCase().contains("other");
         boolean l2HasOther = l2.getCity().toLowerCase().contains("other");
-        if (l1HasOther && !l2HasOther) return 1;
-        if (!l1HasOther && l2HasOther) return -1;
+        if (l1HasOther && !l2HasOther) {
+          return 1;
+        }
+        if (!l1HasOther && l2HasOther) {
+          return -1;
+        }
         return l1.getCity().compareToIgnoreCase(l2.getCity());
       });
       return locations;
     }
-    
+
     // Fallback to database if cache is empty
     log.warn("Location cache is empty, falling back to database");
     List<Location> locations = locationRepository.findAll();
@@ -201,8 +213,12 @@ public class DropdownService {
     locations.sort((l1, l2) -> {
       boolean l1HasOther = l1.getCity().toLowerCase().contains("other");
       boolean l2HasOther = l2.getCity().toLowerCase().contains("other");
-      if (l1HasOther && !l2HasOther) return 1;
-      if (!l1HasOther && l2HasOther) return -1;
+      if (l1HasOther && !l2HasOther) {
+        return 1;
+      }
+      if (!l1HasOther && l2HasOther) {
+        return -1;
+      }
       return l1.getCity().compareToIgnoreCase(l2.getCity());
     });
     return locations;
@@ -233,13 +249,17 @@ public class DropdownService {
       designations.sort((d1, d2) -> {
         boolean d1HasOther = d1.getName().toLowerCase().contains("other");
         boolean d2HasOther = d2.getName().toLowerCase().contains("other");
-        if (d1HasOther && !d2HasOther) return 1;
-        if (!d1HasOther && d2HasOther) return -1;
+        if (d1HasOther && !d2HasOther) {
+          return 1;
+        }
+        if (!d1HasOther && d2HasOther) {
+          return -1;
+        }
         return d1.getName().compareToIgnoreCase(d2.getName());
       });
       return designations;
     }
-    
+
     // Fallback to database if cache is empty
     log.warn("Designation cache is empty, falling back to database");
     List<Designation> designations = designationRepository.findAll();
@@ -247,8 +267,12 @@ public class DropdownService {
     designations.sort((d1, d2) -> {
       boolean d1HasOther = d1.getName().toLowerCase().contains("other");
       boolean d2HasOther = d2.getName().toLowerCase().contains("other");
-      if (d1HasOther && !d2HasOther) return 1;
-      if (!d1HasOther && d2HasOther) return -1;
+      if (d1HasOther && !d2HasOther) {
+        return 1;
+      }
+      if (!d1HasOther && d2HasOther) {
+        return -1;
+      }
       return d1.getName().compareToIgnoreCase(d2.getName());
     });
     return designations;
@@ -270,13 +294,13 @@ public class DropdownService {
 
     designation.setName(cleanedName);
     Designation savedDesignation = designationRepository.save(designation);
-    
+
     // Update cache
     if (savedDesignation.getId() != null && savedDesignation.getName() != null) {
       designationCache.put(savedDesignation.getId(), savedDesignation.getName());
       designationEntityCache.put(savedDesignation.getId(), savedDesignation);
     }
-    
+
     return savedDesignation;
   }
 
@@ -287,7 +311,7 @@ public class DropdownService {
     if (designation != null) {
       return designation;
     }
-    
+
     // Fallback to database if not in cache
     log.warn("Designation with ID {} not found in cache, falling back to database", id);
     return designationRepository.findById(id)
@@ -304,13 +328,17 @@ public class DropdownService {
       countries.sort((c1, c2) -> {
         boolean c1HasOther = c1.getName().toLowerCase().contains("other");
         boolean c2HasOther = c2.getName().toLowerCase().contains("other");
-        if (c1HasOther && !c2HasOther) return 1;
-        if (!c1HasOther && c2HasOther) return -1;
+        if (c1HasOther && !c2HasOther) {
+          return 1;
+        }
+        if (!c1HasOther && c2HasOther) {
+          return -1;
+        }
         return c1.getName().compareToIgnoreCase(c2.getName());
       });
       return countries;
     }
-    
+
     // Fallback to database if cache is empty
     log.warn("Country cache is empty, falling back to database");
     List<Country> countries = countryRepository.findAll();
@@ -318,8 +346,12 @@ public class DropdownService {
     countries.sort((c1, c2) -> {
       boolean c1HasOther = c1.getName().toLowerCase().contains("other");
       boolean c2HasOther = c2.getName().toLowerCase().contains("other");
-      if (c1HasOther && !c2HasOther) return 1;
-      if (!c1HasOther && c2HasOther) return -1;
+      if (c1HasOther && !c2HasOther) {
+        return 1;
+      }
+      if (!c1HasOther && c2HasOther) {
+        return -1;
+      }
       return c1.getName().compareToIgnoreCase(c2.getName());
     });
     return countries;
@@ -332,7 +364,7 @@ public class DropdownService {
     if (country != null) {
       return country;
     }
-    
+
     // Fallback to database if not in cache
     log.warn("Country with ID {} not found in cache, falling back to database", id);
     return countryRepository.findById(id)
@@ -349,13 +381,17 @@ public class DropdownService {
       cities.sort((c1, c2) -> {
         boolean c1HasOther = c1.getName().toLowerCase().contains("other");
         boolean c2HasOther = c2.getName().toLowerCase().contains("other");
-        if (c1HasOther && !c2HasOther) return 1;
-        if (!c1HasOther && c2HasOther) return -1;
-      return c1.getName().compareToIgnoreCase(c2.getName());
+        if (c1HasOther && !c2HasOther) {
+          return 1;
+        }
+        if (!c1HasOther && c2HasOther) {
+          return -1;
+        }
+        return c1.getName().compareToIgnoreCase(c2.getName());
       });
       return cities;
     }
-    
+
     // Fallback to database if cache is empty
     log.warn("City cache is empty, falling back to database");
     List<City> cities = cityRepository.findAll();
@@ -363,8 +399,12 @@ public class DropdownService {
     cities.sort((c1, c2) -> {
       boolean c1HasOther = c1.getName().toLowerCase().contains("other");
       boolean c2HasOther = c2.getName().toLowerCase().contains("other");
-      if (c1HasOther && !c2HasOther) return 1;
-      if (!c1HasOther && c2HasOther) return -1;
+      if (c1HasOther && !c2HasOther) {
+        return 1;
+      }
+      if (!c1HasOther && c2HasOther) {
+        return -1;
+      }
       return c1.getName().compareToIgnoreCase(c2.getName());
     });
     return cities;
@@ -377,7 +417,7 @@ public class DropdownService {
     if (city != null) {
       return city;
     }
-    
+
     // Fallback to database if not in cache
     log.warn("City with ID {} not found in cache, falling back to database", id);
     return cityRepository.findById(id)
@@ -395,23 +435,27 @@ public class DropdownService {
         // First, sort by rank (lower rank values come first)
         Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
         Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
-        
+
         if (!rank1.equals(rank2)) {
           return rank1.compareTo(rank2);
         }
-        
+
         // If ranks are equal, then sort by "other" logic
         boolean i1HasOther = i1.getName().toLowerCase().contains("other");
         boolean i2HasOther = i2.getName().toLowerCase().contains("other");
-        if (i1HasOther && !i2HasOther) return 1;
-        if (!i1HasOther && i2HasOther) return -1;
-        
+        if (i1HasOther && !i2HasOther) {
+          return 1;
+        }
+        if (!i1HasOther && i2HasOther) {
+          return -1;
+        }
+
         // If both have "other" or both don't have "other", sort alphabetically
         return i1.getName().compareToIgnoreCase(i2.getName());
       });
       return industries;
     }
-    
+
     // Fallback to database if cache is empty
     log.warn("Industry cache is empty, falling back to database");
     List<Industry> industries = industryRepository.findAll();
@@ -420,17 +464,21 @@ public class DropdownService {
       // First, sort by rank (lower rank values come first)
       Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
       Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
-      
+
       if (!rank1.equals(rank2)) {
         return rank1.compareTo(rank2);
       }
-      
+
       // If ranks are equal, then sort by "other" logic
       boolean i1HasOther = i1.getName().toLowerCase().contains("other");
       boolean i2HasOther = i2.getName().toLowerCase().contains("other");
-      if (i1HasOther && !i2HasOther) return 1;
-      if (!i1HasOther && i2HasOther) return -1;
-      
+      if (i1HasOther && !i2HasOther) {
+        return 1;
+      }
+      if (!i1HasOther && i2HasOther) {
+        return -1;
+      }
+
       // If both have "other" or both don't have "other", sort alphabetically
       return i1.getName().compareToIgnoreCase(i2.getName());
     });
@@ -452,7 +500,7 @@ public class DropdownService {
     if (industry != null) {
       return industry;
     }
-    
+
     // Fallback to database if not in cache
     log.warn("Industry with ID {} not found in cache, falling back to database", id);
     return industryRepository.findById(id)
@@ -464,14 +512,14 @@ public class DropdownService {
     if (name == null || name.trim().isEmpty()) {
       return null;
     }
-    
+
     // Try to get from cache first
     for (Industry industry : industryEntityCache.values()) {
       if (name.equalsIgnoreCase(industry.getName())) {
         return industry;
       }
     }
-    
+
     // Fallback to database if not in cache
     log.warn("Industry with name '{}' not found in cache, falling back to database", name);
     return industryRepository.findByName(name)
@@ -823,7 +871,7 @@ public class DropdownService {
       log.error("Error initializing city cache: {}", e.getMessage(), e);
     }
   }
-  
+
   /**
    * Initialize location cache in background
    */
@@ -978,7 +1026,6 @@ public class DropdownService {
   }
 
 
-
   // Industry statistics method
   @Transactional(readOnly = true)
   public List<IndustryWiseCompaniesDTO> getIndustryStatistics() {
@@ -992,7 +1039,7 @@ public class DropdownService {
         industryJobCountMap.put(industryId, jobCount);
       }
     }
-    return industryStats.stream().map(stat -> {
+    List<IndustryWiseCompaniesDTO> result = industryStats.stream().map(stat -> {
       Long industryId = stat[0] == null ? null : ((Number) stat[0]).longValue();
       String industryName = (String) stat[1];
       String industryDescription = (String) stat[2];
@@ -1025,6 +1072,32 @@ public class DropdownService {
 
       return industryDTO;
     }).collect(java.util.stream.Collectors.toList());
+
+    // Sort by rank first (lower rank values come first), then by "other" logic
+    result.sort((i1, i2) -> {
+      // First, sort by rank (lower rank values come first)
+      Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
+      Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
+
+      if (!rank1.equals(rank2)) {
+        return rank1.compareTo(rank2);
+      }
+
+      // If ranks are equal, then sort by "other" logic
+      boolean i1HasOther = i1.getIndustryName().toLowerCase().contains("other");
+      boolean i2HasOther = i2.getIndustryName().toLowerCase().contains("other");
+      if (i1HasOther && !i2HasOther) {
+        return 1;
+      }
+      if (!i1HasOther && i2HasOther) {
+        return -1;
+      }
+
+      // If both have "other" or both don't have "other", sort alphabetically
+      return i1.getIndustryName().compareToIgnoreCase(i2.getIndustryName());
+    });
+
+    return result;
   }
 
   @Transactional(readOnly = true)

@@ -4,10 +4,11 @@ import lombok.Data;
 
 @Data
 public class JobReferrerResponse {
-    private Long userId;
-    private String userName;
-    private String designation;
-    private int numApplicationsAccepted;
-    private double feedbackScore;
-    private double overallScore;
+
+  private Long userId;
+  private String userName;
+  private String designation;
+  private int numApplicationsAccepted;
+  private double feedbackScore;
+  private double overallScore;
 } 

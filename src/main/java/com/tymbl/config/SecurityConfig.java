@@ -2,6 +2,7 @@ package com.tymbl.config;
 
 import com.tymbl.auth.filter.JwtAuthenticationFilter;
 import com.tymbl.auth.service.CustomOAuth2UserService;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,10 +22,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.RequestMethod;
-
-import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -51,7 +48,8 @@ public class SecurityConfig {
         .antMatchers("/api/v1/ai/**", "/tymbl-service/api/v1/ai/**").permitAll()
         .antMatchers("/api/v1/ai-jobs/**", "/tymbl-service/api/v1/ai-jobs/**").permitAll()
         .antMatchers("/api/v1/utility/**", "/tymbl-service/api/v1/utility/**").permitAll()
-        .antMatchers("/api/admin/company-data/**", "/tymbl-service/api/admin/company-data/**").permitAll()
+        .antMatchers("/api/admin/company-data/**", "/tymbl-service/api/admin/company-data/**")
+        .permitAll()
         .antMatchers("/api/v1/dropdowns/**", "/tymbl-service/api/v1/dropdowns/**").permitAll()
         .antMatchers("/api/v1/skills/**", "/tymbl-service/api/v1/skills/**").permitAll()
         .antMatchers("/api/v1/companies/**", "/tymbl-service/api/v1/companies/**").permitAll()

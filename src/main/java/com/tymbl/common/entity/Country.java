@@ -1,9 +1,13 @@
 package com.tymbl.common.entity;
 
-import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
 import java.util.Objects;
-
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Table;
+import javax.validation.constraints.NotBlank;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -12,50 +16,54 @@ import lombok.NoArgsConstructor;
 @Entity
 @Table(name = "countries")
 public class Country {
-    
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-    
-    @NotBlank
-    @Column(nullable = false, unique = true)
-    private String name;
-    
-    @Column(nullable = false, unique = true, length = 2)
-    private String code;
-    
-    private String phoneCode;
-    
-    @Column(name = "cities_processed", nullable = false)
-    private boolean citiesProcessed = false;
-    
-    @Column(name = "processed_name")
-    private String processedName;
-    
-    @Column(name = "processed_name_generated", nullable = false)
-    private boolean processedNameGenerated = false;
-    
-    public Country(String name, String code) {
-        this.name = name;
-        this.code = code;
+
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
+
+  @NotBlank
+  @Column(nullable = false, unique = true)
+  private String name;
+
+  @Column(nullable = false, unique = true, length = 2)
+  private String code;
+
+  private String phoneCode;
+
+  @Column(name = "cities_processed", nullable = false)
+  private boolean citiesProcessed = false;
+
+  @Column(name = "processed_name")
+  private String processedName;
+
+  @Column(name = "processed_name_generated", nullable = false)
+  private boolean processedNameGenerated = false;
+
+  public Country(String name, String code) {
+    this.name = name;
+    this.code = code;
+  }
+
+  public Country(String name, String code, String phoneCode) {
+    this.name = name;
+    this.code = code;
+    this.phoneCode = phoneCode;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) {
+      return true;
     }
-    
-    public Country(String name, String code, String phoneCode) {
-        this.name = name;
-        this.code = code;
-        this.phoneCode = phoneCode;
+    if (o == null || getClass() != o.getClass()) {
+      return false;
     }
-    
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Country country = (Country) o;
-        return Objects.equals(id, country.id);
-    }
-    
-    @Override
-    public int hashCode() {
-        return Objects.hash(id);
-    }
+    Country country = (Country) o;
+    return Objects.equals(id, country.id);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(id);
+  }
 } 

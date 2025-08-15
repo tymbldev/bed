@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class LinkedInLoginRequest {
-    @NotBlank(message = "LinkedIn access token is required")
-    private String accessToken;
+
+  @NotBlank(message = "LinkedIn access token is required")
+  private String accessToken;
 } 

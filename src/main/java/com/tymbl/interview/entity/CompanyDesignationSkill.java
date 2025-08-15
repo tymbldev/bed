@@ -20,35 +20,36 @@ import lombok.Data;
 @Entity
 @Table(name = "company_designation_skills")
 public class CompanyDesignationSkill {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "designation_id", nullable = false)
-    private Designation designation;
+  @ManyToOne
+  @JoinColumn(name = "company_id", nullable = false)
+  private Company company;
 
-    @ManyToOne
-    @JoinColumn(name = "skill_id", nullable = false)
-    private Skill skill;
+  @ManyToOne
+  @JoinColumn(name = "designation_id", nullable = false)
+  private Designation designation;
 
-    @Column(name = "importance_level")
-    private String importanceLevel;
+  @ManyToOne
+  @JoinColumn(name = "skill_id", nullable = false)
+  private Skill skill;
 
-    @Column(name = "updated_at")
-    private LocalDateTime updatedAt;
+  @Column(name = "importance_level")
+  private String importanceLevel;
 
-    @PrePersist
-    protected void onCreate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @Column(name = "updated_at")
+  private LocalDateTime updatedAt;
 
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @PrePersist
+  protected void onCreate() {
+    updatedAt = LocalDateTime.now();
+  }
+
+  @PreUpdate
+  protected void onUpdate() {
+    updatedAt = LocalDateTime.now();
+  }
 } 

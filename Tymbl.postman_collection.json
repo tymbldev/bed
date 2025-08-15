@@ -309,6 +309,312 @@
       ]
     },
     {
+      "name": "AI Job Crawling",
+      "item": [
+        {
+          "name": "Crawl Jobs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyword\": \"{{default_keyword}}\",\n  \"portalName\": \"{{foundit_portal}}\",\n  \"start\": 0,\n  \"limit\": 20,\n  \"countries\": \"{{default_country}}\",\n  \"queryDerived\": \"true\",\n  \"variantName\": \"embeddings512\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/crawl",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "crawl"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"keyword\": \"software engineer\",\n  \"portalName\": \"foundit\",\n  \"start\": 0,\n  \"limit\": 20,\n  \"countries\": \"India\",\n  \"queryDerived\": \"true\",\n  \"variantName\": \"embeddings512\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/crawl",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "crawl"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Jobs crawled successfully\",\n  \"totalJobsFound\": 15,\n  \"rawResponseId\": 123,\n  \"processedJobsCount\": 15,\n  \"portalName\": \"foundit\",\n  \"keyword\": \"software engineer\",\n  \"processingTimeMs\": 2500,\n  \"jobDetails\": [\n    {\n      \"portalJobId\": \"34327838\",\n      \"jobTitle\": \"Sr. Software Engineer\",\n      \"companyName\": \"Tessolve Semiconductor Private Limited\",\n      \"companyId\": \"1056230\",\n      \"locations\": \"Bengaluru / Bangalore, Karnataka, India\",\n      \"minExperience\": 4,\n      \"maxExperience\": 10,\n      \"salaryRange\": \"400000-1000000 INR\",\n      \"jobDescription\": \"Position: Sr. Software Engineer Role : Sr. Firmware Development Engineer...\",\n      \"skills\": \"Firmware, Software Engineering\",\n      \"postedDate\": \"2025-01-30T10:30:27\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Manual Crawl by Keyword and Portal",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/crawl/{{default_keyword}}/{{foundit_portal}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "crawl",
+                "{{default_keyword}}",
+                "{{foundit_portal}}"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crawl All Active Keywords",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/crawl-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "crawl-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Process Pending Responses",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/process-pending",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "process-pending"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Crawling Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "stats"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/stats",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "stats"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Crawling statistics retrieved successfully\",\n  \"totalJobsFound\": 1250,\n  \"rawResponseId\": 45,\n  \"processedJobsCount\": 1250,\n  \"portalName\": null,\n  \"keyword\": null,\n  \"processingTimeMs\": null\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get All Keywords",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/keywords",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "keywords"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/keywords",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "keywords"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "[\n  \"Keywords endpoint - implementation needed\"\n]"
+            }
+          ]
+        },
+        {
+          "name": "Add New Keyword",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keyword\": \"data scientist\",\n  \"portalName\": \"{{linkedin_portal}}\",\n  \"start\": 0,\n  \"limit\": 20,\n  \"countries\": \"United States\",\n  \"queryDerived\": \"true\",\n  \"variantName\": \"embeddings512\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/keywords/add",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "keywords",
+                "add"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"keyword\": \"data scientist\",\n  \"portalName\": \"linkedin\",\n  \"start\": 0,\n  \"limit\": 20,\n  \"countries\": \"United States\",\n  \"queryDerived\": \"true\",\n  \"variantName\": \"embeddings512\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/keywords/add",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "keywords",
+                    "add"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Keyword addition endpoint - implementation needed\"\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": "Job Search",
       "item": [
         {
@@ -1572,7 +1878,7 @@
       "name": "AI Dropdown Controller",
       "item": [
         {
-          "name": "Generate Designations",
+          "name": "Generate Designations for All Departments",
           "request": {
             "method": "POST",
             "header": [
@@ -1583,10 +1889,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"industries\": [\"Technology\"]\n}"
+              "raw": ""
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdown/designations/generate",
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/generate-for-departments",
               "host": [
                 "{{base_url}}"
               ],
@@ -1594,12 +1900,35 @@
                 "api",
                 "v1",
                 "ai",
-                "dropdown",
+                "dropdowns",
                 "designations",
-                "generate"
+                "generate-for-departments"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/generate-for-departments"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"totalDepartments\": 35,\n  \"totalDesignationsGenerated\": 875,\n  \"totalErrors\": 0,\n  \"departmentResults\": [\n    {\n      \"departmentId\": 1,\n      \"departmentName\": \"Engineering\",\n      \"success\": true,\n      \"designationsGenerated\": 25,\n      \"designationsSaved\": 23,\n      \"designations\": [\"Software Engineer\", \"Senior Software Engineer\", \"Lead Engineer\"]\n    }\n  ],\n  \"message\": \"Designation generation completed for all departments\"\n}"
+            }
+          ]
         },
         {
           "name": "Generate Similar Designations",
@@ -1616,7 +1945,7 @@
               "raw": "{\n  \"designation\": \"Software Engineer\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdown/designations/similar",
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/generate-similar",
               "host": [
                 "{{base_url}}"
               ],
@@ -1624,72 +1953,1197 @@
                 "api",
                 "v1",
                 "ai",
-                "dropdown",
+                "dropdowns",
+                "designations",
+                "generate-similar"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Cities for All Countries",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/cities/generate-for-countries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "cities",
+                "generate-for-countries"
+              ]
+            }
+          }
+                },
+        {
+          "name": "Generate Designations for Specific Department",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/generate-for-department/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "designations",
+                "generate-for-department",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Cities for Specific Country",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/cities/generate-for-country/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "cities",
+                "generate-for-country",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Cities Processed Flag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/cities/reset-processed-flag",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "cities",
+                "reset-processed-flag"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Skills and Save",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"designation\": \"Software Engineer\",\n  \"industry\": \"Technology\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/generate-and-save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "generate-and-save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Skill Topics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"skillName\": \"Java Programming\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/Java%20Programming/topics/generate-and-save",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "Java Programming",
+                "topics",
+                "generate-and-save"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate All Skill Topics",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/topics/generate-and-save-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "topics",
+                "generate-and-save-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Map All Secondary Industries",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/secondary-industries/map-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "secondary-industries",
+                "map-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Map Secondary Industry for Specific Industry",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"industryName\": \"Technology\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/secondary-industries/map-industry/Technology",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "secondary-industries",
+                "map-industry",
+                "Technology"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Secondary Industries Processed Flag",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/secondary-industries/reset-processed-flag",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "secondary-industries",
+                "reset-processed-flag"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate All Processed Names",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/processed-names/generate-all",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "processed-names",
+                "generate-all"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Processed Names for Countries",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/processed-names/generate-countries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "processed-names",
+                "generate-countries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Processed Names for Cities",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/cities/generate-for-countries",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "cities",
+                "generate-for-countries"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Generate Processed Names for Designations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/processed-names/generate-designations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "processed-names",
+                "generate-designations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Reset Processed Names",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/processed-names/reset",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "processed-names",
+                "reset"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Assign Departments to All Designations",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/assign-departments",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "designations",
+                "assign-departments"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/assign-departments"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Department assignment completed\",\n  \"processed\": 150,\n  \"failed\": 5,\n  \"total\": 155,\n  \"errors\": [\n    \"Failed to assign department to: Senior DevOps Engineer\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Assign Department to Specific Designation",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/Software Engineer/assign-department",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "designations",
+                "Software Engineer",
+                "assign-department"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/Software Engineer/assign-department"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"designation\": \"Software Engineer\",\n  \"departmentId\": 1,\n  \"departmentName\": \"Engineering\",\n  \"message\": \"Department assigned successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Department Assignment Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/departments/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "designations",
+                "departments",
+                "stats"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/departments/stats"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"totalDesignations\": 200,\n  \"assignedDesignations\": 180,\n  \"unassignedDesignations\": 20,\n  \"assignmentPercentage\": 90.0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Designations Grouped by Department",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/departments/grouped",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "designations",
+                "departments",
+                "grouped"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/departments/grouped"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"Engineering\": [\n    \"Software Engineer\",\n    \"DevOps Engineer\",\n    \"QA Engineer\"\n  ],\n  \"Sales\": [\n    \"Sales Representative\",\n    \"Account Manager\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Re-index All Entities to Elasticsearch",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/elasticsearch/index-all-entities",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "elasticsearch",
+                "index-all-entities"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/elasticsearch/index-all-entities",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai",
+                    "dropdowns",
+                    "elasticsearch",
+                    "index-all-entities"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"cleanup\": {\n    \"companies\": {\n      \"indexName\": \"companies\",\n      \"documentsDeleted\": 150,\n      \"message\": \"All documents deleted from index: companies\"\n    },\n    \"designations\": {\n      \"indexName\": \"designations\",\n      \"documentsDeleted\": 80,\n      \"message\": \"All documents deleted from index: designations\"\n    },\n    \"cities\": {\n      \"indexName\": \"cities\",\n      \"documentsDeleted\": 200,\n      \"message\": \"All documents deleted from index: cities\"\n    },\n    \"skills\": {\n      \"indexName\": \"skills\",\n      \"documentsDeleted\": 100,\n      \"message\": \"All documents deleted from index: skills\"\n    },\n    \"message\": \"All documents deleted from all indices\"\n  },\n  \"companies\": {\n    \"totalCompanies\": 150,\n    \"indexedSuccessfully\": 150,\n    \"failedToIndex\": 0,\n    \"message\": \"Company indexing completed\"\n  },\n  \"designations\": {\n    \"totalDesignations\": 80,\n    \"totalIndexed\": 80,\n    \"failedToIndex\": 0,\n    \"message\": \"Designation indexing completed\"\n  },\n  \"cities\": {\n    \"totalCities\": 200,\n    \"indexedSuccessfully\": 200,\n    \"failedToIndex\": 0,\n    \"message\": \"City indexing completed\"\n  },\n  \"skills\": {\n    \"totalSkills\": 100,\n    \"indexedSuccessfully\": 100,\n    \"failedToIndex\": 0,\n    \"message\": \"Skill indexing completed\"\n  },\n  \"message\": \"All entities re-indexed to Elasticsearch after cleanup\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Generate Similar Skills for All Skills",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/generate-similar-skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "generate-similar-skills"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/generate-similar-skills"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Similar skills generation completed\",\n  \"processed\": 150,\n  \"failed\": 5,\n  \"total\": 155,\n  \"errors\": [\n    \"Failed to generate similar skills for: Advanced JavaScript\"\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Generate Similar Skills for Specific Skill",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": ""
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/Java/generate-similar-skills",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "Java",
+                "generate-similar-skills"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/Java/generate-similar-skills"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"skill\": \"Java\",\n  \"skillId\": 1,\n  \"similarSkills\": \"Spring, Hibernate, Maven, JUnit, JPA, JSP, Servlets, J2EE, Android, Kotlin, Scala, Groovy\",\n  \"message\": \"Similar skills generated successfully\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Similar Skills Generation Statistics",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/similar-skills/stats",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "similar-skills",
+                "stats"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/similar-skills/stats"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"totalSkills\": 200,\n  \"processedSkills\": 180,\n  \"unprocessedSkills\": 20,\n  \"processingPercentage\": 90.0\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Skills Grouped by Similar Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/similar-skills/grouped",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai",
+                "dropdowns",
+                "skills",
+                "similar-skills",
+                "grouped"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/skills/similar-skills/grouped"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"Java\": [\n    \"Spring\",\n    \"Hibernate\",\n    \"Maven\",\n    \"JUnit\"\n  ],\n  \"JavaScript\": [\n    \"React\",\n    \"Node.js\",\n    \"TypeScript\",\n    \"Angular\"\n  ]\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "SEO Interlinking Controller",
+      "item": [
+        {
+          "name": "Get Job Location Combinations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/seo/jobs/location-combinations?query=Software Engineer&type=designation",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seo",
+                "jobs",
+                "location-combinations"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Software Engineer",
+                  "description": "Designation name or skill name"
+                },
+                {
+                  "key": "type",
+                  "value": "designation",
+                  "description": "Type of query: 'designation' or 'skill'"
+                }
+              ]
+            },
+            "description": "Returns all location combinations with job counts for a given designation or skill. For example: 'Software Engineer' returns 'Software Engineer jobs in Bangalore (50)', 'Software Engineer jobs in Delhi (30)', etc."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/seo/jobs/location-combinations?query=Software Engineer&type=designation"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"query\": \"Software Engineer\",\n  \"type\": \"designation\",\n  \"totalJobs\": 150,\n  \"locationCombinations\": [\n    {\n      \"location\": \"Bangalore\",\n      \"jobCount\": 50,\n      \"seoText\": \"Software Engineer jobs in Bangalore\"\n    },\n    {\n      \"location\": \"Delhi\",\n      \"jobCount\": 30,\n      \"seoText\": \"Software Engineer jobs in Delhi\"\n    }\n  ]\n}"
+            }
+          ]
+        },
+        {
+          "name": "Get Similar Designations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/seo/designations/similar?designation=Software Engineer",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seo",
                 "designations",
                 "similar"
+              ],
+              "query": [
+                {
+                  "key": "designation",
+                  "value": "Software Engineer",
+                  "description": "Designation name"
+                }
               ]
+            },
+            "description": "Returns similar designations and skills that have jobs, along with their job counts. For designations: First checks the similar_designations column in the designation index. If no similar designations found, groups designations by department and returns those with jobs. For skills: Searches the skills index to find related skills and returns their job counts."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/seo/designations/similar?designation=Software Engineer"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"inputDesignation\": \"Software Engineer\",\n  \"department\": \"Engineering\",\n  \"similarDesignations\": [\n    {\n      \"designationName\": \"Senior Software Engineer\",\n      \"jobCount\": 45\n    },\n    {\n      \"designationName\": \"Tech Lead\",\n      \"jobCount\": 32\n    },\n    {\n      \"designationName\": \"Software Developer\",\n      \"jobCount\": 28\n    }\n  ],\n  \"totalSimilarDesignations\": 3,\n  \"similarSkills\": [\n    {\n      \"skillName\": \"Java\",\n      \"jobCount\": 120,\n      \"category\": \"Programming\",\n      \"description\": \"Object-oriented programming language\"\n    },\n    {\n      \"skillName\": \"Spring\",\n      \"jobCount\": 85,\n      \"category\": \"Framework\",\n      \"description\": \"Java application framework\"\n    },\n    {\n      \"skillName\": \"React\",\n      \"jobCount\": 95,\n      \"category\": \"Frontend\",\n      \"description\": \"JavaScript library for building user interfaces\"\n    }\n  ],\n  \"totalSimilarSkills\": 3\n}"
             }
-          }
+          ]
         },
         {
-          "name": "Generate Cities",
+          "name": "Get Designation/Skill + Location Combinations",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"countries\": [\"United States\"]\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdown/cities/generate",
+              "raw": "{{base_url}}/api/v1/seo/jobs/designation-skill-location?query=Software Engineer&location=Delhi&type=designation",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "ai",
-                "dropdown",
-                "cities",
-                "generate"
+                "seo",
+                "jobs",
+                "designation-skill-location"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "Software Engineer",
+                  "description": "Designation name or skill name"
+                },
+                {
+                  "key": "location",
+                  "value": "Delhi",
+                  "description": "Location name"
+                },
+                {
+                  "key": "type",
+                  "value": "designation",
+                  "description": "Type of query: 'designation' or 'skill'"
+                }
               ]
+            },
+            "description": "Takes a combination of (designation or skill) + location and returns job counts with location combinations and similar designations/skills. For example: 'Software Engineer + Delhi' returns job counts and similar designation+location combinations. 'Java + Delhi' returns job counts and similar skill+location combinations."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/seo/jobs/designation-skill-location?query=Software Engineer&location=Delhi&type=designation"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"query\": \"Software Engineer + Delhi\",\n  \"type\": \"designation\",\n  \"location\": \"Delhi\",\n  \"jobCount\": 45,\n  \"similarCombinations\": [\n    {\n      \"designationName\": \"Senior Software Engineer\",\n      \"location\": \"Delhi\",\n      \"jobCount\": 32,\n      \"seoText\": \"Senior Software Engineer jobs in Delhi\"\n    },\n    {\n      \"designationName\": \"Tech Lead\",\n      \"location\": \"Delhi\",\n      \"jobCount\": 18,\n      \"seoText\": \"Tech Lead jobs in Delhi\"\n    }\n  ],\n  \"totalSimilarCombinations\": 2\n}"
             }
-          }
+          ]
         },
         {
-          "name": "Generate Industries",
+          "name": "Get Top Designations",
           "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"keywords\": [\"technology\", \"finance\"]\n}"
-            },
+            "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdown/industries/generate",
+              "raw": "{{base_url}}/api/v1/seo/designations/top?limit=20",
               "host": [
                 "{{base_url}}"
               ],
               "path": [
                 "api",
                 "v1",
-                "ai",
-                "dropdown",
-                "industries",
-                "generate"
+                "seo",
+                "designations",
+                "top"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of top designations to return"
+                }
               ]
+            },
+            "description": "Returns the top designations ordered by job count. Useful for SEO to show most popular job titles."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/seo/designations/top?limit=20"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"topDesignations\": [\n    {\n      \"designationName\": \"Software Engineer\",\n      \"jobCount\": 150\n    },\n    {\n      \"designationName\": \"Sales Representative\",\n      \"jobCount\": 120\n    },\n    {\n      \"designationName\": \"Product Manager\",\n      \"jobCount\": 95\n    }\n  ],\n  \"totalDesignations\": 50,\n  \"totalJobs\": 2500\n}"
             }
-          }
+          ]
+        },
+        {
+          "name": "Get Job Location Sitemap",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/seo/sitemap/job-locations?page=1&size=100",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seo",
+                "sitemap",
+                "job-locations"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Page number for pagination"
+                },
+                {
+                  "key": "size",
+                  "value": "100",
+                  "description": "Page size for pagination"
+                }
+              ]
+            },
+            "description": "Returns a comprehensive list of all job-location combinations for SEO sitemap generation. This endpoint provides all possible combinations that can be used for creating location-specific job pages."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/seo/sitemap/job-locations?page=1&size=100"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"totalCombinations\": 1500,\n  \"combinations\": [\n    {\n      \"designation\": \"Software Engineer\",\n      \"location\": \"Bangalore\",\n      \"jobCount\": 50,\n      \"seoUrl\": \"/jobs/software-engineer-bangalore\",\n      \"seoText\": \"Software Engineer Jobs in Bangalore - 50 Openings\"\n    }\n  ]\n}"
+            }
+          ]
         }
       ]
     },
@@ -3354,6 +4808,26 @@
     {
       "key": "token",
       "value": "your_jwt_token_here",
+      "type": "string"
+    },
+    {
+      "key": "foundit_portal",
+      "value": "foundit",
+      "type": "string"
+    },
+    {
+      "key": "linkedin_portal",
+      "value": "linkedin",
+      "type": "string"
+    },
+    {
+      "key": "default_keyword",
+      "value": "software engineer",
+      "type": "string"
+    },
+    {
+      "key": "default_country",
+      "value": "India",
       "type": "string"
     }
   ]

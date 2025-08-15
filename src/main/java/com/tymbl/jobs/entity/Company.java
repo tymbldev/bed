@@ -1,99 +1,104 @@
 package com.tymbl.jobs.entity;
 
-import javax.persistence.*;
+import java.time.LocalDateTime;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.PrePersist;
+import javax.persistence.Table;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 @Data
 @Table(name = "companies")
 public class Company {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
-    @Column(nullable = false, unique = true)
-    private String name;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    private String description;
+  @Column(nullable = false, unique = true)
+  private String name;
 
-    private String website;
+  private String description;
 
-    @Column(name = "career_page_url")
-    private String careerPageUrl;
+  private String website;
 
-    private String logoUrl;
-    
-    private String aboutUs;
-    
-    private String vision;
-    private String mission;
-    
-    private String culture;
+  @Column(name = "career_page_url")
+  private String careerPageUrl;
 
-    @Column(name = "linkedin_url")
-    private String linkedinUrl;
+  private String logoUrl;
 
-    @Column(name = "headquarters")
-    private String headquarters;
+  private String aboutUs;
 
-    @Column(name = "primary_industry_id")
-    private Long primaryIndustryId;
+  private String vision;
+  private String mission;
 
-    @Column(name = "secondary_industries", columnDefinition = "TEXT")
-    private String secondaryIndustries; // Comma-separated list of industry names
+  private String culture;
 
-    @Column(name = "company_size")
-    private String companySize;
+  @Column(name = "linkedin_url")
+  private String linkedinUrl;
 
-    @Column(name = "specialties")
-    private String specialties;
+  @Column(name = "headquarters")
+  private String headquarters;
 
-    @Column(name = "is_crawled", nullable = false)
-    private boolean isCrawled = false;
+  @Column(name = "primary_industry_id")
+  private Long primaryIndustryId;
 
-    @Column(name = "last_crawled_at")
-    private LocalDateTime lastCrawledAt;
+  @Column(name = "secondary_industries", columnDefinition = "TEXT")
+  private String secondaryIndustries; // Comma-separated list of industry names
 
-    @Column(name = "crawled_data", columnDefinition = "LONGTEXT")
-    private String crawledData;
+  @Column(name = "company_size")
+  private String companySize;
 
-    @Column(name = "ai_error")
-    private Boolean aiError;
+  @Column(name = "specialties")
+  private String specialties;
 
-    @Column(name = "similar_companies_by_name", columnDefinition = "TEXT")
-    private String similarCompaniesByName;
-    
-    @Column(name = "similar_companies_by_id", columnDefinition = "TEXT")
-    private String similarCompaniesById;
-    
-    @Column(name = "similar_companies_processed", nullable = false)
-    private boolean similarCompaniesProcessed = false;
-    
-    @Column(name = "industry_processed", nullable = false)
-    private boolean industryProcessed = false;
+  @Column(name = "is_crawled", nullable = false)
+  private boolean isCrawled = false;
 
-    @Column(name = "junk_identified", nullable = false)
-    private boolean junkIdentified = false;
+  @Column(name = "last_crawled_at")
+  private LocalDateTime lastCrawledAt;
 
-    @Column(name = "short_name")
-    private String shortname;
+  @Column(name = "crawled_data", columnDefinition = "LONGTEXT")
+  private String crawledData;
 
-    @Column(name = "website_fetched", nullable = false)
-    private Integer websiteFetched = 0; // 0 = not tried, 1 = fetched, 2 = failed
+  @Column(name = "ai_error")
+  private Boolean aiError;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
+  @Column(name = "similar_companies_by_name", columnDefinition = "TEXT")
+  private String similarCompaniesByName;
 
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
+  @Column(name = "similar_companies_by_id", columnDefinition = "TEXT")
+  private String similarCompaniesById;
 
-    @PrePersist
-    protected void onCreate() {
-        updatedAt = LocalDateTime.now();
-    }
+  @Column(name = "similar_companies_processed", nullable = false)
+  private boolean similarCompaniesProcessed = false;
+
+  @Column(name = "industry_processed", nullable = false)
+  private boolean industryProcessed = false;
+
+  @Column(name = "junk_identified", nullable = false)
+  private boolean junkIdentified = false;
+
+  @Column(name = "short_name")
+  private String shortname;
+
+  @Column(name = "website_fetched", nullable = false)
+  private Integer websiteFetched = 0; // 0 = not tried, 1 = fetched, 2 = failed
+
+  @CreationTimestamp
+  private LocalDateTime createdAt;
+
+  @UpdateTimestamp
+  private LocalDateTime updatedAt;
+
+  @PrePersist
+  protected void onCreate() {
+    updatedAt = LocalDateTime.now();
+  }
 } 

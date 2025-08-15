@@ -34,7 +34,8 @@ public class OpenApiConfig {
         .title("Job Referral API")
         .version("1.0.0")
         .contact(contact)
-        .description("API documentation for the Job Referral Application. This API provides endpoints for user registration, authentication, job posting, and management.")
+        .description(
+            "API documentation for the Job Referral Application. This API provides endpoints for user registration, authentication, job posting, and management.")
         .license(new License().name("Apache 2.0").url("http://springdoc.org"));
 
     // Define security scheme
@@ -52,53 +53,54 @@ public class OpenApiConfig {
         .summary("Sample registration request")
         .description("Example of a user registration request")
         .value("{\n" +
-              "  \"email\": \"user@example.com\",\n" +
-              "  \"password\": \"Password123\",\n" +
-              "  \"firstName\": \"John\",\n" +
-              "  \"lastName\": \"Doe\",\n" +
-              "  \"role\": \"USER\",\n" +
-              "  \"phoneNumber\": \"+1234567890\",\n" +
-              "  \"company\": \"Example Corp\",\n" +
-              "  \"position\": \"Software Engineer\",\n" +
-              "  \"department\": \"Engineering\",\n" +
-              "  \"location\": \"San Francisco, CA\",\n" +
-              "  \"yearsOfExperience\": 5,\n" +
-              "  \"skills\": [\"Java\", \"Spring Boot\", \"Microservices\"]\n" +
-              "}");
-              
+            "  \"email\": \"user@example.com\",\n" +
+            "  \"password\": \"Password123\",\n" +
+            "  \"firstName\": \"John\",\n" +
+            "  \"lastName\": \"Doe\",\n" +
+            "  \"role\": \"USER\",\n" +
+            "  \"phoneNumber\": \"+1234567890\",\n" +
+            "  \"company\": \"Example Corp\",\n" +
+            "  \"position\": \"Software Engineer\",\n" +
+            "  \"department\": \"Engineering\",\n" +
+            "  \"location\": \"San Francisco, CA\",\n" +
+            "  \"yearsOfExperience\": 5,\n" +
+            "  \"skills\": [\"Java\", \"Spring Boot\", \"Microservices\"]\n" +
+            "}");
+
     // Example for login request
     Example loginExample = new Example()
         .summary("Sample login request")
         .description("Example of a user login request")
         .value("{\n" +
-              "  \"email\": \"user@example.com\",\n" +
-              "  \"password\": \"Password123\"\n" +
-              "}");
-              
+            "  \"email\": \"user@example.com\",\n" +
+            "  \"password\": \"Password123\"\n" +
+            "}");
+
     // Example for job post request
     Example jobPostExample = new Example()
         .summary("Sample job post request")
         .description("Example of a job posting request")
         .value("{\n" +
-              "  \"title\": \"Senior Java Developer\",\n" +
-              "  \"description\": \"We are looking for an experienced Java Developer...\",\n" +
-              "  \"company\": \"Example Corp\",\n" +
-              "  \"department\": \"Engineering\",\n" +
-              "  \"location\": \"San Francisco, CA\",\n" +
-              "  \"jobType\": \"FULL_TIME\",\n" +
-              "  \"experienceLevel\": \"SENIOR\",\n" +
-              "  \"minExperience\": 5,\n" +
-              "  \"maxExperience\": 10,\n" +
-              "  \"minSalary\": \"120000\",\n" +
-              "  \"maxSalary\": \"160000\",\n" +
-              "  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n" +
-              "  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n" +
-              "  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\"],\n" +
-              "  \"workplaceType\": \"HYBRID\",\n" +
-              "  \"remoteAllowed\": true,\n" +
-              "  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n" +
-              "  \"numberOfOpenings\": 2\n" +
-              "}");
+            "  \"title\": \"Senior Java Developer\",\n" +
+            "  \"description\": \"We are looking for an experienced Java Developer...\",\n" +
+            "  \"company\": \"Example Corp\",\n" +
+            "  \"department\": \"Engineering\",\n" +
+            "  \"location\": \"San Francisco, CA\",\n" +
+            "  \"jobType\": \"FULL_TIME\",\n" +
+            "  \"experienceLevel\": \"SENIOR\",\n" +
+            "  \"minExperience\": 5,\n" +
+            "  \"maxExperience\": 10,\n" +
+            "  \"minSalary\": \"120000\",\n" +
+            "  \"maxSalary\": \"160000\",\n" +
+            "  \"requiredSkills\": [\"Java\", \"Spring Boot\", \"Microservices\"],\n" +
+            "  \"qualifications\": [\"Bachelor's degree in CS or related field\"],\n" +
+            "  \"responsibilities\": [\"Develop backend services\", \"Mentor junior developers\"],\n"
+            +
+            "  \"workplaceType\": \"HYBRID\",\n" +
+            "  \"remoteAllowed\": true,\n" +
+            "  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n" +
+            "  \"numberOfOpenings\": 2\n" +
+            "}");
 
     Map<String, Example> examples = new HashMap<>();
     examples.put("register", registerExample);
@@ -128,43 +130,43 @@ public class OpenApiConfig {
 
   private String getCurlForRegister() {
     return "curl -X POST http://localhost:8080/api/v1/registration \\\n" +
-           "  -H 'Content-Type: application/json' \\\n" +
-           "  -d '{\n" +
-           "  \"email\": \"user@example.com\",\n" +
-           "  \"password\": \"Password123\",\n" +
-           "  \"firstName\": \"John\",\n" +
-           "  \"lastName\": \"Doe\",\n" +
-           "  \"role\": \"USER\",\n" +
-           "  \"phoneNumber\": \"+1234567890\",\n" +
-           "  \"company\": \"Example Corp\",\n" +
-           "  \"position\": \"Software Engineer\"\n" +
-           "}'";
+        "  -H 'Content-Type: application/json' \\\n" +
+        "  -d '{\n" +
+        "  \"email\": \"user@example.com\",\n" +
+        "  \"password\": \"Password123\",\n" +
+        "  \"firstName\": \"John\",\n" +
+        "  \"lastName\": \"Doe\",\n" +
+        "  \"role\": \"USER\",\n" +
+        "  \"phoneNumber\": \"+1234567890\",\n" +
+        "  \"company\": \"Example Corp\",\n" +
+        "  \"position\": \"Software Engineer\"\n" +
+        "}'";
   }
 
   private String getCurlForLogin() {
     return "curl -X POST http://localhost:8080/api/v1/auth/login \\\n" +
-           "  -H 'Content-Type: application/json' \\\n" +
-           "  -d '{\n" +
-           "  \"email\": \"user@example.com\",\n" +
-           "  \"password\": \"Password123\"\n" +
-           "}'";
+        "  -H 'Content-Type: application/json' \\\n" +
+        "  -d '{\n" +
+        "  \"email\": \"user@example.com\",\n" +
+        "  \"password\": \"Password123\"\n" +
+        "}'";
   }
-  
+
   private String getCurlForJobPost() {
     return "curl -X POST http://localhost:8080/api/v1/jobs \\\n" +
-           "  -H 'Content-Type: application/json' \\\n" +
-           "  -H 'Authorization: Bearer YOUR_JWT_TOKEN' \\\n" +
-           "  -d '{\n" +
-           "  \"title\": \"Senior Java Developer\",\n" +
-           "  \"description\": \"We are looking for an experienced Java Developer...\",\n" +
-           "  \"company\": \"Example Corp\",\n" +
-           "  \"location\": \"San Francisco, CA\",\n" +
-           "  \"jobType\": \"FULL_TIME\",\n" +
-           "  \"experienceLevel\": \"SENIOR\",\n" +
-           "  \"minExperience\": 5,\n" +
-           "  \"workplaceType\": \"HYBRID\",\n" +
-           "  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n" +
-           "  \"numberOfOpenings\": 2\n" +
-           "}'";
+        "  -H 'Content-Type: application/json' \\\n" +
+        "  -H 'Authorization: Bearer YOUR_JWT_TOKEN' \\\n" +
+        "  -d '{\n" +
+        "  \"title\": \"Senior Java Developer\",\n" +
+        "  \"description\": \"We are looking for an experienced Java Developer...\",\n" +
+        "  \"company\": \"Example Corp\",\n" +
+        "  \"location\": \"San Francisco, CA\",\n" +
+        "  \"jobType\": \"FULL_TIME\",\n" +
+        "  \"experienceLevel\": \"SENIOR\",\n" +
+        "  \"minExperience\": 5,\n" +
+        "  \"workplaceType\": \"HYBRID\",\n" +
+        "  \"applicationDeadline\": \"2023-12-31T23:59:59\",\n" +
+        "  \"numberOfOpenings\": 2\n" +
+        "}'";
   }
 }

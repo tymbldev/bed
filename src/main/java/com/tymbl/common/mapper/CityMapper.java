@@ -7,27 +7,27 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CityMapper {
-    
-    private final CountryRepository countryRepository;
-    
-    public CityMapper(CountryRepository countryRepository) {
-        this.countryRepository = countryRepository;
+
+  private final CountryRepository countryRepository;
+
+  public CityMapper(CountryRepository countryRepository) {
+    this.countryRepository = countryRepository;
+  }
+
+  public CityDTO toDTO(City city) {
+    String countryName = null;
+    if (city.getCountryId() != null) {
+      countryName = countryRepository.findById(city.getCountryId())
+          .map(country -> country.getName())
+          .orElse(null);
     }
-    
-    public CityDTO toDTO(City city) {
-        String countryName = null;
-        if (city.getCountryId() != null) {
-            countryName = countryRepository.findById(city.getCountryId())
-                .map(country -> country.getName())
-                .orElse(null);
-        }
-        
-        return CityDTO.builder()
-            .id(city.getId())
-            .name(city.getName())
-            .zipCode(city.getZipCode())
-            .countryId(city.getCountryId())
-            .countryName(countryName)
-            .build();
-    }
+
+    return CityDTO.builder()
+        .id(city.getId())
+        .name(city.getName())
+        .zipCode(city.getZipCode())
+        .countryId(city.getCountryId())
+        .countryName(countryName)
+        .build();
+  }
 } 

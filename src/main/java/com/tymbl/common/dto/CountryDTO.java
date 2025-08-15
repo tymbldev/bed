@@ -13,15 +13,15 @@ import lombok.NoArgsConstructor;
 @Schema(description = "Country information")
 public class CountryDTO {
 
-    @Schema(description = "Unique identifier of the country", example = "1")
-    private Long id;
+  @Schema(description = "Unique identifier of the country", example = "1")
+  private Long id;
 
-    @Schema(description = "Name of the country", example = "United States")
-    private String name;
+  @Schema(description = "Name of the country", example = "United States")
+  private String name;
 
-    @Schema(description = "Two-letter country code (ISO 3166-1 alpha-2)", example = "US")
-    private String code;
+  @Schema(description = "Two-letter country code (ISO 3166-1 alpha-2)", example = "US")
+  private String code;
 
-    @Schema(description = "Country phone code (without +)", example = "1")
-    private String phoneCode;
+  @Schema(description = "Country phone code (without +)", example = "1")
+  private String phoneCode;
 } 

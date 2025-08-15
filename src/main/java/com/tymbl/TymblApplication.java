@@ -10,7 +10,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 public class TymblApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(TymblApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(TymblApplication.class, args);
+  }
 } 

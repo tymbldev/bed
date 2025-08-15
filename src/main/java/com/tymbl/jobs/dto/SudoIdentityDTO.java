@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class SudoIdentityDTO {
-    private String designation;
-    private String company;
+
+  private String designation;
+  private String company;
 } 

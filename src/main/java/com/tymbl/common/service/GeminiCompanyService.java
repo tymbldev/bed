@@ -6,15 +6,17 @@ import com.tymbl.common.dto.CompanyGenerationResponse;
 import com.tymbl.common.entity.Industry;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.jobs.entity.Company;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import com.tymbl.common.service.AIRestService;
-
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -39,9 +41,10 @@ public class GeminiCompanyService {
       String prompt = buildCompanyGenerationPrompt(companyName);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
       log.info("Sending request to Gemini API for company: {}", companyName);
-      
+
       try {
-        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company Generation for " + companyName);
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
+            "Company Generation for " + companyName);
         return parseGeminiResponseWithJunkDetection(response.getBody(), companyName);
       } catch (Exception e) {
         log.error("Error calling Gemini API for company: {}", companyName, e);
@@ -70,9 +73,10 @@ public class GeminiCompanyService {
       String prompt = buildIndustryDetectionPrompt(companyName, companyDescription, specialties);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
       log.info("Sending request to Gemini API for industry detection: {}", companyName);
-      
+
       try {
-        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Industry Detection for " + companyName);
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
+            "Industry Detection for " + companyName);
         return parseIndustryResponse(response.getBody());
       } catch (Exception e) {
         log.error("Error calling Gemini API for industry detection: {}", companyName, e);
@@ -114,7 +118,8 @@ public class GeminiCompanyService {
           "IMPORTANT: My system will parse your response as JSON. If you add any note, remark, explanation, or text before or after the array, the process will fail. Do NOT add anything except the JSON array.");
 
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt.toString());
-      ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company List Generation for " + industryName);
+      ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
+          "Company List Generation for " + industryName);
       Thread.sleep(1000); // Add a delay to avoid hitting rate limits too quickly
       return parseCompanyListResponse(response.getBody());
     } catch (Exception e) {
@@ -125,8 +130,8 @@ public class GeminiCompanyService {
   }
 
   /**
-   * Intelligently shorten content using GenAI while maintaining minimum 500 characters
-   * and ensuring all important information is covered
+   * Intelligently shorten content using GenAI while maintaining minimum 500 characters and ensuring
+   * all important information is covered
    *
    * @param content The content to shorten
    * @param contentType The type of content (e.g., "about us", "culture", "description")
@@ -134,39 +139,42 @@ public class GeminiCompanyService {
    */
   public String shortenContentIntelligently(String content, String contentType) {
     try {
-      log.info("Starting intelligent content shortening for {} content (length: {})", contentType, content != null ? content.length() : 0);
-      
+      log.info("Starting intelligent content shortening for {} content (length: {})", contentType,
+          content != null ? content.length() : 0);
+
       // Check if content needs shortening
       if (content == null || content.length() <= 500) {
         log.info("Content is already within 500 character limit, returning as is");
         return content;
       }
-      
+
       String prompt = buildIntelligentShorteningPrompt(content, contentType);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
-      
+
       log.info("Sending request to Gemini API for intelligent content shortening: {}", contentType);
-      
+
       try {
-        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Intelligent Content Shortening for " + contentType);
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
+            "Intelligent Content Shortening for " + contentType);
         String shortenedContent = parseIntelligentShorteningResponse(response.getBody());
-        
+
         // Ensure minimum 500 characters
         if (shortenedContent != null && shortenedContent.length() >= 500) {
-          log.info("Successfully shortened {} content to {} characters", contentType, shortenedContent.length());
+          log.info("Successfully shortened {} content to {} characters", contentType,
+              shortenedContent.length());
           return shortenedContent;
         } else {
-          log.warn("AI-shortened content is too short ({} chars), falling back to smart truncation", 
-                   shortenedContent != null ? shortenedContent.length() : 0);
+          log.warn("AI-shortened content is too short ({} chars), falling back to smart truncation",
+              shortenedContent != null ? shortenedContent.length() : 0);
           return smartTruncateContent(content, 500);
         }
-        
+
       } catch (Exception e) {
         log.error("Error calling Gemini API for content shortening: {}", contentType, e);
         log.info("Falling back to smart truncation for content shortening");
         return smartTruncateContent(content, 500);
       }
-      
+
     } catch (Exception e) {
       log.error("Error in intelligent content shortening for: {}", contentType, e);
       log.info("Falling back to smart truncation for content shortening");
@@ -179,23 +187,26 @@ public class GeminiCompanyService {
    */
   private String buildIntelligentShorteningPrompt(String content, String contentType) {
     return String.format(
-      "You are an expert content editor specializing in %s content. Your task is to intelligently shorten the following content while maintaining ALL important information.\n\n" +
-      "REQUIREMENTS:\n" +
-      "1. MINIMUM LENGTH: The shortened content MUST be at least 500 characters long\n" +
-      "2. COMPREHENSIVE: Cover ALL key points, facts, and important details from the original\n" +
-      "3. NATURAL: Maintain natural, flowing language - don't just truncate sentences\n" +
-      "4. STRUCTURED: Organize information logically with proper paragraphs\n" +
-      "5. PROFESSIONAL: Keep the tone and style appropriate for %s content\n\n" +
-      "TECHNIQUES TO USE:\n" +
-      "- Combine related sentences where possible\n" +
-      "- Remove redundant phrases while keeping unique information\n" +
-      "- Use more concise language without losing meaning\n" +
-      "- Maintain all specific names, numbers, and technical details\n" +
-      "- Preserve the emotional impact and key messaging\n\n" +
-      "IMPORTANT: If you cannot shorten to at least 500 characters while maintaining all important information, return the original content unchanged.\n\n" +
-      "Original %s content:\n%s\n\n" +
-      "Shortened version (minimum 500 characters, covering all important information):",
-      contentType, contentType, contentType, content
+        "You are an expert content editor specializing in %s content. Your task is to intelligently shorten the following content while maintaining ALL important information.\n\n"
+            +
+            "REQUIREMENTS:\n" +
+            "1. MINIMUM LENGTH: The shortened content MUST be at least 500 characters long\n" +
+            "2. COMPREHENSIVE: Cover ALL key points, facts, and important details from the original\n"
+            +
+            "3. NATURAL: Maintain natural, flowing language - don't just truncate sentences\n" +
+            "4. STRUCTURED: Organize information logically with proper paragraphs\n" +
+            "5. PROFESSIONAL: Keep the tone and style appropriate for %s content\n\n" +
+            "TECHNIQUES TO USE:\n" +
+            "- Combine related sentences where possible\n" +
+            "- Remove redundant phrases while keeping unique information\n" +
+            "- Use more concise language without losing meaning\n" +
+            "- Maintain all specific names, numbers, and technical details\n" +
+            "- Preserve the emotional impact and key messaging\n\n" +
+            "IMPORTANT: If you cannot shorten to at least 500 characters while maintaining all important information, return the original content unchanged.\n\n"
+            +
+            "Original %s content:\n%s\n\n" +
+            "Shortened version (minimum 500 characters, covering all important information):",
+        contentType, contentType, contentType, content
     );
   }
 
@@ -216,7 +227,8 @@ public class GeminiCompanyService {
           }
         }
       }
-      log.error("Unexpected Gemini API response structure for intelligent content shortening: {}", responseBody);
+      log.error("Unexpected Gemini API response structure for intelligent content shortening: {}",
+          responseBody);
       return null;
     } catch (Exception e) {
       log.error("Error parsing Gemini response for intelligent content shortening", e);
@@ -231,12 +243,12 @@ public class GeminiCompanyService {
     if (content == null || content.length() <= minLength) {
       return content;
     }
-    
+
     // Try to find a good sentence boundary around the target length
     int targetLength = Math.max(minLength, 500);
     int searchStart = Math.min(targetLength, content.length() - 50);
     int searchEnd = Math.min(targetLength + 200, content.length());
-    
+
     // Look for sentence endings (.!?) in the search range
     int bestBreakPoint = -1;
     for (int i = searchStart; i < searchEnd; i++) {
@@ -245,20 +257,21 @@ public class GeminiCompanyService {
         break;
       }
     }
-    
+
     // If no good sentence boundary found, use the target length
     if (bestBreakPoint == -1 || bestBreakPoint < minLength) {
       bestBreakPoint = Math.max(minLength, content.length());
     }
-    
+
     String truncated = content.substring(0, bestBreakPoint).trim();
-    
+
     // Add ellipsis only if we actually truncated
     if (bestBreakPoint < content.length()) {
       truncated += "...";
     }
-    
-    log.info("Smart truncation: shortened content from {} to {} characters", content.length(), truncated.length());
+
+    log.info("Smart truncation: shortened content from {} to {} characters", content.length(),
+        truncated.length());
     return truncated;
   }
 
@@ -397,7 +410,6 @@ public class GeminiCompanyService {
 
     return prompt.toString();
   }
-
 
 
   private CompanyGenerationResponse parseGeminiResponseWithJunkDetection(String responseBody,

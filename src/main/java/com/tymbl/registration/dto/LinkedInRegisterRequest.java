@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class LinkedInRegisterRequest {
-    private String accessToken;
-    private String linkedInProfileUrl;
+
+  private String accessToken;
+  private String linkedInProfileUrl;
 } 

@@ -11,7 +11,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CompanyGenerationResponse {
-    private Company company;
-    private boolean success;
-    private String errorMessage;
+
+  private Company company;
+  private boolean success;
+  private String errorMessage;
 } 

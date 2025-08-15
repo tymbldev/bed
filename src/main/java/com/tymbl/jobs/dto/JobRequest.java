@@ -1,57 +1,57 @@
 package com.tymbl.jobs.dto;
 
 import com.tymbl.common.entity.Job.JobType;
-import lombok.Data;
-
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import lombok.Data;
 
 @Data
 public class JobRequest {
-    @NotBlank(message = "Title is required")
-    private String title;
 
-    @NotBlank(message = "Description is required")
-    private String description;
+  @NotBlank(message = "Title is required")
+  private String title;
 
-    @NotNull(message = "City ID is required")
-    private Long cityId;
+  @NotBlank(message = "Description is required")
+  private String description;
 
-    @NotNull(message = "Country ID is required")
-    private Long countryId;
+  @NotNull(message = "City ID is required")
+  private Long cityId;
 
-    @NotNull(message = "Designation ID is required")
-    private Long designationId;
+  @NotNull(message = "Country ID is required")
+  private Long countryId;
 
-    private String designation;
+  @NotNull(message = "Designation ID is required")
+  private Long designationId;
 
-    @NotNull(message = "Minimum salary is required")
-    private BigDecimal minSalary;
+  private String designation;
 
-    @NotNull(message = "Maximum salary is required")
-    private BigDecimal maxSalary;
+  @NotNull(message = "Minimum salary is required")
+  private BigDecimal minSalary;
 
-    private Integer minExperience;
+  @NotNull(message = "Maximum salary is required")
+  private BigDecimal maxSalary;
 
-    private Integer maxExperience;
+  private Integer minExperience;
 
-    private JobType jobType;
+  private Integer maxExperience;
 
-    @NotNull(message = "Currency ID is required")
-    private Long currencyId;
+  private JobType jobType;
 
-    @NotNull(message = "Company ID is required")
-    private Long companyId;
+  @NotNull(message = "Currency ID is required")
+  private Long currencyId;
 
-    private String company;
-    
-    private Set<String> tags = new HashSet<>();
+  @NotNull(message = "Company ID is required")
+  private Long companyId;
 
-    private Integer openingCount = 1;
+  private String company;
 
-    private String uniqueUrl;
-    private String platform;
+  private Set<String> tags = new HashSet<>();
+
+  private Integer openingCount = 1;
+
+  private String uniqueUrl;
+  private String platform;
 } 

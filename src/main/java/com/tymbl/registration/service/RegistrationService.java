@@ -49,7 +49,8 @@ public class RegistrationService {
       User user = new User();
       user.setEmail(request.getEmail());
       user.setPassword(passwordEncoder.encode(request.getPassword()));
-      user.setRole(request.getRole() != null ? request.getRole() : com.tymbl.common.entity.Role.USER);
+      user.setRole(
+          request.getRole() != null ? request.getRole() : com.tymbl.common.entity.Role.USER);
 
       // Set optional fields if provided
       if (request.getFirstName() != null) {
@@ -62,7 +63,7 @@ public class RegistrationService {
       updateUserFields(user, request);
 
       User savedUser = userRepository.save(user);
-      
+
       // Save skills separately
       saveUserSkills(savedUser.getId(), request.getSkillIds(), request.getSkillNames());
 
@@ -115,14 +116,14 @@ public class RegistrationService {
 
       // Update the user fields
       updateUserFields(user, request);
-      
+
       User savedUser = userRepository.save(user);
-      
+
       // Handle skills separately
       if (request.getSkillIds() != null || request.getSkillNames() != null) {
         // Delete existing skills
         userSkillRepository.deleteAllByUserId(userId);
-        
+
         // Save new skills
         saveUserSkills(userId, request.getSkillIds(), request.getSkillNames());
       }
@@ -168,34 +169,80 @@ public class RegistrationService {
       user.setEducation(registerRequest.getEducation());
     } else if (requestObj instanceof ProfileUpdateRequest) {
       ProfileUpdateRequest profileUpdateRequest = (ProfileUpdateRequest) requestObj;
-      if (profileUpdateRequest.getEmail() != null) user.setEmail(profileUpdateRequest.getEmail());
-      if (profileUpdateRequest.getFirstName() != null) user.setFirstName(profileUpdateRequest.getFirstName());
-      if (profileUpdateRequest.getLastName() != null) user.setLastName(profileUpdateRequest.getLastName());
-      if (profileUpdateRequest.getPhoneNumber() != null) user.setPhoneNumber(profileUpdateRequest.getPhoneNumber());
-      if (profileUpdateRequest.getCompany() != null) user.setCompany(profileUpdateRequest.getCompany());
+      if (profileUpdateRequest.getEmail() != null) {
+        user.setEmail(profileUpdateRequest.getEmail());
+      }
+      if (profileUpdateRequest.getFirstName() != null) {
+        user.setFirstName(profileUpdateRequest.getFirstName());
+      }
+      if (profileUpdateRequest.getLastName() != null) {
+        user.setLastName(profileUpdateRequest.getLastName());
+      }
+      if (profileUpdateRequest.getPhoneNumber() != null) {
+        user.setPhoneNumber(profileUpdateRequest.getPhoneNumber());
+      }
+      if (profileUpdateRequest.getCompany() != null) {
+        user.setCompany(profileUpdateRequest.getCompany());
+      }
       if (profileUpdateRequest.getCompanyId() != null) {
         user.setCompanyId(profileUpdateRequest.getCompanyId());
         // If companyId is set, set company name to null to avoid inconsistency
         user.setCompany(null);
       }
-      if (profileUpdateRequest.getDepartmentId() != null) user.setDepartmentId(profileUpdateRequest.getDepartmentId());
-      if (profileUpdateRequest.getDesignation() != null) user.setDesignation(profileUpdateRequest.getDesignation());
-      if (profileUpdateRequest.getDesignationId() != null) user.setDesignationId(profileUpdateRequest.getDesignationId());
-      if (profileUpdateRequest.getCityId() != null) user.setCityId(profileUpdateRequest.getCityId());
-      if (profileUpdateRequest.getCountryId() != null) user.setCountryId(profileUpdateRequest.getCountryId());
-      if (profileUpdateRequest.getZipCode() != null) user.setZipCode(profileUpdateRequest.getZipCode());
-      if (profileUpdateRequest.getLinkedInProfile() != null) user.setLinkedInProfile(profileUpdateRequest.getLinkedInProfile());
-      if (profileUpdateRequest.getGithubProfile() != null) user.setGithubProfile(profileUpdateRequest.getGithubProfile());
-      if (profileUpdateRequest.getPortfolioWebsite() != null) user.setPortfolioWebsite(profileUpdateRequest.getPortfolioWebsite());
-      if (profileUpdateRequest.getResume() != null) user.setResume(profileUpdateRequest.getResume());
-      if (profileUpdateRequest.getYearsOfExperience() != null) user.setYearsOfExperience(profileUpdateRequest.getYearsOfExperience());
-      if (profileUpdateRequest.getMonthsOfExperience() != null) user.setMonthsOfExperience(profileUpdateRequest.getMonthsOfExperience());
-      if (profileUpdateRequest.getCurrentSalary() != null) user.setCurrentSalary(profileUpdateRequest.getCurrentSalary());
-      if (profileUpdateRequest.getCurrentSalaryCurrencyId() != null) user.setCurrentSalaryCurrencyId(profileUpdateRequest.getCurrentSalaryCurrencyId());
-      if (profileUpdateRequest.getExpectedSalary() != null) user.setExpectedSalary(profileUpdateRequest.getExpectedSalary());
-      if (profileUpdateRequest.getExpectedSalaryCurrencyId() != null) user.setExpectedSalaryCurrencyId(profileUpdateRequest.getExpectedSalaryCurrencyId());
-      if (profileUpdateRequest.getNoticePeriod() != null) user.setNoticePeriod(profileUpdateRequest.getNoticePeriod());
-      if (profileUpdateRequest.getEducation() != null) user.setEducation(profileUpdateRequest.getEducation());
+      if (profileUpdateRequest.getDepartmentId() != null) {
+        user.setDepartmentId(profileUpdateRequest.getDepartmentId());
+      }
+      if (profileUpdateRequest.getDesignation() != null) {
+        user.setDesignation(profileUpdateRequest.getDesignation());
+      }
+      if (profileUpdateRequest.getDesignationId() != null) {
+        user.setDesignationId(profileUpdateRequest.getDesignationId());
+      }
+      if (profileUpdateRequest.getCityId() != null) {
+        user.setCityId(profileUpdateRequest.getCityId());
+      }
+      if (profileUpdateRequest.getCountryId() != null) {
+        user.setCountryId(profileUpdateRequest.getCountryId());
+      }
+      if (profileUpdateRequest.getZipCode() != null) {
+        user.setZipCode(profileUpdateRequest.getZipCode());
+      }
+      if (profileUpdateRequest.getLinkedInProfile() != null) {
+        user.setLinkedInProfile(profileUpdateRequest.getLinkedInProfile());
+      }
+      if (profileUpdateRequest.getGithubProfile() != null) {
+        user.setGithubProfile(profileUpdateRequest.getGithubProfile());
+      }
+      if (profileUpdateRequest.getPortfolioWebsite() != null) {
+        user.setPortfolioWebsite(profileUpdateRequest.getPortfolioWebsite());
+      }
+      if (profileUpdateRequest.getResume() != null) {
+        user.setResume(profileUpdateRequest.getResume());
+      }
+      if (profileUpdateRequest.getYearsOfExperience() != null) {
+        user.setYearsOfExperience(profileUpdateRequest.getYearsOfExperience());
+      }
+      if (profileUpdateRequest.getMonthsOfExperience() != null) {
+        user.setMonthsOfExperience(profileUpdateRequest.getMonthsOfExperience());
+      }
+      if (profileUpdateRequest.getCurrentSalary() != null) {
+        user.setCurrentSalary(profileUpdateRequest.getCurrentSalary());
+      }
+      if (profileUpdateRequest.getCurrentSalaryCurrencyId() != null) {
+        user.setCurrentSalaryCurrencyId(profileUpdateRequest.getCurrentSalaryCurrencyId());
+      }
+      if (profileUpdateRequest.getExpectedSalary() != null) {
+        user.setExpectedSalary(profileUpdateRequest.getExpectedSalary());
+      }
+      if (profileUpdateRequest.getExpectedSalaryCurrencyId() != null) {
+        user.setExpectedSalaryCurrencyId(profileUpdateRequest.getExpectedSalaryCurrencyId());
+      }
+      if (profileUpdateRequest.getNoticePeriod() != null) {
+        user.setNoticePeriod(profileUpdateRequest.getNoticePeriod());
+      }
+      if (profileUpdateRequest.getEducation() != null) {
+        user.setEducation(profileUpdateRequest.getEducation());
+      }
     }
   }
 
@@ -242,26 +289,26 @@ public class RegistrationService {
   @Transactional(readOnly = true)
   public User getUserByEmail(String email) {
     return userRepository.findByEmail(email)
-            .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+        .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
   }
 
   private void saveUserSkills(Long userId, Set<Long> skillIds, Set<String> skillNames) {
     List<UserSkill> skills = new ArrayList<>();
-    
+
     // Add skills with IDs
     if (skillIds != null && !skillIds.isEmpty()) {
       for (Long skillId : skillIds) {
         skills.add(new UserSkill(userId, skillId));
       }
     }
-    
+
     // Add skills with names only
     if (skillNames != null && !skillNames.isEmpty()) {
       for (String skillName : skillNames) {
         skills.add(new UserSkill(userId, skillName));
       }
     }
-    
+
     // Save all skills
     if (!skills.isEmpty()) {
       userSkillRepository.saveAll(skills);
