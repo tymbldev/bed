@@ -135,7 +135,7 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
         // Foundit-specific URL parameters
         urlBuilder.append("?start=").append(request.getStart())
                  .append("&limit=").append(request.getLimit())
-                 .append("&query=").append(request.getKeyword().replace(" ", "+"))
+                 .append("&query=").append(request.getKeyword())
                  .append("&queryDerived=").append(request.getQueryDerived())
                  .append("&countries=").append(request.getCountries())
                  .append("&variantName=").append(request.getVariantName());

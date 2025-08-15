@@ -66,6 +66,14 @@ public class DropdownService {
   private final Map<Long, String> currencyNameCache = new ConcurrentHashMap<>();
   private final Map<Long, String> currencySymbolCache = new ConcurrentHashMap<>();
   private List<com.tymbl.jobs.entity.Company> companyList = new ArrayList<>();
+  
+  // Entity caches for full objects
+  private final Map<Long, Department> departmentEntityCache = new ConcurrentHashMap<>();
+  private final Map<Long, Location> locationEntityCache = new ConcurrentHashMap<>();
+  private final Map<Long, Designation> designationEntityCache = new ConcurrentHashMap<>();
+  private final Map<Long, Industry> industryEntityCache = new ConcurrentHashMap<>();
+  private final Map<Long, Country> countryEntityCache = new ConcurrentHashMap<>();
+  private final Map<Long, City> cityEntityCache = new ConcurrentHashMap<>();
 
   @PostConstruct
   public void initializeCaches() {
@@ -90,6 +98,8 @@ public class DropdownService {
           this::initializeDesignationCache, taskExecutor);
       CompletableFuture<Void> departmentCacheFuture = CompletableFuture.runAsync(
           this::initializeDepartmentCache, taskExecutor);
+      CompletableFuture<Void> locationCacheFuture = CompletableFuture.runAsync(
+          this::initializeLocationCache, taskExecutor);
       CompletableFuture<Void> countryCacheFuture = CompletableFuture.runAsync(
           this::initializeCountryCache, taskExecutor);
       CompletableFuture<Void> cityCacheFuture = CompletableFuture.runAsync(
@@ -108,6 +118,22 @@ public class DropdownService {
   // Department methods
   @Transactional(readOnly = true)
   public List<Department> getAllDepartments() {
+    // Try to get from cache first
+    if (!departmentEntityCache.isEmpty()) {
+      List<Department> departments = new ArrayList<>(departmentEntityCache.values());
+      // Sort so that entries with "other" in the name come last
+      departments.sort((d1, d2) -> {
+        boolean d1HasOther = d1.getName().toLowerCase().contains("other");
+        boolean d2HasOther = d2.getName().toLowerCase().contains("other");
+        if (d1HasOther && !d2HasOther) return 1;
+        if (!d1HasOther && d2HasOther) return -1;
+        return d1.getName().compareToIgnoreCase(d2.getName());
+      });
+      return departments;
+    }
+    
+    // Fallback to database if cache is empty
+    log.warn("Department cache is empty, falling back to database");
     List<Department> departments = departmentRepository.findAll();
     // Sort so that entries with "other" in the name come last
     departments.sort((d1, d2) -> {
@@ -126,11 +152,27 @@ public class DropdownService {
       throw new RuntimeException(
           "Department with name '" + department.getName() + "' already exists");
     }
-    return departmentRepository.save(department);
+    Department savedDepartment = departmentRepository.save(department);
+    
+    // Update cache
+    if (savedDepartment.getId() != null && savedDepartment.getName() != null) {
+      departmentCache.put(savedDepartment.getId(), savedDepartment.getName());
+      departmentEntityCache.put(savedDepartment.getId(), savedDepartment);
+    }
+    
+    return savedDepartment;
   }
 
   @Transactional(readOnly = true)
   public Department getDepartmentById(Long id) {
+    // Try to get from cache first
+    Department department = departmentEntityCache.get(id);
+    if (department != null) {
+      return department;
+    }
+    
+    // Fallback to database if not in cache
+    log.warn("Department with ID {} not found in cache, falling back to database", id);
     return departmentRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Department not found with ID: " + id));
   }
@@ -138,6 +180,22 @@ public class DropdownService {
   // Location methods
   @Transactional(readOnly = true)
   public List<Location> getAllLocations() {
+    // Try to get from cache first
+    if (!locationEntityCache.isEmpty()) {
+      List<Location> locations = new ArrayList<>(locationEntityCache.values());
+      // Sort so that entries with "other" in the name come last
+      locations.sort((l1, l2) -> {
+        boolean l1HasOther = l1.getCity().toLowerCase().contains("other");
+        boolean l2HasOther = l2.getCity().toLowerCase().contains("other");
+        if (l1HasOther && !l2HasOther) return 1;
+        if (!l1HasOther && l2HasOther) return -1;
+        return l1.getCity().compareToIgnoreCase(l2.getCity());
+      });
+      return locations;
+    }
+    
+    // Fallback to database if cache is empty
+    log.warn("Location cache is empty, falling back to database");
     List<Location> locations = locationRepository.findAll();
     // Sort so that entries with "other" in the name come last
     locations.sort((l1, l2) -> {
@@ -168,6 +226,22 @@ public class DropdownService {
   // Designation methods
   @Transactional(readOnly = true)
   public List<Designation> getAllDesignations() {
+    // Try to get from cache first
+    if (!designationEntityCache.isEmpty()) {
+      List<Designation> designations = new ArrayList<>(designationEntityCache.values());
+      // Sort so that entries with "other" in the name come last
+      designations.sort((d1, d2) -> {
+        boolean d1HasOther = d1.getName().toLowerCase().contains("other");
+        boolean d2HasOther = d2.getName().toLowerCase().contains("other");
+        if (d1HasOther && !d2HasOther) return 1;
+        if (!d1HasOther && d2HasOther) return -1;
+        return d1.getName().compareToIgnoreCase(d2.getName());
+      });
+      return designations;
+    }
+    
+    // Fallback to database if cache is empty
+    log.warn("Designation cache is empty, falling back to database");
     List<Designation> designations = designationRepository.findAll();
     // Sort so that entries with "other" in the name come last
     designations.sort((d1, d2) -> {
@@ -195,11 +269,27 @@ public class DropdownService {
     }
 
     designation.setName(cleanedName);
-    return designationRepository.save(designation);
+    Designation savedDesignation = designationRepository.save(designation);
+    
+    // Update cache
+    if (savedDesignation.getId() != null && savedDesignation.getName() != null) {
+      designationCache.put(savedDesignation.getId(), savedDesignation.getName());
+      designationEntityCache.put(savedDesignation.getId(), savedDesignation);
+    }
+    
+    return savedDesignation;
   }
 
   @Transactional(readOnly = true)
   public Designation getDesignationById(Long id) {
+    // Try to get from cache first
+    Designation designation = designationEntityCache.get(id);
+    if (designation != null) {
+      return designation;
+    }
+    
+    // Fallback to database if not in cache
+    log.warn("Designation with ID {} not found in cache, falling back to database", id);
     return designationRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Designation not found with ID: " + id));
   }
@@ -207,6 +297,22 @@ public class DropdownService {
   // Country methods
   @Transactional(readOnly = true)
   public List<Country> getAllCountries() {
+    // Try to get from cache first
+    if (!countryEntityCache.isEmpty()) {
+      List<Country> countries = new ArrayList<>(countryEntityCache.values());
+      // Sort so that entries with "other" in the name come last
+      countries.sort((c1, c2) -> {
+        boolean c1HasOther = c1.getName().toLowerCase().contains("other");
+        boolean c2HasOther = c2.getName().toLowerCase().contains("other");
+        if (c1HasOther && !c2HasOther) return 1;
+        if (!c1HasOther && c2HasOther) return -1;
+        return c1.getName().compareToIgnoreCase(c2.getName());
+      });
+      return countries;
+    }
+    
+    // Fallback to database if cache is empty
+    log.warn("Country cache is empty, falling back to database");
     List<Country> countries = countryRepository.findAll();
     // Sort so that entries with "other" in the name come last
     countries.sort((c1, c2) -> {
@@ -221,6 +327,14 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public Country getCountryById(Long id) {
+    // Try to get from cache first
+    Country country = countryEntityCache.get(id);
+    if (country != null) {
+      return country;
+    }
+    
+    // Fallback to database if not in cache
+    log.warn("Country with ID {} not found in cache, falling back to database", id);
     return countryRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Country not found with ID: " + id));
   }
@@ -228,6 +342,22 @@ public class DropdownService {
   // City methods
   @Transactional(readOnly = true)
   public List<City> getAllCities() {
+    // Try to get from cache first
+    if (!cityEntityCache.isEmpty()) {
+      List<City> cities = new ArrayList<>(cityEntityCache.values());
+      // Sort so that entries with "other" in the name come last
+      cities.sort((c1, c2) -> {
+        boolean c1HasOther = c1.getName().toLowerCase().contains("other");
+        boolean c2HasOther = c2.getName().toLowerCase().contains("other");
+        if (c1HasOther && !c2HasOther) return 1;
+        if (!c1HasOther && c2HasOther) return -1;
+      return c1.getName().compareToIgnoreCase(c2.getName());
+      });
+      return cities;
+    }
+    
+    // Fallback to database if cache is empty
+    log.warn("City cache is empty, falling back to database");
     List<City> cities = cityRepository.findAll();
     // Sort so that entries with "other" in the name come last
     cities.sort((c1, c2) -> {
@@ -242,6 +372,14 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public City getCityById(Long id) {
+    // Try to get from cache first
+    City city = cityEntityCache.get(id);
+    if (city != null) {
+      return city;
+    }
+    
+    // Fallback to database if not in cache
+    log.warn("City with ID {} not found in cache, falling back to database", id);
     return cityRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("City not found with ID: " + id));
   }
@@ -249,6 +387,33 @@ public class DropdownService {
   // Industry methods
   @Transactional(readOnly = true)
   public List<Industry> getAllIndustries() {
+    // Try to get from cache first
+    if (!industryEntityCache.isEmpty()) {
+      List<Industry> industries = new ArrayList<>(industryEntityCache.values());
+      // Sort by rank first (lower rank values come first), then by "other" logic
+      industries.sort((i1, i2) -> {
+        // First, sort by rank (lower rank values come first)
+        Integer rank1 = i1.getRankOrder() != null ? i1.getRankOrder() : Integer.MAX_VALUE;
+        Integer rank2 = i2.getRankOrder() != null ? i2.getRankOrder() : Integer.MAX_VALUE;
+        
+        if (!rank1.equals(rank2)) {
+          return rank1.compareTo(rank2);
+        }
+        
+        // If ranks are equal, then sort by "other" logic
+        boolean i1HasOther = i1.getName().toLowerCase().contains("other");
+        boolean i2HasOther = i2.getName().toLowerCase().contains("other");
+        if (i1HasOther && !i2HasOther) return 1;
+        if (!i1HasOther && i2HasOther) return -1;
+        
+        // If both have "other" or both don't have "other", sort alphabetically
+        return i1.getName().compareToIgnoreCase(i2.getName());
+      });
+      return industries;
+    }
+    
+    // Fallback to database if cache is empty
+    log.warn("Industry cache is empty, falling back to database");
     List<Industry> industries = industryRepository.findAll();
     // Sort by rank first (lower rank values come first), then by "other" logic
     industries.sort((i1, i2) -> {
@@ -282,12 +447,33 @@ public class DropdownService {
 
   @Transactional(readOnly = true)
   public Industry getIndustryById(Long id) {
+    // Try to get from cache first
+    Industry industry = industryEntityCache.get(id);
+    if (industry != null) {
+      return industry;
+    }
+    
+    // Fallback to database if not in cache
+    log.warn("Industry with ID {} not found in cache, falling back to database", id);
     return industryRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Industry not found with ID: " + id));
   }
 
   @Transactional(readOnly = true)
   public Industry getIndustryByName(String name) {
+    if (name == null || name.trim().isEmpty()) {
+      return null;
+    }
+    
+    // Try to get from cache first
+    for (Industry industry : industryEntityCache.values()) {
+      if (name.equalsIgnoreCase(industry.getName())) {
+        return industry;
+      }
+    }
+    
+    // Fallback to database if not in cache
+    log.warn("Industry with name '{}' not found in cache, falling back to database", name);
     return industryRepository.findByName(name)
         .orElse(null);
   }
@@ -308,6 +494,15 @@ public class DropdownService {
       return null;
     }
 
+    // Try to get from cache first
+    for (City city : cityEntityCache.values()) {
+      if (name.equalsIgnoreCase(city.getName())) {
+        return city.getId();
+      }
+    }
+
+    // Fallback to database if not in cache
+    log.warn("City with name '{}' not found in cache, falling back to database", name);
     try {
       City city = cityRepository.findByName(name).orElse(null);
       return city != null ? city.getId() : null;
@@ -322,6 +517,15 @@ public class DropdownService {
       return null;
     }
 
+    // Try to get from cache first
+    for (Country country : countryEntityCache.values()) {
+      if (name.equalsIgnoreCase(country.getName())) {
+        return country.getId();
+      }
+    }
+
+    // Fallback to database if not in cache
+    log.warn("Country with name '{}' not found in cache, falling back to database", name);
     try {
       Country country = countryRepository.findByName(name).orElse(null);
       return country != null ? country.getId() : null;
@@ -551,6 +755,7 @@ public class DropdownService {
       for (Designation designation : designations) {
         if (designation != null && designation.getId() != null && designation.getName() != null) {
           designationCache.put(designation.getId(), designation.getName());
+          designationEntityCache.put(designation.getId(), designation);
         }
       }
       log.info("Designation cache initialized with {} designations", designations.size());
@@ -570,6 +775,7 @@ public class DropdownService {
       for (Department department : departments) {
         if (department != null && department.getId() != null && department.getName() != null) {
           departmentCache.put(department.getId(), department.getName());
+          departmentEntityCache.put(department.getId(), department);
         }
       }
       log.info("Department cache initialized with {} departments", departments.size());
@@ -589,6 +795,7 @@ public class DropdownService {
       for (Country country : countries) {
         if (country != null && country.getId() != null && country.getName() != null) {
           countryCache.put(country.getId(), country.getName());
+          countryEntityCache.put(country.getId(), country);
         }
       }
       log.info("Country cache initialized with {} countries", countries.size());
@@ -608,11 +815,31 @@ public class DropdownService {
       for (City city : cities) {
         if (city != null && city.getId() != null && city.getName() != null) {
           cityCache.put(city.getId(), city.getName());
+          cityEntityCache.put(city.getId(), city);
         }
       }
       log.info("City cache initialized with {} cities", cities.size());
     } catch (Exception e) {
       log.error("Error initializing city cache: {}", e.getMessage(), e);
+    }
+  }
+  
+  /**
+   * Initialize location cache in background
+   */
+  @Transactional(readOnly = true)
+  private void initializeLocationCache() {
+    try {
+      log.info("Initializing location cache...");
+      List<Location> locations = locationRepository.findAll();
+      for (Location location : locations) {
+        if (location != null && location.getId() != null && location.getDisplayName() != null) {
+          locationEntityCache.put(location.getId(), location);
+        }
+      }
+      log.info("Location cache initialized with {} locations", locations.size());
+    } catch (Exception e) {
+      log.error("Error initializing location cache: {}", e.getMessage(), e);
     }
   }
 
@@ -627,12 +854,80 @@ public class DropdownService {
       for (Industry industry : industries) {
         if (industry != null && industry.getId() != null && industry.getName() != null) {
           industryCache.put(industry.getId(), industry.getName());
+          industryEntityCache.put(industry.getId(), industry);
         }
       }
       log.info("Industry cache initialized with {} industries", industries.size());
     } catch (Exception e) {
       log.error("Error initializing industry cache: {}", e.getMessage(), e);
     }
+  }
+
+  /**
+   * Refresh department cache
+   */
+  public void refreshDepartmentCache() {
+    log.info("Refreshing department cache...");
+    departmentEntityCache.clear();
+    initializeDepartmentCache();
+  }
+
+  /**
+   * Refresh location cache
+   */
+  public void refreshLocationCache() {
+    log.info("Refreshing location cache...");
+    locationEntityCache.clear();
+    initializeLocationCache();
+  }
+
+  /**
+   * Refresh designation cache
+   */
+  public void refreshDesignationCache() {
+    log.info("Refreshing designation cache...");
+    designationEntityCache.clear();
+    initializeDesignationCache();
+  }
+
+  /**
+   * Refresh industry cache
+   */
+  public void refreshIndustryCache() {
+    log.info("Refreshing industry cache...");
+    industryEntityCache.clear();
+    initializeIndustryCache();
+  }
+
+  /**
+   * Refresh country cache
+   */
+  public void refreshCountryCache() {
+    log.info("Refreshing country cache...");
+    countryEntityCache.clear();
+    initializeCountryCache();
+  }
+
+  /**
+   * Refresh city cache
+   */
+  public void refreshCityCache() {
+    log.info("Refreshing city cache...");
+    cityEntityCache.clear();
+    initializeCityCache();
+  }
+
+  /**
+   * Refresh all caches
+   */
+  public void refreshAllCaches() {
+    log.info("Refreshing all caches...");
+    refreshDepartmentCache();
+    refreshLocationCache();
+    refreshDesignationCache();
+    refreshIndustryCache();
+    refreshCountryCache();
+    refreshCityCache();
   }
 
   /**
@@ -682,31 +977,7 @@ public class DropdownService {
 
   }
 
-  /**
-   * Refresh all caches (useful when data is updated)
-   */
-  @Transactional(readOnly = true)
-  public void refreshAllCaches() {
-    log.info("Starting refresh of all caches...");
 
-    // Clear all caches
-    designationCache.clear();
-    departmentCache.clear();
-    countryCache.clear();
-    cityCache.clear();
-    industryCache.clear();
-    companyNameCache.clear();
-    currencyNameCache.clear();
-    currencySymbolCache.clear();
-    companyList.clear();
-
-    // Re-initialize all caches in background
-    CompletableFuture.runAsync(this::initializeAllCachesInBackground, taskExecutor)
-        .exceptionally(throwable -> {
-          log.error("Failed to refresh all caches: {}", throwable.getMessage(), throwable);
-          return null;
-        });
-  }
 
   // Industry statistics method
   @Transactional(readOnly = true)

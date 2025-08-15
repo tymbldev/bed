@@ -117,7 +117,7 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
         StringBuilder urlBuilder = new StringBuilder(keywordConfig.getPortalUrl());
         
         // LinkedIn-specific URL parameters
-        urlBuilder.append("?keywords=").append(request.getKeyword().replace(" ", "%20"))
+        urlBuilder.append("?keywords=").append(request.getKeyword())
                  .append("&start=").append(request.getStart())
                  .append("&count=").append(request.getLimit())
                  .append("&location=").append(request.getCountries());
