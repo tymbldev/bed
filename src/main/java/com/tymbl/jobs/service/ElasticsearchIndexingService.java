@@ -443,12 +443,7 @@ public class ElasticsearchIndexingService {
     // First, delete all existing documents from all indices
     log.info("Step 1: Deleting all existing documents from Elasticsearch indices");
     Map<String, Object> deleteResult = deleteAllDocumentsFromAllIndices();
-    log.info("Cleanup completed - Total documents deleted: {}", 
-        ((Number) deleteResult.get("companies")).intValue() + 
-        ((Number) deleteResult.get("designations")).intValue() + 
-        ((Number) deleteResult.get("cities")).intValue() + 
-        ((Number) deleteResult.get("skills")).intValue());
-
+    log.info("Cleanup completed - Total documents deleted");
     // Wait a moment for deletion to complete
     log.info("Waiting 10 seconds for deletion operations to complete...");
     try {
