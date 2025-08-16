@@ -64,4 +64,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
   // Reset website fetched flag for all companies
   @Query("UPDATE Company c SET c.websiteFetched = 0")
   void resetWebsiteFetchedFlag();
+
+  // Find companies by name containing (for fuzzy matching)
+  List<Company> findByNameContainingIgnoreCase(String name);
 } 

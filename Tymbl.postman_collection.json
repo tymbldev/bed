@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Tymbl API - Complete Collection",
-    "description": "Complete Tymbl API Collection with all endpoints",
+    "description": "Complete Tymbl API Collection with all endpoints including the new External Job Sync functionality with individual transaction processing",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -609,6 +609,153 @@
               ],
               "cookie": [],
               "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Keyword addition endpoint - implementation needed\"\n}"
+            }
+          ]
+        },
+        {
+          "name": "Sync External Jobs to Job Table",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"description\": \"This endpoint synchronizes external job data to the main Job table using AI tagging for companies and designations. Each job is processed in its own transaction for better error isolation.\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-job",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "sync-external-job"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"description\": \"This endpoint synchronizes external job data to the main Job table using AI tagging for companies and designations. Each job is processed in its own transaction for better error isolation.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-job",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "sync-external-job"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Sync completed. Success: 15, Errors: 0\",\n  \"totalJobs\": 15,\n  \"successCount\": 15,\n  \"errorCount\": 0\n}"
+            },
+            {
+              "name": "No Jobs to Sync",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"description\": \"This endpoint synchronizes external job data to the main Job table using AI tagging for companies and designations. Each job is processed in its own transaction for better error isolation.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-job",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "sync-external-job"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"No unsynced external jobs found\",\n  \"totalJobs\": 0,\n  \"successCount\": 0,\n  \"errorCount\": 0\n}"
+            },
+            {
+              "name": "Partial Success with Errors",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"description\": \"This endpoint synchronizes external job data to the main Job table using AI tagging for companies and designations. Each job is processed in its own transaction for better error isolation.\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-job",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "sync-external-job"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"success\": true,\n  \"message\": \"Sync completed. Success: 12, Errors: 3\",\n  \"totalJobs\": 15,\n  \"successCount\": 12,\n  \"errorCount\": 3\n}"
             }
           ]
         }
@@ -4828,6 +4975,11 @@
     {
       "key": "default_country",
       "value": "India",
+      "type": "string"
+    },
+    {
+      "key": "sync_endpoint",
+      "value": "sync-external-job",
       "type": "string"
     }
   ]

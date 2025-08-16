@@ -127,6 +127,12 @@ public class Job {
   @Column(name = "platform")
   private String platform;
 
+  @Column(name = "portal_job_id")
+  private String portalJobId;
+
+  @Column(name = "is_synced_from_external")
+  private Boolean isSyncedFromExternal = false;
+
   @Column(name = "approved", nullable = false)
   private Integer approved = JobApprovalStatus.PENDING.getValue();
 

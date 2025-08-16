@@ -1074,6 +1074,17 @@ public class DropdownService {
   }
 
   /**
+   * Get all companies from in-memory cache
+   */
+  public List<com.tymbl.jobs.entity.Company> getAllCompanies() {
+    // Ensure cache is initialized
+    if (companyList.isEmpty()) {
+      initializeCompanyCache();
+    }
+    return new ArrayList<>(companyList);
+  }
+
+  /**
    * Refresh company list (useful when companies are updated)
    */
   @Transactional(readOnly = true)

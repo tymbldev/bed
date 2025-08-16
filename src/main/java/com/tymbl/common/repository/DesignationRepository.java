@@ -45,4 +45,7 @@ public interface DesignationRepository extends JpaRepository<Designation, Long> 
   long countByDepartmentAssignedTrue();
 
   long countByDepartmentAssignedFalse();
+
+  // Find designations by name containing (for fuzzy matching)
+  List<Designation> findByNameContainingIgnoreCase(String name);
 }

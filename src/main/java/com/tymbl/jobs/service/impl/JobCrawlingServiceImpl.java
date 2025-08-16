@@ -2,12 +2,12 @@ package com.tymbl.jobs.service.impl;
 
 import com.tymbl.jobs.dto.JobCrawlRequest;
 import com.tymbl.jobs.dto.JobCrawlResponse;
-import com.tymbl.jobs.entity.JobCrawlKeyword;
-import com.tymbl.jobs.entity.JobDetail;
-import com.tymbl.jobs.entity.JobRawResponse;
-import com.tymbl.jobs.repository.JobCrawlKeywordRepository;
-import com.tymbl.jobs.repository.JobDetailRepository;
-import com.tymbl.jobs.repository.JobRawResponseRepository;
+import com.tymbl.jobs.entity.ExternalJobCrawlKeyword;
+import com.tymbl.jobs.entity.ExternalJobDetail;
+import com.tymbl.jobs.entity.ExternalJobRawResponse;
+import com.tymbl.jobs.repository.ExternalJobCrawlKeywordRepository;
+import com.tymbl.jobs.repository.ExternalJobDetailRepository;
+import com.tymbl.jobs.repository.ExternalJobRawResponseRepository;
 import com.tymbl.jobs.service.JobCrawlingService;
 import com.tymbl.jobs.service.PortalCrawlingFactory;
 import com.tymbl.jobs.service.PortalCrawlingService;
@@ -24,13 +24,13 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
   private static final Logger logger = LoggerFactory.getLogger(JobCrawlingServiceImpl.class);
 
   @Autowired
-  private JobCrawlKeywordRepository keywordRepository;
+  private ExternalJobCrawlKeywordRepository keywordRepository;
 
   @Autowired
-  private JobRawResponseRepository rawResponseRepository;
+  private ExternalJobRawResponseRepository rawResponseRepository;
 
   @Autowired
-  private JobDetailRepository jobDetailRepository;
+  private ExternalJobDetailRepository jobDetailRepository;
 
   @Autowired
   private PortalCrawlingFactory portalFactory;
@@ -45,7 +45,7 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
           request.getPortalName());
 
       // Find the keyword configuration
-      JobCrawlKeyword keywordConfig = keywordRepository.findByKeywordAndPortalName(
+      ExternalJobCrawlKeyword keywordConfig = keywordRepository.findByKeywordAndPortalName(
           request.getKeyword(), request.getPortalName());
 
       if (keywordConfig == null) {
@@ -61,11 +61,11 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
       String apiResponse = portalService.makePortalApiCall(keywordConfig, request);
 
       // Save raw response
-      JobRawResponse rawResponse = portalService.saveRawResponse(keywordConfig, request,
+      ExternalJobRawResponse rawResponse = portalService.saveRawResponse(keywordConfig, request,
           apiResponse);
 
       // Parse and save job details
-      List<JobDetail> jobDetails = portalService.parseAndSaveJobDetails(rawResponse, apiResponse,
+      List<ExternalJobDetail> jobDetails = portalService.parseAndSaveJobDetails(rawResponse, apiResponse,
           request);
 
       // Update last crawled date
@@ -93,18 +93,18 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
   }
 
 
-  private void updateLastCrawledDate(JobCrawlKeyword keywordConfig) {
+  private void updateLastCrawledDate(ExternalJobCrawlKeyword keywordConfig) {
     keywordConfig.setLastCrawledDate(LocalDateTime.now());
     keywordRepository.save(keywordConfig);
   }
 
   @Override
   public void processPendingRawResponses() {
-    List<JobRawResponse> pendingResponses = rawResponseRepository.findPendingResponses();
+    List<ExternalJobRawResponse> pendingResponses = rawResponseRepository.findPendingResponses();
 
-    for (JobRawResponse rawResponse : pendingResponses) {
+    for (ExternalJobRawResponse rawResponse : pendingResponses) {
       try {
-        rawResponse.setProcessingStatus(JobRawResponse.ProcessingStatus.PROCESSING);
+        rawResponse.setProcessingStatus(ExternalJobRawResponse.ProcessingStatus.PROCESSING);
         rawResponseRepository.save(rawResponse);
 
         // Parse and save job details using portal service
@@ -116,12 +116,12 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
             rawResponse.getPortalName());
         portalService.parseAndSaveJobDetails(rawResponse, rawResponse.getRawResponse(), request);
 
-        rawResponse.setProcessingStatus(JobRawResponse.ProcessingStatus.COMPLETED);
+        rawResponse.setProcessingStatus(ExternalJobRawResponse.ProcessingStatus.COMPLETED);
         rawResponseRepository.save(rawResponse);
 
       } catch (Exception e) {
         logger.error("Error processing raw response ID: {}", rawResponse.getId(), e);
-        rawResponse.setProcessingStatus(JobRawResponse.ProcessingStatus.FAILED);
+        rawResponse.setProcessingStatus(ExternalJobRawResponse.ProcessingStatus.FAILED);
         rawResponse.setErrorMessage(e.getMessage());
         rawResponseRepository.save(rawResponse);
       }
@@ -131,10 +131,10 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
   @Override
   public void crawlAllActiveKeywords() {
     LocalDateTime threshold = LocalDateTime.now().minusHours(24);
-    List<JobCrawlKeyword> keywordsToCrawl = keywordRepository.findKeywordsReadyForCrawling(
+    List<ExternalJobCrawlKeyword> keywordsToCrawl = keywordRepository.findKeywordsReadyForCrawling(
         threshold);
 
-    for (JobCrawlKeyword keyword : keywordsToCrawl) {
+    for (ExternalJobCrawlKeyword keyword : keywordsToCrawl) {
       try {
         JobCrawlRequest request = new JobCrawlRequest();
         request.setKeyword(keyword.getKeyword());

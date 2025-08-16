@@ -3,11 +3,11 @@ package com.tymbl.jobs.service.impl;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.jobs.dto.JobCrawlRequest;
-import com.tymbl.jobs.entity.JobCrawlKeyword;
-import com.tymbl.jobs.entity.JobDetail;
-import com.tymbl.jobs.entity.JobRawResponse;
-import com.tymbl.jobs.repository.JobDetailRepository;
-import com.tymbl.jobs.repository.JobRawResponseRepository;
+import com.tymbl.jobs.entity.ExternalJobCrawlKeyword;
+import com.tymbl.jobs.entity.ExternalJobDetail;
+import com.tymbl.jobs.entity.ExternalJobRawResponse;
+import com.tymbl.jobs.repository.ExternalJobDetailRepository;
+import com.tymbl.jobs.repository.ExternalJobRawResponseRepository;
 import com.tymbl.jobs.service.PortalCrawlingService;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,10 +28,10 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   private static final Logger logger = LoggerFactory.getLogger(LinkedInPortalCrawlingService.class);
 
   @Autowired
-  private JobRawResponseRepository rawResponseRepository;
+  private ExternalJobRawResponseRepository rawResponseRepository;
 
   @Autowired
-  private JobDetailRepository jobDetailRepository;
+  private ExternalJobDetailRepository jobDetailRepository;
 
   @Autowired
   private RestTemplate restTemplate;
@@ -45,7 +45,7 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public String makePortalApiCall(JobCrawlKeyword keywordConfig, JobCrawlRequest request) {
+  public String makePortalApiCall(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request) {
     String url = buildPortalApiUrl(keywordConfig, request);
     HttpHeaders headers = getPortalHeaders(keywordConfig.getPortalName());
     HttpEntity<String> entity = new HttpEntity<>(headers);
@@ -64,24 +64,24 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public JobRawResponse saveRawResponse(JobCrawlKeyword keywordConfig, JobCrawlRequest request,
+  public ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request,
       String apiResponse) {
-    JobRawResponse rawResponse = new JobRawResponse();
+    ExternalJobRawResponse rawResponse = new ExternalJobRawResponse();
     rawResponse.setPortalName(keywordConfig.getPortalName());
     rawResponse.setKeyword(request.getKeyword());
     rawResponse.setRawResponse(apiResponse);
     rawResponse.setApiUrl(buildPortalApiUrl(keywordConfig, request));
     rawResponse.setHttpStatusCode(200);
     rawResponse.setResponseSizeBytes((long) apiResponse.length());
-    rawResponse.setProcessingStatus(JobRawResponse.ProcessingStatus.COMPLETED);
+    rawResponse.setProcessingStatus(ExternalJobRawResponse.ProcessingStatus.COMPLETED);
 
     return rawResponseRepository.save(rawResponse);
   }
 
   @Override
-  public List<JobDetail> parseAndSaveJobDetails(JobRawResponse rawResponse, String apiResponse,
+  public List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse, String apiResponse,
       JobCrawlRequest request) {
-    List<JobDetail> jobDetails = new ArrayList<>();
+    List<ExternalJobDetail> jobDetails = new ArrayList<>();
 
     try {
       JsonNode rootNode = objectMapper.readTree(apiResponse);
@@ -91,7 +91,7 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
 
     } catch (Exception e) {
       logger.error("Error parsing LinkedIn API response", e);
-      rawResponse.setProcessingStatus(JobRawResponse.ProcessingStatus.FAILED);
+      rawResponse.setProcessingStatus(ExternalJobRawResponse.ProcessingStatus.FAILED);
       rawResponse.setErrorMessage("Error parsing response: " + e.getMessage());
       rawResponseRepository.save(rawResponse);
     }
@@ -117,7 +117,7 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public String buildPortalApiUrl(JobCrawlKeyword keywordConfig, JobCrawlRequest request) {
+  public String buildPortalApiUrl(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request) {
     StringBuilder urlBuilder = new StringBuilder(keywordConfig.getPortalUrl());
 
     // LinkedIn-specific URL parameters

@@ -112,4 +112,7 @@ public interface JobRepository extends JpaRepository<Job, Long> {
   List<Job> findByIdInAndActiveTrue(List<Long> jobIds);
 
   long countByCompanyIdAndActiveTrue(Long companyId);
+
+  // Method for finding jobs by portal job ID (for external job sync)
+  Optional<Job> findByPortalJobId(String portalJobId);
 } 

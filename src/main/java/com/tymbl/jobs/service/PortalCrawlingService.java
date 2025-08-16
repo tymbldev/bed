@@ -1,9 +1,9 @@
 package com.tymbl.jobs.service;
 
 import com.tymbl.jobs.dto.JobCrawlRequest;
-import com.tymbl.jobs.entity.JobCrawlKeyword;
-import com.tymbl.jobs.entity.JobDetail;
-import com.tymbl.jobs.entity.JobRawResponse;
+import com.tymbl.jobs.entity.ExternalJobCrawlKeyword;
+import com.tymbl.jobs.entity.ExternalJobDetail;
+import com.tymbl.jobs.entity.ExternalJobRawResponse;
 import java.util.List;
 
 /**
@@ -27,7 +27,7 @@ public interface PortalCrawlingService {
    * @param request The crawl request
    * @return Raw API response as string
    */
-  String makePortalApiCall(JobCrawlKeyword keywordConfig, JobCrawlRequest request);
+  String makePortalApiCall(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request);
 
   /**
    * Save raw response from the portal
@@ -35,9 +35,9 @@ public interface PortalCrawlingService {
    * @param keywordConfig The keyword configuration
    * @param request The crawl request
    * @param apiResponse The raw API response
-   * @return Saved JobRawResponse entity
+   * @return Saved ExternalJobRawResponse entity
    */
-  JobRawResponse saveRawResponse(JobCrawlKeyword keywordConfig, JobCrawlRequest request,
+  ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request,
       String apiResponse);
 
   /**
@@ -46,9 +46,9 @@ public interface PortalCrawlingService {
    * @param rawResponse The raw response entity
    * @param apiResponse The raw API response string
    * @param request The crawl request
-   * @return List of parsed and saved JobDetail entities
+   * @return List of parsed and saved ExternalJobDetail entities
    */
-  List<JobDetail> parseAndSaveJobDetails(JobRawResponse rawResponse, String apiResponse,
+  List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse, String apiResponse,
       JobCrawlRequest request);
 
   /**
@@ -66,5 +66,5 @@ public interface PortalCrawlingService {
    * @param request The crawl request
    * @return Complete API URL for the portal
    */
-  String buildPortalApiUrl(JobCrawlKeyword keywordConfig, JobCrawlRequest request);
+  String buildPortalApiUrl(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request);
 }

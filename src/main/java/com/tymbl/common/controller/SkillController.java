@@ -10,8 +10,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import lombok.RequiredArgsConstructor;
-import org.springframework.cache.annotation.Cacheable;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,9 +37,25 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/skills")
 @RequiredArgsConstructor
 @Tag(name = "Skills", description = "Skills suggester endpoints")
+@Slf4j
 public class SkillController {
 
   private final SkillRepository skillRepository;
+  
+  // JVM cache for skills
+  private final ConcurrentMap<String, List<Skill>> skillsCache = new ConcurrentHashMap<>();
+  private final ConcurrentMap<String, Long> skillsCacheTimestamp = new ConcurrentHashMap<>();
+  
+  // Cache TTL in milliseconds (30 minutes)
+  private static final long CACHE_TTL = 30 * 60 * 1000L;
+
+  /**
+   * Check if cache entry is expired
+   */
+  private boolean isCacheExpired(String cacheKey) {
+    Long timestamp = skillsCacheTimestamp.get(cacheKey);
+    return timestamp == null || (System.currentTimeMillis() - timestamp) > CACHE_TTL;
+  }
 
   @GetMapping
   @Operation(
@@ -75,8 +93,27 @@ public class SkillController {
           )
       )
   })
-  @Cacheable(value = "skills")
   public ResponseEntity<List<Skill>> getAllSkills() {
-    return ResponseEntity.ok(skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc());
+    String cacheKey = "all_skills";
+    
+    // Check cache first
+    if (!isCacheExpired(cacheKey)) {
+      List<Skill> cachedSkills = skillsCache.get(cacheKey);
+      if (cachedSkills != null) {
+        log.debug("Returning skills from cache");
+        return ResponseEntity.ok(cachedSkills);
+      }
+    }
+    
+    // Cache miss or expired, fetch from database
+    log.debug("Cache miss for skills, fetching from database");
+    List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
+    
+    // Update cache
+    skillsCache.put(cacheKey, skills);
+    skillsCacheTimestamp.put(cacheKey, System.currentTimeMillis());
+    
+    log.debug("Skills cache updated with {} skills", skills.size());
+    return ResponseEntity.ok(skills);
   }
 } 

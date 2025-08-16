@@ -1,12 +1,12 @@
--- Add rank_order column to industries table
-ALTER TABLE industries ADD COLUMN rank_order INT DEFAULT 0;
+-- Add rank column to industries table
+ALTER TABLE industries ADD COLUMN rank INT DEFAULT 0;
 
 -- Update existing industries with rank based on their current order
 -- This will be used for sorting in the getIndustryWiseCompanies endpoint
-UPDATE industries SET rank_order = id WHERE rank_order IS NULL OR rank_order = 0;
+UPDATE industries SET rank = id WHERE rank IS NULL OR rank = 0;
 
--- Create index on rank_order for better performance
-CREATE INDEX idx_industries_rank_order ON industries(rank_order);
+-- Create index on rank for better performance
+CREATE INDEX idx_industries_rank ON industries(rank);
 
 -- Verify the changes
-SELECT id, name, rank_order FROM industries ORDER BY rank_order;
+SELECT id, name, rank FROM industries ORDER BY rank;

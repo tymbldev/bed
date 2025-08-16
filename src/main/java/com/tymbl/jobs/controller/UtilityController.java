@@ -60,7 +60,7 @@ public class UtilityController {
   }
 
   // --- Job Admin Operations ---
-  @PostMapping("/job-admin/reindex")
+    @PostMapping("/job-admin/reindex")
   @Operation(
       summary = "Reindex all jobs to Elasticsearch",
       description = "Replaces all existing data in Elasticsearch with current job data from the database. This is an admin/on-demand operation."
