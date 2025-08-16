@@ -380,27 +380,7 @@
             }
           ]
         },
-        {
-          "name": "Manual Crawl by Keyword and Portal",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai-jobs/crawl/{{default_keyword}}/{{foundit_portal}}",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai-jobs",
-                "crawl",
-                "{{default_keyword}}",
-                "{{foundit_portal}}"
-              ]
-            }
-          }
-        },
+
         {
           "name": "Crawl All Active Keywords",
           "request": {
@@ -421,12 +401,12 @@
           }
         },
         {
-          "name": "Process Pending Responses",
+          "name": "Sync External Raw Responses",
           "request": {
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/ai-jobs/process-pending",
+              "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-raw",
               "host": [
                 "{{base_url}}"
               ],
@@ -434,113 +414,13 @@
                 "api",
                 "v1",
                 "ai-jobs",
-                "process-pending"
+                "sync-external-raw"
               ]
             }
           }
         },
-        {
-          "name": "Get Crawling Statistics",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai-jobs/stats",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai-jobs",
-                "stats"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Success Response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/ai-jobs/stats",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "ai-jobs",
-                    "stats"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Crawling statistics retrieved successfully\",\n  \"totalJobsFound\": 1250,\n  \"rawResponseId\": 45,\n  \"processedJobsCount\": 1250,\n  \"portalName\": null,\n  \"keyword\": null,\n  \"processingTimeMs\": null\n}"
-            }
-          ]
-        },
-        {
-          "name": "Get All Keywords",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai-jobs/keywords",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai-jobs",
-                "keywords"
-              ]
-            }
-          },
-          "response": [
-            {
-              "name": "Success Response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/ai-jobs/keywords",
-                  "host": [
-                    "{{base_url}}"
-                  ],
-                  "path": [
-                    "api",
-                    "v1",
-                    "ai-jobs",
-                    "keywords"
-                  ]
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "[\n  \"Keywords endpoint - implementation needed\"\n]"
-            }
-          ]
-        },
+
+
         {
           "name": "Add New Keyword",
           "request": {
@@ -1982,80 +1862,7 @@
             }
           }
         },
-        {
-          "name": "Reset Company Flags (All Companies)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Resets flags for all companies\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,logoUrlFetched,websiteFetched",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "companies",
-                "reset-flags"
-              ],
-              "query": [
-                {
-                  "key": "flags",
-                  "value": "is_crawled,industry_processed,content_shortened,similar_companies_processed,cleanup_processed,logoUrlFetched,websiteFetched"
-                }
-              ]
-            }
-          }
-        },
-        {
-          "name": "Reset Company Flags (Specific Company)",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Resets flags for specific company\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/companies/reset-flags?flags=is_crawled,industry_processed,logoUrlFetched,websiteFetched&companyName=Google",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "companies",
-                "reset-flags"
-              ],
-              "query": [
-                {
-                  "key": "flags",
-                  "value": "is_crawled,industry_processed,logoUrlFetched,websiteFetched"
-                },
-                {
-                  "key": "companyName",
-                  "value": "Google"
-                }
-              ]
-            }
-          }
-        },
+
         {
           "name": "Fetch Websites for All Companies",
           "request": {
@@ -2318,98 +2125,9 @@
             }
           }
                 },
-        {
-          "name": "Generate Designations for Specific Department",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdowns/designations/generate-for-department/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "dropdowns",
-                "designations",
-                "generate-for-department",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Generate Cities for Specific Country",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdowns/cities/generate-for-country/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "dropdowns",
-                "cities",
-                "generate-for-country",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Reset Cities Processed Flag",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": ""
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdowns/cities/reset-processed-flag",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "ai",
-                "dropdowns",
-                "cities",
-                "reset-processed-flag"
-              ]
-            }
-          }
-        },
+
+
+
         {
           "name": "Generate Skills and Save",
           "request": {

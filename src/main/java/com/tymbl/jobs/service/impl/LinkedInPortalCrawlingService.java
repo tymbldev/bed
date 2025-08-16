@@ -31,7 +31,7 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   private ExternalJobRawResponseRepository rawResponseRepository;
 
   @Autowired
-  private ExternalJobDetailRepository jobDetailRepository;
+  private ExternalJobDetailRepository externalJobDetailRepository;
 
   @Autowired
   private RestTemplate restTemplate;

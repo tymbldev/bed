@@ -121,6 +121,9 @@ public class Job {
   @UpdateTimestamp
   private LocalDateTime updatedAt;
 
+  @Column(name = "posted_at")
+  private LocalDateTime postedAt;
+
   @Column(name = "unique_url", unique = true)
   private String uniqueUrl;
 

@@ -30,12 +30,14 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
   private ExternalJobRawResponseRepository rawResponseRepository;
 
   @Autowired
-  private ExternalJobDetailRepository jobDetailRepository;
+  private ExternalJobDetailRepository externalJobDetailRepository;
 
   @Autowired
   private PortalCrawlingFactory portalFactory;
 
-  @Override
+  /**
+   * Crawl jobs for a specific keyword and portal
+   */
   public JobCrawlResponse crawlJobs(JobCrawlRequest request) {
     long startTime = System.currentTimeMillis();
     JobCrawlResponse response = new JobCrawlResponse();
@@ -150,32 +152,5 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
             keyword.getPortalName(), e);
       }
     }
-  }
-
-  @Override
-  public JobCrawlResponse manualCrawl(String keyword, String portalName) {
-    JobCrawlRequest request = new JobCrawlRequest();
-    request.setKeyword(keyword);
-    request.setPortalName(portalName);
-
-    return crawlJobs(request);
-  }
-
-  @Override
-  public JobCrawlResponse getCrawlingStats() {
-    JobCrawlResponse response = new JobCrawlResponse();
-
-    long totalKeywords = keywordRepository.count();
-    long activeKeywords = keywordRepository.findByIsActiveTrue().size();
-    long totalRawResponses = rawResponseRepository.count();
-    long totalJobDetails = jobDetailRepository.count();
-
-    response.setStatus("SUCCESS");
-    response.setMessage("Crawling statistics retrieved successfully");
-    response.setTotalJobsFound(totalJobDetails);
-    response.setRawResponseId(totalRawResponses);
-    response.setProcessedJobsCount(totalJobDetails);
-
-    return response;
   }
 }

@@ -102,51 +102,7 @@ public class AIDropdownController {
     }
   }
 
-  @PostMapping("/designations/generate-for-department/{departmentId}")
-  @Operation(
-      summary = "Generate designations for a specific department using GenAI",
-      description =
-          "Uses Gemini AI to generate comprehensive job designations for a specific department. " +
-              "Generates 20-35 valid designations covering entry-level, mid-level, senior-level, and executive positions."
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Designations generated and saved successfully for the department",
-          content = @Content(
-              examples = @ExampleObject(
-                  value = "{\n" +
-                      "  \"success\": true,\n" +
-                      "  \"departmentId\": 1,\n" +
-                      "  \"departmentName\": \"Engineering\",\n" +
-                      "  \"designationsGenerated\": 25,\n" +
-                      "  \"designationsSaved\": 23,\n" +
-                      "  \"designations\": [\"Software Engineer\", \"Senior Software Engineer\", \"Lead Engineer\"]\n"
-                      +
-                      "}"
-              )
-          )
-      ),
-      @ApiResponse(responseCode = "404", description = "Department not found"),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  public ResponseEntity<Map<String, Object>> generateDesignationsForDepartment(
-      @Parameter(description = "Department ID")
-      @PathVariable Long departmentId) {
-    try {
-      log.info("Starting designation generation for department ID: {}", departmentId);
-      // This method doesn't exist, so we'll skip it for now
-      Map<String, Object> result = new HashMap<>();
-      result.put("message", "Designation generation for specific department not implemented yet");
-      result.put("departmentId", departmentId);
-      return ResponseEntity.ok(result);
-    } catch (Exception e) {
-      log.error("Error generating designations for department ID: {}", departmentId, e);
-      Map<String, Object> errorResponse = new HashMap<>();
-      errorResponse.put("error", "Error generating designations for department: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
-  }
+
 
   @PostMapping("/designations/generate-similar")
   @Operation(
@@ -253,89 +209,9 @@ public class AIDropdownController {
     }
   }
 
-  @PostMapping("/cities/generate-for-country/{countryId}")
-  @Operation(
-      summary = "Generate cities for a specific country using GenAI",
-      description = "Uses Gemini AI to generate major cities for a specific country. " +
-          "Only processes if the country hasn't been processed yet (cities_processed = false). " +
-          "Generates 15-25 major cities focusing on business, technology, and employment opportunities."
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Cities generated and saved successfully for the country",
-          content = @Content(
-              examples = @ExampleObject(
-                  value = "{\n" +
-                      "  \"success\": true,\n" +
-                      "  \"countryId\": 1,\n" +
-                      "  \"countryName\": \"United States\",\n" +
-                      "  \"citiesGenerated\": 20,\n" +
-                      "  \"citiesSaved\": 18,\n" +
-                      "  \"cities\": [\"New York\", \"San Francisco\", \"Los Angeles\", \"Chicago\"]\n"
-                      +
-                      "}"
-              )
-          )
-      ),
-      @ApiResponse(responseCode = "404", description = "Country not found"),
-      @ApiResponse(responseCode = "409", description = "Country already processed"),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  public ResponseEntity<Map<String, Object>> generateCitiesForCountry(
-      @Parameter(description = "Country ID")
-      @PathVariable Long countryId) {
-    try {
-      log.info("Starting city generation for country ID: {}", countryId);
-      // This method doesn't exist, so we'll skip it for now
-      Map<String, Object> result = new HashMap<>();
-      result.put("message", "City generation for specific country not implemented yet");
-      result.put("countryId", countryId);
-      return ResponseEntity.ok(result);
-    } catch (Exception e) {
-      log.error("Error generating cities for country ID: {}", countryId, e);
-      Map<String, Object> errorResponse = new HashMap<>();
-      errorResponse.put("error", "Error generating cities for country: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
-  }
 
-  @PostMapping("/cities/reset-processed-flag")
-  @Operation(
-      summary = "Reset cities processed flag for all countries",
-      description = "Resets the cities_processed flag to false for all countries, allowing reprocessing of city generation"
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Cities processed flag reset successfully",
-          content = @Content(
-              examples = @ExampleObject(
-                  value = "{\n" +
-                      "  \"message\": \"Cities processed flag reset successfully for all countries\",\n"
-                      +
-                      "  \"status\": \"SUCCESS\"\n" +
-                      "}"
-              )
-          )
-      ),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  public ResponseEntity<Map<String, Object>> resetCitiesProcessedFlag() {
-    try {
-      log.info("Resetting cities processed flag for all countries");
-      // This method doesn't exist, so we'll skip it for now
-      Map<String, Object> result = new HashMap<>();
-      result.put("message", "Cities processed flag reset not implemented yet");
-      result.put("status", "SUCCESS");
-      return ResponseEntity.ok(result);
-    } catch (Exception e) {
-      log.error("Error resetting cities processed flag", e);
-      Map<String, Object> errorResponse = new HashMap<>();
-      errorResponse.put("error", "Error resetting cities processed flag: " + e.getMessage());
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
-    }
-  }
+
+
 
   // ============================================================================
   // SKILL GENERATION ENDPOINTS

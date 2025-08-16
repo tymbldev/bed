@@ -21,7 +21,9 @@ public class SimilarContent {
 
   public enum ContentType {
     COMPANY,
-    DESIGNATION
+    DESIGNATION,
+    CITY,
+    COUNTRY
   }
 
   @Id

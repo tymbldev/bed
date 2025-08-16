@@ -35,7 +35,7 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
   private ExternalJobRawResponseRepository rawResponseRepository;
 
   @Autowired
-  private ExternalJobDetailRepository jobDetailRepository;
+  private ExternalJobDetailRepository externalJobDetailRepository;
 
   @Autowired
   private RestTemplate restTemplate;
@@ -97,11 +97,11 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
             ExternalJobDetail jobDetail = parseFounditJobNode(jobNode, rawResponse, request);
 
             // Check if job already exists
-            Optional<ExternalJobDetail> existingJob = jobDetailRepository.findByPortalJobIdAndPortalName(
+            Optional<ExternalJobDetail> existingJob = externalJobDetailRepository.findByPortalJobIdAndPortalName(
                 jobDetail.getPortalJobId(), jobDetail.getPortalName());
 
             if (!existingJob.isPresent()) {
-              jobDetails.add(jobDetailRepository.save(jobDetail));
+              jobDetails.add(externalJobDetailRepository.save(jobDetail));
             }
           } catch (Exception e) {
             logger.warn("Error parsing Foundit job node: {}", e.getMessage());
@@ -158,7 +158,7 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
     // Extract basic job information
     jobDetail.setPortalJobId(jobNode.has("id") ? jobNode.get("id").asText() : null);
     jobDetail.setPortalName(rawResponse.getPortalName());
-    jobDetail.setJobTitle(jobNode.has("title") ? jobNode.get("title").asText() : null);
+    jobDetail.setJobTitle(jobNode.has("title") ? jobNode.get("title").asText().replace("(IND)","").trim() : null);
     jobDetail.setKeywordUsed(request.getKeyword());
     jobDetail.setRawResponseId(rawResponse.getId());
 
@@ -181,6 +181,7 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
 
         StringBuilder locationStr = new StringBuilder();
           if (city != null) {
+              jobDetail.setCityName(city);
               locationStr.append(city);
           }
         if (state != null) {
@@ -190,6 +191,7 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
           locationStr.append(state);
         }
         if (country != null) {
+          jobDetail.setCountryName(country);
             if (locationStr.length() > 0) {
                 locationStr.append(", ");
             }
