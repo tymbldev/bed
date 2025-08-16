@@ -135,7 +135,8 @@ public class CompanyService {
 
   @Transactional(readOnly = true)
   public List<Company> getAllCompaniesForDropdown() {
-    return companyRepository.findAll();
+    // Use cached data from DropdownService instead of direct database call
+    return dropdownService.getAllCompanies();
   }
 
   /**
@@ -145,7 +146,8 @@ public class CompanyService {
    */
   @Transactional(readOnly = true)
   public List<String> getAllCompanyNames() {
-    return companyRepository.findAll().stream()
+    // Use cached data from DropdownService instead of direct database call
+    return dropdownService.getAllCompanies().stream()
         .map(Company::getName)
         .collect(Collectors.toList());
   }

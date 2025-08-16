@@ -1227,6 +1227,187 @@
               ]
             }
           }
+        },
+        {
+          "name": "Get All Locations",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "locations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Create Location",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"San Francisco\",\n  \"description\": \"San Francisco Bay Area\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/locations",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "locations"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get All Degrees",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/degrees",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "degrees"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Currency by ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/currencies/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "currencies",
+                "1"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Currency by Code",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/currencies/code/USD",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "currencies",
+                "code",
+                "USD"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Industries Map",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/industries-map",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "industries-map"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Designations Map",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/designations-map",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "designations-map"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get Companies Map",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/companies-map",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "companies-map"
+              ]
+            }
+          }
+        },
+        {
+          "name": "Autosuggest",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/v1/dropdowns/autosuggest?query=google",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "dropdowns",
+                "autosuggest"
+              ],
+              "query": [
+                {
+                  "key": "query",
+                  "value": "google"
+                }
+              ]
+            }
+          }
         }
       ]
     },
@@ -3421,137 +3602,7 @@
         }
       ]
     },
-    {
-      "name": "Dropdown Controller",
-      "item": [
-        {
-          "name": "Get All Designations",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/designations",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "designations"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Cities",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/cities",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "cities"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Countries",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/countries",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "countries"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Industries",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/industries",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "industries"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Currencies",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/currencies",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "currencies"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Departments",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/departments",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "departments"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get All Companies",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/dropdown/companies",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "dropdown",
-                "companies"
-              ]
-            }
-          }
-        }
-      ]
-    },
+
     {
       "name": "Interview Controller",
       "item": [

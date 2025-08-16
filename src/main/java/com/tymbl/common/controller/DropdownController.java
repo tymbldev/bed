@@ -1,6 +1,8 @@
 package com.tymbl.common.controller;
 
 import com.tymbl.common.dto.IndustryWiseCompaniesDTO;
+import com.tymbl.common.entity.City;
+import com.tymbl.common.entity.Country;
 import com.tymbl.common.entity.Currency;
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
@@ -64,6 +66,86 @@ public class DropdownController {
   private final CompanyService companyService;
   private final ElasticsearchIndexingService elasticsearchIndexingService;
 
+  // DTOs for lightweight responses
+  public static class DepartmentDTO {
+    private Long id;
+    private String name;
+
+    public DepartmentDTO(Long id, String name) {
+      this.id = id;
+      this.name = name;
+    }
+
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public void setId(Long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+  }
+
+  public static class DesignationDTO {
+    private Long id;
+    private String name;
+
+    public DesignationDTO(Long id, String name) {
+      this.id = id;
+      this.name = name;
+    }
+
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public void setId(Long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+  }
+
+  public static class IndustryDTO {
+    private Long id;
+    private String name;
+
+    public IndustryDTO(Long id, String name) {
+      this.id = id;
+      this.name = name;
+    }
+
+    public Long getId() { return id; }
+    public String getName() { return name; }
+    public void setId(Long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+  }
+
+  public static class CompanyDTO {
+    private Long companyId;
+    private String companyName;
+    private String logoUrl;
+    private String website;
+    private String headquarters;
+    private Integer activeJobCount;
+
+    public CompanyDTO(Long companyId, String companyName, String logoUrl, String website, String headquarters, Integer activeJobCount) {
+      this.companyId = companyId;
+      this.companyName = companyName;
+      this.logoUrl = logoUrl;
+      this.website = website;
+      this.headquarters = headquarters;
+      this.activeJobCount = activeJobCount;
+    }
+
+    // Getters
+    public Long getCompanyId() { return companyId; }
+    public String getCompanyName() { return companyName; }
+    public String getLogoUrl() { return logoUrl; }
+    public String getWebsite() { return website; }
+    public String getHeadquarters() { return headquarters; }
+    public Integer getActiveJobCount() { return activeJobCount; }
+
+    // Setters
+    public void setCompanyId(Long companyId) { this.companyId = companyId; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
+    public void setWebsite(String website) { this.website = website; }
+    public void setHeadquarters(String headquarters) { this.headquarters = headquarters; }
+    public void setActiveJobCount(Integer activeJobCount) { this.activeJobCount = activeJobCount; }
+  }
+
   // Department endpoints
   @GetMapping("/departments")
   @Operation(summary = "Get all departments", description = "Returns a list of all departments for dropdown selection")
@@ -72,31 +154,32 @@ public class DropdownController {
           responseCode = "200",
           description = "List of departments retrieved successfully",
           content = @Content(
-              schema = @Schema(implementation = Department.class),
+              schema = @Schema(implementation = DepartmentDTO.class),
               examples = @ExampleObject(
                   value = "[\n" +
                       "  {\n" +
                       "    \"id\": 1,\n" +
-                      "    \"name\": \"Engineering\",\n" +
-                      "    \"description\": \"Software development and engineering\"\n" +
+                      "    \"name\": \"Engineering\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 2,\n" +
-                      "    \"name\": \"Product Management\",\n" +
-                      "    \"description\": \"Product planning and management\"\n" +
+                      "    \"name\": \"Product Management\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 3,\n" +
-                      "    \"name\": \"Human Resources\",\n" +
-                      "    \"description\": \"HR and talent management\"\n" +
+                      "    \"name\": \"Human Resources\"\n" +
                       "  }\n" +
                       "]"
               )
           )
       )
   })
-  public ResponseEntity<List<Department>> getAllDepartments() {
-    return ResponseEntity.ok(dropdownService.getAllDepartments());
+  public ResponseEntity<List<DepartmentDTO>> getAllDepartments() {
+    List<Department> departments = dropdownService.getAllDepartments();
+    List<DepartmentDTO> departmentDTOs = departments.stream()
+        .map(dept -> new DepartmentDTO(dept.getId(), dept.getName()))
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(departmentDTOs);
   }
 
   @PostMapping("/departments")
@@ -188,31 +271,32 @@ public class DropdownController {
           responseCode = "200",
           description = "List of designations retrieved successfully",
           content = @Content(
-              schema = @Schema(implementation = Designation.class),
+              schema = @Schema(implementation = DesignationDTO.class),
               examples = @ExampleObject(
                   value = "[\n" +
                       "  {\n" +
                       "    \"id\": 1,\n" +
-                      "    \"name\": \"Software Engineer\",\n" +
-                      "    \"description\": \"Entry-level software development position\"\n" +
+                      "    \"name\": \"Software Engineer\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 2,\n" +
-                      "    \"name\": \"Senior Software Engineer\",\n" +
-                      "    \"description\": \"Experienced software development position\"\n" +
+                      "    \"name\": \"Senior Software Engineer\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 3,\n" +
-                      "    \"name\": \"Technical Lead\",\n" +
-                      "    \"description\": \"Team leadership position\"\n" +
+                      "    \"name\": \"Technical Lead\"\n" +
                       "  }\n" +
                       "]"
               )
           )
       )
   })
-  public ResponseEntity<List<Designation>> getAllDesignations() {
-    return ResponseEntity.ok(dropdownService.getAllDesignations());
+  public ResponseEntity<List<DesignationDTO>> getAllDesignations() {
+    List<Designation> designations = dropdownService.getAllDesignations();
+    List<DesignationDTO> designationDTOs = designations.stream()
+        .map(desig -> new DesignationDTO(desig.getId(), desig.getName()))
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(designationDTOs);
   }
 
   @PostMapping("/designations")
@@ -247,31 +331,32 @@ public class DropdownController {
           responseCode = "200",
           description = "List of industries retrieved successfully",
           content = @Content(
-              schema = @Schema(implementation = Industry.class),
+              schema = @Schema(implementation = IndustryDTO.class),
               examples = @ExampleObject(
                   value = "[\n" +
                       "  {\n" +
                       "    \"id\": 1,\n" +
-                      "    \"name\": \"Information Technology & Services\",\n" +
-                      "    \"description\": \"Technology and IT services industry\"\n" +
+                      "    \"name\": \"Information Technology & Services\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 2,\n" +
-                      "    \"name\": \"Software Development\",\n" +
-                      "    \"description\": \"Software development and programming\"\n" +
+                      "    \"name\": \"Software Development\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 3,\n" +
-                      "    \"name\": \"Financial Services\",\n" +
-                      "    \"description\": \"Banking, insurance, and financial services\"\n" +
+                      "    \"name\": \"Financial Services\"\n" +
                       "  }\n" +
                       "]"
               )
           )
       )
   })
-  public ResponseEntity<List<Industry>> getAllIndustries() {
-    return ResponseEntity.ok(dropdownService.getAllIndustries());
+  public ResponseEntity<List<IndustryDTO>> getAllIndustries() {
+    List<Industry> industries = dropdownService.getAllIndustries();
+    List<IndustryDTO> industryDTOs = industries.stream()
+        .map(industry -> new IndustryDTO(industry.getId(), industry.getName()))
+        .collect(Collectors.toList());
+    return ResponseEntity.ok(industryDTOs);
   }
 
   @PostMapping("/industries")
@@ -575,15 +660,28 @@ public class DropdownController {
           responseCode = "200",
           description = "List of companies for the industry",
           content = @Content(
-              schema = @Schema(implementation = IndustryWiseCompaniesDTO.TopCompanyDTO.class)
+              schema = @Schema(implementation = CompanyDTO.class)
           )
       ),
       @ApiResponse(responseCode = "404", description = "Industry not found")
   })
-  public ResponseEntity<List<IndustryWiseCompaniesDTO.TopCompanyDTO>> getCompaniesByIndustry(
+  public ResponseEntity<List<CompanyDTO>> getCompaniesByIndustry(
       @PathVariable Long industryId) {
-    List<IndustryWiseCompaniesDTO.TopCompanyDTO> companies = dropdownService.getCompaniesByIndustry(
+    List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = dropdownService.getCompaniesByIndustry(
         industryId);
+    
+    // Convert to CompanyDTO
+    List<CompanyDTO> companies = topCompanies.stream()
+        .map(topCompany -> new CompanyDTO(
+            topCompany.getCompanyId(),
+            topCompany.getCompanyName(),
+            topCompany.getLogoUrl(),
+            topCompany.getWebsite(),
+            topCompany.getHeadquarters(),
+            topCompany.getActiveJobCount()
+        ))
+        .collect(Collectors.toList());
+    
     return ResponseEntity.ok(companies);
   }
 

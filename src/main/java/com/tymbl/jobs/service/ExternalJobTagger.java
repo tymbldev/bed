@@ -495,22 +495,34 @@ public class ExternalJobTagger {
   private String createCompanyMatchingPrompt(String companyName, List<com.tymbl.jobs.entity.Company> companies) {
     StringBuilder prompt = new StringBuilder();
     prompt.append("Given the company name '").append(companyName).append("', ");
-    prompt.append("find the EXACT company from the list below that represents the SAME company. ");
-    prompt.append("Look for:\n");
-    prompt.append("- Exact name matches\n");
-    prompt.append("- Official company names vs. common abbreviations (e.g., 'IBM' vs 'International Business Machines')\n");
-    prompt.append("- Legal entity names vs. trading names\n");
-    prompt.append("- Parent company names vs. subsidiary names\n");
-    prompt.append("- Company name variations due to mergers, acquisitions, or rebranding\n\n");
-    prompt.append("IMPORTANT: Only return a company if it's the SAME company, not just a similar company in the same industry. ");
-    prompt.append("If no exact match or synonym exists, respond with 'NO_MATCH'.\n\n");
+    prompt.append("find the BEST MATCHING company from the list below. ");
+    prompt.append("Consider the following matching scenarios:\n\n");
+    prompt.append("1. **Exact Matches**: Perfect name matches\n");
+    prompt.append("2. **Parent Company**: If the input is a subsidiary, division, or regional office, find the parent company\n");
+    prompt.append("   Examples: 'Walmart Global Tech India' → 'Walmart', 'Microsoft India' → 'Microsoft'\n");
+    prompt.append("3. **Abbreviations**: Official names vs. common abbreviations\n");
+    prompt.append("   Examples: 'IBM' vs 'International Business Machines', 'HP' vs 'Hewlett-Packard'\n");
+    prompt.append("4. **Legal vs. Trading Names**: Company's legal name vs. how it's commonly known\n");
+    prompt.append("5. **Mergers & Acquisitions**: Company names that changed due to business events\n");
+    prompt.append("6. **Regional Variations**: Same company with different names in different regions\n\n");
+    prompt.append("IMPORTANT GUIDELINES:\n");
+    prompt.append("- If the input contains the main company name (e.g., 'Walmart' in 'Walmart Global Tech India'), return that company\n");
+    prompt.append("- If it's clearly a subsidiary/division of a known company, return the parent company\n");
+    prompt.append("- If no clear match exists, respond with 'NO_MATCH'\n");
+    prompt.append("- Don't return companies that are just similar in the same industry\n\n");
     prompt.append("Available companies:\n");
     
+    int counter = 1;
     for (com.tymbl.jobs.entity.Company company : companies) {
-      prompt.append("- ").append(company.getName()).append("\n");
+      prompt.append(counter++).append(". ").append(company.getName()).append("\n");
     }
     
-    prompt.append("\nRespond with ONLY the exact company name from the list, or 'NO_MATCH' if none represent the same company.");
+    prompt.append("\nRESPONSE INSTRUCTIONS:\n");
+    prompt.append("- Return ONLY the exact company name from the numbered list above\n");
+    prompt.append("- If no suitable match is found, respond with exactly 'NO_MATCH' (no quotes, no extra text)\n");
+    prompt.append("- Do not include any explanations, reasoning, or additional text\n");
+    prompt.append("- Do not include the number from the list, only the company name\n");
+    prompt.append("- Examples of valid responses: 'Microsoft', 'Walmart', 'NO_MATCH'\n");
     
     return prompt.toString();
   }
@@ -521,22 +533,35 @@ public class ExternalJobTagger {
   private String createDesignationMatchingPrompt(String jobTitle, List<Designation> designations) {
     StringBuilder prompt = new StringBuilder();
     prompt.append("Given the job title '").append(jobTitle).append("', ");
-    prompt.append("find the EXACT designation from the list below that represents the SAME job role. ");
-    prompt.append("Look for:\n");
-    prompt.append("- Exact title matches\n");
-    prompt.append("- Official job titles vs. common variations (e.g., 'Software Engineer' vs 'Software Developer')\n");
-    prompt.append("- Industry-standard titles vs. company-specific titles\n");
-    prompt.append("- Seniority variations (e.g., 'Senior Developer' vs 'Developer')\n");
-    prompt.append("- Regional variations (e.g., 'Programmer' vs 'Developer')\n\n");
-    prompt.append("IMPORTANT: Only return a designation if it represents the SAME job role, not just a similar role in the same field. ");
-    prompt.append("If no exact match or synonym exists, respond with 'NO_MATCH'.\n\n");
+    prompt.append("find the BEST MATCHING designation from the list below. ");
+    prompt.append("Consider the following matching scenarios:\n\n");
+    prompt.append("1. **Exact Matches**: Perfect title matches\n");
+    prompt.append("2. **Core Role Variations**: Same job role with different titles\n");
+    prompt.append("   Examples: 'Software Engineer' vs 'Software Developer', 'Programmer' vs 'Developer'\n");
+    prompt.append("3. **Seniority Levels**: Different levels of the same role\n");
+    prompt.append("   Examples: 'Senior Developer' vs 'Developer', 'Lead Engineer' vs 'Engineer'\n");
+    prompt.append("4. **Industry Standards**: Official titles vs. company-specific variations\n");
+    prompt.append("5. **Regional Variations**: Same role with different names in different regions\n");
+    prompt.append("6. **Modern vs. Traditional**: Contemporary titles vs. legacy titles\n\n");
+    prompt.append("IMPORTANT GUIDELINES:\n");
+    prompt.append("- If the input contains the core role (e.g., 'Developer' in 'Senior Full Stack Developer'), return the closest match\n");
+    prompt.append("- Consider that 'Software Engineer' and 'Software Developer' are essentially the same role\n");
+    prompt.append("- Seniority differences (Junior/Senior/Lead) should still match the base role\n");
+    prompt.append("- If no clear match exists, respond with 'NO_MATCH'\n");
+    prompt.append("- Don't return designations that are just similar roles in the same field\n\n");
     prompt.append("Available designations:\n");
     
+    int counter = 1;
     for (Designation designation : designations) {
-      prompt.append("- ").append(designation.getName()).append("\n");
+      prompt.append(counter++).append(". ").append(designation.getName()).append("\n");
     }
     
-    prompt.append("\nRespond with ONLY the exact designation name from the list, or 'NO_MATCH' if none represent the same job role.");
+    prompt.append("\nRESPONSE INSTRUCTIONS:\n");
+    prompt.append("- Return ONLY the exact designation name from the numbered list above\n");
+    prompt.append("- If no suitable match is found, respond with exactly 'NO_MATCH' (no quotes, no extra text)\n");
+    prompt.append("- Do not include any explanations, reasoning, or additional text\n");
+    prompt.append("- Do not include the number from the list, only the designation name\n");
+    prompt.append("- Examples of valid responses: 'Software Engineer', 'Developer', 'NO_MATCH'\n");
     
     return prompt.toString();
   }

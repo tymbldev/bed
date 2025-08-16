@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -57,43 +58,58 @@ public class SkillController {
     return timestamp == null || (System.currentTimeMillis() - timestamp) > CACHE_TTL;
   }
 
+  /**
+   * DTO for skills with only id and name
+   */
+  public static class SkillDTO {
+    private Long id;
+    private String name;
+
+    public SkillDTO(Long id, String name) {
+      this.id = id;
+      this.name = name;
+    }
+
+    // Getters
+    public Long getId() { return id; }
+    public String getName() { return name; }
+
+    // Setters
+    public void setId(Long id) { this.id = id; }
+    public void setName(String name) { this.name = name; }
+  }
+
   @GetMapping
   @Operation(
       summary = "Get all skills",
-      description = "Returns a list of all available skills sorted by usage count (descending) and name (ascending). Results are cached for better performance."
+      description = "Returns a list of all available skills with only id and name fields, sorted by usage count (descending) and name (ascending). Results are cached for better performance."
   )
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
           description = "Successfully retrieved skills list",
           content = @Content(
-              schema = @Schema(implementation = Skill.class),
+              schema = @Schema(implementation = SkillDTO.class),
               examples = @ExampleObject(
                   value = "[\n" +
                       "  {\n" +
                       "    \"id\": 1,\n" +
-                      "    \"name\": \"Java\",\n" +
-                      "    \"usageCount\": 1000,\n" +
-                      "    \"category\": \"Programming Language\"\n" +
+                      "    \"name\": \"Java\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 2,\n" +
-                      "    \"name\": \"Spring Boot\",\n" +
-                      "    \"usageCount\": 800,\n" +
-                      "    \"category\": \"Framework\"\n" +
+                      "    \"name\": \"Spring Boot\"\n" +
                       "  },\n" +
                       "  {\n" +
                       "    \"id\": 3,\n" +
-                      "    \"name\": \"AWS\",\n" +
-                      "    \"usageCount\": 600,\n" +
-                      "    \"category\": \"Cloud Platform\"\n" +
+                      "    \"name\": \"AWS\"\n" +
                       "  }\n" +
                       "]"
               )
           )
       )
   })
-  public ResponseEntity<List<Skill>> getAllSkills() {
+  public ResponseEntity<List<SkillDTO>> getAllSkills() {
     String cacheKey = "all_skills";
     
     // Check cache first
@@ -101,7 +117,10 @@ public class SkillController {
       List<Skill> cachedSkills = skillsCache.get(cacheKey);
       if (cachedSkills != null) {
         log.debug("Returning skills from cache");
-        return ResponseEntity.ok(cachedSkills);
+        List<SkillDTO> skillDTOs = cachedSkills.stream()
+            .map(skill -> new SkillDTO(skill.getId(), skill.getName()))
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(skillDTOs);
       }
     }
     
@@ -113,7 +132,12 @@ public class SkillController {
     skillsCache.put(cacheKey, skills);
     skillsCacheTimestamp.put(cacheKey, System.currentTimeMillis());
     
+    // Convert to DTOs
+    List<SkillDTO> skillDTOs = skills.stream()
+        .map(skill -> new SkillDTO(skill.getId(), skill.getName()))
+        .collect(Collectors.toList());
+    
     log.debug("Skills cache updated with {} skills", skills.size());
-    return ResponseEntity.ok(skills);
+    return ResponseEntity.ok(skillDTOs);
   }
 } 
