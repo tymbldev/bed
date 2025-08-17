@@ -104,22 +104,22 @@ public class ElasticsearchJobService {
       }
 
       // City filter
-      if (cityId != null) {
+      if (cityId != null && cityId != 0) {
         boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("cityId").value(cityId))));
       }
 
       // Country filter
-      if (countryId != null) {
+      if (countryId != null && countryId != 0) {
         boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("countryId").value(countryId))));
       }
 
       // Company filter
-      if (companyId != null) {
+      if (companyId != null && companyId != 0) {
         boolQueryBuilder.filter(Query.of(q -> q.term(t -> t.field("companyId").value(companyId))));
       }
 
       // Designation filter
-      if (designationId != null) {
+      if (designationId != null && designationId != 0) {
         boolQueryBuilder.filter(
             Query.of(q -> q.term(t -> t.field("designationId").value(designationId))));
       }
@@ -503,7 +503,7 @@ public class ElasticsearchJobService {
           .size(0) // We don't need the actual documents, just the aggregation results
           .aggregations("locations", a -> a
               .terms(t -> t
-                  .field("cityName")
+                  .field("cityName.keyword")
                   .size(1000) // Get up to 1000 unique cities
               )
           )
@@ -516,16 +516,13 @@ public class ElasticsearchJobService {
       List<Map<String, Object>> locationCombinations = new ArrayList<>();
 
       try {
-        // Parse the aggregation response
-        Map<String, Object> responseMap = objectMapper.convertValue(response, Map.class);
-        Map<String, Object> aggregations = (Map<String, Object>) responseMap.get("aggregations");
-
+        // Parse the aggregation response using direct casting
+        Map<String, Object> aggregations = (Map)response.aggregations();
+        
         if (aggregations != null) {
           Map<String, Object> locationsAgg = (Map<String, Object>) aggregations.get("locations");
           if (locationsAgg != null) {
-            List<Map<String, Object>> buckets = (List<Map<String, Object>>) locationsAgg.get(
-                "buckets");
-
+            List<Map<String, Object>> buckets = (List<Map<String, Object>>) locationsAgg.get("buckets");
             if (buckets != null) {
               for (Map<String, Object> bucket : buckets) {
                 String location = (String) bucket.get("key");
@@ -1082,7 +1079,7 @@ public class ElasticsearchJobService {
           .size(0) // We don't need the actual documents, just the aggregation results
           .aggregations("designations", a -> a
               .terms(t -> t
-                  .field("designationName")
+                  .field("designationName.keyword")
                   .size(limit * 2) // Get more than needed to ensure we have enough after filtering
               )
           )
@@ -1095,17 +1092,13 @@ public class ElasticsearchJobService {
       List<Map<String, Object>> topDesignations = new ArrayList<>();
 
       try {
-        // Parse the aggregation response
-        Map<String, Object> responseMap = objectMapper.convertValue(response, Map.class);
-        Map<String, Object> aggregations = (Map<String, Object>) responseMap.get("aggregations");
-
+        // Parse the aggregation response using direct casting
+        Map<String, Object> aggregations = (Map)response.aggregations();
+        
         if (aggregations != null) {
-          Map<String, Object> designationsAgg = (Map<String, Object>) aggregations.get(
-              "designations");
+          Map<String, Object> designationsAgg = (Map<String, Object>) aggregations.get("designations");
           if (designationsAgg != null) {
-            List<Map<String, Object>> buckets = (List<Map<String, Object>>) designationsAgg.get(
-                "buckets");
-
+            List<Map<String, Object>> buckets = (List<Map<String, Object>>) designationsAgg.get("buckets");
             if (buckets != null) {
               for (int i = 0; i < Math.min(buckets.size(), limit); i++) {
                 Map<String, Object> bucket = buckets.get(i);
@@ -1269,11 +1262,10 @@ public class ElasticsearchJobService {
 
       SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
 
-      // Extract the count from aggregation
+      // Extract the count from aggregation using direct casting
       try {
-        Map<String, Object> responseMap = objectMapper.convertValue(response, Map.class);
-        Map<String, Object> aggregations = (Map<String, Object>) responseMap.get("aggregations");
-
+        Map<String, Object> aggregations = (Map)response.aggregations();
+        
         if (aggregations != null) {
           Map<String, Object> totalJobsAgg = (Map<String, Object>) aggregations.get("total_jobs");
           if (totalJobsAgg != null) {
