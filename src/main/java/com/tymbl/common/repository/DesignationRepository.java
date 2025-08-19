@@ -13,6 +13,8 @@ public interface DesignationRepository extends JpaRepository<Designation, Long> 
 
   Optional<Designation> findByName(String name);
 
+  List<Designation> findByNameIn(List<String> names);
+
   boolean existsByName(String name);
 
   // Find designations that haven't been processed for similar designation generation

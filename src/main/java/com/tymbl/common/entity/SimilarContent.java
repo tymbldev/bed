@@ -23,7 +23,8 @@ public class SimilarContent {
     COMPANY,
     DESIGNATION,
     CITY,
-    COUNTRY
+    COUNTRY,
+    SKILL
   }
 
   @Id
@@ -40,6 +41,9 @@ public class SimilarContent {
   @Column(name = "similar_name", nullable = false, length = 500)
   private String similarName;
 
+  @Column(name = "entity_id")
+  private Long entityId;
+
   @Column(name = "confidence_score", precision = 3, scale = 2)
   private BigDecimal confidenceScore = new BigDecimal("0.80");
 
@@ -51,6 +55,9 @@ public class SimilarContent {
 
   @Column(name = "updated_at")
   private LocalDateTime updatedAt;
+
+  @Column(name = "processed")
+  private Boolean processed = false;
 
   @PrePersist
   protected void onCreate() {

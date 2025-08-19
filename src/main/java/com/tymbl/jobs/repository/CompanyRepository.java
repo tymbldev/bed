@@ -18,6 +18,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
   List<Company> findAllByNameIgnoreCase(String name);
 
+  List<Company> findByNameIn(List<String> names);
+
   boolean existsByName(String name);
 
   Page<Company> findByIsCrawledFalse(Pageable pageable);

@@ -77,6 +77,21 @@ public class ExternalJobDetail {
   @Column(name = "skills", columnDefinition = "TEXT")
   private String skills;
 
+  @Column(name = "skills_json", columnDefinition = "TEXT")
+  private String skillsJson;
+
+  @Column(name = "job_tags_json", columnDefinition = "TEXT")
+  private String jobTagsJson;
+
+  @Column(name = "refined_description", columnDefinition = "TEXT")
+  private String refinedDescription;
+
+  @Column(name = "refined_title", columnDefinition = "TEXT")
+  private String refinedTitle;
+
+  @Column(name = "is_refined", nullable = false)
+  private Boolean isRefined = false;
+
   @Column(name = "industries", columnDefinition = "TEXT")
   private String industries;
 

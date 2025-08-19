@@ -16,6 +16,8 @@ public interface CityRepository extends JpaRepository<City, Long> {
 
   Optional<City> findByName(String name);
 
+  List<City> findByNameIn(List<String> names);
+
   // Find cities that haven't been processed for processed name generation
   List<City> findByProcessedNameGeneratedFalse();
 

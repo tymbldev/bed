@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class IndustryCacheService {
+public class IndustryCacheService  {
 
   private final IndustryRepository industryRepository;
 
@@ -121,5 +121,14 @@ public class IndustryCacheService {
       cacheTimestamps.remove(cacheKey);
       log.info("Top companies cache cleared for key: {}", cacheKey);
     }
+  }
+
+  /**
+   * Flush all caches - public method for external use
+   * This method is called whenever job data changes to ensure cache consistency
+   */
+  public void flushCache() {
+    log.info("Flushing all industry caches due to job data change");
+    clearAllCaches();
   }
 }

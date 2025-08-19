@@ -10,6 +10,7 @@ import com.tymbl.common.repository.PendingContentRepository;
 import com.tymbl.jobs.service.ExternalJobTagger.TaggingResult;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -169,8 +170,8 @@ public class IndividualJobSyncService {
     Job job = new Job();
 
     // Basic job information
-    job.setTitle(externalJob.getJobTitle());
-    job.setDescription(externalJob.getJobDescription());
+    job.setTitle(externalJob.getRefinedTitle() != null ? externalJob.getRefinedTitle() : externalJob.getJobTitle());
+    job.setDescription(externalJob.getRefinedDescription() != null ? externalJob.getRefinedDescription() : externalJob.getJobDescription());
     job.setPortalJobId(externalJob.getPortalJobId());
     job.setIsSyncedFromExternal(true);
 
@@ -241,6 +242,15 @@ public class IndividualJobSyncService {
 
     // Opening count
     job.setOpeningCount(1);
+
+    // Skills and tags from tagging result
+    if (taggingResult.getSkillIds() != null && !taggingResult.getSkillIds().isEmpty()) {
+      job.setSkillIds(new HashSet<>(taggingResult.getSkillIds()));
+    }
+    
+    if (taggingResult.getJobTags() != null && !taggingResult.getJobTags().isEmpty()) {
+      job.setTags(new HashSet<>(taggingResult.getJobTags()));
+    }
 
     // Set timestamps from external job data
     if (externalJob.getPostedDate() != null) {

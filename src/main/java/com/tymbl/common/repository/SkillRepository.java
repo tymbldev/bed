@@ -22,4 +22,9 @@ public interface SkillRepository extends JpaRepository<Skill, Long> {
   List<Skill> findByNameContainingIgnoreCase(String name);
 
   Optional<Skill> findByNameIgnoreCase(String name);
+
+  List<Skill> findByNameIn(List<String> names);
+
+  // Find top skills by usage count for AI matching
+  List<Skill> findTop20ByOrderByUsageCountDesc();
 } 

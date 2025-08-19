@@ -9,6 +9,7 @@ import com.tymbl.jobs.entity.ExternalJobRawResponse;
 import com.tymbl.jobs.repository.ExternalJobDetailRepository;
 import com.tymbl.jobs.repository.ExternalJobRawResponseRepository;
 import com.tymbl.jobs.service.PortalCrawlingService;
+import com.tymbl.jobs.service.SingleJobContentRefinementService;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -42,6 +43,9 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
 
   @Autowired
   private ObjectMapper objectMapper;
+
+  @Autowired
+  private SingleJobContentRefinementService contentRefinementService;
 
   @Override
   public boolean canHandlePortal(String portalName) {
@@ -224,6 +228,25 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
     jobDetail.setIndustries(extractArrayAsString(jobNode, "industries"));
     jobDetail.setFunctions(extractArrayAsString(jobNode, "functions"));
     jobDetail.setRoles(extractArrayAsString(jobNode, "roles"));
+
+    // Extract skills as JSON for detailed skill information
+    if (jobNode.has("itSkills") && jobNode.get("itSkills").isArray()) {
+      jobDetail.setSkillsJson(jobNode.get("itSkills").toString());
+    }
+
+    // Extract job tags as JSON for detailed tag information
+    if (jobNode.has("skills") && jobNode.get("skills").isArray()) {
+      jobDetail.setJobTagsJson(jobNode.get("skills").toString());
+    }
+
+    // Refine job content using AI
+    try {
+      contentRefinementService.refineJobContent(jobDetail, null); // No designation available during crawling
+    } catch (Exception e) {
+      logger.error("Error refining job content for job ID {}: {}", 
+                  jobDetail.getPortalJobId(), e.getMessage(), e);
+      // Continue with unrefined content if refinement fails
+    }
 
     // Extract dates - handle timestamp format
     String postedAt = jobNode.has("postedAt") ? jobNode.get("postedAt").asText() : null;

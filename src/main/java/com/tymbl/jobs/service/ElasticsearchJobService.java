@@ -16,6 +16,7 @@ import com.tymbl.common.entity.Job;
 import com.tymbl.common.entity.Job.JobType;
 import com.tymbl.common.entity.JobApprovalStatus;
 import com.tymbl.common.service.DropdownService;
+import com.tymbl.common.service.IndustryCacheService;
 import com.tymbl.jobs.dto.JobResponse;
 import com.tymbl.jobs.dto.JobSearchRequest;
 import com.tymbl.jobs.dto.JobSearchResponse;
@@ -40,6 +41,7 @@ public class ElasticsearchJobService {
 
   private final ElasticsearchClient elasticsearchClient;
   private final DropdownService dropdownService;
+  private final IndustryCacheService industryCacheService;
   private final ObjectMapper objectMapper;
 
   private static final String INDEX_NAME = "jobs";
@@ -61,6 +63,16 @@ public class ElasticsearchJobService {
 
       log.info("Successfully synced job {} to Elasticsearch with result: {}",
           job.getId(), response.result().name());
+
+      // Flush industry cache to ensure consistency after job data changes
+      try {
+        industryCacheService.flushCache();
+        log.debug("Industry cache flushed after syncing job {}", job.getId());
+      } catch (Exception cacheException) {
+        log.warn("Failed to flush industry cache after syncing job {}: {}", 
+            job.getId(), cacheException.getMessage());
+        // Don't fail the main operation if cache flush fails
+      }
 
     } catch (Exception e) {
       log.error("Failed to sync job {} to Elasticsearch. Error: {}", job.getId(), e.getMessage(),
