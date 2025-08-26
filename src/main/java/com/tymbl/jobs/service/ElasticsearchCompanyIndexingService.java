@@ -42,7 +42,7 @@ public class ElasticsearchCompanyIndexingService {
     log.info("Starting to index all companies to Elasticsearch");
 
     try {
-      int batchSize = 1;
+      int batchSize = 500;
       int totalSuccessCount = 0;
       int totalFailureCount = 0;
       int totalCompanies = 0;
@@ -90,7 +90,7 @@ public class ElasticsearchCompanyIndexingService {
         BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
         log.info("Bulk request completed for batch {}. Response received: {} items, Errors: {}",
             batchIndex + 1, response.items().size(), response.errors());
-        Thread.sleep(1000); // Brief pause to avoid overwhelming ES
+        Thread.sleep(10000); // Brief pause to avoid overwhelming ES
 
         int batchSuccessCount = 0;
         int batchFailureCount = 0;
