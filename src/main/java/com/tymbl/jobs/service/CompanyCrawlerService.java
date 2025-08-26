@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Slf4j
@@ -68,6 +69,7 @@ public class CompanyCrawlerService {
    * Crawl companies in batches with individual transactions per batch This ensures that each batch
    * is processed in its own transaction
    */
+  @Async
   public void crawlCompaniesInBatches() {
     log.info("Starting company crawling process in batches");
 

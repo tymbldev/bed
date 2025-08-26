@@ -160,17 +160,6 @@ public class JobService {
       // Don't fail the main transaction
     }
 
-    // Update company job count in Elasticsearch (non-blocking)
-    try {
-      if (job.getCompanyId() != null) {
-        elasticsearchCompanyIndexingService.updateCompanyJobCount(job.getCompanyId());
-      }
-    } catch (Exception e) {
-      logger.error("Failed to update job count for company {} in Elasticsearch: {}",
-          job.getCompanyId(), e.getMessage());
-      // Don't fail the main transaction
-    }
-
     return mapToResponse(job);
   }
 

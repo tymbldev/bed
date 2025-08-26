@@ -306,7 +306,7 @@ public class ElasticsearchCompanyIndexingService {
 
       log.info("Successfully updated job count for company {} (ID: {}) to {} in Elasticsearch",
           company.getName(), companyId, jobCount);
-        Thread.sleep(1000);
+        Thread.sleep(5000);
     } catch (Exception e) {
       log.error("Error updating job count for company {} in Elasticsearch", companyId, e);
     }

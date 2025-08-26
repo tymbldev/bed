@@ -119,44 +119,6 @@ public class ListOfCompaniesController {
     }
   }
 
-  @PostMapping("/{companyId}/update-job-count")
-  @Operation(
-      summary = "Update job count for a company",
-      description = "Updates the job count for a specific company in Elasticsearch. This should be called when jobs are posted or updated."
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Job count updated successfully",
-          content = @Content(
-              examples = @ExampleObject(
-                  value = "{\n" +
-                      "  \"message\": \"Job count updated successfully for company 1\",\n" +
-                      "  \"companyId\": 1\n" +
-                      "}"
-              )
-          )
-      ),
-      @ApiResponse(responseCode = "404", description = "Company not found"),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  public ResponseEntity<Map<String, Object>> updateCompanyJobCount(@PathVariable Long companyId) {
-    try {
-      elasticsearchCompanyIndexingService.updateCompanyJobCount(companyId);
-
-      Map<String, Object> response = new HashMap<>();
-      response.put("message", "Job count updated successfully for company " + companyId);
-      response.put("companyId", companyId);
-
-      return ResponseEntity.ok(response);
-
-    } catch (Exception e) {
-      log.error("Error updating job count for company {}", companyId, e);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-          .body(createErrorResponse("Failed to update job count: " + e.getMessage()));
-    }
-  }
-
   private Map<String, Object> createErrorResponse(String message) {
     Map<String, Object> error = new HashMap<>();
     error.put("error", message);

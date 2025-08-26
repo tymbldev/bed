@@ -376,7 +376,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Jobs crawled successfully\",\n  \"totalJobsFound\": 15,\n  \"rawResponseId\": 123,\n  \"processedJobsCount\": 15,\n  \"portalName\": \"foundit\",\n  \"keyword\": \"software engineer\",\n  \"processingTimeMs\": 2500,\n  \"jobDetails\": [\n    {\n      \"portalJobId\": \"34327838\",\n      \"jobTitle\": \"Sr. Software Engineer\",\n      \"companyName\": \"Tessolve Semiconductor Private Limited\",\n      \"companyId\": \"1056230\",\n      \"locations\": \"Bengaluru / Bangalore, Karnataka, India\",\n      \"minExperience\": 4,\n      \"maxExperience\": 10,\n      \"salaryRange\": \"400000-1000000 INR\",\n      \"jobDescription\": \"Position: Sr. Software Engineer Role : Sr. Firmware Development Engineer...\",\n      \"skills\": \"Firmware, Software Engineering\",\n      \"postedDate\": \"2025-01-30T10:30:27\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Jobs crawled successfully\",\n  \"totalJobsFound\": 15,\n  \"rawResponseId\": 123,\n  \"processedJobsCount\": 15,\n  \"portalName\": \"foundit\",\n  \"keyword\": \"software engineer\",\n  \"processingTimeMs\": 2500,\n  \"jobDetails\": [\n    {\n      \"portalJobId\": \"34327838\",\n      \"jobTitle\": \"Sr. Software Engineer\",\n      \"companyName\": \"Tessolve Semiconductor Private Limited\",\n      \"companyId\": \"1056230\",\n      \"locations\": \"Bengaluru / Bangalore, Karnataka, India\",\n      \"minExperience\": 4,\n      \"maxExperience\": 10,\n      \"salaryRange\": \"400000-1000000 INR\",\n      \"jobDescription\": \"Position: Sr. Software Engineer Role : Sr. Firmware Development Engineer...\",\n\n      \"itSkills\": [\n        {\n          \"id\": \"805a39d3-d3e0-4418-8790-a061594a5e1b\",\n          \"text\": \"Node\"\n        },\n        {\n          \"id\": \"18cc5439-457e-11e9-a89e-70106fbef856\",\n          \"text\": \"Cassandra\"\n        },\n        {\n          \"id\": \"18a9dd99-457e-11e9-a89e-70106fbef856\",\n          \"text\": \"Spring Boot\"\n        }\n      ],\n      \"skills\": [\n        {\n          \"text\": \"Alerting\"\n        },\n        {\n          \"text\": \"Log aggregation\"\n        },\n        {\n          \"id\": \"1d3e1c4a-77e6-4fd6-abb8-5a76565e339f\",\n          \"text\": \"Monitoring\"\n        }\n      ],\n      \"postedDate\": \"2025-01-30T10:30:27\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -387,7 +387,7 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/ai-jobs/crawl-all",
+              "raw": "{{base_url}}/api/v1/ai-jobs/crawl-all-active-keywords",
               "host": [
                 "{{base_url}}"
               ],
@@ -395,10 +395,234 @@
                 "api",
                 "v1",
                 "ai-jobs",
-                "crawl-all"
+                "crawl-all-active-keywords"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/crawl-all-active-keywords",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "crawl-all-active-keywords"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Crawl process initiated successfully for all active keywords"
+            },
+            {
+              "name": "Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/crawl-all-active-keywords",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "crawl-all-active-keywords"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Error during crawl process: An error occurred while processing the request"
+            }
+          ]
+        },
+        {
+          "name": "Refine Unprocessed Content",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/refine-unprocessed-content",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "refine-unprocessed-content"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/refine-unprocessed-content",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "refine-unprocessed-content"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Content refinement completed successfully. Processed 25 records."
+            },
+            {
+              "name": "Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/refine-unprocessed-content",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "refine-unprocessed-content"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Error during content refinement: AI service unavailable"
+            }
+          ]
+        },
+        {
+          "name": "Process Pending Raw Responses",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/process-pending-raw-responses",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "process-pending-raw-responses"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/process-pending-raw-responses",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "process-pending-raw-responses"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Pending raw responses processing completed successfully"
+            },
+            {
+              "name": "Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/process-pending-raw-responses",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "process-pending-raw-responses"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Error during processing: Database connection failed"
+            }
+          ]
         },
         {
           "name": "Sync External Raw Responses",
@@ -417,7 +641,178 @@
                 "sync-external-raw"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-raw",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "sync-external-raw"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"External raw responses sync completed successfully\",\n  \"processedCount\": 150,\n  \"totalCount\": 150,\n  \"processingTimeMs\": 5000\n}"
+            },
+            {
+              "name": "Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-raw",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "sync-external-raw"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"status\": \"ERROR\",\n  \"message\": \"Error during external raw responses sync: Database connection failed\"\n}"
+            }
+          ]
+        },
+
+        {
+          "name": "Reindex Jobs",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"note\": \"Reindexes jobs in Elasticsearch\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/ai-jobs/reindex",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "ai-jobs",
+                "reindex"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Reindexes jobs in Elasticsearch\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/reindex",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "reindex"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Reindex completed successfully"
+            },
+            {
+              "name": "Error Response",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"note\": \"Reindexes jobs in Elasticsearch\"\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/ai-jobs/reindex",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "ai-jobs",
+                    "reindex"
+                  ]
+                }
+              },
+              "status": "Internal Server Error",
+              "code": 500,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "Reindex failed: Elasticsearch connection error"
+            }
+          ]
         },
 
 
@@ -3134,62 +3529,6 @@
               "body": "{\n  \"topDesignations\": [\n    {\n      \"designationName\": \"Software Engineer\",\n      \"jobCount\": 150\n    },\n    {\n      \"designationName\": \"Sales Representative\",\n      \"jobCount\": 120\n    },\n    {\n      \"designationName\": \"Product Manager\",\n      \"jobCount\": 95\n    }\n  ],\n  \"totalDesignations\": 50,\n  \"totalJobs\": 2500\n}"
             }
           ]
-        },
-        {
-          "name": "Get Job Location Sitemap",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{base_url}}/api/v1/seo/sitemap/job-locations?page=1&size=100",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "seo",
-                "sitemap",
-                "job-locations"
-              ],
-              "query": [
-                {
-                  "key": "page",
-                  "value": "1",
-                  "description": "Page number for pagination"
-                },
-                {
-                  "key": "size",
-                  "value": "100",
-                  "description": "Page size for pagination"
-                }
-              ]
-            },
-            "description": "Returns a comprehensive list of all job-location combinations for SEO sitemap generation. This endpoint provides all possible combinations that can be used for creating location-specific job pages."
-          },
-          "response": [
-            {
-              "name": "Success Response",
-              "originalRequest": {
-                "method": "GET",
-                "header": [],
-                "url": {
-                  "raw": "{{base_url}}/api/v1/seo/sitemap/job-locations?page=1&size=100"
-                }
-              },
-              "status": "OK",
-              "code": 200,
-              "_postman_previewlanguage": "json",
-              "header": [
-                {
-                  "key": "Content-Type",
-                  "value": "application/json"
-                }
-              ],
-              "cookie": [],
-              "body": "{\n  \"totalCombinations\": 1500,\n  \"combinations\": [\n    {\n      \"designation\": \"Software Engineer\",\n      \"location\": \"Bangalore\",\n      \"jobCount\": 50,\n      \"seoUrl\": \"/jobs/software-engineer-bangalore\",\n      \"seoText\": \"Software Engineer Jobs in Bangalore - 50 Openings\"\n    }\n  ]\n}"
-            }
-          ]
         }
       ]
     },
@@ -3638,35 +3977,6 @@
                 "utility",
                 "company-data",
                 "cleanup-duplicates"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Reindex Jobs",
-          "request": {
-            "method": "POST",
-            "header": [
-              {
-                "key": "Content-Type",
-                "value": "application/json"
-              }
-            ],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"note\": \"Reindexes jobs in Elasticsearch\"\n}"
-            },
-            "url": {
-              "raw": "{{base_url}}/api/v1/utility/job-admin/reindex",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "utility",
-                "job-admin",
-                "reindex"
               ]
             }
           }

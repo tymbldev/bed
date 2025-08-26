@@ -1,8 +1,6 @@
 package com.tymbl.jobs.service;
 
 import co.elastic.clients.elasticsearch.ElasticsearchClient;
-import co.elastic.clients.elasticsearch.core.BulkRequest;
-import co.elastic.clients.elasticsearch.core.BulkResponse;
 import co.elastic.clients.elasticsearch.core.IndexRequest;
 import co.elastic.clients.elasticsearch.core.IndexResponse;
 import com.tymbl.common.entity.Job;
@@ -15,7 +13,6 @@ import com.tymbl.jobs.repository.JobRepository;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -33,6 +30,7 @@ public class ElasticsearchJobIndexingService {
   private final IndustryCacheService industryCacheService;
   private final CompanyRepository companyRepository;
   private final JobRepository jobRepository;
+  private final ElasticsearchCompanyIndexingService elasticsearchCompanyIndexingService;
 
   /**
    * Sync a job to Elasticsearch (save or update) Does not fail the main transaction if ES fails
@@ -65,8 +63,7 @@ public class ElasticsearchJobIndexingService {
       // Update job count in companies index for this job's company
       try {
         if (job.getCompanyId() != null) {
-          new ElasticsearchCompanyIndexingService(elasticsearchClient, companyRepository, dropdownService)
-              .updateCompanyJobCount(job.getCompanyId());
+          elasticsearchCompanyIndexingService.updateCompanyJobCount(job.getCompanyId());
         }
       } catch (Exception e) {
         log.warn("Failed to update company jobCount after syncing job {}: {}", job.getId(), e.getMessage());
@@ -199,78 +196,22 @@ public class ElasticsearchJobIndexingService {
    */
   public void reindexAllJobs() {
     List<Job> jobs = jobRepository.findAll();
-    log.info("Starting reindex of {} jobs to Elasticsearch", jobs.size());
+    log.info("Starting reindex of {} jobs to Elasticsearch (centralized sync)", jobs.size());
 
-    int batchSize = 10;
-    int totalBatches = (int) Math.ceil((double) jobs.size() / batchSize);
     int totalSuccessCount = 0;
     int totalFailureCount = 0;
 
-    log.info("Processing {} jobs in {} batches of {} each", jobs.size(), totalBatches, batchSize);
-
-    for (int batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
-      int startIndex = batchIndex * batchSize;
-      int endIndex = Math.min(startIndex + batchSize, jobs.size());
-      List<Job> batch = jobs.subList(startIndex, endIndex);
-
-      log.info("Processing batch {}/{}: jobs {} to {}",
-          batchIndex + 1, totalBatches, startIndex + 1, endIndex);
-
-      BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
-      log.info("Building bulk request for batch {} with {} jobs", batchIndex + 1, batch.size());
-
-      for (Job job : batch) {
-        try {
-          Map<String, Object> jobDocument = buildJobDocument(job);
-          bulkRequest.operations(op -> op
-              .index(idx -> idx
-                  .index(ElasticsearchConstants.JOBS_INDEX)
-                  .id(job.getId().toString())
-                  .document(jobDocument)
-              )
-          );
-        } catch (Exception e) {
-          log.error("Failed to build document for job {}. Error: {}", job.getId(), e.getMessage());
-          totalFailureCount++;
-        }
-      }
-
+    for (Job job : jobs) {
       try {
-        log.info("Executing bulk request to Elasticsearch for batch {} with {} jobs",
-            batchIndex + 1, batch.size());
-        BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
-        log.info("Bulk request completed for batch {}. Response received: {} items, Errors: {}",
-            batchIndex + 1, response.items().size(), response.errors());
-
-        int batchSuccessCount = 0;
-        int batchFailureCount = 0;
-        Thread.sleep(10000);
-        if (response.errors()) {
-          batchFailureCount = response.items().size();
-          log.error("Failed to index jobs in batch {}: {}",
-              batchIndex + 1,
-              response.items().stream().map(item -> item.error().reason())
-                  .collect(Collectors.joining(", ")));
-        } else {
-          batchSuccessCount = batch.size();
-          log.info("All {} jobs in batch {} indexed successfully", batchSuccessCount,
-              batchIndex + 1);
-        }
-
-        totalSuccessCount += batchSuccessCount;
-        totalFailureCount += batchFailureCount;
-
-        log.info("Batch {} completed - Success: {}, Failures: {}", batchIndex + 1,
-            batchSuccessCount, batchFailureCount);
-
+        // Sync to Elasticsearch (non-blocking semantics preserved with try/catch)
+        syncJobToElasticsearch(job);
+        totalSuccessCount++;
       } catch (Exception e) {
-        log.error("Error executing bulk request for batch {}: {}", batchIndex + 1, e.getMessage(),
-            e);
-        totalFailureCount += batch.size();
+        totalFailureCount++;
+        log.error("Failed to sync job {} to Elasticsearch during reindex: {}", job.getId(), e.getMessage(), e);
       }
     }
 
-    log.info("Reindex completed. Total Success: {}, Total Failures: {}, Batches: {}",
-        totalSuccessCount, totalFailureCount, totalBatches);
+    log.info("Reindex completed. Total Success: {}, Total Failures: {}", totalSuccessCount, totalFailureCount);
   }
 }
