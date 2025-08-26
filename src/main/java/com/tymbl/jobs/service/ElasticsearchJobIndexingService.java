@@ -201,7 +201,7 @@ public class ElasticsearchJobIndexingService {
     List<Job> jobs = jobRepository.findAll();
     log.info("Starting reindex of {} jobs to Elasticsearch", jobs.size());
 
-    int batchSize = 1;
+    int batchSize = 10;
     int totalBatches = (int) Math.ceil((double) jobs.size() / batchSize);
     int totalSuccessCount = 0;
     int totalFailureCount = 0;
@@ -244,7 +244,7 @@ public class ElasticsearchJobIndexingService {
 
         int batchSuccessCount = 0;
         int batchFailureCount = 0;
-
+        Thread.sleep(10000);
         if (response.errors()) {
           batchFailureCount = response.items().size();
           log.error("Failed to index jobs in batch {}: {}",
