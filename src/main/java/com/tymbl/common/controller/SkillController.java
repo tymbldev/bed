@@ -42,11 +42,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class SkillController {
 
   private final SkillRepository skillRepository;
-  
+
   // JVM cache for skills
   private final ConcurrentMap<String, List<Skill>> skillsCache = new ConcurrentHashMap<>();
   private final ConcurrentMap<String, Long> skillsCacheTimestamp = new ConcurrentHashMap<>();
-  
+
   // Cache TTL in milliseconds (30 minutes)
   private static final long CACHE_TTL = 30 * 60 * 1000L;
 
@@ -62,6 +62,7 @@ public class SkillController {
    * DTO for skills with only id and name
    */
   public static class SkillDTO {
+
     private Long id;
     private String name;
 
@@ -71,12 +72,22 @@ public class SkillController {
     }
 
     // Getters
-    public Long getId() { return id; }
-    public String getName() { return name; }
+    public Long getId() {
+      return id;
+    }
+
+    public String getName() {
+      return name;
+    }
 
     // Setters
-    public void setId(Long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
+    public void setId(Long id) {
+      this.id = id;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
   }
 
   @GetMapping
@@ -111,7 +122,7 @@ public class SkillController {
   })
   public ResponseEntity<List<SkillDTO>> getAllSkills() {
     String cacheKey = "all_skills";
-    
+
     // Check cache first
     if (!isCacheExpired(cacheKey)) {
       List<Skill> cachedSkills = skillsCache.get(cacheKey);
@@ -123,20 +134,20 @@ public class SkillController {
         return ResponseEntity.ok(skillDTOs);
       }
     }
-    
+
     // Cache miss or expired, fetch from database
     log.debug("Cache miss for skills, fetching from database");
     List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
-    
+
     // Update cache
     skillsCache.put(cacheKey, skills);
     skillsCacheTimestamp.put(cacheKey, System.currentTimeMillis());
-    
+
     // Convert to DTOs
     List<SkillDTO> skillDTOs = skills.stream()
         .map(skill -> new SkillDTO(skill.getId(), skill.getName()))
         .collect(Collectors.toList());
-    
+
     log.debug("Skills cache updated with {} skills", skills.size());
     return ResponseEntity.ok(skillDTOs);
   }

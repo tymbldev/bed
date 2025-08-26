@@ -749,9 +749,9 @@ public class AIJobService {
           prompt);
       if (!codeResp.isEmpty()) {
         String code = (String) codeResp.get(0).getOrDefault("detailed_answer", "");
-          if (code.isEmpty()) {
-              code = (String) codeResp.get(0).getOrDefault("html_content", "");
-          }
+        if (code.isEmpty()) {
+          code = (String) codeResp.get(0).getOrDefault("html_content", "");
+        }
         return code;
       }
     } catch (Exception e) {

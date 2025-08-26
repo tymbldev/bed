@@ -103,7 +103,6 @@ public class AIDropdownController {
   }
 
 
-
   @PostMapping("/designations/generate-similar")
   @Operation(
       summary = "Generate similar designations for all unprocessed designations",
@@ -208,10 +207,6 @@ public class AIDropdownController {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
     }
   }
-
-
-
-
 
   // ============================================================================
   // SKILL GENERATION ENDPOINTS

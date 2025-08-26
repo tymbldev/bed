@@ -72,7 +72,8 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request,
+  public ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig,
+      JobCrawlRequest request,
       String apiResponse) {
     ExternalJobRawResponse rawResponse = new ExternalJobRawResponse();
     rawResponse.setPortalName(keywordConfig.getPortalName());
@@ -87,7 +88,8 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse, String apiResponse,
+  public List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse,
+      String apiResponse,
       JobCrawlRequest request) {
     List<ExternalJobDetail> jobDetails = new ArrayList<>();
 
@@ -155,14 +157,16 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
     return urlBuilder.toString();
   }
 
-  private ExternalJobDetail parseFounditJobNode(JsonNode jobNode, ExternalJobRawResponse rawResponse,
+  private ExternalJobDetail parseFounditJobNode(JsonNode jobNode,
+      ExternalJobRawResponse rawResponse,
       JobCrawlRequest request) {
     ExternalJobDetail jobDetail = new ExternalJobDetail();
 
     // Extract basic job information
     jobDetail.setPortalJobId(jobNode.has("id") ? jobNode.get("id").asText() : null);
     jobDetail.setPortalName(rawResponse.getPortalName());
-    jobDetail.setJobTitle(jobNode.has("title") ? jobNode.get("title").asText().replace("(IND)","").trim() : null);
+    jobDetail.setJobTitle(
+        jobNode.has("title") ? jobNode.get("title").asText().replace("(IND)", "").trim() : null);
     jobDetail.setKeywordUsed(request.getKeyword());
     jobDetail.setRawResponseId(rawResponse.getId());
 
@@ -184,21 +188,21 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
         String country = location.has("country") ? location.get("country").asText() : null;
 
         StringBuilder locationStr = new StringBuilder();
-          if (city != null) {
-              jobDetail.setCityName(city);
-              locationStr.append(city);
-          }
+        if (city != null) {
+          jobDetail.setCityName(city);
+          locationStr.append(city);
+        }
         if (state != null) {
-            if (locationStr.length() > 0) {
-                locationStr.append(", ");
-            }
+          if (locationStr.length() > 0) {
+            locationStr.append(", ");
+          }
           locationStr.append(state);
         }
         if (country != null) {
           jobDetail.setCountryName(country);
-            if (locationStr.length() > 0) {
-                locationStr.append(", ");
-            }
+          if (locationStr.length() > 0) {
+            locationStr.append(", ");
+          }
           locationStr.append(country);
         }
 
@@ -241,10 +245,11 @@ public class FounditPortalCrawlingService implements PortalCrawlingService {
 
     // Refine job content using AI
     try {
-      contentRefinementService.refineJobContent(jobDetail, null); // No designation available during crawling
+      contentRefinementService.refineJobContent(jobDetail,
+          null); // No designation available during crawling
     } catch (Exception e) {
-      logger.error("Error refining job content for job ID {}: {}", 
-                  jobDetail.getPortalJobId(), e.getMessage(), e);
+      logger.error("Error refining job content for job ID {}: {}",
+          jobDetail.getPortalJobId(), e.getMessage(), e);
       // Continue with unrefined content if refinement fails
     }
 

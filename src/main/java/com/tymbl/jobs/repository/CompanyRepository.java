@@ -69,4 +69,8 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
 
   // Find companies by name containing (for fuzzy matching)
   List<Company> findByNameContainingIgnoreCase(String name);
+
+  // Count active jobs for a specific company
+  @Query("SELECT COUNT(j) FROM Job j WHERE j.companyId = :companyId AND j.active = true")
+  long countActiveJobsByCompanyId(Long companyId);
 } 

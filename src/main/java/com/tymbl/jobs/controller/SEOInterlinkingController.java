@@ -2,7 +2,7 @@ package com.tymbl.jobs.controller;
 
 import com.tymbl.common.service.DropdownService;
 import com.tymbl.jobs.service.ElasticsearchIndexingService;
-import com.tymbl.jobs.service.ElasticsearchJobService;
+import com.tymbl.jobs.service.ElasticsearchSEOService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -41,7 +41,7 @@ import org.springframework.web.bind.annotation.RestController;
 @Tag(name = "SEO Interlinking", description = "APIs for SEO interlinking with job location combinations, similar designations, and top designations")
 public class SEOInterlinkingController {
 
-  private final ElasticsearchJobService elasticsearchJobService;
+  private final ElasticsearchSEOService elasticsearchSEOService;
   private final ElasticsearchIndexingService elasticsearchIndexingService;
   private final DropdownService dropdownService;
 
@@ -102,7 +102,7 @@ public class SEOInterlinkingController {
         return ResponseEntity.badRequest().body(error);
       }
 
-      Map<String, Object> result = elasticsearchJobService.getJobLocationCombinations(query.trim(),
+      Map<String, Object> result = elasticsearchSEOService.getJobLocationCombinations(query.trim(),
           type);
       return ResponseEntity.ok(result);
 
@@ -198,7 +198,7 @@ public class SEOInterlinkingController {
         return ResponseEntity.badRequest().body(error);
       }
 
-      Map<String, Object> result = elasticsearchJobService.getSimilarDesignationsWithJobCounts(
+      Map<String, Object> result = elasticsearchSEOService.getSimilarDesignationsWithJobCounts(
           designation.trim());
 
       if (result.containsKey("error") && result.get("error").toString().contains("not found")) {
@@ -282,7 +282,7 @@ public class SEOInterlinkingController {
         return ResponseEntity.badRequest().body(error);
       }
 
-      Map<String, Object> result = elasticsearchJobService.getDesignationSkillLocationCombinations(
+      Map<String, Object> result = elasticsearchSEOService.getDesignationSkillLocationCombinations(
           query.trim(), location.trim(), type);
       return ResponseEntity.ok(result);
 
@@ -351,7 +351,7 @@ public class SEOInterlinkingController {
         return ResponseEntity.badRequest().body(error);
       }
 
-      Map<String, Object> result = elasticsearchJobService.getTopDesignationsByJobCount(limit);
+      Map<String, Object> result = elasticsearchSEOService.getTopDesignationsByJobCount(limit);
       return ResponseEntity.ok(result);
 
     } catch (Exception e) {

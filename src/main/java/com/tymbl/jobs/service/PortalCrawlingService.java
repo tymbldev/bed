@@ -37,7 +37,8 @@ public interface PortalCrawlingService {
    * @param apiResponse The raw API response
    * @return Saved ExternalJobRawResponse entity
    */
-  ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request,
+  ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig,
+      JobCrawlRequest request,
       String apiResponse);
 
   /**
@@ -48,7 +49,8 @@ public interface PortalCrawlingService {
    * @param request The crawl request
    * @return List of parsed and saved ExternalJobDetail entities
    */
-  List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse, String apiResponse,
+  List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse,
+      String apiResponse,
       JobCrawlRequest request);
 
   /**

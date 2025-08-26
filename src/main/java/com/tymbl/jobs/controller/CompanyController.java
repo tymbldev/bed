@@ -6,6 +6,7 @@ import com.tymbl.jobs.dto.CompanyRequest;
 import com.tymbl.jobs.dto.CompanyResponse;
 import com.tymbl.jobs.exception.CompanyNotFoundException;
 import com.tymbl.jobs.service.CompanyService;
+import com.tymbl.jobs.service.ElasticsearchJobQueryService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -50,10 +52,12 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/api/v1/companies")
 @RequiredArgsConstructor
 @Tag(name = "Companies", description = "APIs for managing companies")
+@Slf4j
 public class CompanyController {
 
   private final CompanyService companyService;
   private final DropdownService dropdownService;
+  private final ElasticsearchJobQueryService elasticsearchJobQueryService;
 
   @PostMapping
   @Operation(summary = "Create or update a company", description = "Creates a new company or updates an existing one")
@@ -170,7 +174,7 @@ public class CompanyController {
   }
 
   @GetMapping("/industry-wise-companies")
-  @Operation(summary = "Get industry-wise companies with statistics", description = "Returns all industries with company counts and top 5 companies in each industry based on active job count")
+  @Operation(summary = "Get industry-wise companies with statistics", description = "Returns all industries with company counts and top 5 companies in each industry based on active job count using Elasticsearch")
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
@@ -226,7 +230,13 @@ public class CompanyController {
       )
   })
   public ResponseEntity<List<IndustryWiseCompaniesDTO>> getIndustryWiseCompanies() {
-    return ResponseEntity.ok(dropdownService.getIndustryStatistics());
+    try {
+      List<IndustryWiseCompaniesDTO> result = elasticsearchJobQueryService.getIndustryWiseCompanies();
+      return ResponseEntity.ok(result);
+    } catch (Exception e) {
+      log.error("Error fetching industry-wise companies: {}", e.getMessage(), e);
+      return ResponseEntity.internalServerError().build();
+    }
   }
 
   @GetMapping("/by-industry/{primaryIndustryId}")

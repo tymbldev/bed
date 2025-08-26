@@ -20,7 +20,8 @@ public interface ExternalJobDetailRepository extends JpaRepository<ExternalJobDe
   List<ExternalJobDetail> findByPortalNameAndKeywordUsed(String portalName, String keyword);
 
   @Query("SELECT j FROM ExternalJobDetail j WHERE j.portalName = :portalName AND j.jobTitle LIKE %:title%")
-  List<ExternalJobDetail> findByPortalNameAndJobTitleContaining(@Param("portalName") String portalName,
+  List<ExternalJobDetail> findByPortalNameAndJobTitleContaining(
+      @Param("portalName") String portalName,
       @Param("title") String title);
 
   @Query("SELECT j FROM ExternalJobDetail j WHERE j.companyName LIKE %:companyName%")
@@ -32,11 +33,11 @@ public interface ExternalJobDetailRepository extends JpaRepository<ExternalJobDe
 
   // Methods for external job sync
   List<ExternalJobDetail> findByIsSyncedToJobTableFalse();
-  
+
   long countByIsSyncedToJobTableTrue();
 
   // Methods for content refinement
   List<ExternalJobDetail> findByIsRefinedFalse();
-  
+
   long countByIsRefinedTrue();
 }

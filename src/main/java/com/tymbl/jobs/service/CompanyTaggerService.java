@@ -1,21 +1,21 @@
 package com.tymbl.jobs.service;
 
-import com.tymbl.jobs.entity.Company;
-import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import com.tymbl.jobs.entity.Company;
+import com.tymbl.jobs.repository.CompanyRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import java.util.Map;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j
@@ -32,7 +32,7 @@ public class CompanyTaggerService {
   @Transactional
   public CompanyTaggingResult tagCompany(String companyName, Long sourceId, String portalName) {
     CompanyTaggingResult result = new CompanyTaggingResult();
-    
+
     if (companyName == null || companyName.trim().isEmpty()) {
       return result;
     }
@@ -50,14 +50,16 @@ public class CompanyTaggerService {
       }
 
       // Try partial match with LIKE operator
-      List<Company> likeMatches = companyRepository.findByNameContainingIgnoreCase(companyName.trim());
+      List<Company> likeMatches = companyRepository.findByNameContainingIgnoreCase(
+          companyName.trim());
       if (!likeMatches.isEmpty()) {
         Company bestMatch = findBestCompanyMatchBySimilarity(companyName, likeMatches);
         if (bestMatch != null) {
           result.setCompanyId(bestMatch.getId());
           result.setCompanyName(bestMatch.getName());
           result.setConfidence(0.8);
-          log.info("Partial company match found: '{}' -> '{}' (ID: {})", companyName, bestMatch.getName(), bestMatch.getId());
+          log.info("Partial company match found: '{}' -> '{}' (ID: {})", companyName,
+              bestMatch.getName(), bestMatch.getId());
           return result;
         }
       }
@@ -65,7 +67,7 @@ public class CompanyTaggerService {
       // Try similar content matching
       List<SimilarContent> similarContents = similarContentRepository.findByTypeAndSearchTerm(
           ContentType.COMPANY, companyName);
-      
+
       if (!similarContents.isEmpty()) {
         // Extract company names from similar content (using parentName since entityId is null)
         List<String> companyNames = similarContents.stream()
@@ -82,7 +84,8 @@ public class CompanyTaggerService {
               result.setCompanyId(bestMatch.getId());
               result.setCompanyName(bestMatch.getName());
               result.setConfidence(0.6);
-              log.info("Similar content company match found: '{}' -> '{}' (ID: {})", companyName, bestMatch.getName(), bestMatch.getId());
+              log.info("Similar content company match found: '{}' -> '{}' (ID: {})", companyName,
+                  bestMatch.getName(), bestMatch.getId());
               return result;
             }
           }
@@ -90,22 +93,25 @@ public class CompanyTaggerService {
       }
 
       // Try AI-powered matching if available
-      Company aiMatch = validateCompanyMatchWithGenAI(companyName, likeMatches.isEmpty() ? new ArrayList<>() : likeMatches);
+      Company aiMatch = validateCompanyMatchWithGenAI(companyName,
+          likeMatches.isEmpty() ? new ArrayList<>() : likeMatches);
       if (aiMatch != null) {
         result.setCompanyId(aiMatch.getId());
         result.setCompanyName(aiMatch.getName());
         result.setConfidence(0.9);
-        log.info("AI-powered company match found: '{}' -> '{}' (ID: {})", companyName, aiMatch.getName(), aiMatch.getId());
+        log.info("AI-powered company match found: '{}' -> '{}' (ID: {})", companyName,
+            aiMatch.getName(), aiMatch.getId());
         return result;
       }
 
       log.info("No company match found for: '{}'", companyName);
-      
+
     } catch (Exception e) {
-      log.error("Error tagging company '{}' for external job {}: {}", companyName, sourceId, e.getMessage(), e);
+      log.error("Error tagging company '{}' for external job {}: {}", companyName, sourceId,
+          e.getMessage(), e);
       result.setError(e.getMessage());
     }
-    
+
     return result;
   }
 
@@ -116,7 +122,7 @@ public class CompanyTaggerService {
     try {
       List<SimilarContent> similarContents = similarContentRepository.findByTypeAndSearchTerm(
           ContentType.COMPANY, companyName);
-      
+
       if (similarContents.isEmpty()) {
         return new ArrayList<>();
       }
@@ -133,7 +139,7 @@ public class CompanyTaggerService {
 
       // Fetch companies by names
       return companyRepository.findByNameIn(companyNames);
-      
+
     } catch (Exception e) {
       log.error("Error finding companies by similar content for: {}", companyName, e);
       return new ArrayList<>();
@@ -143,7 +149,8 @@ public class CompanyTaggerService {
   /**
    * Find best company match using string similarity
    */
-  private Company findBestCompanyMatchBySimilarity(String inputCompanyName, List<Company> companies) {
+  private Company findBestCompanyMatchBySimilarity(String inputCompanyName,
+      List<Company> companies) {
     if (companies.isEmpty()) {
       return null;
     }
@@ -184,7 +191,7 @@ public class CompanyTaggerService {
     // Simple word overlap similarity
     String[] words1 = normalized1.split("\\s+");
     String[] words2 = normalized2.split("\\s+");
-    
+
     int commonWords = 0;
     for (String word1 : words1) {
       for (String word2 : words2) {
@@ -211,19 +218,22 @@ public class CompanyTaggerService {
       }
 
       StringBuilder prompt = new StringBuilder();
-      prompt.append("CRITICAL: You are matching company names. Be EXTREMELY strict and accurate.\n\n");
+      prompt.append(
+          "CRITICAL: You are matching company names. Be EXTREMELY strict and accurate.\n\n");
       prompt.append("Input company name: '").append(inputCompanyName).append("'\n\n");
       prompt.append("Available matches (ranked by similarity):\n");
-      
+
       for (int i = 0; i < topMatches.size(); i++) {
         Company company = topMatches.get(i);
         prompt.append(i + 1).append(". ").append(company.getName()).append("\n");
       }
-      
+
       prompt.append("\nSTRICT MATCHING RULES:\n");
       prompt.append("1. **EXACT MATCH**: Company names must be essentially the same\n");
-      prompt.append("2. **SUBSIDIARY**: Only if clearly a subsidiary (e.g., 'Microsoft India' → 'Microsoft')\n");
-      prompt.append("3. **ABBREVIATION**: Only official abbreviations (e.g., 'IBM' → 'International Business Machines')\n");
+      prompt.append(
+          "2. **SUBSIDIARY**: Only if clearly a subsidiary (e.g., 'Microsoft India' → 'Microsoft')\n");
+      prompt.append(
+          "3. **ABBREVIATION**: Only official abbreviations (e.g., 'IBM' → 'International Business Machines')\n");
       prompt.append("4. **REJECT**: If names are different companies, even in same industry\n");
       prompt.append("5. **REJECT**: If names are similar but clearly different entities\n\n");
       prompt.append("EXAMPLES OF WHAT TO REJECT:\n");
@@ -236,45 +246,50 @@ public class CompanyTaggerService {
       prompt.append("Only respond with the exact company name or 'NO_MATCH', no additional text.");
 
       String aiResponse = callGenAIService(prompt.toString());
-      
+
       if (aiResponse != null && !aiResponse.trim().equalsIgnoreCase("NO_MATCH")) {
         String selectedCompanyName = aiResponse.trim();
-        
+
         // Find the selected company in our list
         for (Company company : topMatches) {
           if (company.getName().equalsIgnoreCase(selectedCompanyName)) {
             // Additional validation: Check if this match makes sense
             if (isValidCompanyMatch(inputCompanyName, company.getName())) {
-              log.info("GenAI selected company match: '{}' -> '{}'", inputCompanyName, company.getName());
+              log.info("GenAI selected company match: '{}' -> '{}'", inputCompanyName,
+                  company.getName());
               return company;
             } else {
-              log.warn("GenAI selected match rejected by validation: '{}' -> '{}'", inputCompanyName, company.getName());
+              log.warn("GenAI selected match rejected by validation: '{}' -> '{}'",
+                  inputCompanyName, company.getName());
               return null;
             }
           }
         }
-        
+
         // If exact match not found, try partial matching with validation
         for (Company company : topMatches) {
-          if (company.getName().toLowerCase().contains(selectedCompanyName.toLowerCase()) || 
+          if (company.getName().toLowerCase().contains(selectedCompanyName.toLowerCase()) ||
               selectedCompanyName.toLowerCase().contains(company.getName().toLowerCase())) {
             if (isValidCompanyMatch(inputCompanyName, company.getName())) {
-              log.info("GenAI selected company match (partial): '{}' -> '{}'", inputCompanyName, company.getName());
+              log.info("GenAI selected company match (partial): '{}' -> '{}'", inputCompanyName,
+                  company.getName());
               return company;
             } else {
-              log.warn("GenAI partial match rejected by validation: '{}' -> '{}'", inputCompanyName, company.getName());
+              log.warn("GenAI partial match rejected by validation: '{}' -> '{}'", inputCompanyName,
+                  company.getName());
               return null;
             }
           }
         }
-        
-        log.warn("GenAI response '{}' could not be matched to any company in the list", selectedCompanyName);
+
+        log.warn("GenAI response '{}' could not be matched to any company in the list",
+            selectedCompanyName);
         return null;
       } else {
         log.info("GenAI found no suitable match for: '{}'", inputCompanyName);
         return null;
       }
-      
+
     } catch (Exception e) {
       log.error("Error validating company matches with GenAI for: {}", inputCompanyName, e);
       return null;
@@ -290,22 +305,25 @@ public class CompanyTaggerService {
       if (aiRestService != null) {
         // Build request body using AIRestService
         Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
-        
+
         // Call Gemini API
-        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Company Matching");
-        
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
+            "Company Matching");
+
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
           // Parse the response to extract the generated text
           return extractTextFromGeminiResponse(response.getBody());
         } else {
-          log.warn("Gemini API call failed with status: {} - {}", response.getStatusCode(), response.getBody());
+          log.warn("Gemini API call failed with status: {} - {}", response.getStatusCode(),
+              response.getBody());
         }
       }
-      
+
       // Fallback: Use string similarity as a placeholder for GenAI
-      log.info("Using string similarity as GenAI fallback for prompt: {}", prompt.substring(0, Math.min(100, prompt.length())));
+      log.info("Using string similarity as GenAI fallback for prompt: {}",
+          prompt.substring(0, Math.min(100, prompt.length())));
       return "AI_SERVICE_UNAVAILABLE";
-      
+
     } catch (Exception e) {
       log.warn("Failed to call GenAI service: {}", e.getMessage());
       return null;
@@ -320,7 +338,7 @@ public class CompanyTaggerService {
       // Parse JSON response
       com.fasterxml.jackson.databind.ObjectMapper objectMapper = new com.fasterxml.jackson.databind.ObjectMapper();
       com.fasterxml.jackson.databind.JsonNode responseNode = objectMapper.readTree(responseBody);
-      
+
       // Navigate to the text content
       com.fasterxml.jackson.databind.JsonNode candidates = responseNode.get("candidates");
       if (candidates != null && candidates.isArray() && candidates.size() > 0) {
@@ -334,10 +352,10 @@ public class CompanyTaggerService {
           }
         }
       }
-      
+
       log.warn("Unexpected Gemini API response structure: {}", responseBody);
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Failed to parse Gemini response: {}", e.getMessage());
       return null;
@@ -361,7 +379,8 @@ public class CompanyTaggerService {
     }
 
     // One contains the other (subsidiary case)
-    if (normalizedInput.contains(normalizedMatched) || normalizedMatched.contains(normalizedInput)) {
+    if (normalizedInput.contains(normalizedMatched) || normalizedMatched.contains(
+        normalizedInput)) {
       return true;
     }
 
@@ -374,22 +393,43 @@ public class CompanyTaggerService {
    * Result class for company tagging
    */
   public static class CompanyTaggingResult {
+
     private Long companyId;
     private String companyName;
     private Double confidence = 0.0;
     private String error;
 
     // Getters and setters
-    public Long getCompanyId() { return companyId; }
-    public void setCompanyId(Long companyId) { this.companyId = companyId; }
-    
-    public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-    
-    public Double getConfidence() { return confidence; }
-    public void setConfidence(Double confidence) { this.confidence = confidence; }
-    
-    public String getError() { return error; }
-    public void setError(String error) { this.error = error; }
+    public Long getCompanyId() {
+      return companyId;
+    }
+
+    public void setCompanyId(Long companyId) {
+      this.companyId = companyId;
+    }
+
+    public String getCompanyName() {
+      return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+      this.companyName = companyName;
+    }
+
+    public Double getConfidence() {
+      return confidence;
+    }
+
+    public void setConfidence(Double confidence) {
+      this.confidence = confidence;
+    }
+
+    public String getError() {
+      return error;
+    }
+
+    public void setError(String error) {
+      this.error = error;
+    }
   }
 }

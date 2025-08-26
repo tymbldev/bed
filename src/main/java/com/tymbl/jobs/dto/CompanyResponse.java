@@ -1,10 +1,12 @@
 package com.tymbl.jobs.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import java.time.LocalDateTime;
 import java.util.List;
 import lombok.Data;
 
 @Data
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class CompanyResponse {
 
   private Long id;
@@ -27,4 +29,5 @@ public class CompanyResponse {
   private String secondaryIndustries;
   private String companySize;
   private String specialties;
+  private Integer jobCount;
 } 

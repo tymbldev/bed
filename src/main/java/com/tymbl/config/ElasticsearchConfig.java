@@ -7,7 +7,6 @@ import co.elastic.clients.transport.rest_client.RestClientTransport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.HttpHost;
 import org.elasticsearch.client.RestClient;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -15,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class ElasticsearchConfig {
 
-    @Value("${elasticsearch.host:localhost}")
+  @Value("${elasticsearch.host:localhost}")
   private String host;
 
   @Value("${elasticsearch.port:9200}")
@@ -32,7 +31,8 @@ public class ElasticsearchConfig {
   }
 
   @Bean
-  public ElasticsearchTransport elasticsearchTransport(RestClient restClient, ObjectMapper objectMapper) {
+  public ElasticsearchTransport elasticsearchTransport(RestClient restClient,
+      ObjectMapper objectMapper) {
     JacksonJsonpMapper jsonpMapper = new JacksonJsonpMapper(objectMapper);
     return new RestClientTransport(restClient, jsonpMapper);
   }

@@ -8,16 +8,19 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ExternalJobRawResponseRepository extends JpaRepository<ExternalJobRawResponse, Long> {
+public interface ExternalJobRawResponseRepository extends
+    JpaRepository<ExternalJobRawResponse, Long> {
 
   List<ExternalJobRawResponse> findByPortalNameAndKeyword(String portalName, String keyword);
 
-  List<ExternalJobRawResponse> findByProcessingStatus(ExternalJobRawResponse.ProcessingStatus status);
+  List<ExternalJobRawResponse> findByProcessingStatus(
+      ExternalJobRawResponse.ProcessingStatus status);
 
   @Query("SELECT r FROM ExternalJobRawResponse r WHERE r.processingStatus = 'PENDING' ORDER BY r.createdAt ASC")
   List<ExternalJobRawResponse> findPendingResponses();
 
   @Query("SELECT r FROM ExternalJobRawResponse r WHERE r.portalName = :portalName AND r.keyword = :keyword ORDER BY r.createdAt DESC")
-  List<ExternalJobRawResponse> findLatestResponsesByPortalAndKeyword(@Param("portalName") String portalName,
+  List<ExternalJobRawResponse> findLatestResponsesByPortalAndKeyword(
+      @Param("portalName") String portalName,
       @Param("keyword") String keyword);
 }

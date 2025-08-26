@@ -2,20 +2,16 @@ package com.tymbl.jobs.controller;
 
 import com.tymbl.jobs.service.ExternalJobSyncService;
 import com.tymbl.jobs.service.ExternalJobSyncService.SyncResult;
-import com.tymbl.jobs.service.JobCrawlingService;
 import com.tymbl.jobs.service.JobContentRefinementService;
+import com.tymbl.jobs.service.JobCrawlingService;
 import com.tymbl.jobs.service.JobService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -48,7 +44,8 @@ public class AIJobController {
       jobCrawlingService.crawlAllActiveKeywords();
       return ResponseEntity.ok("Crawl process initiated successfully for all active keywords");
     } catch (Exception e) {
-      return ResponseEntity.internalServerError().body("Error during crawl process: " + e.getMessage());
+      return ResponseEntity.internalServerError()
+          .body("Error during crawl process: " + e.getMessage());
     }
   }
 
@@ -63,7 +60,8 @@ public class AIJobController {
       jobCrawlingService.processPendingRawResponses();
       return ResponseEntity.ok("Pending raw responses processing completed successfully");
     } catch (Exception e) {
-      return ResponseEntity.internalServerError().body("Error during processing: " + e.getMessage());
+      return ResponseEntity.internalServerError()
+          .body("Error during processing: " + e.getMessage());
     }
   }
 
@@ -76,9 +74,11 @@ public class AIJobController {
   public ResponseEntity<String> refineUnprocessedContent() {
     try {
       int processedCount = contentRefinementService.refineAllUnprocessedContent();
-      return ResponseEntity.ok("Content refinement completed successfully. Processed " + processedCount + " records.");
+      return ResponseEntity.ok(
+          "Content refinement completed successfully. Processed " + processedCount + " records.");
     } catch (Exception e) {
-      return ResponseEntity.internalServerError().body("Error during content refinement: " + e.getMessage());
+      return ResponseEntity.internalServerError()
+          .body("Error during content refinement: " + e.getMessage());
     }
   }
 

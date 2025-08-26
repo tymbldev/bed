@@ -1,24 +1,24 @@
 package com.tymbl.jobs.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.City;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.repository.CityRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import java.math.BigDecimal;
-import org.springframework.http.ResponseEntity;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,14 +35,14 @@ public class CityTaggerService {
   @Transactional
   public CityTaggingResult tagCity(String cityName, Long sourceId, String portalName) {
     CityTaggingResult result = new CityTaggingResult();
-    
+
     if (cityName == null || cityName.trim().isEmpty()) {
       return result;
     }
 
     try {
       String normalizedCityName = cityName.trim();
-      
+
       // 1. Try exact match first
       Optional<City> exactMatch = cityRepository.findByName(normalizedCityName);
       if (exactMatch.isPresent()) {
@@ -50,14 +50,15 @@ public class CityTaggerService {
         result.setCityId(city.getId());
         result.setCityName(city.getName());
         result.setConfidence(1.0);
-        log.info("Exact city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(), city.getId());
+        log.info("Exact city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(),
+            city.getId());
         return result;
       }
 
       // 2. Try similar content matching
       List<SimilarContent> similarContents = similarContentRepository.findByTypeAndSearchTerm(
           ContentType.CITY, cityName);
-      
+
       if (!similarContents.isEmpty()) {
         // Extract city names from similar content (using parentName since entityId is null)
         List<String> cityNames = similarContents.stream()
@@ -74,7 +75,8 @@ public class CityTaggerService {
               result.setCityId(bestMatch.getId());
               result.setCityName(bestMatch.getName());
               result.setConfidence(0.6);
-              log.info("Similar content city match found: '{}' -> '{}' (ID: {})", cityName, bestMatch.getName(), bestMatch.getId());
+              log.info("Similar content city match found: '{}' -> '{}' (ID: {})", cityName,
+                  bestMatch.getName(), bestMatch.getId());
               return result;
             }
           }
@@ -82,14 +84,16 @@ public class CityTaggerService {
       }
 
       // 3. Try LIKE operator matching
-      List<City> likeMatches = cityRepository.findByNameContainingIgnoreCaseOrderByNameAsc(normalizedCityName);
+      List<City> likeMatches = cityRepository.findByNameContainingIgnoreCaseOrderByNameAsc(
+          normalizedCityName);
       if (!likeMatches.isEmpty()) {
         if (likeMatches.size() == 1) {
           City city = likeMatches.get(0);
           result.setCityId(city.getId());
           result.setCityName(city.getName());
           result.setConfidence(0.8);
-          log.info("Single LIKE city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(), city.getId());
+          log.info("Single LIKE city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(),
+              city.getId());
           return result;
         } else {
           log.warn("Multiple cities found with name '{}', using first result", cityName);
@@ -102,23 +106,26 @@ public class CityTaggerService {
       }
 
       // 4. Try AI-powered matching if available
-      City aiMatch = validateCityMatchWithGenAI(cityName, likeMatches.isEmpty() ? new ArrayList<>() : likeMatches);
+      City aiMatch = validateCityMatchWithGenAI(cityName,
+          likeMatches.isEmpty() ? new ArrayList<>() : likeMatches);
       if (aiMatch != null) {
         result.setCityId(aiMatch.getId());
         result.setCityName(aiMatch.getName());
         result.setConfidence(0.9);
-        log.info("AI-powered city match found: '{}' -> '{}' (ID: {})", cityName, aiMatch.getName(), aiMatch.getId());
+        log.info("AI-powered city match found: '{}' -> '{}' (ID: {})", cityName, aiMatch.getName(),
+            aiMatch.getId());
         return result;
       }
 
-      log.info("NO_MATCH for city: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies", 
-               cityName, sourceId, portalName);
-      
+      log.info(
+          "NO_MATCH for city: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies",
+          cityName, sourceId, portalName);
+
     } catch (Exception e) {
       log.error("Error tagging city for external job {}: {}", sourceId, e.getMessage(), e);
       result.setError(e.getMessage());
     }
-    
+
     return result;
   }
 
@@ -166,7 +173,7 @@ public class CityTaggerService {
     // Simple word overlap similarity
     String[] words1 = normalized1.split("\\s+");
     String[] words2 = normalized2.split("\\s+");
-    
+
     int commonWords = 0;
     for (String word1 : words1) {
       for (String word2 : words2) {
@@ -198,14 +205,15 @@ public class CityTaggerService {
       prompt.append("which of the following cities is the best match? ");
       prompt.append("Consider abbreviations, common names, and regional variations.\n\n");
       prompt.append("Available cities:\n");
-      
+
       for (int i = 0; i < Math.min(topMatches.size(), 5); i++) {
         City city = topMatches.get(i);
         prompt.append(i + 1).append(". ").append(city.getName());
         prompt.append("\n");
       }
-      
-      prompt.append("\nRespond with only the number (1-").append(Math.min(topMatches.size(), 5)).append(") of the best match.");
+
+      prompt.append("\nRespond with only the number (1-").append(Math.min(topMatches.size(), 5))
+          .append(") of the best match.");
 
       String aiResponse = callGenAIService(prompt.toString());
       if (aiResponse != null) {
@@ -214,7 +222,7 @@ public class CityTaggerService {
           int selectedIndex = Integer.parseInt(aiResponse.trim()) - 1;
           if (selectedIndex >= 0 && selectedIndex < topMatches.size()) {
             City selectedCity = topMatches.get(selectedIndex);
-            
+
             // Validate the selection
             if (isValidCityMatch(inputCityName, selectedCity.getName())) {
               return selectedCity;
@@ -229,13 +237,14 @@ public class CityTaggerService {
       if (!topMatches.isEmpty()) {
         City firstMatch = topMatches.get(0);
         if (isValidCityMatch(inputCityName, firstMatch.getName())) {
-          log.info("AI validation failed, using first reasonable match: '{}' -> '{}'", inputCityName, firstMatch.getName());
+          log.info("AI validation failed, using first reasonable match: '{}' -> '{}'",
+              inputCityName, firstMatch.getName());
           return firstMatch;
         }
       }
 
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Error in GenAI city matching for '{}': {}", inputCityName, e.getMessage());
       return null;
@@ -251,22 +260,23 @@ public class CityTaggerService {
       if (aiRestService != null) {
         // Build request body using AIRestService
         Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
-        
+
         // Call Gemini API
         ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "City Matching");
-        
+
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
           // Parse the response to extract the generated text
           return extractTextFromGeminiResponse(response.getBody());
         } else {
-          log.warn("Gemini API call failed with status: {} - {}", response.getStatusCode(), response.getBody());
+          log.warn("Gemini API call failed with status: {} - {}", response.getStatusCode(),
+              response.getBody());
         }
       }
-      
+
       // Fallback: Return null if AI service is not available
       log.info("AI service not available for city matching");
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Failed to call GenAI service: {}", e.getMessage());
       return null;
@@ -281,7 +291,7 @@ public class CityTaggerService {
       // Parse JSON response
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode responseNode = objectMapper.readTree(responseBody);
-      
+
       // Navigate to the text content
       JsonNode candidates = responseNode.get("candidates");
       if (candidates != null && candidates.isArray() && candidates.size() > 0) {
@@ -295,10 +305,10 @@ public class CityTaggerService {
           }
         }
       }
-      
+
       log.warn("Unexpected Gemini API response structure: {}", responseBody);
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Failed to parse Gemini response: {}", e.getMessage());
       return null;
@@ -312,24 +322,24 @@ public class CityTaggerService {
     if (inputName == null || matchedName == null) {
       return false;
     }
-    
+
     String input = inputName.toLowerCase().trim();
     String matched = matchedName.toLowerCase().trim();
-    
+
     // Exact match
     if (input.equals(matched)) {
       return true;
     }
-    
+
     // Contains match
     if (input.contains(matched) || matched.contains(input)) {
       return true;
     }
-    
+
     // Word overlap
     String[] inputWords = input.split("\\s+");
     String[] matchedWords = matched.split("\\s+");
-    
+
     for (String inputWord : inputWords) {
       for (String matchedWord : matchedWords) {
         if (inputWord.equals(matchedWord) && inputWord.length() > 2) {
@@ -337,7 +347,7 @@ public class CityTaggerService {
         }
       }
     }
-    
+
     return false;
   }
 
@@ -352,10 +362,11 @@ public class CityTaggerService {
       similarContent.setSimilarName(similarCityName);
       similarContent.setConfidenceScore(BigDecimal.valueOf(confidence));
       similarContent.setProcessed(true);
-      
+
       similarContentRepository.save(similarContent);
-      log.debug("Stored city mapping: '{}' -> '{}' with confidence {}", similarCityName, parentCityName, confidence);
-      
+      log.debug("Stored city mapping: '{}' -> '{}' with confidence {}", similarCityName,
+          parentCityName, confidence);
+
     } catch (Exception e) {
       log.warn("Failed to store city mapping: {}", e.getMessage());
     }
@@ -365,22 +376,43 @@ public class CityTaggerService {
    * Result class for city tagging
    */
   public static class CityTaggingResult {
+
     private Long cityId;
     private String cityName;
     private Double confidence;
     private String error;
 
     // Getters and setters
-    public Long getCityId() { return cityId; }
-    public void setCityId(Long cityId) { this.cityId = cityId; }
-    
-    public String getCityName() { return cityName; }
-    public void setCityName(String cityName) { this.cityName = cityName; }
-    
-    public Double getConfidence() { return confidence; }
-    public void setConfidence(Double confidence) { this.confidence = confidence; }
-    
-    public String getError() { return error; }
-    public void setError(String error) { this.error = error; }
+    public Long getCityId() {
+      return cityId;
+    }
+
+    public void setCityId(Long cityId) {
+      this.cityId = cityId;
+    }
+
+    public String getCityName() {
+      return cityName;
+    }
+
+    public void setCityName(String cityName) {
+      this.cityName = cityName;
+    }
+
+    public Double getConfidence() {
+      return confidence;
+    }
+
+    public void setConfidence(Double confidence) {
+      this.confidence = confidence;
+    }
+
+    public String getError() {
+      return error;
+    }
+
+    public void setError(String error) {
+      this.error = error;
+    }
   }
 }

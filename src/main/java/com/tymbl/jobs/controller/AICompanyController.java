@@ -28,7 +28,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -252,8 +251,6 @@ public class AICompanyController {
       return ResponseEntity.internalServerError().body(errorResponse);
     }
   }
-
-
 
 
   // Helper methods for processing operations

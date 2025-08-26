@@ -64,7 +64,8 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig, JobCrawlRequest request,
+  public ExternalJobRawResponse saveRawResponse(ExternalJobCrawlKeyword keywordConfig,
+      JobCrawlRequest request,
       String apiResponse) {
     ExternalJobRawResponse rawResponse = new ExternalJobRawResponse();
     rawResponse.setPortalName(keywordConfig.getPortalName());
@@ -79,7 +80,8 @@ public class LinkedInPortalCrawlingService implements PortalCrawlingService {
   }
 
   @Override
-  public List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse, String apiResponse,
+  public List<ExternalJobDetail> parseAndSaveJobDetails(ExternalJobRawResponse rawResponse,
+      String apiResponse,
       JobCrawlRequest request) {
     List<ExternalJobDetail> jobDetails = new ArrayList<>();
 

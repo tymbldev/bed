@@ -1,24 +1,24 @@
 package com.tymbl.jobs.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.Country;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.repository.CountryRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
-import java.math.BigDecimal;
-import org.springframework.http.ResponseEntity;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.util.ArrayList;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -35,14 +35,14 @@ public class CountryTaggerService {
   @Transactional
   public CountryTaggingResult tagCountry(String countryName, Long sourceId, String portalName) {
     CountryTaggingResult result = new CountryTaggingResult();
-    
+
     if (countryName == null || countryName.trim().isEmpty()) {
       return result;
     }
 
     try {
       String normalizedCountryName = countryName.trim();
-      
+
       // 1. Try exact match first
       Optional<Country> exactMatch = countryRepository.findByName(normalizedCountryName);
       if (exactMatch.isPresent()) {
@@ -50,14 +50,15 @@ public class CountryTaggerService {
         result.setCountryId(country.getId());
         result.setCountryName(country.getName());
         result.setConfidence(1.0);
-        log.info("Exact country match found: '{}' -> '{}' (ID: {})", countryName, country.getName(), country.getId());
+        log.info("Exact country match found: '{}' -> '{}' (ID: {})", countryName, country.getName(),
+            country.getId());
         return result;
       }
 
       // 2. Try similar content matching
       List<SimilarContent> similarContents = similarContentRepository.findByTypeAndSearchTerm(
           ContentType.COUNTRY, countryName);
-      
+
       if (!similarContents.isEmpty()) {
         // Extract country names from similar content (using parentName since entityId is null)
         List<String> countryNames = similarContents.stream()
@@ -74,7 +75,8 @@ public class CountryTaggerService {
               result.setCountryId(bestMatch.getId());
               result.setCountryName(bestMatch.getName());
               result.setConfidence(0.6);
-              log.info("Similar content country match found: '{}' -> '{}' (ID: {})", countryName, bestMatch.getName(), bestMatch.getId());
+              log.info("Similar content country match found: '{}' -> '{}' (ID: {})", countryName,
+                  bestMatch.getName(), bestMatch.getId());
               return result;
             }
           }
@@ -82,14 +84,16 @@ public class CountryTaggerService {
       }
 
       // 3. Try LIKE operator matching
-      List<Country> likeMatches = countryRepository.findByNameContainingIgnoreCase(normalizedCountryName);
+      List<Country> likeMatches = countryRepository.findByNameContainingIgnoreCase(
+          normalizedCountryName);
       if (!likeMatches.isEmpty()) {
         if (likeMatches.size() == 1) {
           Country country = likeMatches.get(0);
           result.setCountryId(country.getId());
           result.setCountryName(country.getName());
           result.setConfidence(0.8);
-          log.info("Single LIKE country match found: '{}' -> '{}' (ID: {})", countryName, country.getName(), country.getId());
+          log.info("Single LIKE country match found: '{}' -> '{}' (ID: {})", countryName,
+              country.getName(), country.getId());
           return result;
         } else {
           log.warn("Multiple countries found with name '{}', using first result", countryName);
@@ -102,30 +106,34 @@ public class CountryTaggerService {
       }
 
       // 4. Try AI-powered matching if available
-      Country aiMatch = validateCountryMatchWithGenAI(countryName, likeMatches.isEmpty() ? new ArrayList<>() : likeMatches);
+      Country aiMatch = validateCountryMatchWithGenAI(countryName,
+          likeMatches.isEmpty() ? new ArrayList<>() : likeMatches);
       if (aiMatch != null) {
         result.setCountryId(aiMatch.getId());
         result.setCountryName(aiMatch.getName());
         result.setConfidence(0.9);
-        log.info("AI-powered country match found: '{}' -> '{}' (ID: {})", countryName, aiMatch.getName(), aiMatch.getId());
+        log.info("AI-powered country match found: '{}' -> '{}' (ID: {})", countryName,
+            aiMatch.getName(), aiMatch.getId());
         return result;
       }
 
-      log.info("NO_MATCH for country: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies", 
-               countryName, sourceId, portalName);
-      
+      log.info(
+          "NO_MATCH for country: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies",
+          countryName, sourceId, portalName);
+
     } catch (Exception e) {
       log.error("Error tagging country for external job {}: {}", sourceId, e.getMessage(), e);
       result.setError(e.getMessage());
     }
-    
+
     return result;
   }
 
   /**
    * Find best country match using string similarity
    */
-  private Country findBestCountryMatchBySimilarity(String inputCountryName, List<Country> countries) {
+  private Country findBestCountryMatchBySimilarity(String inputCountryName,
+      List<Country> countries) {
     if (countries.isEmpty()) {
       return null;
     }
@@ -166,7 +174,7 @@ public class CountryTaggerService {
     // Simple word overlap similarity
     String[] words1 = normalized1.split("\\s+");
     String[] words2 = normalized2.split("\\s+");
-    
+
     int commonWords = 0;
     for (String word1 : words1) {
       for (String word2 : words2) {
@@ -198,14 +206,15 @@ public class CountryTaggerService {
       prompt.append("which of the following countries is the best match? ");
       prompt.append("Consider abbreviations, common names, and regional variations.\n\n");
       prompt.append("Available countries:\n");
-      
+
       for (int i = 0; i < Math.min(topMatches.size(), 5); i++) {
         Country country = topMatches.get(i);
         prompt.append(i + 1).append(". ").append(country.getName());
         prompt.append("\n");
       }
-      
-      prompt.append("\nRespond with only the number (1-").append(Math.min(topMatches.size(), 5)).append(") of the best match.");
+
+      prompt.append("\nRespond with only the number (1-").append(Math.min(topMatches.size(), 5))
+          .append(") of the best match.");
 
       String aiResponse = callGenAIService(prompt.toString());
       if (aiResponse != null) {
@@ -214,7 +223,7 @@ public class CountryTaggerService {
           int selectedIndex = Integer.parseInt(aiResponse.trim()) - 1;
           if (selectedIndex >= 0 && selectedIndex < topMatches.size()) {
             Country selectedCountry = topMatches.get(selectedIndex);
-            
+
             // Validate the selection
             if (isValidCountryMatch(inputCountryName, selectedCountry.getName())) {
               return selectedCountry;
@@ -229,13 +238,14 @@ public class CountryTaggerService {
       if (!topMatches.isEmpty()) {
         Country firstMatch = topMatches.get(0);
         if (isValidCountryMatch(inputCountryName, firstMatch.getName())) {
-          log.info("AI validation failed, using first reasonable match: '{}' -> '{}'", inputCountryName, firstMatch.getName());
+          log.info("AI validation failed, using first reasonable match: '{}' -> '{}'",
+              inputCountryName, firstMatch.getName());
           return firstMatch;
         }
       }
 
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Error in GenAI country matching for '{}': {}", inputCountryName, e.getMessage());
       return null;
@@ -251,22 +261,24 @@ public class CountryTaggerService {
       if (aiRestService != null) {
         // Build request body using AIRestService
         Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
-        
+
         // Call Gemini API
-        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody, "Country Matching");
-        
+        ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
+            "Country Matching");
+
         if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
           // Parse the response to extract the generated text
           return extractTextFromGeminiResponse(response.getBody());
         } else {
-          log.warn("Gemini API call failed with status: {} - {}", response.getStatusCode(), response.getBody());
+          log.warn("Gemini API call failed with status: {} - {}", response.getStatusCode(),
+              response.getBody());
         }
       }
-      
+
       // Fallback: Return null if AI service is not available
       log.info("AI service not available for country matching");
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Failed to call GenAI service: {}", e.getMessage());
       return null;
@@ -281,7 +293,7 @@ public class CountryTaggerService {
       // Parse JSON response
       ObjectMapper objectMapper = new ObjectMapper();
       JsonNode responseNode = objectMapper.readTree(responseBody);
-      
+
       // Navigate to the text content
       JsonNode candidates = responseNode.get("candidates");
       if (candidates != null && candidates.isArray() && candidates.size() > 0) {
@@ -295,10 +307,10 @@ public class CountryTaggerService {
           }
         }
       }
-      
+
       log.warn("Unexpected Gemini API response structure: {}", responseBody);
       return null;
-      
+
     } catch (Exception e) {
       log.warn("Failed to parse Gemini response: {}", e.getMessage());
       return null;
@@ -312,24 +324,24 @@ public class CountryTaggerService {
     if (inputName == null || matchedName == null) {
       return false;
     }
-    
+
     String input = inputName.toLowerCase().trim();
     String matched = matchedName.toLowerCase().trim();
-    
+
     // Exact match
     if (input.equals(matched)) {
       return true;
     }
-    
+
     // Contains match
     if (input.contains(matched) || matched.contains(input)) {
       return true;
     }
-    
+
     // Word overlap
     String[] inputWords = input.split("\\s+");
     String[] matchedWords = matched.split("\\s+");
-    
+
     for (String inputWord : inputWords) {
       for (String matchedWord : matchedWords) {
         if (inputWord.equals(matchedWord) && inputWord.length() > 2) {
@@ -337,14 +349,15 @@ public class CountryTaggerService {
         }
       }
     }
-    
+
     return false;
   }
 
   /**
    * Store country mapping in similar_content table
    */
-  private void storeCountryMapping(String similarCountryName, String parentCountryName, double confidence) {
+  private void storeCountryMapping(String similarCountryName, String parentCountryName,
+      double confidence) {
     try {
       SimilarContent similarContent = new SimilarContent();
       similarContent.setType(ContentType.COUNTRY);
@@ -352,10 +365,11 @@ public class CountryTaggerService {
       similarContent.setSimilarName(similarCountryName);
       similarContent.setConfidenceScore(BigDecimal.valueOf(confidence));
       similarContent.setProcessed(true);
-      
+
       similarContentRepository.save(similarContent);
-      log.debug("Stored country mapping: '{}' -> '{}' with confidence {}", similarCountryName, parentCountryName, confidence);
-      
+      log.debug("Stored country mapping: '{}' -> '{}' with confidence {}", similarCountryName,
+          parentCountryName, confidence);
+
     } catch (Exception e) {
       log.warn("Failed to store country mapping: {}", e.getMessage());
     }
@@ -365,22 +379,43 @@ public class CountryTaggerService {
    * Result class for country tagging
    */
   public static class CountryTaggingResult {
+
     private Long countryId;
     private String countryName;
     private Double confidence;
     private String error;
 
     // Getters and setters
-    public Long getCountryId() { return countryId; }
-    public void setCountryId(Long countryId) { this.countryId = countryId; }
-    
-    public String getCountryName() { return countryName; }
-    public void setCountryName(String countryName) { this.countryName = countryName; }
-    
-    public Double getConfidence() { return confidence; }
-    public void setConfidence(Double confidence) { this.confidence = confidence; }
-    
-    public String getError() { return error; }
-    public void setError(String error) { this.error = error; }
+    public Long getCountryId() {
+      return countryId;
+    }
+
+    public void setCountryId(Long countryId) {
+      this.countryId = countryId;
+    }
+
+    public String getCountryName() {
+      return countryName;
+    }
+
+    public void setCountryName(String countryName) {
+      this.countryName = countryName;
+    }
+
+    public Double getConfidence() {
+      return confidence;
+    }
+
+    public void setConfidence(Double confidence) {
+      this.confidence = confidence;
+    }
+
+    public String getError() {
+      return error;
+    }
+
+    public void setError(String error) {
+      this.error = error;
+    }
   }
 }

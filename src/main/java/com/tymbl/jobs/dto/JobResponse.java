@@ -52,9 +52,9 @@ public class JobResponse {
 
   // Helper method to get approval status string
   public String getApprovalStatus() {
-      if (approved == null) {
-          return "PENDING";
-      }
+    if (approved == null) {
+      return "PENDING";
+    }
     return JobApprovalStatus.fromValue(approved).name();
   }
 } 

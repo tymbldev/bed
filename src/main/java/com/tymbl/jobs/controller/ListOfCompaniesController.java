@@ -1,5 +1,6 @@
 package com.tymbl.jobs.controller;
 
+import com.tymbl.jobs.service.ElasticsearchCompanyIndexingService;
 import com.tymbl.jobs.service.ElasticsearchIndexingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ListOfCompaniesController {
 
   private final ElasticsearchIndexingService elasticsearchIndexingService;
+  private final ElasticsearchCompanyIndexingService elasticsearchCompanyIndexingService;
 
   @GetMapping("/search")
   @Operation(
@@ -140,7 +142,7 @@ public class ListOfCompaniesController {
   })
   public ResponseEntity<Map<String, Object>> updateCompanyJobCount(@PathVariable Long companyId) {
     try {
-      elasticsearchIndexingService.updateCompanyJobCount(companyId);
+      elasticsearchCompanyIndexingService.updateCompanyJobCount(companyId);
 
       Map<String, Object> response = new HashMap<>();
       response.put("message", "Job count updated successfully for company " + companyId);

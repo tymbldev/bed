@@ -58,8 +58,10 @@ public class JobService {
   private final CompanyRepository companyRepository;
   private final CompanyService companyService;
   private final UserEnrichmentUtil userEnrichmentUtil;
-  private final ElasticsearchJobService elasticsearchJobService;
+  private final ElasticsearchJobIndexingService elasticsearchJobIndexingService;
+  private final ElasticsearchJobQueryService elasticsearchJobQueryService;
   private final ElasticsearchIndexingService elasticsearchIndexingService;
+  private final ElasticsearchCompanyIndexingService elasticsearchCompanyIndexingService;
   private final DropdownService dropdownService;
 
   @Value("${referrer.sort.weight.designation:0.3}")
@@ -152,7 +154,7 @@ public class JobService {
 
     // Sync to Elasticsearch (non-blocking)
     try {
-      elasticsearchJobService.syncJobToElasticsearch(job);
+      elasticsearchJobIndexingService.syncJobToElasticsearch(job);
     } catch (Exception e) {
       logger.error("Failed to sync job {} to Elasticsearch: {}", job.getId(), e.getMessage());
       // Don't fail the main transaction
@@ -161,7 +163,7 @@ public class JobService {
     // Update company job count in Elasticsearch (non-blocking)
     try {
       if (job.getCompanyId() != null) {
-        elasticsearchIndexingService.updateCompanyJobCount(job.getCompanyId());
+        elasticsearchCompanyIndexingService.updateCompanyJobCount(job.getCompanyId());
       }
     } catch (Exception e) {
       logger.error("Failed to update job count for company {} in Elasticsearch: {}",
@@ -265,7 +267,7 @@ public class JobService {
     // Update company job count in Elasticsearch (non-blocking)
     try {
       if (job.getCompanyId() != null) {
-        elasticsearchIndexingService.updateCompanyJobCount(job.getCompanyId());
+        elasticsearchCompanyIndexingService.updateCompanyJobCount(job.getCompanyId());
       }
     } catch (Exception e) {
       logger.error("Failed to update job count for company {} in Elasticsearch: {}",
@@ -292,7 +294,7 @@ public class JobService {
     // Map city and country names to IDs if provided
     JobSearchRequest mappedRequest = mapCityAndCountryNamesToIds(request);
 
-    JobSearchResponse response = elasticsearchJobService.searchJobs(mappedRequest,
+    JobSearchResponse response = elasticsearchJobQueryService.searchJobs(mappedRequest,
         userDesignationId);
 
     // Populate companyMetaData
@@ -378,8 +380,7 @@ public class JobService {
    * Reindex all jobs to Elasticsearch
    */
   public void reindexAllJobsToElasticsearch() {
-    List<Job> allJobs = jobRepository.findAll();
-    elasticsearchJobService.reindexAllJobs(allJobs);
+    elasticsearchJobIndexingService.reindexAllJobs();
   }
 
   @Transactional(readOnly = true)
@@ -516,7 +517,7 @@ public class JobService {
 
     // Sync to Elasticsearch (non-blocking)
     try {
-      elasticsearchJobService.syncJobToElasticsearch(job);
+      elasticsearchJobIndexingService.syncJobToElasticsearch(job);
     } catch (Exception e) {
       logger.error("Failed to sync job {} to Elasticsearch: {}", job.getId(), e.getMessage());
       // Don't fail the main transaction
@@ -596,45 +597,45 @@ public class JobService {
   }
 
   private double getDesignationScore(String designation) {
-      if (designation == null) {
-          return 0.0;
-      }
+    if (designation == null) {
+      return 0.0;
+    }
     String d = designation.toLowerCase();
-      if (d.contains("lead")) {
-          return 3.0;
-      }
-      if (d.contains("manager")) {
-          return 4.0;
-      }
-      if (d.contains("director")) {
-          return 5.0;
-      }
-      if (d.contains("head")) {
-          return 4.5;
-      }
-      if (d.contains("principal")) {
-          return 4.2;
-      }
-      if (d.contains("senior")) {
-          return 2.0;
-      }
-      if (d.contains("junior")) {
-          return 1.0;
-      }
+    if (d.contains("lead")) {
+      return 3.0;
+    }
+    if (d.contains("manager")) {
+      return 4.0;
+    }
+    if (d.contains("director")) {
+      return 5.0;
+    }
+    if (d.contains("head")) {
+      return 4.5;
+    }
+    if (d.contains("principal")) {
+      return 4.2;
+    }
+    if (d.contains("senior")) {
+      return 2.0;
+    }
+    if (d.contains("junior")) {
+      return 1.0;
+    }
     return 1.5;
   }
 
   public void submitReferrerFeedback(ReferrerFeedbackRequest request, User applicant) {
     JobReferrer referrer = jobReferrerRepository.findByJobIdAndUserId(request.getJobId(),
         request.getReferrerUserId());
-      if (referrer == null) {
-          throw new ResourceNotFoundException("Referrer not found for this job");
-      }
+    if (referrer == null) {
+      throw new ResourceNotFoundException("Referrer not found for this job");
+    }
     ReferrerFeedback feedback = referrerFeedbackRepository.findByJobReferrerIdAndApplicantId(
         referrer.getId(), applicant.getId());
-      if (feedback == null) {
-          feedback = new ReferrerFeedback();
-      }
+    if (feedback == null) {
+      feedback = new ReferrerFeedback();
+    }
     feedback.setJobReferrer(referrer);
     feedback.setApplicant(applicant);
     feedback.setFeedbackText(request.getFeedbackText());

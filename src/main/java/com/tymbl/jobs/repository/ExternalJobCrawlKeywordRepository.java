@@ -9,14 +9,16 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ExternalJobCrawlKeywordRepository extends JpaRepository<ExternalJobCrawlKeyword, Long> {
+public interface ExternalJobCrawlKeywordRepository extends
+    JpaRepository<ExternalJobCrawlKeyword, Long> {
 
   List<ExternalJobCrawlKeyword> findByIsActiveTrue();
 
   List<ExternalJobCrawlKeyword> findByPortalNameAndIsActiveTrue(String portalName);
 
   @Query("SELECT k FROM ExternalJobCrawlKeyword k WHERE k.isActive = true AND (k.lastCrawledDate IS NULL OR k.lastCrawledDate <= :threshold)")
-  List<ExternalJobCrawlKeyword> findKeywordsReadyForCrawling(@Param("threshold") LocalDateTime threshold);
+  List<ExternalJobCrawlKeyword> findKeywordsReadyForCrawling(
+      @Param("threshold") LocalDateTime threshold);
 
   ExternalJobCrawlKeyword findByKeywordAndPortalName(String keyword, String portalName);
 

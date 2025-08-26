@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class IndustryCacheService  {
+public class IndustryCacheService {
 
   private final IndustryRepository industryRepository;
 
@@ -23,7 +23,7 @@ public class IndustryCacheService  {
   // Cache keys
   private static final String INDUSTRY_STATS_CACHE_KEY = "industry_stats";
   private static final String TOP_COMPANIES_CACHE_PREFIX = "top_companies_";
-  
+
   // Cache TTL in milliseconds (30 minutes)
   private static final long CACHE_TTL = 30 * 60 * 1000L;
 
@@ -85,7 +85,7 @@ public class IndustryCacheService  {
    */
   public List<Object[]> getTopCompaniesByIndustry(Long industryId) {
     String cacheKey = TOP_COMPANIES_CACHE_PREFIX + industryId;
-    
+
     // Check cache first
     if (!isCacheExpired(cacheKey)) {
       List<Object[]> cachedCompanies = topCompaniesCache.get(cacheKey);
@@ -124,8 +124,8 @@ public class IndustryCacheService  {
   }
 
   /**
-   * Flush all caches - public method for external use
-   * This method is called whenever job data changes to ensure cache consistency
+   * Flush all caches - public method for external use This method is called whenever job data
+   * changes to ensure cache consistency
    */
   public void flushCache() {
     log.info("Flushing all industry caches due to job data change");

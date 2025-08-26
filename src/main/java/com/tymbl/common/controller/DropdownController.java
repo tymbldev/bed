@@ -1,8 +1,6 @@
 package com.tymbl.common.controller;
 
 import com.tymbl.common.dto.IndustryWiseCompaniesDTO;
-import com.tymbl.common.entity.City;
-import com.tymbl.common.entity.Country;
 import com.tymbl.common.entity.Currency;
 import com.tymbl.common.entity.Department;
 import com.tymbl.common.entity.Designation;
@@ -68,6 +66,7 @@ public class DropdownController {
 
   // DTOs for lightweight responses
   public static class DepartmentDTO {
+
     private Long id;
     private String name;
 
@@ -76,13 +75,25 @@ public class DropdownController {
       this.name = name;
     }
 
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public void setId(Long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
+    public Long getId() {
+      return id;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setId(Long id) {
+      this.id = id;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
   }
 
   public static class DesignationDTO {
+
     private Long id;
     private String name;
 
@@ -91,13 +102,25 @@ public class DropdownController {
       this.name = name;
     }
 
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public void setId(Long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
+    public Long getId() {
+      return id;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setId(Long id) {
+      this.id = id;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
   }
 
   public static class IndustryDTO {
+
     private Long id;
     private String name;
 
@@ -106,13 +129,25 @@ public class DropdownController {
       this.name = name;
     }
 
-    public Long getId() { return id; }
-    public String getName() { return name; }
-    public void setId(Long id) { this.id = id; }
-    public void setName(String name) { this.name = name; }
+    public Long getId() {
+      return id;
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public void setId(Long id) {
+      this.id = id;
+    }
+
+    public void setName(String name) {
+      this.name = name;
+    }
   }
 
   public static class CompanyDTO {
+
     private Long companyId;
     private String companyName;
     private String logoUrl;
@@ -120,7 +155,8 @@ public class DropdownController {
     private String headquarters;
     private Integer activeJobCount;
 
-    public CompanyDTO(Long companyId, String companyName, String logoUrl, String website, String headquarters, Integer activeJobCount) {
+    public CompanyDTO(Long companyId, String companyName, String logoUrl, String website,
+        String headquarters, Integer activeJobCount) {
       this.companyId = companyId;
       this.companyName = companyName;
       this.logoUrl = logoUrl;
@@ -130,20 +166,54 @@ public class DropdownController {
     }
 
     // Getters
-    public Long getCompanyId() { return companyId; }
-    public String getCompanyName() { return companyName; }
-    public String getLogoUrl() { return logoUrl; }
-    public String getWebsite() { return website; }
-    public String getHeadquarters() { return headquarters; }
-    public Integer getActiveJobCount() { return activeJobCount; }
+    public Long getCompanyId() {
+      return companyId;
+    }
+
+    public String getCompanyName() {
+      return companyName;
+    }
+
+    public String getLogoUrl() {
+      return logoUrl;
+    }
+
+    public String getWebsite() {
+      return website;
+    }
+
+    public String getHeadquarters() {
+      return headquarters;
+    }
+
+    public Integer getActiveJobCount() {
+      return activeJobCount;
+    }
 
     // Setters
-    public void setCompanyId(Long companyId) { this.companyId = companyId; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
-    public void setWebsite(String website) { this.website = website; }
-    public void setHeadquarters(String headquarters) { this.headquarters = headquarters; }
-    public void setActiveJobCount(Integer activeJobCount) { this.activeJobCount = activeJobCount; }
+    public void setCompanyId(Long companyId) {
+      this.companyId = companyId;
+    }
+
+    public void setCompanyName(String companyName) {
+      this.companyName = companyName;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+      this.logoUrl = logoUrl;
+    }
+
+    public void setWebsite(String website) {
+      this.website = website;
+    }
+
+    public void setHeadquarters(String headquarters) {
+      this.headquarters = headquarters;
+    }
+
+    public void setActiveJobCount(Integer activeJobCount) {
+      this.activeJobCount = activeJobCount;
+    }
   }
 
   // Department endpoints
@@ -669,7 +739,7 @@ public class DropdownController {
       @PathVariable Long industryId) {
     List<IndustryWiseCompaniesDTO.TopCompanyDTO> topCompanies = dropdownService.getCompaniesByIndustry(
         industryId);
-    
+
     // Convert to CompanyDTO
     List<CompanyDTO> companies = topCompanies.stream()
         .map(topCompany -> new CompanyDTO(
@@ -681,7 +751,7 @@ public class DropdownController {
             topCompany.getActiveJobCount()
         ))
         .collect(Collectors.toList());
-    
+
     return ResponseEntity.ok(companies);
   }
 

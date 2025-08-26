@@ -720,9 +720,9 @@ public class GeminiInterviewService {
             String[] blocks = generatedText.split("tymblQuestion");
             for (String block : blocks) {
               String trimmed = block.trim();
-                if (trimmed.isEmpty()) {
-                    continue;
-                }
+              if (trimmed.isEmpty()) {
+                continue;
+              }
               String[] fields = trimmed.split("\\|\\|\\|\\|");
               if (fields.length < 4) {
                 log.warn("[Gemini] Malformed question block (expected 4 fields): {}", trimmed);

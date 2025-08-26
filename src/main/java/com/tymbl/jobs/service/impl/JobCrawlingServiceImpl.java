@@ -67,7 +67,8 @@ public class JobCrawlingServiceImpl implements JobCrawlingService {
           apiResponse);
 
       // Parse and save job details
-      List<ExternalJobDetail> jobDetails = portalService.parseAndSaveJobDetails(rawResponse, apiResponse,
+      List<ExternalJobDetail> jobDetails = portalService.parseAndSaveJobDetails(rawResponse,
+          apiResponse,
           request);
 
       // Update last crawled date

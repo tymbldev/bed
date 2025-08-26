@@ -34,6 +34,7 @@ public class CompanyService {
   private final IndustryRepository industryRepository;
   private final DropdownService dropdownService;
   private final CompanyTransactionService companyTransactionService;
+  private final ElasticsearchJobQueryService elasticsearchJobQueryService;
 
   private static final Long SUPER_ADMIN_ID = 0L;
 
@@ -106,32 +107,17 @@ public class CompanyService {
    */
   public Page<CompanyResponse> getCompaniesByPrimaryIndustryId(Long primaryIndustryId,
       Pageable pageable) {
-    // For pagination, we need to use repository directly
-    Page<Company> companies = companyRepository.findByPrimaryIndustryId(primaryIndustryId,
-        pageable);
-    if (companies.isEmpty()) {
-      throw new CompanyNotFoundException(
-          "No companies found for industry ID: " + primaryIndustryId);
+    try {
+      // Use Elasticsearch to get companies with jobs prioritized and ordered by rank
+      return elasticsearchJobQueryService.getCompaniesByPrimaryIndustryId(primaryIndustryId,
+          pageable);
+    } catch (Exception e) {
+      log.error("Error fetching companies by primary industry ID {} from Elasticsearch: {}",
+          primaryIndustryId, e.getMessage(), e);
+      return null;
     }
-    return companies.map(this::mapToResponse);
   }
 
-  /**
-   * Get companies by primary industry ID without pagination
-   *
-   * @param primaryIndustryId The primary industry ID
-   * @return List of companies
-   */
-  public List<CompanyResponse> getCompaniesByPrimaryIndustryId(Long primaryIndustryId) {
-    List<Company> companies = companyRepository.findByPrimaryIndustryId(primaryIndustryId);
-    if (companies.isEmpty()) {
-      throw new CompanyNotFoundException(
-          "No companies found for industry ID: " + primaryIndustryId);
-    }
-    return companies.stream()
-        .map(this::mapToResponse)
-        .collect(Collectors.toList());
-  }
 
   @Transactional(readOnly = true)
   public List<Company> getAllCompaniesForDropdown() {
@@ -139,18 +125,6 @@ public class CompanyService {
     return dropdownService.getAllCompanies();
   }
 
-  /**
-   * Get all company names from the database
-   *
-   * @return List of company names
-   */
-  @Transactional(readOnly = true)
-  public List<String> getAllCompanyNames() {
-    // Use cached data from DropdownService instead of direct database call
-    return dropdownService.getAllCompanies().stream()
-        .map(Company::getName)
-        .collect(Collectors.toList());
-  }
 
   private CompanyResponse mapToResponse(Company company) {
     List<Job> jobs = jobRepository.findByCompanyId(company.getId());
@@ -178,21 +152,21 @@ public class CompanyService {
     response.setCompanySize(company.getCompanySize());
     response.setSpecialties(company.getSpecialties());
     // Ensure all fields are always set
-      if (response.getSecondaryIndustries() == null) {
-          response.setSecondaryIndustries("");
-      }
-      if (response.getCompanySize() == null) {
-          response.setCompanySize("");
-      }
+    if (response.getSecondaryIndustries() == null) {
+      response.setSecondaryIndustries("");
+    }
+    if (response.getCompanySize() == null) {
+      response.setCompanySize("");
+    }
 
     // Enrich with dropdown values
     enrichCompanyResponseWithDropdownValues(response);
-      if (response.getSpecialties() == null) {
-          response.setSpecialties("");
-      }
-      if (response.getCareerPageUrl() == null) {
-          response.setCareerPageUrl("");
-      }
+    if (response.getSpecialties() == null) {
+      response.setSpecialties("");
+    }
+    if (response.getCareerPageUrl() == null) {
+      response.setCareerPageUrl("");
+    }
     if (jobs != null) {
       response.setJobs(jobs.stream().map(this::mapJobToResponse).collect(Collectors.toList()));
     }
@@ -288,19 +262,6 @@ public class CompanyService {
     }
   }
 
-  public List<CompanyIndustryResponse> detectIndustriesForCompanies() {
-    // Only fetch companies that haven't been processed for industry detection
-    List<Company> companies = companyRepository.findByIndustryProcessedFalse();
-    List<CompanyIndustryResponse> results = new ArrayList<>();
-
-    for (Company company : companies) {
-      CompanyIndustryResponse response = companyTransactionService.processCompanyIndustryDetectionInTransaction(
-          company);
-      results.add(response);
-    }
-    return results;
-  }
-
   /**
    * Detect industries for companies in batches with individual transactions per batch This ensures
    * that each batch is processed in its own transaction
@@ -354,17 +315,4 @@ public class CompanyService {
     return results;
   }
 
-
-  /**
-   * Reset industry processed flag for all companies This allows reprocessing of industry detection
-   * for all companies
-   */
-  @Transactional
-  public void resetIndustryProcessedFlag() {
-    companyRepository.resetIndustryProcessedFlag();
-    // Refresh company cache to ensure fresh data
-    dropdownService.refreshCompanyList();
-  }
-
-
-} 
+}
