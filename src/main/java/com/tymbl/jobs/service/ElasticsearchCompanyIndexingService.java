@@ -42,7 +42,7 @@ public class ElasticsearchCompanyIndexingService {
     log.info("Starting to index all companies to Elasticsearch");
 
     try {
-      int batchSize = 500;
+      int batchSize = 1;
       int totalSuccessCount = 0;
       int totalFailureCount = 0;
       int totalCompanies = 0;
