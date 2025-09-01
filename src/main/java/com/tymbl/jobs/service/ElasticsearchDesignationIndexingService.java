@@ -147,8 +147,59 @@ public class ElasticsearchDesignationIndexingService {
     doc.put("name", designation.getName());
     doc.put("level", designation.getLevel());
     doc.put("enabled", designation.isEnabled());
-    doc.put("similarDesignationsByName", designation.getSimilarDesignationsByName());
-    doc.put("similarDesignationsById", designation.getSimilarDesignationsById());
+    // Normalize similarDesignationsByName to a List<String>
+    try {
+      Object namesRaw = designation.getSimilarDesignationsByName();
+      List<String> names;
+      if (namesRaw == null) {
+        names = java.util.Collections.emptyList();
+      } else if (namesRaw instanceof List) {
+        //noinspection unchecked
+        names = (List<String>) namesRaw;
+      } else {
+        String s = namesRaw.toString().trim();
+        if (s.startsWith("[") && s.endsWith("]")) {
+          s = s.substring(1, s.length() - 1);
+        }
+        names = java.util.Arrays.stream(s.split(","))
+            .map(String::trim)
+            .map(t -> t.replaceAll("^\"|\"$", ""))
+            .filter(v -> !v.isEmpty())
+            .collect(java.util.stream.Collectors.toList());
+      }
+      doc.put("similarDesignationsByName", names);
+    } catch (Exception e) {
+      log.warn("Failed parsing similarDesignationsByName for designation {}: {}", designation.getId(), e.getMessage());
+      doc.put("similarDesignationsByName", java.util.Collections.emptyList());
+    }
+
+    // Normalize similarDesignationsById to a List<Long>
+    try {
+      Object idsRaw = designation.getSimilarDesignationsById();
+      List<Long> ids;
+      if (idsRaw == null) {
+        ids = java.util.Collections.emptyList();
+      } else if (idsRaw instanceof List) {
+        //noinspection unchecked
+        ids = ((List<?>) idsRaw).stream()
+            .map(o -> Long.valueOf(o.toString().trim()))
+            .collect(java.util.stream.Collectors.toList());
+      } else {
+        String s = idsRaw.toString().trim();
+        if (s.startsWith("[") && s.endsWith("]")) {
+          s = s.substring(1, s.length() - 1);
+        }
+        ids = java.util.Arrays.stream(s.split(","))
+            .map(String::trim)
+            .filter(v -> !v.isEmpty())
+            .map(Long::valueOf)
+            .collect(java.util.stream.Collectors.toList());
+      }
+      doc.put("similarDesignationsById", ids);
+    } catch (Exception e) {
+      log.warn("Failed parsing similarDesignationsById for designation {}: {}", designation.getId(), e.getMessage());
+      doc.put("similarDesignationsById", java.util.Collections.emptyList());
+    }
     doc.put("similarDesignationsProcessed", designation.isSimilarDesignationsProcessed());
     doc.put("processedName", designation.getProcessedName());
     doc.put("processedNameGenerated", designation.isProcessedNameGenerated());

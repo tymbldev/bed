@@ -154,6 +154,16 @@ public class ElasticsearchIndexingService {
   }
 
   /**
+   * Reindex all jobs by delegating to the job indexing service
+   */
+  @Transactional(readOnly = true)
+  public void reindexAllJobs() {
+    log.info("Starting jobs re-indexing via ElasticsearchIndexingService delegating to Job service");
+    elasticsearchJobIndexingService.reindexAllJobs();
+    log.info("Jobs re-indexing delegated successfully");
+  }
+
+  /**
    * Delete all documents from all Elasticsearch indices
    */
   public Map<String, Object> deleteAllDocumentsFromAllIndices() {

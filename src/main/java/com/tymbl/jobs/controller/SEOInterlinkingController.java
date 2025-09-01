@@ -66,7 +66,6 @@ public class SEOInterlinkingController {
               examples = @ExampleObject(
                   value = "{\n" +
                       "  \"query\": \"Software Engineer\",\n" +
-                      "  \"type\": \"designation\",\n" +
                       "  \"totalJobs\": 150,\n" +
                       "  \"locationCombinations\": [\n" +
                       "    {\n" +
@@ -89,12 +88,10 @@ public class SEOInterlinkingController {
   })
   public ResponseEntity<Map<String, Object>> getJobLocationCombinations(
       @Parameter(description = "Designation name or skill name", example = "Software Engineer")
-      @RequestParam String query,
-      @Parameter(description = "Type of query: 'designation' or 'skill'", example = "designation")
-      @RequestParam(defaultValue = "designation") String type) {
+      @RequestParam String query) {
 
     try {
-      log.info("Getting job location combinations for {}: {}", type, query);
+      log.info("Getting job location combinations for: {}", query);
 
       if (query == null || query.trim().isEmpty()) {
         Map<String, Object> error = new HashMap<>();
@@ -102,116 +99,14 @@ public class SEOInterlinkingController {
         return ResponseEntity.badRequest().body(error);
       }
 
-      Map<String, Object> result = elasticsearchSEOService.getJobLocationCombinations(query.trim(),
-          type);
+      Map<String, Object> result = elasticsearchSEOService.getJobLocationCombinations(query.trim());
       return ResponseEntity.ok(result);
 
     } catch (Exception e) {
-      log.error("Error getting job location combinations for {}: {}", type, query, e);
+      log.error("Error getting job location combinations for: {}", query, e);
       Map<String, Object> error = new HashMap<>();
       error.put("error", "Error getting job location combinations: " + e.getMessage());
       error.put("query", query);
-      error.put("type", type);
-      return ResponseEntity.internalServerError().body(error);
-    }
-  }
-
-  // ============================================================================
-  // SIMILAR DESIGNATIONS ENDPOINTS
-  // ============================================================================
-
-  @GetMapping("/designations/similar")
-  @Operation(
-      summary = "Get similar designations and skills with job counts",
-      description =
-          "Returns similar designations and skills that have jobs, along with their job counts. " +
-              "For designations: First checks the similar_designations column in the designation index. "
-              +
-              "If no similar designations found, groups designations by department and returns those with jobs. "
-              +
-              "For skills: Searches the skills index to find related skills and returns their job counts."
-  )
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Similar designations and skills retrieved successfully",
-          content = @Content(
-              examples = @ExampleObject(
-                  value = "{\n" +
-                      "  \"inputDesignation\": \"Software Engineer\",\n" +
-                      "  \"department\": \"Engineering\",\n" +
-                      "  \"similarDesignations\": [\n" +
-                      "    {\n" +
-                      "      \"designationName\": \"Senior Software Engineer\",\n" +
-                      "      \"jobCount\": 45\n" +
-                      "    },\n" +
-                      "    {\n" +
-                      "      \"designationName\": \"Tech Lead\",\n" +
-                      "      \"jobCount\": 32\n" +
-                      "    },\n" +
-                      "    {\n" +
-                      "      \"designationName\": \"Software Developer\",\n" +
-                      "      \"jobCount\": 28\n" +
-                      "    }\n" +
-                      "  ],\n" +
-                      "  \"totalSimilarDesignations\": 3,\n" +
-                      "  \"similarSkills\": [\n" +
-                      "    {\n" +
-                      "      \"skillName\": \"Java\",\n" +
-                      "      \"jobCount\": 120,\n" +
-                      "      \"category\": \"Programming\",\n" +
-                      "      \"description\": \"Object-oriented programming language\"\n" +
-                      "    },\n" +
-                      "    {\n" +
-                      "      \"skillName\": \"Spring\",\n" +
-                      "      \"jobCount\": 85,\n" +
-                      "      \"category\": \"Framework\",\n" +
-                      "      \"description\": \"Java application framework\"\n" +
-                      "    },\n" +
-                      "    {\n" +
-                      "      \"skillName\": \"React\",\n" +
-                      "      \"jobCount\": 95,\n" +
-                      "      \"category\": \"Frontend\",\n" +
-                      "      \"description\": \"JavaScript library for building user interfaces\"\n"
-                      +
-                      "    }\n" +
-                      "  ],\n" +
-                      "  \"totalSimilarSkills\": 3\n" +
-                      "}"
-              )
-          )
-      ),
-      @ApiResponse(responseCode = "400", description = "Invalid designation parameter"),
-      @ApiResponse(responseCode = "404", description = "Designation not found"),
-      @ApiResponse(responseCode = "500", description = "Internal server error")
-  })
-  public ResponseEntity<Map<String, Object>> getSimilarDesignations(
-      @Parameter(description = "Designation name", example = "Software Engineer")
-      @RequestParam String designation) {
-
-    try {
-      log.info("Getting similar designations and skills for: {}", designation);
-
-      if (designation == null || designation.trim().isEmpty()) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("error", "Designation parameter is required");
-        return ResponseEntity.badRequest().body(error);
-      }
-
-      Map<String, Object> result = elasticsearchSEOService.getSimilarDesignationsWithJobCounts(
-          designation.trim());
-
-      if (result.containsKey("error") && result.get("error").toString().contains("not found")) {
-        return ResponseEntity.notFound().build();
-      }
-
-      return ResponseEntity.ok(result);
-
-    } catch (Exception e) {
-      log.error("Error getting similar designations and skills for: {}", designation, e);
-      Map<String, Object> error = new HashMap<>();
-      error.put("error", "Error getting similar designations and skills: " + e.getMessage());
-      error.put("designation", designation);
       return ResponseEntity.internalServerError().body(error);
     }
   }
@@ -358,6 +253,64 @@ public class SEOInterlinkingController {
       log.error("Error getting top designations", e);
       Map<String, Object> error = new HashMap<>();
       error.put("error", "Error getting top designations: " + e.getMessage());
+      return ResponseEntity.internalServerError().body(error);
+    }
+  }
+
+  // ============================================================================
+  // TOP SKILLS ENDPOINTS
+  // ============================================================================
+
+  @GetMapping("/skills/top")
+  @Operation(
+      summary = "Get top skills by job count",
+      description = "Returns the top skills ordered by job count. Useful for SEO to show most popular skills."
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Top skills retrieved successfully",
+          content = @Content(
+              examples = @ExampleObject(
+                  value = "{\n" +
+                      "  \"topSkills\": [\n" +
+                      "    {\n" +
+                      "      \"skillName\": \"Java\",\n" +
+                      "      \"jobCount\": 220\n" +
+                      "    },\n" +
+                      "    {\n" +
+                      "      \"skillName\": \"React\",\n" +
+                      "      \"jobCount\": 180\n" +
+                      "    }\n" +
+                      "  ],\n" +
+                      "  \"totalSkills\": 50,\n" +
+                      "  \"totalJobs\": 2500\n" +
+                      "}"
+              )
+          )
+      ),
+      @ApiResponse(responseCode = "500", description = "Internal server error")
+  })
+  public ResponseEntity<Map<String, Object>> getTopSkills(
+      @Parameter(description = "Number of top skills to return", example = "20")
+      @RequestParam(defaultValue = "20") int limit) {
+
+    try {
+      log.info("Getting top {} skills by job count", limit);
+
+      if (limit <= 0 || limit > 100) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Limit must be between 1 and 100");
+        return ResponseEntity.badRequest().body(error);
+      }
+
+      Map<String, Object> result = elasticsearchSEOService.getTopSkillsByJobCount(limit);
+      return ResponseEntity.ok(result);
+
+    } catch (Exception e) {
+      log.error("Error getting top skills", e);
+      Map<String, Object> error = new HashMap<>();
+      error.put("error", "Error getting top skills: " + e.getMessage());
       return ResponseEntity.internalServerError().body(error);
     }
   }

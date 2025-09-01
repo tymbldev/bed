@@ -3060,7 +3060,7 @@
             "method": "POST",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/ai/dropdowns/elasticsearch/index-all-entities",
+              "raw": "{{base_url}}/api/v1/ai/dropdowns/elasticsearch/index-all-entities?entity=company",
               "host": [
                 "{{base_url}}"
               ],
@@ -3071,6 +3071,13 @@
                 "dropdowns",
                 "elasticsearch",
                 "index-all-entities"
+              ],
+              "query": [
+                {
+                  "key": "entity",
+                  "value": "company",
+                  "description": "Optional. One of: company, designation, city, skill, job. Omit to index all."
+                }
               ]
             }
           },
@@ -3081,7 +3088,7 @@
                 "method": "POST",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/ai/dropdowns/elasticsearch/index-all-entities",
+                  "raw": "{{base_url}}/api/v1/ai/dropdowns/elasticsearch/index-all-entities?entity=company",
                   "host": [
                     "{{base_url}}"
                   ],
@@ -3092,6 +3099,12 @@
                     "dropdowns",
                     "elasticsearch",
                     "index-all-entities"
+                  ],
+                  "query": [
+                    {
+                      "key": "entity",
+                      "value": "company"
+                    }
                   ]
                 }
               },
@@ -3317,7 +3330,7 @@
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/seo/jobs/location-combinations?query=Software Engineer&type=designation",
+              "raw": "{{base_url}}/api/v1/seo/jobs/location-combinations?query=Software Engineer",
               "host": [
                 "{{base_url}}"
               ],
@@ -3333,11 +3346,6 @@
                   "key": "query",
                   "value": "Software Engineer",
                   "description": "Designation name or skill name"
-                },
-                {
-                  "key": "type",
-                  "value": "designation",
-                  "description": "Type of query: 'designation' or 'skill'"
                 }
               ]
             },
@@ -3350,7 +3358,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/seo/jobs/location-combinations?query=Software Engineer&type=designation"
+                  "raw": "{{base_url}}/api/v1/seo/jobs/location-combinations?query=Software Engineer"
                 }
               },
               "status": "OK",
@@ -3363,17 +3371,17 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"query\": \"Software Engineer\",\n  \"type\": \"designation\",\n  \"totalJobs\": 150,\n  \"locationCombinations\": [\n    {\n      \"location\": \"Bangalore\",\n      \"jobCount\": 50,\n      \"seoText\": \"Software Engineer jobs in Bangalore\"\n    },\n    {\n      \"location\": \"Delhi\",\n      \"jobCount\": 30,\n      \"seoText\": \"Software Engineer jobs in Delhi\"\n    }\n  ]\n}"
+              "body": "{\n  \"query\": \"Software Engineer\",\n  \"totalJobs\": 150,\n  \"locationCombinations\": [\n    {\n      \"location\": \"Bangalore\",\n      \"jobCount\": 50,\n      \"seoText\": \"Software Engineer jobs in Bangalore\"\n    },\n    {\n      \"location\": \"Delhi\",\n      \"jobCount\": 30,\n      \"seoText\": \"Software Engineer jobs in Delhi\"\n    }\n  ]\n}"
             }
           ]
         },
         {
-          "name": "Get Similar Designations",
+          "name": "Get Similar Content",
           "request": {
             "method": "GET",
             "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/seo/designations/similar?designation=Software Engineer",
+              "raw": "{{base_url}}/api/v1/seo/similarcontent?query=Software Engineer",
               "host": [
                 "{{base_url}}"
               ],
@@ -3381,14 +3389,13 @@
                 "api",
                 "v1",
                 "seo",
-                "designations",
-                "similar"
+                "similarcontent"
               ],
               "query": [
                 {
-                  "key": "designation",
+                  "key": "query",
                   "value": "Software Engineer",
-                  "description": "Designation name"
+                  "description": "Designation name or skill name"
                 }
               ]
             },
@@ -3401,7 +3408,7 @@
                 "method": "GET",
                 "header": [],
                 "url": {
-                  "raw": "{{base_url}}/api/v1/seo/designations/similar?designation=Software Engineer"
+                  "raw": "{{base_url}}/api/v1/seo/similarcontent?query=Software Engineer"
                 }
               },
               "status": "OK",
@@ -3527,6 +3534,58 @@
               ],
               "cookie": [],
               "body": "{\n  \"topDesignations\": [\n    {\n      \"designationName\": \"Software Engineer\",\n      \"jobCount\": 150\n    },\n    {\n      \"designationName\": \"Sales Representative\",\n      \"jobCount\": 120\n    },\n    {\n      \"designationName\": \"Product Manager\",\n      \"jobCount\": 95\n    }\n  ],\n  \"totalDesignations\": 50,\n  \"totalJobs\": 2500\n}"
+            }
+          ]
+        }
+        ,
+        {
+          "name": "Get Top Skills",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/api/v1/seo/skills/top?limit=20",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "seo",
+                "skills",
+                "top"
+              ],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "20",
+                  "description": "Number of top skills to return"
+                }
+              ]
+            },
+            "description": "Returns the top skills ordered by job count. Useful for SEO to show most popular skills."
+          },
+          "response": [
+            {
+              "name": "Success Response",
+              "originalRequest": {
+                "method": "GET",
+                "header": [],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/seo/skills/top?limit=20"
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"topSkills\": [\n    {\n      \"skillName\": \"Java\",\n      \"jobCount\": 220\n    },\n    {\n      \"skillName\": \"React\",\n      \"jobCount\": 180\n    }\n  ],\n  \"totalSkills\": 50,\n  \"totalJobs\": 2500\n}"
             }
           ]
         }

@@ -7,6 +7,7 @@ import co.elastic.clients.elasticsearch.core.SearchRequest;
 import co.elastic.clients.elasticsearch.core.SearchResponse;
 import co.elastic.clients.elasticsearch.core.search.Hit;
 import com.tymbl.jobs.constants.ElasticsearchConstants;
+import com.tymbl.common.service.DropdownService;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -25,28 +26,42 @@ import org.springframework.stereotype.Service;
 public class ElasticsearchSEOService {
 
   private final ElasticsearchClient elasticsearchClient;
+  private final DropdownService dropdownService;
 
   /**
    * Get job location combinations for designation or skill
    */
-  public Map<String, Object> getJobLocationCombinations(String query, String type) {
+  public Map<String, Object> getJobLocationCombinations(String query) {
     try {
-      log.info("Getting job location combinations for {}: {}", type, query);
+      log.info("Getting job location combinations for: {} (type param ignored)", query);
 
       // Build search query based on type
       BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
 
-      if ("designation".equalsIgnoreCase(type)) {
-        // Search in designation name
+      // Auto-detect whether the query matches a known designation or skill using dropdown caches
+      String lowered = query == null ? "" : query.trim().toLowerCase();
+      boolean isDesignation = false;
+      boolean isSkill = false;
+      try {
+        // Check designation cache via DropdownService
+        java.util.List<com.tymbl.common.entity.Designation> allDesignations = dropdownService.getAllDesignations();
+        isDesignation = allDesignations.stream()
+            .anyMatch(d -> d.getName() != null && d.getName().trim().equalsIgnoreCase(lowered));
+
+        // Heuristic for skills: search jobs index via title/description/tags match when not designation
+        if (!isDesignation) {
+          isSkill = true; // default to skill if not designation; reduces client responsibility
+        }
+      } catch (Exception ignore) {
+        // Fallback: default to designation
+        isDesignation = true;
+      }
+
+      if (isDesignation) {
         boolQueryBuilder.must(Query.of(q -> q.match(
             m -> m.field(ElasticsearchConstants.FIELD_DESIGNATION_NAME).query(query))));
-      } else if ("skill".equalsIgnoreCase(type)) {
-        // Search in tags (skills)
+      } else if (isSkill) {
         boolQueryBuilder.must(Query.of(q -> q.match(m -> m.field("tags").query(query))));
-      } else {
-        // Default to designation search
-        boolQueryBuilder.must(Query.of(q -> q.match(
-            m -> m.field(ElasticsearchConstants.FIELD_DESIGNATION_NAME).query(query))));
       }
 
       // Only active jobs
@@ -99,99 +114,23 @@ public class ElasticsearchSEOService {
           }
         }
       } catch (Exception e) {
-        log.warn("Error parsing aggregation response, falling back to manual processing: {}",
-            e.getMessage());
+        log.warn("Error parsing aggregation response, falling back to manual processing: {}", e);
         // Fallback to manual processing if aggregation parsing fails
-        return getJobLocationCombinationsFallback(query, type);
+        return null;
       }
 
       Map<String, Object> result = new HashMap<>();
       result.put("query", query);
-      result.put("type", type);
+      result.put("type", isDesignation ? "designation" : "skill");
       result.put("totalJobs", totalJobs);
       result.put("locationCombinations", locationCombinations);
 
       return result;
 
     } catch (Exception e) {
-      log.error("Error getting job location combinations for {}: {}", type, query, e);
+      log.error("Error getting job location combinations for {} : ", query, e);
       Map<String, Object> error = new HashMap<>();
       error.put("error", "Error getting job location combinations: " + e.getMessage());
-      return error;
-    }
-  }
-
-  /**
-   * Fallback method for job location combinations (manual processing)
-   */
-  private Map<String, Object> getJobLocationCombinationsFallback(String query, String type) {
-    try {
-      log.info("Using fallback method for job location combinations for {}: {}", type, query);
-
-      // Build search query based on type
-      BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
-
-      if ("designation".equalsIgnoreCase(type)) {
-        boolQueryBuilder.must(Query.of(q -> q.match(
-            m -> m.field(ElasticsearchConstants.FIELD_DESIGNATION_NAME).query(query))));
-      } else if ("skill".equalsIgnoreCase(type)) {
-        boolQueryBuilder.must(Query.of(q -> q.match(m -> m.field("tags").query(query))));
-      } else {
-        boolQueryBuilder.must(Query.of(q -> q.match(
-            m -> m.field(ElasticsearchConstants.FIELD_DESIGNATION_NAME).query(query))));
-      }
-
-      boolQueryBuilder.must(
-          Query.of(q -> q.term(t -> t.field(ElasticsearchConstants.FIELD_ACTIVE).value(true))));
-
-      // Build search request
-      SearchRequest searchRequest = SearchRequest.of(s -> s
-          .index(ElasticsearchConstants.JOBS_INDEX)
-          .query(boolQueryBuilder.build()._toQuery())
-          .size(10000) // Get all matching jobs for manual processing
-      );
-
-      SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
-
-      // Process results to group by location
-      Map<String, Long> locationJobCounts = new HashMap<>();
-      long totalJobs = 0;
-
-      for (Hit<Map> hit : response.hits().hits()) {
-        Map<String, Object> job = hit.source();
-        if (job != null && job.get("cityName") != null) {
-          String cityName = job.get("cityName").toString();
-          locationJobCounts.merge(cityName, 1L, Long::sum);
-          totalJobs++;
-        }
-      }
-
-      // Build response
-      List<Map<String, Object>> locationCombinations = new ArrayList<>();
-      for (Map.Entry<String, Long> entry : locationJobCounts.entrySet()) {
-        Map<String, Object> combination = new HashMap<>();
-        combination.put("location", entry.getKey());
-        combination.put("jobCount", entry.getValue());
-        combination.put("seoText", query + " jobs in " + entry.getKey());
-        locationCombinations.add(combination);
-      }
-
-      // Sort by job count descending
-      locationCombinations.sort((a, b) ->
-          Long.compare((Long) b.get("jobCount"), (Long) a.get("jobCount")));
-
-      Map<String, Object> result = new HashMap<>();
-      result.put("query", query);
-      result.put("type", type);
-      result.put("totalJobs", totalJobs);
-      result.put("locationCombinations", locationCombinations);
-
-      return result;
-
-    } catch (Exception e) {
-      log.error("Error in fallback method for job location combinations: {}", e.getMessage());
-      Map<String, Object> error = new HashMap<>();
-      error.put("error", "Error in fallback method: " + e.getMessage());
       return error;
     }
   }
@@ -224,16 +163,27 @@ public class ElasticsearchSEOService {
 
       // Extract designation details
       Map<String, Object> designationDoc = designationResponse.hits().hits().get(0).source();
-      String similarDesignationsStr = (String) designationDoc.get("similarDesignationsByName");
       String departmentName = (String) designationDoc.get("departmentName");
 
       List<String> similarDesignations = new ArrayList<>();
-
-      // First, try to get similar designations from the similarDesignationsByName field
-      if (similarDesignationsStr != null && !similarDesignationsStr.trim().isEmpty()) {
-        String[] similarArray = similarDesignationsStr.split(",");
+      Object similarByNameObj = designationDoc.get("similarDesignationsByName");
+      if (similarByNameObj instanceof List<?>) {
+        for (Object o : (List<?>) similarByNameObj) {
+          if (o != null) {
+            String name = o.toString().trim();
+            if (!name.isEmpty()) {
+              similarDesignations.add(name);
+            }
+          }
+        }
+      } else if (similarByNameObj != null) {
+        String s = similarByNameObj.toString().trim();
+        if (s.startsWith("[") && s.endsWith("]")) {
+          s = s.substring(1, s.length() - 1);
+        }
+        String[] similarArray = s.split(",");
         for (String similar : similarArray) {
-          String trimmed = similar.trim();
+          String trimmed = similar.trim().replaceAll("^\"|\"$", "");
           if (!trimmed.isEmpty()) {
             similarDesignations.add(trimmed);
           }
@@ -552,6 +502,167 @@ public class ElasticsearchSEOService {
     }
   }
 
+  /**
+   * Get top skills by job count
+   */
+  public Map<String, Object> getTopSkillsByJobCount(int limit) {
+    try {
+      log.info("Getting top {} skills by job count", limit);
+
+      // Build search request with aggregation on tags (skills)
+      BoolQuery.Builder boolQueryBuilder = new BoolQuery.Builder();
+      boolQueryBuilder.must(
+          Query.of(q -> q.term(t -> t.field(ElasticsearchConstants.FIELD_ACTIVE).value(true))));
+
+      SearchRequest searchRequest = SearchRequest.of(s -> s
+          .index(ElasticsearchConstants.JOBS_INDEX)
+          .query(boolQueryBuilder.build()._toQuery())
+          .size(0)
+          .aggregations("skills", a -> a
+              .terms(t -> t
+                  .field("skills.keyword")
+                  .size(limit * 2)
+              )
+          )
+      );
+
+      SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
+
+      long totalJobs = 0;
+      List<Map<String, Object>> topSkills = new ArrayList<>();
+
+      try {
+        Map<String, co.elastic.clients.elasticsearch._types.aggregations.Aggregate> aggregations = response.aggregations();
+        if (aggregations != null) {
+          co.elastic.clients.elasticsearch._types.aggregations.Aggregate skillsAgg = aggregations.get("skills");
+          if (skillsAgg != null && skillsAgg.isSterms()) {
+            co.elastic.clients.elasticsearch._types.aggregations.StringTermsAggregate stringTerms = skillsAgg.sterms();
+            int count = 0;
+            for (co.elastic.clients.elasticsearch._types.aggregations.StringTermsBucket bucket : stringTerms.buckets().array()) {
+              if (count >= limit) {
+                break;
+              }
+              String skillName = bucket.key().stringValue();
+              Long jobCount = bucket.docCount();
+              if (skillName != null && !skillName.trim().isEmpty()) {
+                Map<String, Object> skill = new HashMap<>();
+                skill.put("skillName", skillName);
+                skill.put("jobCount", jobCount);
+                topSkills.add(skill);
+                totalJobs += jobCount;
+                count++;
+              }
+            }
+          }
+        }
+      } catch (Exception e) {
+        log.warn("Error parsing skills aggregation, returning empty list: {}", e.getMessage());
+      }
+
+      Map<String, Object> result = new HashMap<>();
+      result.put("topSkills", topSkills);
+      result.put("totalSkills", topSkills.size());
+      result.put("totalJobs", totalJobs);
+      return result;
+
+    } catch (Exception e) {
+      log.error("Error getting top skills by job count", e);
+      Map<String, Object> error = new HashMap<>();
+      error.put("error", "Error getting top skills: " + e.getMessage());
+      return error;
+    }
+  }
+
+  /**
+   * Get similar skills with job counts for a given skill
+   */
+  public Map<String, Object> getSimilarSkillsWithJobCounts(String skill) {
+    try {
+      log.info("Getting similar skills with job counts for: {}", skill);
+
+      // First, get the skill details from skills index
+      BoolQuery.Builder skillQueryBuilder = new BoolQuery.Builder();
+      skillQueryBuilder.must(Query.of(q -> q.match(m -> m.field("name").query(skill))));
+
+      SearchRequest skillSearchRequest = SearchRequest.of(s -> s
+          .index(ElasticsearchConstants.SKILLS_INDEX)
+          .query(skillQueryBuilder.build()._toQuery())
+          .size(1)
+      );
+
+      SearchResponse<Map> skillResponse = elasticsearchClient.search(skillSearchRequest, Map.class);
+
+      if (skillResponse.hits().hits().isEmpty()) {
+        Map<String, Object> error = new HashMap<>();
+        error.put("error", "Skill not found: " + skill);
+        return error;
+      }
+
+      Map<String, Object> skillDoc = skillResponse.hits().hits().get(0).source();
+
+      // Parse similarSkillsByName list
+      java.util.List<String> similarSkills = new java.util.ArrayList<>();
+      Object similarByNameObj = skillDoc.get("similarSkillsByName");
+      if (similarByNameObj instanceof java.util.List<?>) {
+        for (Object o : (java.util.List<?>) similarByNameObj) {
+          if (o != null) {
+            String name = o.toString().trim();
+            if (!name.isEmpty()) {
+              similarSkills.add(name);
+            }
+          }
+        }
+      } else if (similarByNameObj != null) {
+        String s = similarByNameObj.toString().trim();
+        if (s.startsWith("[") && s.endsWith("]")) {
+          s = s.substring(1, s.length() - 1);
+        }
+        String[] similarArray = s.split(",");
+        for (String similar : similarArray) {
+          String trimmed = similar.trim().replaceAll("^\"|\"$", "");
+          if (!trimmed.isEmpty()) {
+            similarSkills.add(trimmed);
+          }
+        }
+      }
+
+      // If none found in doc, fallback by searching skills index for related names
+      if (similarSkills.isEmpty()) {
+        similarSkills = getSimilarSkillsForLocationSearch(skill);
+      }
+
+      // Get job counts for each similar skill
+      java.util.List<java.util.Map<String, Object>> similarSkillsWithCounts = new java.util.ArrayList<>();
+      for (String similarSkill : similarSkills) {
+        long jobCount = getJobCountForSkillWithAggregation(similarSkill);
+        if (jobCount > 0) {
+          java.util.Map<String, Object> skillWithCount = new java.util.HashMap<>();
+          skillWithCount.put("skillName", similarSkill);
+          skillWithCount.put("jobCount", jobCount);
+          similarSkillsWithCounts.add(skillWithCount);
+        }
+      }
+
+      // Sort by job count desc and limit to top 10
+      similarSkillsWithCounts.sort((a, b) -> Long.compare((Long) b.get("jobCount"), (Long) a.get("jobCount")));
+      if (similarSkillsWithCounts.size() > 10) {
+        similarSkillsWithCounts = similarSkillsWithCounts.subList(0, 10);
+      }
+
+      Map<String, Object> result = new HashMap<>();
+      result.put("inputSkill", skill);
+      result.put("similarSkills", similarSkillsWithCounts);
+      result.put("totalSimilarSkills", similarSkillsWithCounts.size());
+      return result;
+
+    } catch (Exception e) {
+      log.error("Error getting similar skills with job counts for: {}", skill, e);
+      Map<String, Object> error = new HashMap<>();
+      error.put("error", "Error getting similar skills with job counts: " + e.getMessage());
+      return error;
+    }
+  }
+
   // Helper methods
 
   private List<String> getDesignationsByDepartmentFromElasticsearch(String departmentName) {
@@ -705,12 +816,24 @@ public class ElasticsearchSEOService {
 
       if (!designationResponse.hits().hits().isEmpty()) {
         Map<String, Object> designationDoc = designationResponse.hits().hits().get(0).source();
-        String similarDesignationsStr = (String) designationDoc.get("similarDesignationsByName");
-
-        if (similarDesignationsStr != null && !similarDesignationsStr.trim().isEmpty()) {
-          String[] similarArray = similarDesignationsStr.split(",");
+        Object similarByNameObj = designationDoc.get("similarDesignationsByName");
+        if (similarByNameObj instanceof List<?>) {
+          for (Object o : (List<?>) similarByNameObj) {
+            if (o != null) {
+              String name = o.toString().trim();
+              if (!name.isEmpty()) {
+                similarDesignations.add(name);
+              }
+            }
+          }
+        } else if (similarByNameObj != null) {
+          String s = similarByNameObj.toString().trim();
+          if (s.startsWith("[") && s.endsWith("]")) {
+            s = s.substring(1, s.length() - 1);
+          }
+          String[] similarArray = s.split(",");
           for (String similar : similarArray) {
-            String trimmed = similar.trim();
+            String trimmed = similar.trim().replaceAll("^\"|\"$", "");
             if (!trimmed.isEmpty()) {
               similarDesignations.add(trimmed);
             }

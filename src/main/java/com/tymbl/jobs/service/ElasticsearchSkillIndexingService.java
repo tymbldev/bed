@@ -143,8 +143,45 @@ public class ElasticsearchSkillIndexingService {
     doc.put("category", skill.getCategory());
     doc.put("description", skill.getDescription());
     doc.put("usageCount", skill.getUsageCount());
-    doc.put("similarSkillsByName", skill.getSimilarSkillsByName());
-    doc.put("similarSkillsById", skill.getSimilarSkillsById());
+
+    // Parse similarSkillsByName into a List<String>
+    java.util.List<String> similarSkillsByNameList = new java.util.ArrayList<>();
+    String similarNames = skill.getSimilarSkillsByName();
+    if (similarNames != null && !similarNames.trim().isEmpty()) {
+      String s = similarNames.trim();
+      // Handle JSON-array-like strings: ["A","B"]
+      if (s.startsWith("[") && s.endsWith("]")) {
+        s = s.substring(1, s.length() - 1);
+      }
+      for (String part : s.split(",")) {
+        String name = part.trim().replaceAll("^\"|\"$", "");
+        if (!name.isEmpty()) {
+          similarSkillsByNameList.add(name);
+        }
+      }
+    }
+    doc.put("similarSkillsByName", similarSkillsByNameList);
+
+    // Parse similarSkillsById into a List<Long>
+    java.util.List<Long> similarSkillsByIdList = new java.util.ArrayList<>();
+    String similarIds = skill.getSimilarSkillsById();
+    if (similarIds != null && !similarIds.trim().isEmpty()) {
+      String ids = similarIds.trim();
+      if (ids.startsWith("[") && ids.endsWith("]")) {
+        ids = ids.substring(1, ids.length() - 1);
+      }
+      for (String part : ids.split(",")) {
+        String value = part.trim().replaceAll("^\"|\"$", "");
+        if (!value.isEmpty()) {
+          try {
+            similarSkillsByIdList.add(Long.parseLong(value));
+          } catch (NumberFormatException ex) {
+            log.warn("Invalid ID in similarSkillsById for skill {}: {}", skill.getName(), value);
+          }
+        }
+      }
+    }
+    doc.put("similarSkillsById", similarSkillsByIdList);
     doc.put("similarSkillsProcessed", skill.isSimilarSkillsProcessed());
 
     log.info("Basic skill fields added for: {} - Fields: {}", skill.getName(), doc.size());

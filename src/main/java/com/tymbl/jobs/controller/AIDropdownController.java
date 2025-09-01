@@ -862,10 +862,47 @@ public class AIDropdownController {
       ),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
-  public ResponseEntity<Map<String, Object>> indexAllEntitiesToElasticsearch() {
+  public ResponseEntity<Map<String, Object>> indexAllEntitiesToElasticsearch(
+      @Parameter(description = "Entity to index: company/designation/city/skill/job. If omitted, indexes all")
+      @org.springframework.web.bind.annotation.RequestParam(name = "entity", required = false) String entity
+  ) {
     try {
-      log.info("Starting to re-index all entities to Elasticsearch with cleanup");
-      Map<String, Object> result = elasticsearchIndexingService.indexAllEntities();
+      if (entity == null || entity.trim().isEmpty()) {
+        log.info("Starting to re-index ALL entities to Elasticsearch with cleanup");
+        Map<String, Object> result = elasticsearchIndexingService.indexAllEntities();
+        return ResponseEntity.ok(result);
+      }
+
+      String e = entity.trim().toLowerCase();
+      log.info("Starting to re-index single entity to Elasticsearch: {}", e);
+      Map<String, Object> result = new java.util.HashMap<>();
+      switch (e) {
+        case "company":
+        case "companies":
+          result = elasticsearchIndexingService.indexAllCompanies();
+          break;
+        case "designation":
+        case "designations":
+          result = elasticsearchIndexingService.indexAllDesignations();
+          break;
+        case "city":
+        case "cities":
+          result = elasticsearchIndexingService.indexAllCities();
+          break;
+        case "skill":
+        case "skills":
+          result = elasticsearchIndexingService.indexAllSkills();
+          break;
+        case "job":
+        case "jobs":
+          elasticsearchIndexingService.reindexAllJobs();
+          result = java.util.Collections.singletonMap("message", "Jobs re-indexed successfully");
+          break;
+        default:
+          Map<String, Object> errorResponse = new HashMap<>();
+          errorResponse.put("error", "Unsupported entity. Use one of: company, designation, city, skill, job");
+          return ResponseEntity.badRequest().body(errorResponse);
+      }
       return ResponseEntity.ok(result);
     } catch (Exception e) {
       log.error("Error re-indexing all entities to Elasticsearch", e);
