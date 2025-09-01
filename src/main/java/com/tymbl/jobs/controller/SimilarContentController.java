@@ -84,17 +84,12 @@ public class SimilarContentController {
       } catch (Exception ignore) {
         isDesignation = true; // fallback
       }
-
       Map<String, Object> result;
       if (isDesignation) {
         result = elasticsearchSEOService.getSimilarDesignationsWithJobCounts(query.trim());
-        result.put("type", "designation");
       } else {
         result = elasticsearchSEOService.getSimilarSkillsWithJobCounts(query.trim());
-        result.put("type", "skill");
       }
-
-      result.put("input", query.trim());
       return ResponseEntity.ok(result);
     } catch (Exception e) {
       log.error("Error getting similar content for: {}", query, e);

@@ -121,6 +121,8 @@ public class SEOInterlinkingController {
       description =
           "Takes a combination of (designation or skill) + location and returns job counts with location combinations and similar designations/skills. "
               +
+              "The type (designation or skill) is automatically detected based on the query. "
+              +
               "For example: 'Software Engineer + Delhi' returns job counts and similar designation+location combinations. "
               +
               "'Java + Delhi' returns job counts and similar skill+location combinations."
@@ -162,13 +164,10 @@ public class SEOInterlinkingController {
       @Parameter(description = "Designation name or skill name", example = "Software Engineer")
       @RequestParam String query,
       @Parameter(description = "Location name", example = "Delhi")
-      @RequestParam String location,
-      @Parameter(description = "Type of query: 'designation' or 'skill'", example = "designation")
-      @RequestParam(defaultValue = "designation") String type) {
+      @RequestParam String location) {
 
     try {
-      log.info("Getting designation/skill + location combinations for {}: {} in {}", type, query,
-          location);
+      log.info("Getting designation/skill + location combinations for: {} in {}", query, location);
 
       if (query == null || query.trim().isEmpty() || location == null || location.trim()
           .isEmpty()) {
@@ -178,18 +177,16 @@ public class SEOInterlinkingController {
       }
 
       Map<String, Object> result = elasticsearchSEOService.getDesignationSkillLocationCombinations(
-          query.trim(), location.trim(), type);
+          query.trim(), location.trim());
       return ResponseEntity.ok(result);
 
     } catch (Exception e) {
-      log.error("Error getting designation/skill + location combinations for {}: {} in {}", type,
-          query, location, e);
+      log.error("Error getting designation/skill + location combinations for: {} in {}", query, location, e);
       Map<String, Object> error = new HashMap<>();
       error.put("error",
           "Error getting designation/skill + location combinations: " + e.getMessage());
       error.put("query", query);
       error.put("location", location);
-      error.put("type", type);
       return ResponseEntity.internalServerError().body(error);
     }
   }

@@ -10,6 +10,9 @@ import com.tymbl.jobs.constants.ElasticsearchConstants;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.repository.CompanyRepository;
 import com.tymbl.jobs.repository.JobRepository;
+import com.tymbl.common.entity.Skill;
+import com.tymbl.common.repository.SkillRepository;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,6 +33,7 @@ public class ElasticsearchJobIndexingService {
   private final IndustryCacheService industryCacheService;
   private final CompanyRepository companyRepository;
   private final JobRepository jobRepository;
+  private final SkillRepository skillRepository;
   private final ElasticsearchCompanyIndexingService elasticsearchCompanyIndexingService;
 
   /**
@@ -111,7 +115,35 @@ public class ElasticsearchJobIndexingService {
           java.sql.Timestamp.valueOf(job.getUpdatedAt()));
     }
 
-    document.put("tags", job.getTags());
+    // Add job skills and tags as lists
+    List<String> skillNames = new ArrayList<>();
+    if (job.getSkillIds() != null && !job.getSkillIds().isEmpty()) {
+      document.put("skillIds", new ArrayList<>(job.getSkillIds()));
+      
+      // Fetch skill names for better searchability
+      for (Long skillId : job.getSkillIds()) {
+        try {
+          Skill skill = skillRepository.findById(skillId).orElse(null);
+          if (skill != null) {
+            skillNames.add(skill.getName());
+          }
+        } catch (Exception e) {
+          log.warn("Error fetching skill name for ID {}: {}", skillId, e.getMessage());
+        }
+      }
+      document.put("skillNames", skillNames);
+    } else {
+      document.put("skillIds", new ArrayList<>());
+      document.put("skillNames", new ArrayList<>());
+    }
+    
+    // Convert tags from Set to List
+    if (job.getTags() != null && !job.getTags().isEmpty()) {
+      document.put("tags", new ArrayList<>(job.getTags()));
+    } else {
+      document.put("tags", new ArrayList<>());
+    }
+    
     document.put("openingCount", job.getOpeningCount());
     document.put("uniqueUrl", job.getUniqueUrl());
     document.put("platform", job.getPlatform());
@@ -168,7 +200,17 @@ public class ElasticsearchJobIndexingService {
     if (secondaryIndustries != null) {
       searchableText.append(secondaryIndustries).append(" ");
     }
-    if (job.getTags() != null) {
+    // Add skills to searchable text (using already fetched skill names)
+    if (!skillNames.isEmpty()) {
+      for (String skillName : skillNames) {
+        if (skillName != null) {
+          searchableText.append(skillName).append(" ");
+        }
+      }
+    }
+    
+    // Add tags to searchable text (as list)
+    if (job.getTags() != null && !job.getTags().isEmpty()) {
       searchableText.append(String.join(" ", job.getTags())).append(" ");
     }
     if (job.getPlatform() != null) {
