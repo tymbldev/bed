@@ -5,6 +5,7 @@ import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
 import com.tymbl.jobs.repository.CompanyContentRepository;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -108,11 +109,12 @@ public class CrawlingService {
     summary.append("Specialties: ").append(company.getSpecialties()).append("\n");
 
     // Get original content from CompanyContent table
-    Optional<CompanyContent> contentOpt = companyContentRepository.findByCompanyId(company.getId());
+    List<CompanyContent> contentList = companyContentRepository.findByCompanyId(company.getId());
     String aboutUsOriginal = "";
     String cultureOriginal = "";
-    if (contentOpt.isPresent()) {
-      CompanyContent content = contentOpt.get();
+    if (!contentList.isEmpty()) {
+      // Get the most recent content (assuming the latest one has the most up-to-date information)
+      CompanyContent content = contentList.get(0);
       aboutUsOriginal = content.getAboutUsOriginal() != null ? content.getAboutUsOriginal() : "";
       cultureOriginal = content.getCultureOriginal() != null ? content.getCultureOriginal() : "";
     }

@@ -29,6 +29,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -141,6 +142,7 @@ public class AICompanyController {
       @ApiResponse(responseCode = "404", description = "Company not found (if companyName provided)"),
       @ApiResponse(responseCode = "500", description = "Internal server error")
   })
+  @Async
   public ResponseEntity<Map<String, Object>> processCompanyOperations(
       @Parameter(description = "Comma-separated list of operations to process: crawl, detectIndustries, shortenContent, similarCompanies, fetchWebsites")
       @RequestParam(required = false) String operations,

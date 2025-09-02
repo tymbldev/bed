@@ -148,11 +148,11 @@ public class AIJobService {
     response.put("companyName", company.getName());
 
     // Get or create company content record
-    Optional<CompanyContent> contentOpt = companyContentRepository.findByCompanyId(companyId);
+            List<CompanyContent> contentList = companyContentRepository.findByCompanyId(companyId);
     CompanyContent companyContent;
 
-    if (contentOpt.isPresent()) {
-      companyContent = contentOpt.get();
+    if (!contentList.isEmpty()) {
+      companyContent = contentList.get(0);
       // Check if company has already been processed for content shortening
       if (companyContent.isContentShortened()) {
         response.put("aboutUsShortened", false);
