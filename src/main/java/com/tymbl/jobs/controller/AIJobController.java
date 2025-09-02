@@ -136,7 +136,7 @@ public class AIJobController {
    * PostConstruct method that runs all AI job processing methods in a continuous loop
    * Each method runs independently in its own thread with a 1-hour sleep interval
    */
-  @PostConstruct
+  //@PostConstruct
   public void startContinuousProcessing() {
     log.info("Starting continuous AI job processing loop");
     
