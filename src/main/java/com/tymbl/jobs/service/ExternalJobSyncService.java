@@ -52,7 +52,7 @@ public class ExternalJobSyncService {
         
         log.info("⏳ Processing job {}/{}: ID={}, Title='{}', Portal='{}'", 
             currentJobIndex, unsyncedJobs.size(), externalJob.getId(), 
-            externalJob.getTitle(), externalJob.getPortalName());
+            externalJob.getJobTitle(), externalJob.getPortalName());
 
         try {
           // Use the individual job sync service (which handles its own transaction)
@@ -66,19 +66,19 @@ public class ExternalJobSyncService {
             successCount++;
             log.info("✅ Successfully synced external job {}/{}: ID={}, Title='{}', ProcessingTime={}ms, Message='{}'", 
                 currentJobIndex, unsyncedJobs.size(), externalJob.getId(), 
-                externalJob.getTitle(), jobProcessingTime, individualResult.getMessage());
+                externalJob.getJobTitle(), jobProcessingTime, individualResult.getMessage());
           } else {
             errorCount++;
             log.warn("❌ Failed to sync external job {}/{}: ID={}, Title='{}', ProcessingTime={}ms, Message='{}'", 
                 currentJobIndex, unsyncedJobs.size(), externalJob.getId(), 
-                externalJob.getTitle(), jobProcessingTime, individualResult.getMessage());
+                externalJob.getJobTitle(), jobProcessingTime, individualResult.getMessage());
           }
 
         } catch (Exception e) {
           long jobProcessingTime = System.currentTimeMillis() - jobStartTime;
           log.error("💥 Exception syncing external job {}/{}: ID={}, Title='{}', ProcessingTime={}ms, Error='{}'", 
               currentJobIndex, unsyncedJobs.size(), externalJob.getId(), 
-              externalJob.getTitle(), jobProcessingTime, e.getMessage(), e);
+              externalJob.getJobTitle(), jobProcessingTime, e.getMessage(), e);
           errorCount++;
         }
       }
