@@ -73,7 +73,7 @@ public class SiteMapService {
             // Generate job description sitemaps
             generateJobDescriptionSitemaps();
             
-            log.info("Daily sitemap generation completed successfully");
+            log.info("✅ Daily sitemap generation completed successfully");
             
         } catch (Exception e) {
             log.error("Error during daily sitemap generation", e);
@@ -85,7 +85,7 @@ public class SiteMapService {
      */
     @Transactional
     public void generateCompanySitemap() {
-        log.info("Generating company sitemap");
+        log.info("🏢 Generating company sitemap");
         
         try {
             // Clear existing cache
@@ -106,7 +106,7 @@ public class SiteMapService {
                 siteMapCacheRepository.save(cache);
             }
             
-            log.info("Company sitemap generated with {} pages", totalPages);
+            log.info("✅ Company sitemap generated with {} pages", totalPages);
             
         } catch (Exception e) {
             log.error("Error generating company sitemap", e);
@@ -118,7 +118,7 @@ public class SiteMapService {
      */
     @Transactional
     public void generateLocationWiseJobsSitemap() {
-        log.info("Generating location-wise jobs sitemap");
+        log.info("📍 Generating location-wise jobs sitemap");
         
         try {
             siteMapCacheRepository.deleteBySitemapTypeAndLevel("location-wise-jobs", 1);
@@ -130,7 +130,7 @@ public class SiteMapService {
             cache.setTotalPages(1);
             siteMapCacheRepository.save(cache);
             
-            log.info("Location-wise jobs sitemap generated");
+            log.info("✅ Location-wise jobs sitemap generated");
             
         } catch (Exception e) {
             log.error("Error generating location-wise jobs sitemap", e);
@@ -142,7 +142,7 @@ public class SiteMapService {
      */
     @Transactional
     public void generateDesignationWiseJobsSitemap() {
-        log.info("Generating designation-wise jobs sitemap");
+        log.info("💼 Generating designation-wise jobs sitemap");
         
         try {
             siteMapCacheRepository.deleteBySitemapTypeAndLevel("designation-wise-jobs", 1);
@@ -154,7 +154,7 @@ public class SiteMapService {
             cache.setTotalPages(1);
             siteMapCacheRepository.save(cache);
             
-            log.info("Designation-wise jobs sitemap generated");
+            log.info("✅ Designation-wise jobs sitemap generated");
             
         } catch (Exception e) {
             log.error("Error generating designation-wise jobs sitemap", e);
@@ -166,7 +166,7 @@ public class SiteMapService {
      */
     @Transactional
     public void generateSkillWiseJobsSitemap() {
-        log.info("Generating skill-wise jobs sitemap");
+        log.info("🛠️ Generating skill-wise jobs sitemap");
         
         try {
             siteMapCacheRepository.deleteBySitemapTypeAndLevel("skill-wise-jobs", 1);

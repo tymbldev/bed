@@ -50,7 +50,7 @@ public class SingleJobContentRefinementService {
       // Save the refined job in the same transaction
       externalJobDetailRepository.save(externalJob);
 
-      log.info("Successfully refined and saved content for external job ID: {}",
+      log.info("✅ Successfully refined and saved content for external job ID: {}",
           externalJob.getId());
     } catch (Exception e) {
       log.error("Error refining content for external job ID {}: {}",
@@ -76,7 +76,7 @@ public class SingleJobContentRefinementService {
       if (aiResponse != null && !aiResponse.trim().isEmpty()) {
         // Clean the AI response
         String refinedDescription = cleanAIResponse(aiResponse);
-        log.info("Successfully refined job description. Original length: {}, Refined length: {}",
+        log.info("✅ Successfully refined job description. Original length: {}, Refined length: {}",
             rawDescription.length(), refinedDescription.length());
         return refinedDescription;
       } else {
@@ -104,8 +104,8 @@ public class SingleJobContentRefinementService {
       if (aiResponse != null && !aiResponse.trim().isEmpty()) {
         // Clean the AI response
         String refinedTitle = cleanAIResponse(aiResponse);
-        log.info("Successfully refined job title. Original: '{}', Designation: '{}', Refined: '{}'",
-            rawTitle, designation, refinedTitle);
+              log.info("✅ Successfully refined job title. Original: '{}', Designation: '{}', Refined: '{}'",
+          rawTitle, designation, refinedTitle);
         return refinedTitle;
       } else {
         log.warn("AI service returned empty response for title refinement");
@@ -248,7 +248,7 @@ public class SingleJobContentRefinementService {
       }
 
       // Fallback: Return original content if AI service is not available
-      log.info("AI service not available, returning original content");
+      log.info("🤖 AI service not available, returning original content");
       return null;
 
     } catch (Exception e) {

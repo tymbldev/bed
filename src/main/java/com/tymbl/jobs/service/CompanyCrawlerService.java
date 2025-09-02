@@ -26,7 +26,7 @@ public class CompanyCrawlerService {
 
   //@Scheduled(cron = "0 0 0 * * *") // Run at midnight every day
   public void crawlCompanies() {
-    log.info("Starting company crawling process");
+    log.info("🚀 Starting company crawling process");
 
     int pageNumber = 0;
     boolean hasMoreCompanies = true;
@@ -41,7 +41,7 @@ public class CompanyCrawlerService {
           break;
         }
 
-        log.info("Processing batch {} with {} companies", pageNumber + 1,
+        log.info("📦 Processing batch {} with {} companies", pageNumber + 1,
             companyPage.getContent().size());
 
         for (Company company : companyPage.getContent()) {
@@ -62,7 +62,7 @@ public class CompanyCrawlerService {
       }
     }
 
-    log.info("Completed company crawling process");
+    log.info("✅ Completed company crawling process");
   }
 
   /**
@@ -71,7 +71,7 @@ public class CompanyCrawlerService {
    */
   @Async
   public void crawlCompaniesInBatches() {
-    log.info("Starting company crawling process in batches");
+    log.info("🚀 Starting company crawling process in batches");
 
     int pageNumber = 0;
     boolean hasMoreCompanies = true;
@@ -88,7 +88,7 @@ public class CompanyCrawlerService {
           break;
         }
 
-        log.info("Processing crawling batch {} with {} companies", pageNumber + 1,
+        log.info("📦 Processing crawling batch {} with {} companies", pageNumber + 1,
             companyPage.getContent().size());
 
         // Process each company in the batch with its own transaction
@@ -96,7 +96,7 @@ public class CompanyCrawlerService {
           try {
             companyTransactionService.processCompanyCrawlingInTransaction(company);
             totalProcessed++;
-            log.info("Successfully processed company: {} (ID: {})", company.getName(),
+            log.info("✅ Successfully processed company: {} (ID: {})", company.getName(),
                 company.getId());
           } catch (Exception e) {
             totalErrors++;
@@ -114,7 +114,7 @@ public class CompanyCrawlerService {
       }
     }
 
-    log.info("Completed company crawling in batches. Total processed: {}, Total errors: {}",
+    log.info("🎉 Completed company crawling in batches. Total processed: {}, Total errors: {}",
         totalProcessed, totalErrors);
   }
 } 

@@ -29,9 +29,9 @@ public class ExternalJobSyncService {
 
     try {
       // Get all external job details that haven't been synced yet
-      log.info("📊 Querying database for unsynced external jobs...");
-      List<ExternalJobDetail> unsyncedJobs = externalJobDetailRepository.findByIsSyncedToJobTableFalse();
-      log.info("📋 Found {} unsynced external jobs in database", unsyncedJobs.size());
+              log.info("📊 Querying database for refined but unsynced external jobs...");
+      List<ExternalJobDetail> unsyncedJobs = externalJobDetailRepository.findByIsRefinedTrueAndIsSyncedToJobTableFalse();
+              log.info("📋 Found {} refined but unsynced external jobs in database", unsyncedJobs.size());
 
       if (unsyncedJobs.isEmpty()) {
         log.info("✅ No unsynced external jobs found - sync process completed immediately");
@@ -114,11 +114,12 @@ public class ExternalJobSyncService {
 
     long totalExternalJobs = externalJobDetailRepository.count();
     long syncedJobs = externalJobDetailRepository.countByIsSyncedToJobTableTrue();
-    long unsyncedJobs = totalExternalJobs - syncedJobs;
+    long refinedUnsyncedJobs = externalJobDetailRepository.countByIsRefinedTrueAndIsSyncedToJobTableFalse();
+    long totalUnsyncedJobs = totalExternalJobs - syncedJobs;
 
     stats.setTotalExternalJobs(totalExternalJobs);
     stats.setSyncedJobs(syncedJobs);
-    stats.setUnsyncedJobs(unsyncedJobs);
+    stats.setUnsyncedJobs(refinedUnsyncedJobs); // Only count refined unsynced jobs
     stats.setSyncPercentage(
         totalExternalJobs > 0 ? (double) syncedJobs / totalExternalJobs * 100 : 0);
 

@@ -40,4 +40,10 @@ public interface ExternalJobDetailRepository extends JpaRepository<ExternalJobDe
   List<ExternalJobDetail> findByIsRefinedFalse();
 
   long countByIsRefinedTrue();
+  
+  // Method for finding refined jobs that are not synced to job table
+  List<ExternalJobDetail> findByIsRefinedTrueAndIsSyncedToJobTableFalse();
+  
+  // Method for counting refined jobs that are not synced to job table
+  long countByIsRefinedTrueAndIsSyncedToJobTableFalse();
 }

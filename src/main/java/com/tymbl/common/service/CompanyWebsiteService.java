@@ -31,7 +31,7 @@ public class CompanyWebsiteService {
     Map<String, Object> result = new HashMap<>();
 
     try {
-      log.info("Fetching website for company: {} (ID: {})", company.getName(), company.getId());
+      log.info("🌐 Fetching website for company: {} (ID: {})", company.getName(), company.getId());
 
       // Check if already processed
       if (company.getWebsiteFetched() != null && company.getWebsiteFetched() == 1) {
@@ -65,7 +65,7 @@ public class CompanyWebsiteService {
       result.put("website", website);
       result.put("message", "Website URL fetched successfully");
 
-      log.info("Fetched website URL '{}' for company: {} (ID: {})", website, company.getName(),
+      log.info("✅ Fetched website URL '{}' for company: {} (ID: {})", website, company.getName(),
           company.getId());
 
     } catch (Exception e) {
@@ -85,7 +85,7 @@ public class CompanyWebsiteService {
    * Fetch websites for all companies in batches using database pagination
    */
   public Map<String, Object> fetchWebsitesForAllCompaniesInBatches() {
-    log.info("Starting website fetching for all companies using database pagination");
+    log.info("🚀 Starting website fetching for all companies using database pagination");
 
     List<Map<String, Object>> companyResults = new ArrayList<>();
     int totalProcessed = 0;
@@ -102,13 +102,13 @@ public class CompanyWebsiteService {
       List<Company> companies = companyPage.getContent();
 
       if (companies.isEmpty()) {
-        log.info("No more companies to process for website fetching. Completed at page: {}",
+        log.info("✅ No more companies to process for website fetching. Completed at page: {}",
             pageNumber);
         break;
       }
 
-      log.info("Processing website fetching batch {} with {} companies", pageNumber + 1,
-          companies.size());
+              log.info("📦 Processing website fetching batch {} with {} companies", pageNumber + 1,
+            companies.size());
 
       for (Company company : companies) {
         try {
@@ -117,8 +117,8 @@ public class CompanyWebsiteService {
 
           if ((Boolean) result.get("success")) {
             totalWebsitesFetched++;
-            log.info("Successfully fetched website for company: {} (ID: {})", company.getName(),
-                company.getId());
+                      log.info("✅ Successfully fetched website for company: {} (ID: {})", company.getName(),
+              company.getId());
           } else {
             totalErrors++;
             log.error("Failed to fetch website for company: {} (ID: {})", company.getName(),
@@ -152,7 +152,7 @@ public class CompanyWebsiteService {
     result.put("message", "Website fetching completed using database pagination");
 
     log.info(
-        "Completed website fetching using database pagination. Total processed: {}, Websites fetched: {}, Errors: {}",
+        "🎉 Completed website fetching using database pagination. Total processed: {}, Websites fetched: {}, Errors: {}",
         totalProcessed, totalWebsitesFetched, totalErrors);
 
     return result;
@@ -163,16 +163,16 @@ public class CompanyWebsiteService {
    */
   private String generateWebsiteForCompany(String companyName) {
     try {
-      log.info("[Gemini] Generating website URL for company: {}", companyName);
+      log.info("🤖 [Gemini] Generating website URL for company: {}", companyName);
       String prompt = buildWebsiteGenerationPrompt(companyName);
-      log.info("[Gemini] Prompt (first 200 chars): {}",
+      log.info("📝 [Gemini] Prompt (first 200 chars): {}",
           prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
 
       ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
           "Website Generation for " + companyName);
       String website = parseWebsiteResponse(response.getBody());
-      log.info("[Gemini] Parsed website URL '{}' for company: {}", website, companyName);
+      log.info("✅ [Gemini] Parsed website URL '{}' for company: {}", website, companyName);
       return website;
     } catch (Exception e) {
       log.error("[Gemini] Error generating website URL for company: {}", companyName, e);

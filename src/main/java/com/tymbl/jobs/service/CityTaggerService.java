@@ -50,7 +50,7 @@ public class CityTaggerService {
         result.setCityId(city.getId());
         result.setCityName(city.getName());
         result.setConfidence(1.0);
-        log.info("Exact city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(),
+        log.info("🎯 Exact city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(),
             city.getId());
         return result;
       }
@@ -75,7 +75,7 @@ public class CityTaggerService {
               result.setCityId(bestMatch.getId());
               result.setCityName(bestMatch.getName());
               result.setConfidence(0.6);
-              log.info("Similar content city match found: '{}' -> '{}' (ID: {})", cityName,
+              log.info("🔍 Similar content city match found: '{}' -> '{}' (ID: {})", cityName,
                   bestMatch.getName(), bestMatch.getId());
               return result;
             }
@@ -92,8 +92,8 @@ public class CityTaggerService {
           result.setCityId(city.getId());
           result.setCityName(city.getName());
           result.setConfidence(0.8);
-          log.info("Single LIKE city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(),
-              city.getId());
+                  log.info("🔎 Single LIKE city match found: '{}' -> '{}' (ID: {})", cityName, city.getName(),
+            city.getId());
           return result;
         } else {
           log.warn("Multiple cities found with name '{}', using first result", cityName);
@@ -112,7 +112,7 @@ public class CityTaggerService {
         result.setCityId(aiMatch.getId());
         result.setCityName(aiMatch.getName());
         result.setConfidence(0.9);
-        log.info("AI-powered city match found: '{}' -> '{}' (ID: {})", cityName, aiMatch.getName(),
+        log.info("🤖 AI-powered city match found: '{}' -> '{}' (ID: {})", cityName, aiMatch.getName(),
             aiMatch.getId());
         return result;
       }
@@ -122,7 +122,7 @@ public class CityTaggerService {
           cityName, sourceId, portalName);
 
     } catch (Exception e) {
-      log.error("Error tagging city for external job {}: {}", sourceId, e.getMessage(), e);
+      log.error("💥 Error tagging city for external job {}: {}", sourceId, e.getMessage(), e);
       result.setError(e.getMessage());
     }
 
@@ -237,7 +237,7 @@ public class CityTaggerService {
       if (!topMatches.isEmpty()) {
         City firstMatch = topMatches.get(0);
         if (isValidCityMatch(inputCityName, firstMatch.getName())) {
-          log.info("AI validation failed, using first reasonable match: '{}' -> '{}'",
+          log.info("⚠️ AI validation failed, using first reasonable match: '{}' -> '{}'",
               inputCityName, firstMatch.getName());
           return firstMatch;
         }
@@ -274,7 +274,7 @@ public class CityTaggerService {
       }
 
       // Fallback: Return null if AI service is not available
-      log.info("AI service not available for city matching");
+      log.info("🤖 AI service not available for city matching");
       return null;
 
     } catch (Exception e) {

@@ -36,7 +36,7 @@ public class ComprehensiveQuestionService {
 
   @Transactional
   public Map<String, Object> generateQuestionsForAllSkills() {
-    log.info("Starting comprehensive question generation for all skills");
+    log.info("🚀 Starting comprehensive question generation for all skills");
 
     Map<String, Object> result = new HashMap<>();
     List<Map<String, Object>> skillResults = new ArrayList<>();
@@ -45,7 +45,7 @@ public class ComprehensiveQuestionService {
 
     // Get all enabled skills
     List<Skill> skills = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc();
-    log.info("Found {} enabled skills to process", skills.size());
+    log.info("📋 Found {} enabled skills to process", skills.size());
 
     // Create a fixed thread pool with 10 threads for parallel processing
     ExecutorService executor = Executors.newFixedThreadPool(10);
@@ -55,7 +55,7 @@ public class ComprehensiveQuestionService {
       List<CompletableFuture<Map<String, Object>>> futures = skills.stream()
           .map(skill -> CompletableFuture.supplyAsync(() -> {
             try {
-              log.info("Processing skill: {} (ID: {})", skill.getName(), skill.getId());
+              log.info("🔄 Processing skill: {} (ID: {})", skill.getName(), skill.getId());
               return generateQuestionsForSkill(skill);
             } catch (Exception e) {
               log.error("Error processing skill: {}", skill.getName(), e);
@@ -94,14 +94,14 @@ public class ComprehensiveQuestionService {
     result.put("skill_results", skillResults);
     result.put("message", "Comprehensive question generation completed with parallel processing");
 
-    log.info("Completed comprehensive question generation. Total questions: {}",
+    log.info("🎉 Completed comprehensive question generation. Total questions: {}",
         totalQuestionsGenerated);
     return result;
   }
 
   @Transactional
   public Map<String, Object> generateQuestionsForSkill(Skill skill) {
-    log.info("Generating comprehensive questions for skill: {}", skill.getName());
+    log.info("🔄 Generating comprehensive questions for skill: {}", skill.getName());
 
     Map<String, Object> result = new HashMap<>();
     result.put("skill_name", skill.getName());
@@ -119,7 +119,7 @@ public class ComprehensiveQuestionService {
         return result;
       }
 
-      log.info("Generated {} summary questions for skill: {}", summaryQuestions.size(),
+      log.info("✅ Generated {} summary questions for skill: {}", summaryQuestions.size(),
           skill.getName());
 
       // Step 2: Generate detailed content for each summary question
@@ -199,7 +199,7 @@ public class ComprehensiveQuestionService {
       result.put("mappings_created", savedMappings.size());
       result.put("status", "success");
 
-      log.info("Successfully generated {} questions for skill: {}", questionsGenerated,
+      log.info("✅ Successfully generated {} questions for skill: {}", questionsGenerated,
           skill.getName());
 
     } catch (Exception e) {
@@ -213,7 +213,7 @@ public class ComprehensiveQuestionService {
 
   @Transactional
   public Map<String, Object> generateQuestionsForSpecificSkill(String skillName) {
-    log.info("Generating comprehensive questions for specific skill: {}", skillName);
+    log.info("🔄 Generating comprehensive questions for specific skill: {}", skillName);
 
     Skill skill = skillRepository.findByEnabledTrueOrderByUsageCountDescNameAsc()
         .stream()

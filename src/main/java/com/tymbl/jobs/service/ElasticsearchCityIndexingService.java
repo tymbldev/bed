@@ -36,20 +36,20 @@ public class ElasticsearchCityIndexingService {
    */
   @Transactional(readOnly = true)
   public Map<String, Object> indexAllCities() {
-    log.info("Starting to index all cities to Elasticsearch");
+    log.info("🚀 Starting to index all cities to Elasticsearch");
 
     try {
       List<City> cities = cityRepository.findAll();
-      log.info("Found {} cities to index", cities.size());
+      log.info("📋 Found {} cities to index", cities.size());
 
       BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
-      log.info("Building bulk request for {} cities", cities.size());
+      log.info("🏗️ Building bulk request for {} cities", cities.size());
 
       for (City city : cities) {
-        log.info("Building document for city: {} (ID: {})", city.getName(), city.getId());
+        log.info("📄 Building document for city: {} (ID: {})", city.getName(), city.getId());
         Map<String, Object> cityDoc = buildCityDocument(city);
         log.info(
-            "City document built successfully for: {} - Document size: {} fields, Country ID: {}",
+            "✅ City document built successfully for: {} - Document size: {} fields, Country ID: {}",
             city.getName(), cityDoc.size(), cityDoc.get("countryId"));
 
         bulkRequest.operations(op -> op
@@ -61,9 +61,9 @@ public class ElasticsearchCityIndexingService {
         );
       }
 
-      log.info("Executing bulk request to Elasticsearch for {} cities", cities.size());
+      log.info("🚀 Executing bulk request to Elasticsearch for {} cities", cities.size());
       BulkResponse response = elasticsearchClient.bulk(bulkRequest.build());
-      log.info("Bulk request completed. Response received: {} items, Errors: {}",
+      log.info("📊 Bulk request completed. Response received: {} items, Errors: {}",
           response.items().size(), response.errors());
 
       int successCount = 0;
@@ -76,7 +76,7 @@ public class ElasticsearchCityIndexingService {
                 .collect(Collectors.joining(", ")));
       } else {
         successCount = cities.size();
-        log.info("All {} cities indexed successfully", successCount);
+        log.info("✅ All {} cities indexed successfully", successCount);
       }
 
       Map<String, Object> result = new HashMap<>();
@@ -85,7 +85,7 @@ public class ElasticsearchCityIndexingService {
       result.put("failedToIndex", failureCount);
       result.put("message", "City indexing completed");
 
-      log.info("City indexing completed - Success: {}, Failures: {}", successCount, failureCount);
+      log.info("🎉 City indexing completed - Success: {}, Failures: {}", successCount, failureCount);
 
       return result;
 
@@ -102,10 +102,10 @@ public class ElasticsearchCityIndexingService {
    */
   public void syncCityToElasticsearch(City city) {
     try {
-      log.info("Starting to sync city to Elasticsearch: {} (ID: {})", city.getName(), city.getId());
+      log.info("🔄 Starting to sync city to Elasticsearch: {} (ID: {})", city.getName(), city.getId());
 
       Map<String, Object> cityDocument = buildCityDocument(city);
-      log.info("City document built successfully for: {} - Document size: {} fields",
+      log.info("✅ City document built successfully for: {} - Document size: {} fields",
           city.getName(), cityDocument.size());
 
       IndexRequest<Map<String, Object>> indexRequest = IndexRequest.of(i -> i
@@ -113,14 +113,14 @@ public class ElasticsearchCityIndexingService {
           .id(city.getId().toString())
           .document(cityDocument)
       );
-      log.info("Index request prepared for city: {} to index: {}", city.getName(), CITIES_INDEX);
+      log.info("📝 Index request prepared for city: {} to index: {}", city.getName(), CITIES_INDEX);
 
-      log.info("Executing index request to Elasticsearch for city: {}", city.getName());
+      log.info("🚀 Executing index request to Elasticsearch for city: {}", city.getName());
       IndexResponse response = elasticsearchClient.index(indexRequest);
-      log.info("Index request completed for city: {} - Result: {}, Document ID: {}",
+      log.info("📊 Index request completed for city: {} - Result: {}, Document ID: {}",
           city.getName(), response.result().name(), response.id());
 
-      log.info("Successfully synced city {} to Elasticsearch with result: {}",
+      log.info("✅ Successfully synced city {} to Elasticsearch with result: {}",
           city.getId(), response.result().name());
 
     } catch (Exception e) {
@@ -134,7 +134,7 @@ public class ElasticsearchCityIndexingService {
    * Build city document for Elasticsearch
    */
   private Map<String, Object> buildCityDocument(City city) {
-    log.info("Building Elasticsearch document for city: {} (ID: {})", city.getName(), city.getId());
+    log.info("🏗️ Building Elasticsearch document for city: {} (ID: {})", city.getName(), city.getId());
 
     Map<String, Object> doc = new HashMap<>();
     doc.put("id", city.getId());
@@ -144,14 +144,14 @@ public class ElasticsearchCityIndexingService {
     doc.put("processedName", city.getProcessedName());
     doc.put("processedNameGenerated", city.isProcessedNameGenerated());
 
-    log.info("Basic city fields added for: {} - Fields: {}", city.getName(), doc.size());
+          log.info("📋 Basic city fields added for: {} - Fields: {}", city.getName(), doc.size());
 
     // Add country name if available
     if (city.getCountryId() != null) {
       try {
         String countryName = dropdownService.getCountryNameById(city.getCountryId());
         doc.put("countryName", countryName);
-        log.info("Country name added for city: {} - Country: {}", city.getName(), countryName);
+        log.info("🌍 Country name added for city: {} - Country: {}", city.getName(), countryName);
       } catch (Exception e) {
         log.warn("Error fetching country name for city ID {}: {}", city.getId(), e.getMessage());
       }
@@ -159,7 +159,7 @@ public class ElasticsearchCityIndexingService {
 
     // Build searchable text
     StringBuilder searchableText = new StringBuilder();
-    log.info("Building searchable text for city: {}", city.getName());
+          log.info("🔍 Building searchable text for city: {}", city.getName());
 
     if (city.getName() != null) {
       searchableText.append(city.getName()).append(" ");
@@ -183,11 +183,11 @@ public class ElasticsearchCityIndexingService {
     }
 
     doc.put("searchableText", searchableText.toString().trim());
-    log.info("Searchable text built for city: {} - Length: {} characters",
-        city.getName(), searchableText.length());
+          log.info("📝 Searchable text built for city: {} - Length: {} characters",
+          city.getName(), searchableText.length());
 
-    log.info("City document built successfully for: {} - Total fields: {}", city.getName(),
-        doc.size());
+          log.info("✅ City document built successfully for: {} - Total fields: {}", city.getName(),
+          doc.size());
     return doc;
   }
 }

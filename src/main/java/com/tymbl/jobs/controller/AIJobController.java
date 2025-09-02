@@ -196,13 +196,6 @@ public class AIJobController {
             }
           }, taskExecutor);
 
-          // Wait for all methods to complete (or fail)
-          CompletableFuture.allOf(crawlFuture, processFuture, refineFuture, syncFuture, reindexFuture)
-              .exceptionally(throwable -> {
-                log.error("One or more methods failed in this cycle", throwable);
-                return null;
-              })
-              .join();
 
           log.info("Completed cycle of AI job processing methods, sleeping for 1 hour");
           

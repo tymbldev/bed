@@ -54,7 +54,7 @@ public class ElasticsearchJobIndexingService {
 
       IndexResponse response = elasticsearchClient.index(indexRequest);
 
-      log.info("Successfully synced job {} to Elasticsearch with result: {}",
+      log.info("✅ Successfully synced job {} to Elasticsearch with result: {}",
           job.getId(), response.result().name());
 
       // Flush industry cache to ensure consistency after job data changes

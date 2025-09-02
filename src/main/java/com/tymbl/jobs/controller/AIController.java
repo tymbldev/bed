@@ -99,9 +99,9 @@ public class AIController {
   })
   public ResponseEntity<Map<String, Object>> generateSimilarCompaniesForAll() {
     try {
-      log.info("Starting similar company generation for all companies");
+      log.info("🚀 Starting similar company generation for all companies");
       Map<String, Object> result = aiJobService.generateSimilarCompaniesForAll();
-      log.info("Similar company generation completed successfully");
+              log.info("✅ Similar company generation completed successfully");
       return ResponseEntity.ok(result);
     } catch (Exception e) {
       log.error("Error generating similar companies for all", e);
@@ -265,7 +265,7 @@ public class AIController {
   })
   public ResponseEntity<Map<String, Object>> generateProcessedNamesForAllEntities() {
     try {
-      log.info("Starting processed name generation for all entities");
+      log.info("🚀 Starting processed name generation for all entities");
       Map<String, Object> result = processedNameService.generateProcessedNamesForAllEntities();
       return ResponseEntity.ok(result);
     } catch (Exception e) {
@@ -299,7 +299,7 @@ public class AIController {
   })
   public ResponseEntity<Map<String, Object>> removeDuplicateProcessedNames() {
     try {
-      log.info("Removing duplicate processed names from database");
+      log.info("🧹 Removing duplicate processed names from database");
       Map<String, Object> result = processedNameService.removeDuplicateProcessedNames();
       return ResponseEntity.ok(result);
     } catch (Exception e) {
@@ -333,7 +333,7 @@ public class AIController {
   })
   public ResponseEntity<Map<String, Object>> resetProcessedNameGenerationFlag() {
     try {
-      log.info("Resetting processed name generation flags for all entities");
+      log.info("🔄 Resetting processed name generation flags for all entities");
       Map<String, Object> result = processedNameService.resetProcessedNameGenerationFlag();
       return ResponseEntity.ok(result);
     } catch (Exception e) {

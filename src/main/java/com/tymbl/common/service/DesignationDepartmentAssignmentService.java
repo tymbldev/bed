@@ -27,7 +27,7 @@ public class DesignationDepartmentAssignmentService {
 
   public Map<String, Object> assignDepartmentsToAllDesignations() {
     try {
-      log.info("Starting department assignment for all unassigned designations");
+      log.info("🚀 Starting department assignment for all unassigned designations");
 
       List<Designation> unassignedDesignations = designationRepository.findByDepartmentAssignedFalse();
       List<Department> availableDepartments = departmentRepository.findAll();
@@ -41,7 +41,7 @@ public class DesignationDepartmentAssignmentService {
         return result;
       }
 
-      log.info("Found {} designations without departments assigned", unassignedDesignations.size());
+      log.info("📋 Found {} designations without departments assigned", unassignedDesignations.size());
 
       int processed = 0;
       int failed = 0;
@@ -54,7 +54,7 @@ public class DesignationDepartmentAssignmentService {
 
           if ((Boolean) result.get("success")) {
             processed++;
-            log.info("Assigned department to designation: {} - Department: {}",
+            log.info("✅ Assigned department to designation: {} - Department: {}",
                 designation.getName(), result.get("departmentName"));
           } else {
             failed++;
@@ -78,7 +78,7 @@ public class DesignationDepartmentAssignmentService {
       result.put("total", unassignedDesignations.size());
       result.put("errors", errors);
 
-      log.info("Department assignment completed. Processed: {}, Failed: {}", processed, failed);
+      log.info("🎉 Department assignment completed. Processed: {}, Failed: {}", processed, failed);
       return result;
 
     } catch (Exception e) {

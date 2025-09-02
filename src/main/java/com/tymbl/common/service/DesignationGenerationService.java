@@ -37,7 +37,7 @@ public class DesignationGenerationService {
     int totalDesignationsGenerated = 0;
     int totalErrors = 0;
 
-    log.info("Starting designation generation for {} departments", totalDepartments);
+    log.info("🚀 Starting designation generation for {} departments", totalDepartments);
 
     for (Department department : departments) {
       Map<String, Object> departmentResult = new HashMap<>();
@@ -58,7 +58,7 @@ public class DesignationGenerationService {
           departmentResult.put("designations", departmentProcessResult.get("designations"));
           totalDesignationsGenerated += (Integer) departmentProcessResult.get("designationsSaved");
 
-          log.info("Generated {} designations for department: {} ({})",
+          log.info("✅ Generated {} designations for department: {} ({})",
               departmentProcessResult.get("designationsSaved"), department.getName(),
               department.getId());
         } else {
@@ -86,7 +86,7 @@ public class DesignationGenerationService {
     result.put("message", "Designation generation completed for all departments");
 
     log.info(
-        "Designation generation completed. Total departments: {}, Total designations: {}, Errors: {}",
+        "🎉 Designation generation completed. Total departments: {}, Total designations: {}, Errors: {}",
         totalDepartments, totalDesignationsGenerated, totalErrors);
 
     return result;
@@ -115,7 +115,7 @@ public class DesignationGenerationService {
       result.put("designationsSaved", savedCount);
       result.put("designations", designations);
 
-      log.info("Successfully processed department: {} ({}). Generated: {}, Saved: {}",
+      log.info("✅ Successfully processed department: {} ({}). Generated: {}, Saved: {}",
           department.getName(), department.getId(), designations.size(), savedCount);
 
     } catch (Exception e) {
@@ -131,16 +131,16 @@ public class DesignationGenerationService {
   private List<String> generateDesignationsForDepartment(String departmentName,
       String departmentDescription) {
     try {
-      log.info("[Gemini] Generating designations for department: {}", departmentName);
+      log.info("🤖 [Gemini] Generating designations for department: {}", departmentName);
       String prompt = buildDesignationGenerationPrompt(departmentName, departmentDescription);
-      log.info("[Gemini] Prompt (first 200 chars): {}",
+      log.info("📝 [Gemini] Prompt (first 200 chars): {}",
           prompt.length() > 200 ? prompt.substring(0, 200) + "..." : prompt);
       Map<String, Object> requestBody = aiRestService.buildRequestBody(prompt);
 
       ResponseEntity<String> response = aiRestService.callGeminiAPI(requestBody,
           "Designation Generation for " + departmentName);
       List<String> designations = parseDesignationsResponse(response.getBody());
-      log.info("[Gemini] Parsed {} designations for department: {}", designations.size(),
+      log.info("✅ [Gemini] Parsed {} designations for department: {}", designations.size(),
           departmentName);
       return designations;
     } catch (Exception e) {
