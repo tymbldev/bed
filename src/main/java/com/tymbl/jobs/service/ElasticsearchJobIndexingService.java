@@ -14,11 +14,14 @@ import com.tymbl.common.entity.Skill;
 import com.tymbl.common.repository.SkillRepository;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service for indexing jobs to Elasticsearch
@@ -81,6 +84,30 @@ public class ElasticsearchJobIndexingService {
   }
 
   /**
+   * Safely get skill IDs from job, handling lazy loading
+   */
+  private Set<Long> getSkillIdsSafely(Job job) {
+    try {
+      return job.getSkillIds() != null ? job.getSkillIds() : new HashSet<>();
+    } catch (Exception e) {
+      log.warn("Error accessing skillIds for job {}: {}", job.getId(), e.getMessage());
+      return new HashSet<>();
+    }
+  }
+
+  /**
+   * Safely get tags from job, handling lazy loading
+   */
+  private Set<String> getTagsSafely(Job job) {
+    try {
+      return job.getTags() != null ? job.getTags() : new HashSet<>();
+    } catch (Exception e) {
+      log.warn("Error accessing tags for job {}: {}", job.getId(), e.getMessage());
+      return new HashSet<>();
+    }
+  }
+
+  /**
    * Build job document for Elasticsearch
    */
   private Map<String, Object> buildJobDocument(Job job) {
@@ -117,11 +144,12 @@ public class ElasticsearchJobIndexingService {
 
     // Add job skills and tags as lists
     List<String> skillNames = new ArrayList<>();
-    if (job.getSkillIds() != null && !job.getSkillIds().isEmpty()) {
-      document.put("skillIds", new ArrayList<>(job.getSkillIds()));
+    Set<Long> skillIds = getSkillIdsSafely(job);
+    if (!skillIds.isEmpty()) {
+      document.put("skillIds", new ArrayList<>(skillIds));
       
       // Fetch skill names for better searchability
-      for (Long skillId : job.getSkillIds()) {
+      for (Long skillId : skillIds) {
         try {
           Skill skill = skillRepository.findById(skillId).orElse(null);
           if (skill != null) {
@@ -138,8 +166,9 @@ public class ElasticsearchJobIndexingService {
     }
     
     // Convert tags from Set to List
-    if (job.getTags() != null && !job.getTags().isEmpty()) {
-      document.put("tags", new ArrayList<>(job.getTags()));
+    Set<String> tags = getTagsSafely(job);
+    if (!tags.isEmpty()) {
+      document.put("tags", new ArrayList<>(tags));
     } else {
       document.put("tags", new ArrayList<>());
     }
@@ -210,8 +239,9 @@ public class ElasticsearchJobIndexingService {
     }
     
     // Add tags to searchable text (as list)
-    if (job.getTags() != null && !job.getTags().isEmpty()) {
-      searchableText.append(String.join(" ", job.getTags())).append(" ");
+    Set<String> jobTags = getTagsSafely(job);
+    if (!jobTags.isEmpty()) {
+      searchableText.append(String.join(" ", jobTags)).append(" ");
     }
     if (job.getPlatform() != null) {
       searchableText.append(job.getPlatform()).append(" ");
@@ -236,12 +266,13 @@ public class ElasticsearchJobIndexingService {
   /**
    * Reindex all jobs from database to Elasticsearch
    */
+  @Transactional(readOnly = true)
   public void reindexAllJobs() {
     long startTime = System.currentTimeMillis();
     log.info("🚀 Starting reindex of all jobs from database to Elasticsearch");
     
-    log.info("📊 Querying database for all jobs...");
-    List<Job> jobs = jobRepository.findAll();
+    log.info("📊 Querying database for all jobs with collections...");
+    List<Job> jobs = jobRepository.findAllWithCollections();
     log.info("📋 Found {} jobs in database for reindexing", jobs.size());
 
     if (jobs.isEmpty()) {

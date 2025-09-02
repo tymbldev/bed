@@ -115,4 +115,8 @@ public interface JobRepository extends JpaRepository<Job, Long> {
 
   // Method for finding jobs by portal job ID (for external job sync)
   Optional<Job> findByPortalJobId(String portalJobId);
+  
+  // Method for finding all jobs with collections eagerly loaded (for Elasticsearch indexing)
+  @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.skillIds LEFT JOIN FETCH j.tags")
+  List<Job> findAllWithCollections();
 } 
