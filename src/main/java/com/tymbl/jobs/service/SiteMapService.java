@@ -517,7 +517,7 @@ public class SiteMapService {
         xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         
         for (String location : locations) {
-            String url = baseUrl + "/jobs-in-" + location.toLowerCase().replace(" ", "-");
+            String url = baseUrl + "/jobs-in-" + location.toLowerCase().replace(" ", "-").replace("&", "-and-");
             xml.append("  <url>\n");
             xml.append("    <loc>").append(url).append("</loc>\n");
             xml.append("    <lastmod>").append(LocalDateTime.now()).append("</lastmod>\n");
@@ -537,7 +537,7 @@ public class SiteMapService {
         xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         
         for (String designation : designations) {
-            String url = baseUrl + "/" + designation.toLowerCase().replace(" ", "-") + "-jobs";
+            String url = baseUrl + "/" + designation.toLowerCase().replace(" ", "-").replace("&", "-and-") + "-jobs";
             xml.append("  <url>\n");
             xml.append("    <loc>").append(url).append("</loc>\n");
             xml.append("    <lastmod>").append(LocalDateTime.now()).append("</lastmod>\n");
@@ -557,7 +557,7 @@ public class SiteMapService {
         xml.append("<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\n");
         
         for (String skill : skills) {
-            String url = baseUrl + "/" + skill.toLowerCase().replace(" ", "-") + "-jobs";
+            String url = baseUrl + "/" + skill.toLowerCase().replace(" ", "-").replace("&", "-and-") + "-jobs";
             xml.append("  <url>\n");
             xml.append("    <loc>").append(url).append("</loc>\n");
             xml.append("    <lastmod>").append(LocalDateTime.now()).append("</lastmod>\n");
@@ -594,7 +594,7 @@ public class SiteMapService {
      * Generate company URL
      */
     private String generateCompanyUrl(String companyName, String companyId) {
-        String sanitizedName = companyName.toLowerCase().replace(" ", "-");
+        String sanitizedName = companyName.toLowerCase().replace(" ", "-").replace("&", "-and-");
         return baseUrl + "/" + sanitizedName + "-careers-cid-" + companyId;
     }
 
@@ -629,9 +629,9 @@ public class SiteMapService {
                 }
             }
             
-            String sanitizedDesignation = designation.toLowerCase().replace(" ", "-");
-            String sanitizedLocation = location.toLowerCase().replace(" ", "-");
-            String sanitizedCompany = companyName.toLowerCase().replace(" ", "-");
+            String sanitizedDesignation = designation.toLowerCase().replace(" ", "-").replace("&", "-and-");
+            String sanitizedLocation = location.toLowerCase().replace(" ", "-").replace("&", "-and-");
+            String sanitizedCompany = companyName.toLowerCase().replace(" ", "-").replace("&", "-and-");
             
             return baseUrl + "/" + sanitizedDesignation + "-jobs-in-" + sanitizedLocation + 
                    "-in-" + sanitizedCompany + "-for-" + experience + "-jid-" + jobId;
