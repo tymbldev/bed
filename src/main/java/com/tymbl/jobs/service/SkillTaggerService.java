@@ -100,7 +100,11 @@ public class SkillTaggerService {
     if (exactMatch.isPresent()) {
       Skill skill = exactMatch.get();
       // Update usage count
-      skill.setUsageCount(skill.getUsageCount() + 1);
+      Long currentUsageCount = skill.getUsageCount();
+      if (currentUsageCount == null) {
+        currentUsageCount = 0L;
+      }
+      skill.setUsageCount(currentUsageCount + 1);
       skillRepository.save(skill);
       return new SkillTaggingResult(skill.getId(), skill.getName(), 1.0);
     }
@@ -121,7 +125,11 @@ public class SkillTaggerService {
         if (skill.isPresent()) {
           Skill foundSkill = skill.get();
           // Update usage count
-          foundSkill.setUsageCount(foundSkill.getUsageCount() + 1);
+          Long currentUsageCount = foundSkill.getUsageCount();
+          if (currentUsageCount == null) {
+            currentUsageCount = 0L;
+          }
+          foundSkill.setUsageCount(currentUsageCount + 1);
           skillRepository.save(foundSkill);
           return new SkillTaggingResult(
               foundSkill.getId(),
@@ -140,7 +148,11 @@ public class SkillTaggerService {
         // Store this mapping in similar content for future use
         storeSkillMapping(bestMatch.getName(), normalizedSkillName, 0.85);
         // Update usage count
-        bestMatch.setUsageCount(bestMatch.getUsageCount() + 1);
+        Long currentUsageCount = bestMatch.getUsageCount();
+        if (currentUsageCount == null) {
+          currentUsageCount = 0L;
+        }
+        bestMatch.setUsageCount(currentUsageCount + 1);
         skillRepository.save(bestMatch);
         return new SkillTaggingResult(bestMatch.getId(), bestMatch.getName(), 0.85);
       }
@@ -150,7 +162,11 @@ public class SkillTaggerService {
     Skill genAIMatch = findBestSkillUsingGenAI(normalizedSkillName);
     if (genAIMatch != null) {
       // Update usage count
-      genAIMatch.setUsageCount(genAIMatch.getUsageCount() + 1);
+      Long currentUsageCount = genAIMatch.getUsageCount();
+      if (currentUsageCount == null) {
+        currentUsageCount = 0L;
+      }
+      genAIMatch.setUsageCount(currentUsageCount + 1);
       skillRepository.save(genAIMatch);
       return new SkillTaggingResult(genAIMatch.getId(), genAIMatch.getName(), 0.7);
     }

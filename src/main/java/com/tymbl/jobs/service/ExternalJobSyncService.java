@@ -3,6 +3,7 @@ package com.tymbl.jobs.service;
 import com.tymbl.jobs.entity.ExternalJobDetail;
 import com.tymbl.jobs.repository.ExternalJobDetailRepository;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
