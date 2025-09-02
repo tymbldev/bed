@@ -382,7 +382,10 @@ public class CompanyDataService {
         // --- CompanyContent logic ---
         CompanyContent companyContent = null;
         if (companyContentRepository.existsByCompanyId(company.getId())) {
-          companyContent = companyContentRepository.findByCompanyId(company.getId()).orElse(null);
+          List<CompanyContent> contentList = companyContentRepository.findByCompanyId(company.getId());
+          if (!contentList.isEmpty()) {
+            companyContent = contentList.get(0);
+          }
         }
         if (companyContent == null) {
           companyContent = new CompanyContent();

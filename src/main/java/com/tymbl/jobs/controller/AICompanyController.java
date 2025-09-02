@@ -573,9 +573,9 @@ public class AICompanyController {
       }
 
       // Check if company content has been shortened
-      Optional<CompanyContent> content = companyContentRepository.findByCompanyId(
+      List<CompanyContent> contentList = companyContentRepository.findByCompanyId(
           company.get().getId());
-      return content.isPresent() && content.get().isContentShortened();
+      return !contentList.isEmpty() && contentList.get(0).isContentShortened();
     } catch (Exception e) {
       log.error("Error checking if company content is already shortened: {}", companyName, e);
       return false;
@@ -655,11 +655,12 @@ public class AICompanyController {
             break;
           case "content_shortened":
             // Reset content shortened flag in CompanyContent table
-            Optional<CompanyContent> content = companyContentRepository.findByCompanyId(
+            List<CompanyContent> contentList = companyContentRepository.findByCompanyId(
                 companyEntity.getId());
-            if (content.isPresent()) {
-              content.get().setContentShortened(false);
-              companyContentRepository.save(content.get());
+            if (!contentList.isEmpty()) {
+              CompanyContent content = contentList.get(0);
+              content.setContentShortened(false);
+              companyContentRepository.save(content);
               updated = true;
             }
             break;

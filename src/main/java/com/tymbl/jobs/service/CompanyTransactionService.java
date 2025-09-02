@@ -142,15 +142,15 @@ public class CompanyTransactionService {
     Map<String, Object> result = new HashMap<>();
 
     try {
-      Optional<CompanyContent> companyContentOpt = companyContentRepository.findByCompanyId(
+      List<CompanyContent> companyContentList = companyContentRepository.findByCompanyId(
           companyId);
-      if (!companyContentOpt.isPresent()) {
+      if (companyContentList.isEmpty()) {
         result.put("success", false);
         result.put("error", "Company content not found for company ID: " + companyId);
         return result;
       }
 
-      CompanyContent companyContent = companyContentOpt.get();
+      CompanyContent companyContent = companyContentList.get(0);
 
       // Check if already processed
       if (companyContent.isContentShortened()) {
@@ -352,12 +352,12 @@ public class CompanyTransactionService {
 
   private void saveCompanyContent(Long companyId, String contentType, String content) {
     try {
-      Optional<CompanyContent> existingContent = companyContentRepository.findByCompanyId(
+      List<CompanyContent> existingContentList = companyContentRepository.findByCompanyId(
           companyId);
       CompanyContent companyContent;
 
-      if (existingContent.isPresent()) {
-        companyContent = existingContent.get();
+      if (!existingContentList.isEmpty()) {
+        companyContent = existingContentList.get(0);
       } else {
         companyContent = new CompanyContent();
         companyContent.setCompanyId(companyId);
