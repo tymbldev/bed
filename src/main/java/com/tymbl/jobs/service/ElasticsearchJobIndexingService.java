@@ -237,23 +237,57 @@ public class ElasticsearchJobIndexingService {
    * Reindex all jobs from database to Elasticsearch
    */
   public void reindexAllJobs() {
+    long startTime = System.currentTimeMillis();
+    log.info("🚀 Starting reindex of all jobs from database to Elasticsearch");
+    
+    log.info("📊 Querying database for all jobs...");
     List<Job> jobs = jobRepository.findAll();
-    log.info("Starting reindex of {} jobs to Elasticsearch (centralized sync)", jobs.size());
+    log.info("📋 Found {} jobs in database for reindexing", jobs.size());
+
+    if (jobs.isEmpty()) {
+      log.info("✅ No jobs found in database - reindex process completed immediately");
+      return;
+    }
+
+    log.info("🔄 Starting reindex of {} jobs to Elasticsearch (centralized sync)", jobs.size());
 
     int totalSuccessCount = 0;
     int totalFailureCount = 0;
+    int currentJobIndex = 0;
 
     for (Job job : jobs) {
+      currentJobIndex++;
+      long jobStartTime = System.currentTimeMillis();
+      
+      log.info("⏳ Processing job {}/{}: ID={}, Title='{}', Company='{}'", 
+          currentJobIndex, jobs.size(), job.getId(), 
+          job.getTitle(), job.getCompany());
+
       try {
+        log.debug("🔄 Syncing job ID: {} to Elasticsearch", job.getId());
+        
         // Sync to Elasticsearch (non-blocking semantics preserved with try/catch)
         syncJobToElasticsearch(job);
+        
+        long jobProcessingTime = System.currentTimeMillis() - jobStartTime;
         totalSuccessCount++;
+        
+        log.info("✅ Successfully synced job {}/{}: ID={}, Title='{}', Company='{}' in {}ms", 
+            currentJobIndex, jobs.size(), job.getId(), 
+            job.getTitle(), job.getCompany(), jobProcessingTime);
+            
       } catch (Exception e) {
+        long jobProcessingTime = System.currentTimeMillis() - jobStartTime;
         totalFailureCount++;
-        log.error("Failed to sync job {} to Elasticsearch during reindex: {}", job.getId(), e.getMessage(), e);
+        log.error("💥 Failed to sync job {}/{}: ID={}, Title='{}', Company='{}' after {}ms: {}", 
+            currentJobIndex, jobs.size(), job.getId(), 
+            job.getTitle(), job.getCompany(), jobProcessingTime, e.getMessage(), e);
       }
     }
 
-    log.info("Reindex completed. Total Success: {}, Total Failures: {}", totalSuccessCount, totalFailureCount);
+    long totalProcessingTime = System.currentTimeMillis() - startTime;
+    log.info("🎉 Reindex completed successfully! 📊 Summary: Total={}, Success={}, Failures={}, TotalTime={}ms, AvgTimePerJob={}ms", 
+        jobs.size(), totalSuccessCount, totalFailureCount, totalProcessingTime, 
+        jobs.size() > 0 ? totalProcessingTime / jobs.size() : 0);
   }
 }

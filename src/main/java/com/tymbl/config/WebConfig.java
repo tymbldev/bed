@@ -19,10 +19,12 @@ public class WebConfig {
   @Bean("taskExecutor")
   public Executor taskExecutor() {
     ThreadPoolTaskExecutor executor = new ThreadPoolTaskExecutor();
-    executor.setCorePoolSize(5);
-    executor.setMaxPoolSize(10);
-    executor.setQueueCapacity(25);
-    executor.setThreadNamePrefix("CacheInit-");
+    executor.setCorePoolSize(10);
+    executor.setMaxPoolSize(20);
+    executor.setQueueCapacity(100);
+    executor.setThreadNamePrefix("TaskExecutor-");
+    executor.setKeepAliveSeconds(300); // 5 minutes keep alive for idle threads
+    executor.setAllowCoreThreadTimeOut(true); // Allow core threads to timeout
     executor.initialize();
     return executor;
   }
