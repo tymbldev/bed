@@ -380,7 +380,6 @@
             }
           ]
         },
-
         {
           "name": "Crawl All Active Keywords",
           "request": {
@@ -705,7 +704,6 @@
             }
           ]
         },
-
         {
           "name": "Reindex Jobs",
           "request": {
@@ -814,8 +812,6 @@
             }
           ]
         },
-
-
         {
           "name": "Add New Keyword",
           "request": {
@@ -902,7 +898,7 @@
               "raw": "{\n  \"description\": \"This endpoint synchronizes external job data to the main Job table using AI tagging for companies and designations. Each job is processed in its own transaction for better error isolation.\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-job",
+              "raw": "{{base_url}}/api/v1/ai-jobs/sync-external-raw",
               "host": [
                 "{{base_url}}"
               ],
@@ -910,7 +906,7 @@
                 "api",
                 "v1",
                 "ai-jobs",
-                "sync-external-job"
+                "sync-external-raw"
               ]
             }
           },
@@ -2257,7 +2253,6 @@
             }
           }
         },
-
         {
           "name": "Fetch Websites for All Companies",
           "request": {
@@ -2519,10 +2514,7 @@
               ]
             }
           }
-                },
-
-
-
+        },
         {
           "name": "Generate Skills and Save",
           "request": {
@@ -3531,8 +3523,7 @@
               "body": "{\n  \"topDesignations\": [\n    {\n      \"designationName\": \"Software Engineer\",\n      \"jobCount\": 150\n    },\n    {\n      \"designationName\": \"Sales Representative\",\n      \"jobCount\": 120\n    },\n    {\n      \"designationName\": \"Product Manager\",\n      \"jobCount\": 95\n    }\n  ],\n  \"totalDesignations\": 50,\n  \"totalJobs\": 2500\n}"
             }
           ]
-        }
-        ,
+        },
         {
           "name": "Get Top Skills",
           "request": {
@@ -3713,7 +3704,6 @@
         }
       ]
     },
-
     {
       "name": "Interview Controller",
       "item": [

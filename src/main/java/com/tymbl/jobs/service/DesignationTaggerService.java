@@ -89,6 +89,7 @@ public class DesignationTaggerService {
     // 4. Try GenAI with all designations as fallback
     Designation genAIMatch = findBestDesignationUsingGenAI(normalizedJobTitle);
     if (genAIMatch != null) {
+      storeDesignationMapping(genAIMatch.getName(), normalizedJobTitle, 0.85);
       return new DesignationTaggingResult(genAIMatch.getId(), genAIMatch.getName(), 0.7);
     }
 
@@ -142,29 +143,65 @@ public class DesignationTaggerService {
   }
 
   /**
-   * Find best designation using GenAI with all designations
+   * Find best designation using GenAI with tokenized matching
    */
   private Designation findBestDesignationUsingGenAI(String jobTitle) {
     try {
-      // Get designations from dropdown service (cached and optimized)
+      // Get all designations from dropdown service (cached and optimized)
       List<Designation> allDesignations = dropdownService.getAllDesignations();
-      List<Designation> topDesignations = allDesignations.stream()
-          .limit(20)
+      
+      // Tokenize the input job title
+      List<String> tokens = tokenizeJobTitle(jobTitle);
+      log.debug("Tokenized job title '{}' into tokens: {}", jobTitle, tokens);
+      
+      // Filter designations that contain at least one token (case-insensitive)
+      List<Designation> matchedDesignations = allDesignations.stream()
+          .filter(designation -> containsAnyToken(designation.getName(), tokens))
           .collect(Collectors.toList());
+      
+      log.debug("Found {} designations matching tokens from '{}'", matchedDesignations.size(), jobTitle);
+      
+      // Log some examples of matches for debugging
+      if (!matchedDesignations.isEmpty()) {
+        List<String> exampleMatches = matchedDesignations.stream()
+            .limit(5)
+            .map(Designation::getName)
+            .collect(Collectors.toList());
+        log.debug("Example matches for '{}': {}", jobTitle, exampleMatches);
+      }
+      
+      // If no matches found, return null
+      if (matchedDesignations.isEmpty()) {
+        log.debug("No designations found matching any tokens from '{}'", jobTitle);
+        return null;
+      }
+      
+      // If only one match, return it directly
+      if (matchedDesignations.size() == 1) {
+        log.debug("Single match found for '{}': {}", jobTitle, matchedDesignations.get(0).getName());
+        return matchedDesignations.get(0);
+      }
 
+      // Use GenAI to find the best match from filtered designations
       StringBuilder prompt = new StringBuilder();
       prompt.append(
-          "You are a job title matching expert. Match the input job title to the best available designation.\n\n");
+          "You are a job title matching expert. Your task is to find the BEST matching designation from the list below.\n\n");
       prompt.append("Input job title: '").append(jobTitle).append("'\n\n");
-      prompt.append("Available designations (top 20 by usage):\n");
+      prompt.append("Available designations (filtered by token matching):\n");
 
-      for (int i = 0; i < topDesignations.size(); i++) {
-        Designation designation = topDesignations.get(i);
+      for (int i = 0; i < matchedDesignations.size(); i++) {
+        Designation designation = matchedDesignations.get(i);
         prompt.append(i + 1).append(". ").append(designation.getName()).append("\n");
       }
 
       prompt.append(
-          "\nRespond with the EXACT designation name from the list above, or 'NO_MATCH' if none are suitable.\n");
+          "\nIMPORTANT: Look for designations that contain the key words from the input job title.\n");
+      prompt.append(
+          "For 'SENIOR, SOFTWARE ENGINEER', prioritize designations containing 'Senior', 'Software', and 'Engineer'.\n");
+      prompt.append(
+          "The best match should be the most specific and relevant designation.\n\n");
+      prompt.append(
+          "Respond with the EXACT designation name from the list above, or 'NO_MATCH' if none are suitable.\n");
       prompt.append(
           "Only respond with the exact designation name or 'NO_MATCH', no additional text.");
 
@@ -173,18 +210,137 @@ public class DesignationTaggerService {
       if (aiResponse != null && !aiResponse.trim().equalsIgnoreCase("NO_MATCH")) {
         String selectedDesignationName = aiResponse.trim();
 
-        for (Designation designation : topDesignations) {
+        for (Designation designation : matchedDesignations) {
           if (designation.getName().equalsIgnoreCase(selectedDesignationName)) {
+            log.debug("GenAI selected designation '{}' for job title '{}'", designation.getName(), jobTitle);
             return designation;
           }
         }
       }
+      
+      // Fallback: If GenAI returns NO_MATCH or fails, return the designation with the most token matches
+      log.debug("GenAI returned NO_MATCH or failed, using fallback token-based selection for '{}'", jobTitle);
+      return findBestDesignationByTokenCount(jobTitle, matchedDesignations, tokens);
 
     } catch (Exception e) {
       log.warn("Error in GenAI designation matching: {}", e.getMessage());
     }
 
     return null;
+  }
+
+  /**
+   * Tokenize job title by splitting on spaces, commas, and other delimiters
+   */
+  private List<String> tokenizeJobTitle(String jobTitle) {
+    if (jobTitle == null || jobTitle.trim().isEmpty()) {
+      return java.util.Collections.emptyList();
+    }
+    
+    // Split on spaces, commas, hyphens, forward slashes, and other common delimiters
+    String[] tokens = jobTitle.trim()
+        .split("[\\s,\\-/&+()]+");
+    
+    // Filter out empty tokens and convert to lowercase for case-insensitive matching
+    return java.util.Arrays.stream(tokens)
+        .filter(token -> !token.trim().isEmpty())
+        .map(String::trim)
+        .map(String::toLowerCase)
+        .collect(Collectors.toList());
+  }
+
+  /**
+   * Check if a designation name contains any of the given tokens (case-insensitive)
+   * Improved matching to handle word boundaries and partial matches
+   */
+  private boolean containsAnyToken(String designationName, List<String> tokens) {
+    if (designationName == null || designationName.trim().isEmpty() || tokens.isEmpty()) {
+      return false;
+    }
+    
+    String lowerDesignationName = designationName.toLowerCase();
+    
+    return tokens.stream()
+        .anyMatch(token -> {
+          // Check for exact word match or substring match
+          String lowerToken = token.toLowerCase();
+          
+          // Direct substring match
+          if (lowerDesignationName.contains(lowerToken)) {
+            return true;
+          }
+          
+          // Check for word boundary matches (e.g., "engineer" in "software engineer")
+          String[] designationWords = lowerDesignationName.split("[\\s\\-]+");
+          for (String word : designationWords) {
+            if (word.equals(lowerToken) || word.startsWith(lowerToken) || word.endsWith(lowerToken)) {
+              return true;
+            }
+          }
+          
+          return false;
+        });
+  }
+
+  /**
+   * Find the best designation by counting token matches as a fallback
+   */
+  private Designation findBestDesignationByTokenCount(String jobTitle, List<Designation> matchedDesignations, List<String> tokens) {
+    if (matchedDesignations.isEmpty()) {
+      return null;
+    }
+    
+    // Score each designation by how many tokens it contains
+    Designation bestDesignation = null;
+    int bestScore = 0;
+    
+    for (Designation designation : matchedDesignations) {
+      int score = countTokenMatches(designation.getName(), tokens);
+      if (score > bestScore) {
+        bestScore = score;
+        bestDesignation = designation;
+      }
+    }
+    
+    if (bestDesignation != null) {
+      log.debug("Fallback selected designation '{}' with {} token matches for '{}'", 
+          bestDesignation.getName(), bestScore, jobTitle);
+    }
+    
+    return bestDesignation;
+  }
+
+  /**
+   * Count how many tokens from the job title are found in the designation name
+   */
+  private int countTokenMatches(String designationName, List<String> tokens) {
+    if (designationName == null || designationName.trim().isEmpty() || tokens.isEmpty()) {
+      return 0;
+    }
+    
+    String lowerDesignationName = designationName.toLowerCase();
+    int matchCount = 0;
+    
+    for (String token : tokens) {
+      String lowerToken = token.toLowerCase();
+      
+      // Direct substring match
+      if (lowerDesignationName.contains(lowerToken)) {
+        matchCount++;
+        continue;
+      }
+      
+      // Check for word boundary matches
+      String[] designationWords = lowerDesignationName.split("[\\s\\-]+");
+      for (String word : designationWords) {
+        if (word.equals(lowerToken) || word.startsWith(lowerToken) || word.endsWith(lowerToken)) {
+          matchCount++;
+          break; // Count each token only once per designation
+        }
+      }
+    }
+    
+    return matchCount;
   }
 
   /**
