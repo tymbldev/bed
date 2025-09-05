@@ -4295,11 +4295,12 @@
       "name": "Notification Controller",
       "item": [
         {
-          "name": "Get Recent Notifications",
+          "name": "Get Notification Count with Type Breakdown",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/notifications/recent/1",
+              "raw": "{{base_url}}/api/v1/notifications/count/1?page=0&size=10",
               "host": [
                 "{{base_url}}"
               ],
@@ -4307,18 +4308,32 @@
                 "api",
                 "v1",
                 "notifications",
-                "recent",
+                "count",
                 "1"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Page size"
+                }
               ]
-            }
+            },
+            "description": "Returns total count, new count (unseen), and count breakdown by notification type for a user"
           }
         },
         {
-          "name": "Get All Notifications",
+          "name": "Get Notifications List (Paginated)",
           "request": {
             "method": "GET",
+            "header": [],
             "url": {
-              "raw": "{{base_url}}/api/v1/notifications/all/1",
+              "raw": "{{base_url}}/api/v1/notifications/list/1?page=0&size=10",
               "host": [
                 "{{base_url}}"
               ],
@@ -4326,52 +4341,27 @@
                 "api",
                 "v1",
                 "notifications",
-                "all",
+                "list",
                 "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Unread Notifications",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/notifications/unread/1",
-              "host": [
-                "{{base_url}}"
               ],
-              "path": [
-                "api",
-                "v1",
-                "notifications",
-                "unread",
-                "1"
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0",
+                  "description": "Page number (0-based)"
+                },
+                {
+                  "key": "size",
+                  "value": "10",
+                  "description": "Page size"
+                }
               ]
-            }
+            },
+            "description": "Returns paginated list of all notification types for a user with type mentioned in response. Sorted by: 1) Not clicked + Not seen, 2) Not clicked + Seen, 3) Clicked + Seen, then by recency"
           }
         },
         {
-          "name": "Get Unread Count",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/notifications/unread-count/1",
-              "host": [
-                "{{base_url}}"
-              ],
-              "path": [
-                "api",
-                "v1",
-                "notifications",
-                "unread-count",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Mark Notification as Read",
+          "name": "Mark Notifications as Seen",
           "request": {
             "method": "PUT",
             "header": [
@@ -4382,10 +4372,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"Marks notification as read\"\n}"
+              "raw": "{\n  \"notificationIds\": [1, 2, 3],\n  \"userId\": 1\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/notifications/mark-read/1",
+              "raw": "{{base_url}}/api/v1/notifications/mark-seen?notificationIds=1&notificationIds=2&notificationIds=3&userId=1",
               "host": [
                 "{{base_url}}"
               ],
@@ -4393,14 +4383,34 @@
                 "api",
                 "v1",
                 "notifications",
-                "mark-read",
-                "1"
+                "mark-seen"
+              ],
+              "query": [
+                {
+                  "key": "notificationIds",
+                  "value": "1",
+                  "description": "List of notification IDs"
+                },
+                {
+                  "key": "notificationIds",
+                  "value": "2"
+                },
+                {
+                  "key": "notificationIds",
+                  "value": "3"
+                },
+                {
+                  "key": "userId",
+                  "value": "1",
+                  "description": "User ID"
+                }
               ]
-            }
+            },
+            "description": "Marks multiple notifications as seen when user opens notification tray"
           }
         },
         {
-          "name": "Mark All Notifications as Read",
+          "name": "Mark All Notifications as Seen",
           "request": {
             "method": "PUT",
             "header": [
@@ -4411,10 +4421,10 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"note\": \"Marks all notifications as read\"\n}"
+              "raw": "{\n  \"note\": \"Marks all unseen notifications as seen for a user\"\n}"
             },
             "url": {
-              "raw": "{{base_url}}/api/v1/notifications/mark-all-read/1",
+              "raw": "{{base_url}}/api/v1/notifications/mark-all-seen/1",
               "host": [
                 "{{base_url}}"
               ],
@@ -4422,18 +4432,29 @@
                 "api",
                 "v1",
                 "notifications",
-                "mark-all-read",
+                "mark-all-seen",
                 "1"
               ]
-            }
+            },
+            "description": "Marks all unseen notifications as seen for a user"
           }
         },
         {
-          "name": "Delete Notification",
+          "name": "Mark Notifications as Clicked",
           "request": {
-            "method": "DELETE",
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"notificationIds\": [1, 2, 3],\n  \"userId\": 1\n}"
+            },
             "url": {
-              "raw": "{{base_url}}/api/v1/notifications/1",
+              "raw": "{{base_url}}/api/v1/notifications/mark-clicked?notificationIds=1&notificationIds=2&notificationIds=3&userId=1",
               "host": [
                 "{{base_url}}"
               ],
@@ -4441,28 +4462,30 @@
                 "api",
                 "v1",
                 "notifications",
-                "1"
-              ]
-            }
-          }
-        },
-        {
-          "name": "Get Notifications by Type",
-          "request": {
-            "method": "GET",
-            "url": {
-              "raw": "{{base_url}}/api/v1/notifications/type/1",
-              "host": [
-                "{{base_url}}"
+                "mark-clicked"
               ],
-              "path": [
-                "api",
-                "v1",
-                "notifications",
-                "type",
-                "1"
+              "query": [
+                {
+                  "key": "notificationIds",
+                  "value": "1",
+                  "description": "List of notification IDs"
+                },
+                {
+                  "key": "notificationIds",
+                  "value": "2"
+                },
+                {
+                  "key": "notificationIds",
+                  "value": "3"
+                },
+                {
+                  "key": "userId",
+                  "value": "1",
+                  "description": "User ID"
+                }
               ]
-            }
+            },
+            "description": "Marks multiple notifications as clicked when user explicitly clicks them"
           }
         }
       ]
