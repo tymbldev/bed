@@ -66,7 +66,8 @@ public class PendingContent {
     COMPANY,
     DESIGNATION,
     CITY,
-    COUNTRY
+    COUNTRY,
+    SKILL
   }
 
   @PrePersist

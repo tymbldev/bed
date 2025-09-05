@@ -2,7 +2,9 @@ package com.tymbl.config;
 
 import com.tymbl.auth.filter.JwtAuthenticationFilter;
 import com.tymbl.auth.service.CustomOAuth2UserService;
+
 import java.util.Arrays;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,108 +30,109 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-  private final JwtAuthenticationFilter jwtAuthenticationFilter;
-  private final UserDetailsService userDetailsService;
-  private final CustomOAuth2UserService customOAuth2UserService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UserDetailsService userDetailsService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-  @Bean
-  public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .cors().and()
-        .csrf().disable()
-        .authorizeRequests()
-        // Allow pre-flight OPTIONS requests
-        .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-        // Public endpoints (no JWT required)
-        .antMatchers("/api/v1/auth/**", "/tymbl-service/api/v1/auth/**").permitAll()
-        .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
-        .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
-        .antMatchers("/api/v1/locations/**", "/tymbl-service/api/v1/locations/**").permitAll()
-        .antMatchers("/api/v1/ai/**", "/tymbl-service/api/v1/ai/**").permitAll()
-        .antMatchers("/api/v1/ai-jobs/**", "/tymbl-service/api/v1/ai-jobs/**").permitAll()
-        .antMatchers("/api/v1/utility/**", "/tymbl-service/api/v1/utility/**").permitAll()
-        .antMatchers("/api/admin/company-data/**", "/tymbl-service/api/admin/company-data/**")
-        .permitAll()
-        .antMatchers("/api/v1/dropdowns/**", "/tymbl-service/api/v1/dropdowns/**").permitAll()
-        .antMatchers("/api/v1/sitemap/**", "/tymbl-service/api/v1/sitemap/**").permitAll()
-        .antMatchers("/api/v1/seo/**", "/tymbl-service/api/v1/seo/**").permitAll()
-        .antMatchers("/api/v1/skills/**", "/tymbl-service/api/v1/skills/**").permitAll()
-        .antMatchers("/api/v1/companies/**", "/tymbl-service/api/v1/companies/**").permitAll()
-        .antMatchers("/api/v1/oauth2/**", "/tymbl-service/api/v1/oauth2/**").permitAll()
-        .antMatchers("/api/v1/health/**", "/tymbl-service/api/v1/health/**").permitAll()
-        .antMatchers("/v3/api-docs/**", "/tymbl-service/v3/api-docs/**").permitAll()
-        .antMatchers("/swagger-ui/**", "/tymbl-service/swagger-ui/**").permitAll()
-        .antMatchers("/swagger-ui.html", "/tymbl-service/swagger-ui.html").permitAll()
-        .antMatchers("/api/v1/jobsearch/**", "/tymbl-service/api/v1/jobsearch/**").permitAll()
-        .antMatchers("/api-docs/**", "/tymbl-service/api-docs/**").permitAll()
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors().and()
+                .csrf().disable()
+                .authorizeRequests()
+                // Allow pre-flight OPTIONS requests
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                // Public endpoints (no JWT required)
+                .antMatchers("/api/v1/auth/**", "/tymbl-service/api/v1/auth/**").permitAll()
+                .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
+                .antMatchers("/api/v1/notifications", "/tymbl-service/api/v1/notifications").permitAll()
+                .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
+                .antMatchers("/api/v1/locations/**", "/tymbl-service/api/v1/locations/**").permitAll()
+                .antMatchers("/api/v1/ai/**", "/tymbl-service/api/v1/ai/**").permitAll()
+                .antMatchers("/api/v1/ai-jobs/**", "/tymbl-service/api/v1/ai-jobs/**").permitAll()
+                .antMatchers("/api/v1/utility/**", "/tymbl-service/api/v1/utility/**").permitAll()
+                .antMatchers("/api/admin/company-data/**", "/tymbl-service/api/admin/company-data/**")
+                .permitAll()
+                .antMatchers("/api/v1/dropdowns/**", "/tymbl-service/api/v1/dropdowns/**").permitAll()
+                .antMatchers("/api/v1/sitemap/**", "/tymbl-service/api/v1/sitemap/**").permitAll()
+                .antMatchers("/api/v1/seo/**", "/tymbl-service/api/v1/seo/**").permitAll()
+                .antMatchers("/api/v1/skills/**", "/tymbl-service/api/v1/skills/**").permitAll()
+                .antMatchers("/api/v1/companies/**", "/tymbl-service/api/v1/companies/**").permitAll()
+                .antMatchers("/api/v1/oauth2/**", "/tymbl-service/api/v1/oauth2/**").permitAll()
+                .antMatchers("/api/v1/health/**", "/tymbl-service/api/v1/health/**").permitAll()
+                .antMatchers("/v3/api-docs/**", "/tymbl-service/v3/api-docs/**").permitAll()
+                .antMatchers("/swagger-ui/**", "/tymbl-service/swagger-ui/**").permitAll()
+                .antMatchers("/swagger-ui.html", "/tymbl-service/swagger-ui.html").permitAll()
+                .antMatchers("/api/v1/jobsearch/**", "/tymbl-service/api/v1/jobsearch/**").permitAll()
+                .antMatchers("/api-docs/**", "/tymbl-service/api-docs/**").permitAll()
 
-        // Protected endpoints (JWT required)
-        .antMatchers("/api/v1/jobmanagement/**").authenticated()
-        .antMatchers("/api/v1/users/**").authenticated()
-        .antMatchers("/api/v1/resumes/**").authenticated()
-        .antMatchers("/api/v1/job-applications/**").authenticated()
-        .anyRequest().authenticated()
-        .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .authenticationProvider(authenticationProvider())
-        .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+                // Protected endpoints (JWT required)
+                .antMatchers("/api/v1/jobmanagement/**").authenticated()
+                .antMatchers("/api/v1/users/**").authenticated()
+                .antMatchers("/api/v1/resumes/**").authenticated()
+                .antMatchers("/api/v1/job-applications/**").authenticated()
+                .anyRequest().authenticated()
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authenticationProvider(authenticationProvider())
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
-    return http.build();
-  }
+        return http.build();
+    }
 
-  @Bean
-  public CorsConfigurationSource corsConfigurationSource() {
-    CorsConfiguration configuration = new CorsConfiguration();
-    configuration.setAllowedOrigins(Arrays.asList("*"));
-    configuration.setAllowedMethods(
-        Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-    configuration.setAllowedHeaders(Arrays.asList("*"));
-    configuration.setAllowCredentials(false);
-    configuration.setMaxAge(3600L);
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(
+                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        configuration.setAllowedHeaders(Arrays.asList("*"));
+        configuration.setAllowCredentials(false);
+        configuration.setMaxAge(3600L);
 
-    // Specific configuration for /api/v1/users/profile
-    CorsConfiguration profileConfig = new CorsConfiguration();
+        // Specific configuration for /api/v1/users/profile
+        CorsConfiguration profileConfig = new CorsConfiguration();
 
-    profileConfig.setAllowedOrigins(Arrays.asList(
-        "http://localhost:3000",        // ✅ Local development
-        "https://www.tymblhub.com",     // ✅ Production
-        "https://tymblhub.com"          // ✅ Production alternative
-    ));
-    profileConfig.setAllowedMethods(
-        Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-    profileConfig.setAllowedHeaders(
-        Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
-    profileConfig.setExposedHeaders(Arrays.asList("Authorization"));
-    profileConfig.setAllowCredentials(true);
-    profileConfig.setMaxAge(3600L);
+        profileConfig.setAllowedOrigins(Arrays.asList(
+                "http://localhost:3000",        // ✅ Local development
+                "https://www.tymblhub.com",     // ✅ Production
+                "https://tymblhub.com"          // ✅ Production alternative
+        ));
+        profileConfig.setAllowedMethods(
+                Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        profileConfig.setAllowedHeaders(
+                Arrays.asList("Authorization", "Content-Type", "Accept", "Origin", "X-Requested-With"));
+        profileConfig.setExposedHeaders(Arrays.asList("Authorization"));
+        profileConfig.setAllowCredentials(true);
+        profileConfig.setMaxAge(3600L);
 
-    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/api/v1/users/**", profileConfig);
-    source.registerCorsConfiguration("/api/v1/resumes/**", profileConfig);
-    source.registerCorsConfiguration("/api/v1/jobmanagement/**", profileConfig);
-    source.registerCorsConfiguration("/**", configuration);
-    return source;
-  }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/v1/users/**", profileConfig);
+        source.registerCorsConfiguration("/api/v1/resumes/**", profileConfig);
+        source.registerCorsConfiguration("/api/v1/jobmanagement/**", profileConfig);
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
-  @Bean
-  public AuthenticationProvider authenticationProvider() {
-    DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
-    authProvider.setUserDetailsService(userDetailsService);
-    authProvider.setPasswordEncoder(passwordEncoder());
-    return authProvider;
-  }
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
+        authProvider.setUserDetailsService(userDetailsService);
+        authProvider.setPasswordEncoder(passwordEncoder());
+        return authProvider;
+    }
 
-  @Bean
-  public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
-      throws Exception {
-    return config.getAuthenticationManager();
-  }
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
+            throws Exception {
+        return config.getAuthenticationManager();
+    }
 
-  @Bean
-  @SuppressWarnings("deprecation")
-  public PasswordEncoder passwordEncoder() {
-    return NoOpPasswordEncoder.getInstance();
-  }
+    @Bean
+    @SuppressWarnings("deprecation")
+    public PasswordEncoder passwordEncoder() {
+        return NoOpPasswordEncoder.getInstance();
+    }
 }

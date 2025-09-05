@@ -119,4 +119,16 @@ public interface JobRepository extends JpaRepository<Job, Long> {
   // Method for finding all jobs with collections eagerly loaded (for Elasticsearch indexing)
   @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.skillIds LEFT JOIN FETCH j.tags")
   List<Job> findAllWithCollections();
+
+  // Efficient query to get jobs that have applications
+  @Query("SELECT DISTINCT j FROM Job j WHERE EXISTS (SELECT 1 FROM JobApplication ja WHERE ja.jobId = j.id)")
+  List<Job> findJobsWithApplications();
+
+  // Find existing jobs by designation, company, and location within last 30 days
+  @Query("SELECT j FROM Job j WHERE j.designation = :designation AND j.company = :companyName AND j.cityName = :cityName AND j.createdAt >= :sinceDate AND j.active = true")
+  List<Job> findExistingJobsByDesignationCompanyAndLocation(
+      @Param("designation") String designation,
+      @Param("companyName") String companyName,
+      @Param("cityName") String cityName,
+      @Param("sinceDate") java.time.LocalDateTime sinceDate);
 } 

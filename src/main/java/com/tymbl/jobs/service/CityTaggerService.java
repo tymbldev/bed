@@ -3,9 +3,11 @@ package com.tymbl.jobs.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.City;
+import com.tymbl.common.entity.PendingContent;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.repository.CityRepository;
+import com.tymbl.common.repository.PendingContentRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ public class CityTaggerService {
 
   private final CityRepository cityRepository;
   private final SimilarContentRepository similarContentRepository;
+  private final PendingContentRepository pendingContentRepository;
   private final AIRestService aiRestService;
 
   /**
@@ -112,18 +115,23 @@ public class CityTaggerService {
         result.setCityId(aiMatch.getId());
         result.setCityName(aiMatch.getName());
         result.setConfidence(0.9);
+        storeCityMapping(cityName,aiMatch.getName(),0.8);
         log.info("🤖 AI-powered city match found: '{}' -> '{}' (ID: {})", cityName, aiMatch.getName(),
             aiMatch.getId());
         return result;
       }
 
-      log.info(
-          "NO_MATCH for city: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies",
-          cityName, sourceId, portalName);
+      // Log NO_MATCH case to PendingContent for future analysis
+      logPendingContent(cityName, sourceId, portalName, 
+          "No match found after all tagging strategies (exact, similar content, AI)");
 
     } catch (Exception e) {
       log.error("💥 Error tagging city for external job {}: {}", sourceId, e.getMessage(), e);
       result.setError(e.getMessage());
+      
+      // Log error case to PendingContent for future analysis
+      logPendingContent(cityName, sourceId, portalName, 
+          "Error during tagging: " + e.getMessage());
     }
 
     return result;
@@ -369,6 +377,36 @@ public class CityTaggerService {
 
     } catch (Exception e) {
       log.warn("Failed to store city mapping: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Log untagged city to PendingContent for future analysis
+   */
+  private void logPendingContent(String entityName, Long sourceId, String portalName, String notes) {
+    try {
+      // Check if this entity name is already in pending content to avoid duplicates (regardless of source)
+      if (pendingContentRepository.existsByEntityNameAndEntityType(
+          entityName, PendingContent.EntityType.CITY)) {
+        log.debug("Pending content already exists for city: '{}' (entity name already logged)", entityName);
+        return;
+      }
+
+      PendingContent pendingContent = PendingContent.builder()
+          .entityName(entityName)
+          .entityType(PendingContent.EntityType.CITY)
+          .sourceTable("external_jobs") // Assuming this comes from external jobs
+          .sourceId(sourceId)
+          .portalName(portalName)
+          .notes(notes)
+          .build();
+
+      pendingContentRepository.save(pendingContent);
+      log.info("Logged untagged city to PendingContent: '{}' (sourceId: {}, portal: {})", 
+          entityName, sourceId, portalName);
+
+    } catch (Exception e) {
+      log.warn("Failed to log pending content for city '{}': {}", entityName, e.getMessage());
     }
   }
 

@@ -3,9 +3,11 @@ package com.tymbl.jobs.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.Designation;
+import com.tymbl.common.entity.PendingContent;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.repository.DesignationRepository;
+import com.tymbl.common.repository.PendingContentRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
 import com.tymbl.common.service.DropdownService;
@@ -27,6 +29,7 @@ public class DesignationTaggerService {
 
   private final DesignationRepository designationRepository;
   private final SimilarContentRepository similarContentRepository;
+  private final PendingContentRepository pendingContentRepository;
   private final AIRestService aiRestService;
   private final ObjectMapper objectMapper;
   private final DropdownService dropdownService;
@@ -65,6 +68,14 @@ public class DesignationTaggerService {
         Optional<Designation> designation = designationRepository.findByName(
             bestMatch.getParentName());
         if (designation.isPresent()) {
+          // Store additional synonyms found during the search
+          for (SimilarContent sc : similarDesignations) {
+            if (!sc.getSimilarName().equalsIgnoreCase(normalizedJobTitle)) {
+              storeSynonymMapping(ContentType.DESIGNATION, bestMatch.getParentName(), 
+                  sc.getSimilarName(), sc.getConfidenceScore().doubleValue());
+            }
+          }
+          
           return new DesignationTaggingResult(
               designation.get().getId(),
               designation.get().getName(),
@@ -82,6 +93,15 @@ public class DesignationTaggerService {
       if (bestMatch != null) {
         // Store this mapping in similar content for future use
         storeDesignationMapping(bestMatch.getName(), normalizedJobTitle, 0.85);
+        
+        // Store synonyms for other similar matches found
+        for (Designation match : likeMatches) {
+          if (!match.getName().equalsIgnoreCase(bestMatch.getName())) {
+            storeSynonymMapping(ContentType.DESIGNATION, bestMatch.getName(), 
+                match.getName(), 0.75);
+          }
+        }
+        
         return new DesignationTaggingResult(bestMatch.getId(), bestMatch.getName(), 0.85);
       }
     }
@@ -90,13 +110,16 @@ public class DesignationTaggerService {
     Designation genAIMatch = findBestDesignationUsingGenAI(normalizedJobTitle);
     if (genAIMatch != null) {
       storeDesignationMapping(genAIMatch.getName(), normalizedJobTitle, 0.85);
+      
+      // Store additional synonyms from the token matching process
+      storeAdditionalSynonymsFromGenAI(normalizedJobTitle, genAIMatch);
+      
       return new DesignationTaggingResult(genAIMatch.getId(), genAIMatch.getName(), 0.7);
     }
 
-    // 5. Log NO_MATCH case for future analysis
-    log.info(
-        "NO_MATCH for designation: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies",
-        normalizedJobTitle, sourceId, portalName);
+    // 5. Log NO_MATCH case to PendingContent for future analysis
+    logPendingContent(normalizedJobTitle, sourceId, portalName, 
+        "No match found after all tagging strategies (exact, similar content, LIKE, GenAI)");
 
     return new DesignationTaggingResult();
   }
@@ -109,7 +132,22 @@ public class DesignationTaggerService {
     try {
       StringBuilder prompt = new StringBuilder();
       prompt.append(
-          "You are a job title matching expert. Match the input job title to the best available designation.\n\n");
+          "You are a job title functional similarity expert. Your task is to identify designations that are FUNCTIONALLY SIMILAR, not just containing similar words.\n\n");
+      prompt.append("CRITICAL RULES:\n");
+      prompt.append("1. FUNCTIONAL SIMILARITY ONLY: Match only if the roles have the same core job function/responsibility\n");
+      prompt.append("2. AVOID WORD-BASED MATCHING: Do NOT match based on shared words if the functions are different\n");
+      prompt.append("3. EXAMPLES OF FUNCTIONAL SIMILARITY:\n");
+      prompt.append("   - 'Software Developer' = 'C++ Python Developer' (both develop software)\n");
+      prompt.append("   - 'Software Developer' = 'Lead Python Developer' (both develop software, different seniority)\n");
+      prompt.append("   - 'Software Developer' = 'Software Engineer III' (both develop software, different seniority)\n");
+      prompt.append("   - 'Database Administrator' = 'SQL Server Administrator' (both manage databases)\n");
+      prompt.append("   - 'Project Manager' = 'Senior Project Manager' (both manage projects, different seniority)\n");
+      prompt.append("4. EXAMPLES OF NON-SIMILAR (DIFFERENT FUNCTIONS):\n");
+      prompt.append("   - 'Cloud Database Administrator' ≠ 'Dialer Administrator' (database vs telephony systems)\n");
+      prompt.append("   - 'Change Management Consultant' ≠ 'Dialer Management' (business process vs telephony)\n");
+      prompt.append("   - 'Software Developer' ≠ 'Database Administrator' (development vs administration)\n");
+      prompt.append("   - 'Project Manager' ≠ 'Software Developer' (management vs development)\n");
+      prompt.append("   - 'Marketing Manager' ≠ 'Sales Manager' (marketing vs sales functions)\n\n");
       prompt.append("Input job title: '").append(jobTitle).append("'\n\n");
       prompt.append("Available designations:\n");
 
@@ -119,9 +157,10 @@ public class DesignationTaggerService {
       }
 
       prompt.append(
-          "\nRespond with the EXACT designation name from the list above, or 'NO_MATCH' if none are suitable.\n");
-      prompt.append(
-          "Only respond with the exact designation name or 'NO_MATCH', no additional text.");
+          "\nCRITICAL: Only match if the designations have the SAME CORE JOB FUNCTION.\n");
+      prompt.append("Consider the primary responsibility, not just shared keywords.\n");
+      prompt.append("Respond with the EXACT designation name from the list above, or 'NO_MATCH' if none are functionally similar.\n");
+      prompt.append("Only respond with the exact designation name or 'NO_MATCH', no additional text.");
 
       String aiResponse = callGenAIService(prompt.toString());
 
@@ -152,40 +191,57 @@ public class DesignationTaggerService {
       
       // Tokenize the input job title
       List<String> tokens = tokenizeJobTitle(jobTitle);
-      log.debug("Tokenized job title '{}' into tokens: {}", jobTitle, tokens);
+      log.info("Tokenized job title '{}' into tokens: {}", jobTitle, tokens);
       
       // Filter designations that contain at least one token (case-insensitive)
       List<Designation> matchedDesignations = allDesignations.stream()
           .filter(designation -> containsAnyToken(designation.getName(), tokens))
           .collect(Collectors.toList());
       
-      log.debug("Found {} designations matching tokens from '{}'", matchedDesignations.size(), jobTitle);
+      log.info("Found {} designations matching tokens from '{}'", matchedDesignations.size(), jobTitle);
       
-      // Log some examples of matches for debugging
+      // Log some examples of matches for infoging
       if (!matchedDesignations.isEmpty()) {
         List<String> exampleMatches = matchedDesignations.stream()
             .limit(5)
             .map(Designation::getName)
             .collect(Collectors.toList());
-        log.debug("Example matches for '{}': {}", jobTitle, exampleMatches);
+        log.info("Example matches for '{}': {}", jobTitle, exampleMatches);
       }
       
       // If no matches found, return null
       if (matchedDesignations.isEmpty()) {
-        log.debug("No designations found matching any tokens from '{}'", jobTitle);
+        log.info("No designations found matching any tokens from '{}'", jobTitle);
         return null;
       }
       
       // If only one match, return it directly
       if (matchedDesignations.size() == 1) {
-        log.debug("Single match found for '{}': {}", jobTitle, matchedDesignations.get(0).getName());
+        log.info("Single match found for '{}': {}", jobTitle, matchedDesignations.get(0).getName());
         return matchedDesignations.get(0);
       }
 
       // Use GenAI to find the best match from filtered designations
       StringBuilder prompt = new StringBuilder();
       prompt.append(
-          "You are a job title matching expert. Your task is to find the BEST matching designation from the list below.\n\n");
+          "You are a job title functional similarity expert. Your task is to identify designations that are FUNCTIONALLY SIMILAR, not just containing similar words.\n\n");
+      prompt.append("CRITICAL RULES:\n");
+      prompt.append("1. FUNCTIONAL SIMILARITY ONLY: Match only if the roles have the same core job function/responsibility\n");
+      prompt.append("2. AVOID WORD-BASED MATCHING: Do NOT match based on shared words if the functions are different\n");
+      prompt.append("3. EXAMPLES OF FUNCTIONAL SIMILARITY:\n");
+      prompt.append("   - 'Software Developer' = 'C++ Python Developer' (both develop software)\n");
+      prompt.append("   - 'Software Developer' = 'Lead Python Developer' (both develop software, different seniority)\n");
+      prompt.append("   - 'Software Developer' = 'Software Engineer III' (both develop software, different seniority)\n");
+      prompt.append("   - 'Database Administrator' = 'SQL Server Administrator' (both manage databases)\n");
+      prompt.append("   - 'Project Manager' = 'Senior Project Manager' (both manage projects, different seniority)\n");
+      prompt.append("   - 'Data Analyst' = 'Business Intelligence Analyst' (both analyze data)\n");
+      prompt.append("4. EXAMPLES OF NON-SIMILAR (DIFFERENT FUNCTIONS):\n");
+      prompt.append("   - 'Cloud Database Administrator' ≠ 'Dialer Administrator' (database vs telephony systems)\n");
+      prompt.append("   - 'Change Management Consultant' ≠ 'Dialer Management' (business process vs telephony)\n");
+      prompt.append("   - 'Software Developer' ≠ 'Database Administrator' (development vs administration)\n");
+      prompt.append("   - 'Project Manager' ≠ 'Software Developer' (management vs development)\n");
+      prompt.append("   - 'Marketing Manager' ≠ 'Sales Manager' (marketing vs sales functions)\n");
+      prompt.append("   - 'Network Administrator' ≠ 'System Administrator' (network vs system management)\n\n");
       prompt.append("Input job title: '").append(jobTitle).append("'\n\n");
       prompt.append("Available designations (filtered by token matching):\n");
 
@@ -195,15 +251,10 @@ public class DesignationTaggerService {
       }
 
       prompt.append(
-          "\nIMPORTANT: Look for designations that contain the key words from the input job title.\n");
-      prompt.append(
-          "For 'SENIOR, SOFTWARE ENGINEER', prioritize designations containing 'Senior', 'Software', and 'Engineer'.\n");
-      prompt.append(
-          "The best match should be the most specific and relevant designation.\n\n");
-      prompt.append(
-          "Respond with the EXACT designation name from the list above, or 'NO_MATCH' if none are suitable.\n");
-      prompt.append(
-          "Only respond with the exact designation name or 'NO_MATCH', no additional text.");
+          "\nCRITICAL: Only match if the designations have the SAME CORE JOB FUNCTION.\n");
+      prompt.append("Consider the primary responsibility and work domain, not just shared keywords.\n");
+      prompt.append("Respond with the EXACT designation name from the list above, or 'NO_MATCH' if none are functionally similar.\n");
+      prompt.append("Only respond with the exact designation name or 'NO_MATCH', no additional text.");
 
       String aiResponse = callGenAIService(prompt.toString());
 
@@ -212,14 +263,14 @@ public class DesignationTaggerService {
 
         for (Designation designation : matchedDesignations) {
           if (designation.getName().equalsIgnoreCase(selectedDesignationName)) {
-            log.debug("GenAI selected designation '{}' for job title '{}'", designation.getName(), jobTitle);
+            log.info("GenAI selected designation '{}' for job title '{}'", designation.getName(), jobTitle);
             return designation;
           }
         }
       }
       
       // Fallback: If GenAI returns NO_MATCH or fails, return the designation with the most token matches
-      log.debug("GenAI returned NO_MATCH or failed, using fallback token-based selection for '{}'", jobTitle);
+      log.info("GenAI returned NO_MATCH or failed, using fallback token-based selection for '{}'", jobTitle);
       return findBestDesignationByTokenCount(jobTitle, matchedDesignations, tokens);
 
     } catch (Exception e) {
@@ -303,7 +354,7 @@ public class DesignationTaggerService {
     }
     
     if (bestDesignation != null) {
-      log.debug("Fallback selected designation '{}' with {} token matches for '{}'", 
+      log.info("Fallback selected designation '{}' with {} token matches for '{}'", 
           bestDesignation.getName(), bestScore, jobTitle);
     }
     
@@ -344,24 +395,100 @@ public class DesignationTaggerService {
   }
 
   /**
-   * Store designation mapping in similar content table
+   * Generic method to store synonyms in similar content table
    */
-  private void storeDesignationMapping(String parentDesignationName, String similarDesignationName,
+  private void storeSynonymMapping(ContentType contentType, String parentName, String similarName,
       double confidence) {
     try {
+      // Check if mapping already exists to avoid duplicates
+      if (similarContentRepository.existsByParentNameAndSimilarNameAndType(parentName, similarName, contentType)) {
+        log.debug("Synonym mapping already exists: '{}' -> '{}' for type {}", similarName, parentName, contentType);
+        return;
+      }
+
       SimilarContent similarContent = new SimilarContent();
-      similarContent.setType(ContentType.DESIGNATION);
-      similarContent.setParentName(parentDesignationName);
-      similarContent.setSimilarName(similarDesignationName);
+      similarContent.setType(contentType);
+      similarContent.setParentName(parentName);
+      similarContent.setSimilarName(similarName);
       similarContent.setConfidenceScore(BigDecimal.valueOf(confidence));
       similarContent.setProcessed(true);
 
       similarContentRepository.save(similarContent);
-      log.debug("Stored designation mapping: '{}' -> '{}' with confidence {}",
-          similarDesignationName, parentDesignationName, confidence);
+      log.info("Stored synonym mapping: '{}' -> '{}' with confidence {} for type {}",
+          similarName, parentName, confidence, contentType);
 
     } catch (Exception e) {
-      log.warn("Failed to store designation mapping: {}", e.getMessage());
+      log.warn("Failed to store synonym mapping: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Store designation mapping in similar content table (legacy method for backward compatibility)
+   */
+  private void storeDesignationMapping(String parentDesignationName, String similarDesignationName,
+      double confidence) {
+    storeSynonymMapping(ContentType.DESIGNATION, parentDesignationName, similarDesignationName, confidence);
+  }
+
+  /**
+   * Log untagged designation to PendingContent for future analysis
+   */
+  private void logPendingContent(String entityName, Long sourceId, String portalName, String notes) {
+    try {
+      // Check if this entity name is already in pending content to avoid duplicates (regardless of source)
+      if (pendingContentRepository.existsByEntityNameAndEntityType(
+          entityName, PendingContent.EntityType.DESIGNATION)) {
+        log.debug("Pending content already exists for designation: '{}' (entity name already logged)", entityName);
+        return;
+      }
+
+      PendingContent pendingContent = PendingContent.builder()
+          .entityName(entityName)
+          .entityType(PendingContent.EntityType.DESIGNATION)
+          .sourceTable("external_jobs") // Assuming this comes from external jobs
+          .sourceId(sourceId)
+          .portalName(portalName)
+          .notes(notes)
+          .build();
+
+      pendingContentRepository.save(pendingContent);
+      log.info("Logged untagged designation to PendingContent: '{}' (sourceId: {}, portal: {})", 
+          entityName, sourceId, portalName);
+
+    } catch (Exception e) {
+      log.warn("Failed to log pending content for designation '{}': {}", entityName, e.getMessage());
+    }
+  }
+
+  /**
+   * Store additional synonyms found during GenAI token matching process
+   */
+  private void storeAdditionalSynonymsFromGenAI(String jobTitle, Designation selectedDesignation) {
+    try {
+      // Get all designations and find token matches
+      List<Designation> allDesignations = dropdownService.getAllDesignations();
+      List<String> tokens = tokenizeJobTitle(jobTitle);
+      
+      // Find other designations that match the tokens
+      List<Designation> tokenMatches = allDesignations.stream()
+          .filter(designation -> containsAnyToken(designation.getName(), tokens))
+          .filter(designation -> !designation.getName().equalsIgnoreCase(selectedDesignation.getName()))
+          .collect(Collectors.toList());
+      
+      // Store synonyms for the top token matches
+      for (Designation match : tokenMatches.stream().limit(5).collect(Collectors.toList())) {
+        int tokenCount = countTokenMatches(match.getName(), tokens);
+        double confidence = Math.min(0.8, 0.6 + (tokenCount * 0.1)); // Higher confidence for more token matches
+        
+        storeSynonymMapping(ContentType.DESIGNATION, selectedDesignation.getName(), 
+            match.getName(), confidence);
+      }
+      
+      log.info("Stored {} additional synonyms for '{}' -> '{}'", 
+          Math.min(5, tokenMatches.size()), jobTitle, selectedDesignation.getName());
+      
+    } catch (Exception e) {
+      log.warn("Failed to store additional synonyms from GenAI: {}", e.getMessage());
     }
   }
 
@@ -414,7 +541,7 @@ public class DesignationTaggerService {
           JsonNode parts = content.get("parts");
           if (parts != null && parts.isArray() && parts.size() > 0) {
             String generatedText = parts.get(0).get("text").asText();
-            log.debug("Extracted text from Gemini response: {}", generatedText);
+            log.info("Extracted text from Gemini response: {}", generatedText);
             return generatedText;
           }
         }

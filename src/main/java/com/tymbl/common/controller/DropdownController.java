@@ -10,7 +10,6 @@ import com.tymbl.common.enums.Degree;
 import com.tymbl.common.service.CurrencyService;
 import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.GeminiService;
-import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.service.CompanyService;
 import com.tymbl.jobs.service.ElasticsearchIndexingService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -661,7 +660,7 @@ public class DropdownController {
           responseCode = "200",
           description = "List of companies retrieved successfully",
           content = @Content(
-              schema = @Schema(implementation = Company.class),
+              schema = @Schema(implementation = com.tymbl.common.dto.CompanyDropdownDTO.class),
               examples = @ExampleObject(
                   value = "[\n" +
                       "  {\n" +
@@ -681,8 +680,8 @@ public class DropdownController {
           )
       )
   })
-  public ResponseEntity<List<Company>> getAllCompanies() {
-    return ResponseEntity.ok(companyService.getAllCompaniesForDropdown());
+  public ResponseEntity<List<com.tymbl.common.dto.CompanyDropdownDTO>> getAllCompanies() {
+    return ResponseEntity.ok(companyService.getAllCompaniesForDropdownDTO());
   }
 
   @GetMapping("/companies-map")

@@ -1024,6 +1024,40 @@ public class ElasticsearchJobQueryService {
   }
 
   /**
+   * Search jobs by company and date range for notification purposes
+   * @param companyId The company ID to search for
+   * @param daysBack Number of days to look back
+   * @return Count of jobs found
+   */
+  public long searchJobsByCompanyAndDateRange(Long companyId, int daysBack) {
+    try {
+      LocalDateTime since = LocalDateTime.now().minusDays(daysBack);
+      
+      SearchRequest searchRequest = SearchRequest.of(s -> s
+          .index(ElasticsearchConstants.JOBS_INDEX)
+          .size(0) // We only need the count
+          .query(q -> q
+              .bool(b -> b
+                  .must(m -> m.term(t -> t.field(ElasticsearchConstants.FIELD_COMPANY_ID).value(companyId)))
+                  .must(m -> m.term(t -> t.field(ElasticsearchConstants.FIELD_ACTIVE).value(true)))
+                  .must(m -> m.range(r -> r
+                      .field(ElasticsearchConstants.FIELD_CREATED_AT)
+                      .gte(JsonData.of(since))
+                  ))
+              )
+          )
+      );
+
+      SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
+      return response.hits().total() != null ? response.hits().total().value() : 0L;
+      
+    } catch (Exception e) {
+      log.error("Error searching jobs by company and date range for company {}: {}", companyId, e.getMessage(), e);
+      return 0L;
+    }
+  }
+
+  /**
    * Get companies by primary industry ID using Elasticsearch with pagination Companies with jobs
    * are prioritized and ordered by rank
    *

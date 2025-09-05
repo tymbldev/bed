@@ -131,6 +131,12 @@ public class ExternalJobDetail {
   @Column(name = "is_synced_to_job_table")
   private Boolean isSyncedToJobTable = false;
 
+  @Column(name = "redirect_url", columnDefinition = "TEXT")
+  private String redirectUrl;
+
+  @Column(name = "crawl_status", nullable = false)
+  private String crawlStatus = "NOT_CRAWLED"; // NOT_CRAWLED, CRAWLING, CRAWLED, FAILED
+
   @PrePersist
   protected void onCreate() {
     createdAt = LocalDateTime.now();

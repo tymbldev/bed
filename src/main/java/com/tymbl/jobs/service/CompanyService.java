@@ -125,6 +125,17 @@ public class CompanyService {
     return dropdownService.getAllCompanies();
   }
 
+  @Transactional(readOnly = true)
+  public List<com.tymbl.common.dto.CompanyDropdownDTO> getAllCompaniesForDropdownDTO() {
+    // Use cached data from DropdownService and map to DTO with only id and name
+    return dropdownService.getAllCompanies().stream()
+        .map(company -> com.tymbl.common.dto.CompanyDropdownDTO.builder()
+            .id(company.getId())
+            .name(company.getName())
+            .build())
+        .collect(java.util.stream.Collectors.toList());
+  }
+
 
   private CompanyResponse mapToResponse(Company company) {
     List<Job> jobs = jobRepository.findByCompanyId(company.getId());

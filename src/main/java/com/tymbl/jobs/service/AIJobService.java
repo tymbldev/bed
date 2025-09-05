@@ -7,6 +7,7 @@ import com.tymbl.common.repository.DesignationRepository;
 import com.tymbl.common.repository.IndustryRepository;
 import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.common.repository.SkillTopicRepository;
+import com.tymbl.common.service.AIJobFetchingService;
 import com.tymbl.common.service.DropdownService;
 import com.tymbl.common.service.GeminiService;
 import com.tymbl.common.util.CompanyNameCleaner;
@@ -15,8 +16,11 @@ import com.tymbl.interview.entity.InterviewQuestion;
 import com.tymbl.interview.repository.InterviewQuestionRepository;
 import com.tymbl.jobs.entity.Company;
 import com.tymbl.jobs.entity.CompanyContent;
+import com.tymbl.jobs.entity.ExternalJobDetail;
 import com.tymbl.jobs.repository.CompanyContentRepository;
 import com.tymbl.jobs.repository.CompanyRepository;
+import com.tymbl.jobs.repository.ExternalJobDetailRepository;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -47,6 +51,129 @@ public class AIJobService {
   private final GeminiService geminiService;
   private final DropdownService dropdownService;
   private final CompanyTransactionService companyTransactionService;
+  private final AIJobFetchingService aiJobFetchingService;
+  private final ExternalJobDetailRepository externalJobDetailRepository;
+
+  // ============================================================================
+  // AI JOB FETCHING AND SAVING METHODS
+  // ============================================================================
+
+  /**
+   * Fetch jobs for a company and save them to external_job_details table
+   */
+  public Map<String, Object> fetchAndSaveJobsForCompany(String companyName) {
+    Map<String, Object> response = new HashMap<>();
+    
+    try {
+      log.info("Starting job fetching and saving for company: {}", companyName);
+      
+      // Fetch jobs using AIJobFetchingService
+      List<Map<String, Object>> jobs = aiJobFetchingService.fetchJobsForCompany(companyName);
+      
+      int savedCount = 0;
+      int skippedCount = 0;
+      List<String> errors = new ArrayList<>();
+      
+      for (Map<String, Object> jobData : jobs) {
+        try {
+          ExternalJobDetail jobDetail = createExternalJobDetailFromJobData(jobData, companyName);
+          
+          // Check if job already exists
+          Optional<ExternalJobDetail> existingJob = externalJobDetailRepository
+              .findByPortalJobIdAndPortalName(jobDetail.getPortalJobId(), jobDetail.getPortalName());
+          
+          if (!existingJob.isPresent()) {
+            externalJobDetailRepository.save(jobDetail);
+            savedCount++;
+            log.info("Saved job: {} for company: {}", jobDetail.getJobTitle(), companyName);
+          } else {
+            skippedCount++;
+            log.info("Skipped existing job: {} for company: {}", jobDetail.getJobTitle(), companyName);
+          }
+          
+        } catch (Exception e) {
+          log.error("Error saving job for company {}: {}", companyName, e.getMessage(), e);
+          errors.add("Error saving job: " + e.getMessage());
+        }
+      }
+      
+      response.put("companyName", companyName);
+      response.put("totalJobsFetched", jobs.size());
+      response.put("jobsSaved", savedCount);
+      response.put("jobsSkipped", skippedCount);
+      response.put("errors", errors);
+      response.put("success", true);
+      response.put("message", String.format("Successfully processed %d jobs for company %s", jobs.size(), companyName));
+      
+      log.info("Completed job fetching and saving for company: {}. Saved: {}, Skipped: {}", 
+          companyName, savedCount, skippedCount);
+      
+    } catch (Exception e) {
+      log.error("Error fetching and saving jobs for company: {}", companyName, e);
+      response.put("companyName", companyName);
+      response.put("success", false);
+      response.put("error", e.getMessage());
+      response.put("message", "Error fetching and saving jobs for company: " + e.getMessage());
+    }
+    
+    return response;
+  }
+
+  /**
+   * Create ExternalJobDetail from job data returned by AIJobFetchingService
+   */
+  private ExternalJobDetail createExternalJobDetailFromJobData(Map<String, Object> jobData, String companyName) {
+    ExternalJobDetail jobDetail = new ExternalJobDetail();
+    
+    // Extract basic information
+    jobDetail.setPortalJobId(String.valueOf(jobData.getOrDefault("id", System.currentTimeMillis())));
+    jobDetail.setPortalName("AI_FETCHED");
+    jobDetail.setJobTitle((String) jobData.getOrDefault("title", "Unknown Title"));
+    jobDetail.setCompanyName(companyName);
+    
+
+    // Extract description
+    jobDetail.setJobDescription((String) jobData.getOrDefault("description", ""));
+    
+    // Extract location information
+    String location = (String) jobData.getOrDefault("location", "");
+    jobDetail.setLocations(location);
+    
+    // Extract salary information
+    Object minSalary = jobData.get("minSalary");
+    Object maxSalary = jobData.get("maxSalary");
+    if (minSalary instanceof Number) {
+      jobDetail.setMinimumSalary(new BigDecimal(minSalary.toString()));
+    }
+    if (maxSalary instanceof Number) {
+      jobDetail.setMaximumSalary(new BigDecimal(maxSalary.toString()));
+    }
+    
+    // Extract experience information
+    Object minExp = jobData.get("minExperience");
+    Object maxExp = jobData.get("maxExperience");
+    if (minExp instanceof Number) {
+      jobDetail.setMinimumExperience(((Number) minExp).intValue());
+    }
+    if (maxExp instanceof Number) {
+      jobDetail.setMaximumExperience(((Number) maxExp).intValue());
+    }
+    
+    // Extract job type
+    String jobType = (String) jobData.getOrDefault("jobType", "");
+    jobDetail.setJobTypes(jobType);
+    
+    // Extract skills
+    String skills = (String) jobData.getOrDefault("skills", "");
+    jobDetail.setSkills(skills);
+    
+    // Set other fields
+    jobDetail.setIsRefined(false);
+    jobDetail.setIsSyncedToJobTable(false);
+    jobDetail.setKeywordUsed(companyName);
+    
+    return jobDetail;
+  }
 
   // ============================================================================
   // COMPANY GENERATION METHODS
@@ -217,73 +344,6 @@ public class AIJobService {
     }
 
     return response;
-  }
-
-  public Map<String, Object> shortenAllCompaniesContent() {
-    // Only get companies that haven't been processed for content shortening and have original content
-    List<CompanyContent> unprocessedContent = companyContentRepository.findUnprocessedContentWithOriginalData();
-    List<Map<String, Object>> companyResults = new ArrayList<>();
-    int totalProcessed = 0;
-    int totalAboutUsShortened = 0;
-    int totalCultureShortened = 0;
-    int totalErrors = 0;
-    int totalSkipped = 0;
-
-    log.info("Found {} unprocessed companies with original content for shortening",
-        unprocessedContent.size());
-
-    for (CompanyContent companyContent : unprocessedContent) {
-      try {
-        Map<String, Object> result = companyTransactionService.processCompanyContentShorteningInTransaction(
-            companyContent.getCompanyId());
-        companyResults.add(result);
-        totalProcessed++;
-
-        // Check if company was already processed (shouldn't happen with our query, but just in case)
-        if (result.containsKey("alreadyProcessed") && (Boolean) result.get("alreadyProcessed")) {
-          totalSkipped++;
-          log.info("Skipped already processed company: {} (ID: {})", result.get("companyName"),
-              companyContent.getCompanyId());
-          continue;
-        }
-
-        if ((Boolean) result.get("aboutUsShortened")) {
-          totalAboutUsShortened++;
-        }
-        if ((Boolean) result.get("cultureShortened")) {
-          totalCultureShortened++;
-        }
-
-        log.info("Processed company {} of {}: {} (ID: {})",
-            totalProcessed, unprocessedContent.size(), result.get("companyName"),
-            companyContent.getCompanyId());
-
-      } catch (Exception e) {
-        totalErrors++;
-        log.error("Error shortening content for company: {} (ID: {})",
-            companyContent.getCompanyId(), companyContent.getCompanyId(), e);
-        Map<String, Object> errorResult = new HashMap<>();
-        errorResult.put("companyId", companyContent.getCompanyId());
-        errorResult.put("companyName", "Unknown");
-        errorResult.put("success", false);
-        errorResult.put("error", e.getMessage());
-        companyResults.add(errorResult);
-      }
-    }
-
-    Map<String, Object> result = new HashMap<>();
-    result.put("totalProcessed", totalProcessed);
-    result.put("totalAboutUsShortened", totalAboutUsShortened);
-    result.put("totalCultureShortened", totalCultureShortened);
-    result.put("totalErrors", totalErrors);
-    result.put("totalSkipped", totalSkipped);
-    result.put("companyResults", companyResults);
-
-    log.info(
-        "Content shortening completed. Processed: {}, AboutUs: {}, Culture: {}, Errors: {}, Skipped: {}",
-        totalProcessed, totalAboutUsShortened, totalCultureShortened, totalErrors, totalSkipped);
-
-    return result;
   }
 
   /**

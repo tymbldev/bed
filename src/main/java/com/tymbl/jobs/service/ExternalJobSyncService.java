@@ -2,11 +2,11 @@ package com.tymbl.jobs.service;
 
 import com.tymbl.jobs.entity.ExternalJobDetail;
 import com.tymbl.jobs.repository.ExternalJobDetailRepository;
-import java.util.List;
-import javax.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @Slf4j
@@ -56,7 +56,7 @@ public class ExternalJobSyncService {
 
         try {
           // Use the individual job sync service (which handles its own transaction)
-          log.debug("🔄 Calling individual job sync service for job ID: {}", externalJob.getId());
+          log.info("🔄 Calling individual job sync service for job ID: {}", externalJob.getId());
           IndividualJobSyncService.SyncResult individualResult = individualJobSyncService.syncIndividualJob(
               externalJob);
 

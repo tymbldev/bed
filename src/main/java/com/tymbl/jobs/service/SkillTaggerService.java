@@ -2,9 +2,11 @@ package com.tymbl.jobs.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.tymbl.common.entity.PendingContent;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.entity.Skill;
+import com.tymbl.common.repository.PendingContentRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.repository.SkillRepository;
 import com.tymbl.common.service.AIRestService;
@@ -26,6 +28,7 @@ public class SkillTaggerService {
 
   private final SkillRepository skillRepository;
   private final SimilarContentRepository similarContentRepository;
+  private final PendingContentRepository pendingContentRepository;
   private final AIRestService aiRestService;
   private final ObjectMapper objectMapper;
 
@@ -166,6 +169,7 @@ public class SkillTaggerService {
       if (currentUsageCount == null) {
         currentUsageCount = 0L;
       }
+      storeSkillMapping(genAIMatch.getName(), normalizedSkillName, 0.85);
       genAIMatch.setUsageCount(currentUsageCount + 1);
       skillRepository.save(genAIMatch);
       return new SkillTaggingResult(genAIMatch.getId(), genAIMatch.getName(), 0.7);
@@ -177,10 +181,9 @@ public class SkillTaggerService {
       return new SkillTaggingResult(newSkill.getId(), newSkill.getName(), 0.5);
     }
 
-    // 6. Log NO_MATCH case for future analysis
-    log.info(
-        "NO_MATCH for skill: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies",
-        normalizedSkillName, sourceId, portalName);
+    // 6. Log NO_MATCH case to PendingContent for future analysis
+    logPendingContent(normalizedSkillName, sourceId, portalName, 
+        "No match found after all tagging strategies (exact, similar content, LIKE, GenAI) and failed to create new skill");
 
     return new SkillTaggingResult();
   }
@@ -192,7 +195,19 @@ public class SkillTaggerService {
     try {
       StringBuilder prompt = new StringBuilder();
       prompt.append(
-          "You are a skill matching expert. Match the input skill to the best available skill.\n\n");
+          "You are a technical skill synonym expert. Your task is to identify TRUE SYNONYMS, not just similar or related skills.\n\n");
+      prompt.append("IMPORTANT RULES:\n");
+      prompt.append("1. SYNONYMS ONLY: Match only if the skills are essentially the same technology/concept\n");
+      prompt.append("2. AVOID RELATED SKILLS: Do NOT match skills that are related but different (e.g., 'asynchronous programming' ≠ 'Node.js')\n");
+      prompt.append("3. EXAMPLES OF TRUE SYNONYMS:\n");
+      prompt.append("   - 'Core Java' = 'Java' (same programming language)\n");
+      prompt.append("   - 'Azure' = 'Azure Cloud Services' (same cloud platform)\n");
+      prompt.append("   - 'React' = 'React.js' (same framework)\n");
+      prompt.append("   - 'JavaScript' = 'JS' (same language abbreviation)\n");
+      prompt.append("4. EXAMPLES OF NON-SYNONYMS:\n");
+      prompt.append("   - 'Asynchronous Programming' ≠ 'Node.js' (concept vs framework)\n");
+      prompt.append("   - 'Database Design' ≠ 'MySQL' (concept vs specific database)\n");
+      prompt.append("   - 'Machine Learning' ≠ 'Python' (field vs programming language)\n\n");
       prompt.append("Input skill: '").append(skillName).append("'\n\n");
       prompt.append("Available skills:\n");
 
@@ -202,7 +217,8 @@ public class SkillTaggerService {
       }
 
       prompt.append(
-          "\nRespond with the EXACT skill name from the list above, or 'NO_MATCH' if none are suitable.\n");
+          "\nCRITICAL: Only match if the skills are TRUE SYNONYMS (same technology/concept).\n");
+      prompt.append("Respond with the EXACT skill name from the list above, or 'NO_MATCH' if none are true synonyms.\n");
       prompt.append("Only respond with the exact skill name or 'NO_MATCH', no additional text.");
 
       String aiResponse = callGenAIService(prompt.toString());
@@ -234,7 +250,21 @@ public class SkillTaggerService {
 
       StringBuilder prompt = new StringBuilder();
       prompt.append(
-          "You are a skill matching expert. Match the input skill to the best available skill.\n\n");
+          "You are a technical skill synonym expert. Your task is to identify TRUE SYNONYMS, not just similar or related skills.\n\n");
+      prompt.append("IMPORTANT RULES:\n");
+      prompt.append("1. SYNONYMS ONLY: Match only if the skills are essentially the same technology/concept\n");
+      prompt.append("2. AVOID RELATED SKILLS: Do NOT match skills that are related but different (e.g., 'asynchronous programming' ≠ 'Node.js')\n");
+      prompt.append("3. EXAMPLES OF TRUE SYNONYMS:\n");
+      prompt.append("   - 'Core Java' = 'Java' (same programming language)\n");
+      prompt.append("   - 'Azure' = 'Azure Cloud Services' (same cloud platform)\n");
+      prompt.append("   - 'React' = 'React.js' (same framework)\n");
+      prompt.append("   - 'JavaScript' = 'JS' (same language abbreviation)\n");
+      prompt.append("   - 'SQL Server' = 'Microsoft SQL Server' (same database)\n");
+      prompt.append("4. EXAMPLES OF NON-SYNONYMS:\n");
+      prompt.append("   - 'Asynchronous Programming' ≠ 'Node.js' (concept vs framework)\n");
+      prompt.append("   - 'Database Design' ≠ 'MySQL' (concept vs specific database)\n");
+      prompt.append("   - 'Machine Learning' ≠ 'Python' (field vs programming language)\n");
+      prompt.append("   - 'Web Development' ≠ 'HTML' (field vs markup language)\n\n");
       prompt.append("Input skill: '").append(skillName).append("'\n\n");
       prompt.append("Available skills (top 20 by usage):\n");
 
@@ -244,7 +274,8 @@ public class SkillTaggerService {
       }
 
       prompt.append(
-          "\nRespond with the EXACT skill name from the list above, or 'NO_MATCH' if none are suitable.\n");
+          "\nCRITICAL: Only match if the skills are TRUE SYNONYMS (same technology/concept).\n");
+      prompt.append("Respond with the EXACT skill name from the list above, or 'NO_MATCH' if none are true synonyms.\n");
       prompt.append("Only respond with the exact skill name or 'NO_MATCH', no additional text.");
 
       String aiResponse = callGenAIService(prompt.toString());
@@ -285,6 +316,36 @@ public class SkillTaggerService {
 
     } catch (Exception e) {
       log.warn("Failed to store skill mapping: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Log untagged skill to PendingContent for future analysis
+   */
+  private void logPendingContent(String entityName, Long sourceId, String portalName, String notes) {
+    try {
+      // Check if this entity name is already in pending content to avoid duplicates (regardless of source)
+      if (pendingContentRepository.existsByEntityNameAndEntityType(
+          entityName, PendingContent.EntityType.SKILL)) {
+        log.debug("Pending content already exists for skill: '{}' (entity name already logged)", entityName);
+        return;
+      }
+
+      PendingContent pendingContent = PendingContent.builder()
+          .entityName(entityName)
+          .entityType(PendingContent.EntityType.SKILL)
+          .sourceTable("external_jobs") // Assuming this comes from external jobs
+          .sourceId(sourceId)
+          .portalName(portalName)
+          .notes(notes)
+          .build();
+
+      pendingContentRepository.save(pendingContent);
+      log.info("Logged untagged skill to PendingContent: '{}' (sourceId: {}, portal: {})", 
+          entityName, sourceId, portalName);
+
+    } catch (Exception e) {
+      log.warn("Failed to log pending content for skill '{}': {}", entityName, e.getMessage());
     }
   }
 

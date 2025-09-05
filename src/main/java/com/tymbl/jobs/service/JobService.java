@@ -720,6 +720,85 @@ public class JobService {
     jobReferrerRepository.save(jobReferrer);
   }
 
+  @Transactional
+  public com.tymbl.jobs.dto.MultipleJobReferrerRegistrationResponse registerAsJobReferrerForMultipleJobs(
+      List<Long> jobIds, User currentUser) {
+    
+    List<com.tymbl.jobs.dto.JobReferrerRegistrationResult> results = new java.util.ArrayList<>();
+    int successfulRegistrations = 0;
+    int failedRegistrations = 0;
+
+    for (Long jobId : jobIds) {
+      try {
+        registerAsJobReferrer(jobId, currentUser);
+        
+        results.add(com.tymbl.jobs.dto.JobReferrerRegistrationResult.builder()
+            .jobId(jobId)
+            .success(true)
+            .message("Successfully registered as referrer")
+            .build());
+        successfulRegistrations++;
+        
+      } catch (ResourceNotFoundException e) {
+        results.add(com.tymbl.jobs.dto.JobReferrerRegistrationResult.builder()
+            .jobId(jobId)
+            .success(false)
+            .message("Job not found")
+            .errorCode("JOB_NOT_FOUND")
+            .build());
+        failedRegistrations++;
+        
+      } catch (BadRequestException e) {
+        results.add(com.tymbl.jobs.dto.JobReferrerRegistrationResult.builder()
+            .jobId(jobId)
+            .success(false)
+            .message(e.getMessage())
+            .errorCode("INVALID_JOB_STATE")
+            .build());
+        failedRegistrations++;
+        
+      } catch (ConflictException e) {
+        results.add(com.tymbl.jobs.dto.JobReferrerRegistrationResult.builder()
+            .jobId(jobId)
+            .success(false)
+            .message("Already registered as referrer for this job")
+            .errorCode("ALREADY_REGISTERED")
+            .build());
+        failedRegistrations++;
+        
+      } catch (ForbiddenException e) {
+        results.add(com.tymbl.jobs.dto.JobReferrerRegistrationResult.builder()
+            .jobId(jobId)
+            .success(false)
+            .message("Cannot register for jobs from different company")
+            .errorCode("DIFFERENT_COMPANY")
+            .build());
+        failedRegistrations++;
+        
+      } catch (Exception e) {
+        results.add(com.tymbl.jobs.dto.JobReferrerRegistrationResult.builder()
+            .jobId(jobId)
+            .success(false)
+            .message("Unexpected error occurred")
+            .errorCode("UNKNOWN_ERROR")
+            .build());
+        failedRegistrations++;
+        logger.error("Unexpected error registering as referrer for job {}: {}", jobId, e.getMessage(), e);
+      }
+    }
+
+    String overallMessage = String.format("Registration completed: %d successful, %d failed out of %d jobs", 
+        successfulRegistrations, failedRegistrations, jobIds.size());
+
+    return com.tymbl.jobs.dto.MultipleJobReferrerRegistrationResponse.builder()
+        .results(results)
+        .totalJobs(jobIds.size())
+        .successfulRegistrations(successfulRegistrations)
+        .failedRegistrations(failedRegistrations)
+        .overallMessage(overallMessage)
+        .build();
+  }
+
   private JobResponse mapToResponse(Job job) {
     JobResponse response = new JobResponse();
     response.setId(job.getId());

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.service.AIRestService;
 import com.tymbl.jobs.entity.ExternalJobDetail;
+import com.tymbl.jobs.entity.ExternalJobDetailsFromCompanyPortal;
 import com.tymbl.jobs.repository.ExternalJobDetailRepository;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
@@ -28,35 +29,82 @@ public class SingleJobContentRefinementService {
   @Autowired
   private ExternalJobDetailRepository externalJobDetailRepository;
 
+  @Autowired
+  private WebCrawlerService webCrawlerService;
+
   private final ObjectMapper objectMapper = new ObjectMapper();
 
   /**
    * Refine both description and title for a single external job detail with single transaction
+   * Also crawls the redirect URL if available and stores the content
    */
   @Transactional
   public void refineJobContent(ExternalJobDetail externalJob, String designation) {
     try {
-      // Refine description
-      String refinedDescription = refineJobDescription(externalJob.getJobDescription());
+      log.info("🚀 Starting content refinement for external job ID: {}", externalJob.getId());
+
+      // Step 1: Crawl redirect URL if available and not already crawled
+      ExternalJobDetailsFromCompanyPortal crawledContent = null;
+      if (externalJob.getRedirectUrl() != null && !externalJob.getRedirectUrl().trim().isEmpty()) {
+        try {
+          log.info("🕷️ Crawling redirect URL for external job ID: {}", externalJob.getId());
+          externalJob.setCrawlStatus("CRAWLING");
+          externalJobDetailRepository.save(externalJob); // Save status update
+
+          crawledContent = webCrawlerService.crawlJobUrl(externalJob.getId(), externalJob.getRedirectUrl());
+          
+          if (crawledContent != null && "SUCCESS".equals(crawledContent.getCrawlStatus())) {
+            externalJob.setCrawlStatus("CRAWLED");
+            log.info("✅ Successfully crawled content for external job ID: {}", externalJob.getId());
+          } else {
+            externalJob.setCrawlStatus("FAILED");
+            log.warn("⚠️ Failed to crawl content for external job ID: {}", externalJob.getId());
+          }
+        } catch (Exception e) {
+          externalJob.setCrawlStatus("FAILED");
+          log.error("❌ Error crawling URL for external job ID {}: {}", externalJob.getId(), e.getMessage(), e);
+          // Continue with refinement even if crawling fails
+        }
+      } else {
+        log.info("ℹ️ No redirect URL available for external job ID: {}", externalJob.getId());
+        externalJob.setCrawlStatus("NOT_CRAWLED");
+      }
+
+      // Step 2: Refine description (use crawled content if available, otherwise use original)
+      String descriptionToRefine = externalJob.getJobDescription();
+      if (crawledContent != null && crawledContent.getParsedTextContent() != null 
+          && !crawledContent.getParsedTextContent().trim().isEmpty()) {
+        // Use crawled content for refinement if available
+        descriptionToRefine = crawledContent.getParsedTextContent();
+        log.info("📄 Using crawled content for description refinement (length: {})", descriptionToRefine.length());
+      } else {
+        log.info("📄 Using original description for refinement (length: {})", 
+            descriptionToRefine != null ? descriptionToRefine.length() : 0);
+      }
+
+      String refinedDescription = refineJobDescription(descriptionToRefine);
       externalJob.setRefinedDescription(refinedDescription);
 
-      // Refine title with designation
+      // Step 3: Refine title with designation
       String refinedTitle = refineJobTitle(externalJob.getJobTitle(), designation);
       externalJob.setRefinedTitle(refinedTitle);
 
-      // Mark as refined
+      // Step 4: Mark as refined
       externalJob.setIsRefined(true);
 
-      // Save the refined job in the same transaction
+      // Step 5: Save the refined job in the same transaction
       externalJobDetailRepository.save(externalJob);
 
-      log.info("✅ Successfully refined and saved content for external job ID: {}",
-          externalJob.getId());
+      log.info("✅ Successfully refined and saved content for external job ID: {} (Crawled: {}, Refined: {})",
+          externalJob.getId(), 
+          crawledContent != null ? "Yes" : "No",
+          "Yes");
     } catch (Exception e) {
-      log.error("Error refining content for external job ID {}: {}",
+      log.error("❌ Error refining content for external job ID {}: {}",
           externalJob.getId(), e.getMessage(), e);
       // Don't mark as refined if there was an error
       externalJob.setIsRefined(false);
+      externalJob.setCrawlStatus("FAILED");
       throw e; // Re-throw to rollback transaction
     }
   }
@@ -127,7 +175,7 @@ public class SingleJobContentRefinementService {
     prompt.append("RAW JOB DESCRIPTION HTML:\n");
     prompt.append(rawDescription);
     prompt.append("\n\nREFINEMENT INSTRUCTIONS:\n");
-    prompt.append("1. Keep all HTML tags but clean and validate them\n");
+    prompt.append("1. Keep all HcontentcontentTML tags but clean and validate them\n");
     prompt.append(
         "2. Remove unnecessary content like 'show more', 'show less', 'read more', 'click here', etc.\n");
     prompt.append("3. Remove any crawling artifacts or portal-specific content\n");
@@ -137,7 +185,7 @@ public class SingleJobContentRefinementService {
     prompt.append("7. Maintain the original meaning and intent\n");
     prompt.append("8. Remove any duplicate or redundant information\n");
     prompt.append("9. Ensure proper HTML formatting and indentation\n");
-    prompt.append("10. Keep the description concise but comprehensive\n");
+    prompt.append("10. Keep the description comprehensive and detailed - do not shorten or condense the content\n");
     prompt.append("11. Preserve important formatting like lists, paragraphs, and emphasis\n");
     prompt.append("12. Remove any JavaScript code or event handlers\n");
     prompt.append("13. Clean up any CSS classes that are not needed\n");

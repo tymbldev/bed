@@ -27,6 +27,9 @@ public class Department {
 
   private String description;
 
+  @Column(name = "rank")
+  private Integer rank = 0;
+
   public Department(String name) {
     this.name = name;
   }
@@ -34,6 +37,12 @@ public class Department {
   public Department(String name, String description) {
     this.name = name;
     this.description = description;
+  }
+
+  public Department(String name, String description, Integer rank) {
+    this.name = name;
+    this.description = description;
+    this.rank = rank;
   }
 
   @Override

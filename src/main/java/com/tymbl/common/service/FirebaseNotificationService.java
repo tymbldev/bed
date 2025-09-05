@@ -216,7 +216,7 @@ public class FirebaseNotificationService {
               .toString() : "");
       data.put("click_action", "FLUTTER_NOTIFICATION_CLICK");
 
-      return sendNotificationToDevice(deviceToken, notification.getTitle(),
+      return sendNotificationToDevice(deviceToken, "Job Notification",
           notification.getMessage(), data);
     } catch (Exception e) {
       log.error("Error sending notification for entity: {}", notification.getId(), e);

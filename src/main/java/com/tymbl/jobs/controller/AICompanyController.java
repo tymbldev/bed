@@ -266,13 +266,9 @@ public class AICompanyController {
         return response;
       }
 
-      // Perform crawling
-      List<Map<String, Object>> jobs = AIJobFetchingService.fetchJobsForCompany(companyName);
-      Map<String, Object> response = new HashMap<>();
-      response.put("processed", true);
-      response.put("message", "Company crawled successfully");
-      response.put("jobsCount", jobs.size());
-      return response;
+      // Perform crawling and save to database
+      Map<String, Object> result = aiJobService.fetchAndSaveJobsForCompany(companyName);
+      return result;
     } catch (Exception e) {
       log.error("Error crawling company: {}", companyName, e);
       Map<String, Object> response = new HashMap<>();

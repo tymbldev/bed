@@ -11,10 +11,13 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -30,80 +33,65 @@ public class Notification {
   private Long userId;
 
   @NotNull
-  @Column(name = "title", nullable = false)
-  private String title;
+  @Column(name = "type", nullable = false)
+  @Enumerated(EnumType.STRING)
+  private NotificationType type;
 
   @NotNull
   @Column(name = "message", nullable = false, columnDefinition = "TEXT")
   private String message;
 
-  @NotNull
-  @Column(name = "type", nullable = false)
-  @Enumerated(EnumType.STRING)
-  private NotificationType type;
+  @Column(name = "metadata", columnDefinition = "TEXT")
+  private String metadata; // JSON string for additional data
 
+  @NotNull
+  @Column(name = "seen", nullable = false)
+  @Builder.Default
+  private Boolean seen = false;
+
+  @NotNull
+  @Column(name = "clicked", nullable = false)
+  @Builder.Default
+  private Boolean clicked = false;
+
+  @CreationTimestamp
+  @Column(name = "created_at", nullable = false)
+  private LocalDateTime createdAt;
+
+  @Column(name = "seen_at")
+  private LocalDateTime seenAt;
+
+  @Column(name = "clicked_at")
+  private LocalDateTime clickedAt;
+
+  // Related entity information for context
   @Column(name = "related_entity_id")
   private Long relatedEntityId;
 
   @Column(name = "related_entity_type")
-  @Enumerated(EnumType.STRING)
-  private RelatedEntityType relatedEntityType;
+  private String relatedEntityType; // e.g., "job", "application", "company"
 
-  @NotNull
-  @Column(name = "is_read", nullable = false)
-  private Boolean isRead = false;
+  // Additional fields for duplicate checking
+  @Column(name = "company_id")
+  private Long companyId;
 
-  @NotNull
-  @Column(name = "is_sent", nullable = false)
-  private Boolean isSent = false;
-
-  @NotNull
-  @Column(name = "created_at", nullable = false)
-  private LocalDateTime createdAt;
-
-  @Column(name = "sent_at")
-  private LocalDateTime sentAt;
-
-  @Column(name = "read_at")
-  private LocalDateTime readAt;
-
-  @Column(name = "firebase_token")
-  private String firebaseToken;
-
-  @Column(name = "error_message")
-  private String errorMessage;
+  @Column(name = "designation")
+  private String designation;
 
   public enum NotificationType {
-    REFERRAL_APPLICATION,
-    APPLICATION_SHORTLISTED,
-    APPLICATION_REJECTED,
-    APPLICATION_ACCEPTED,
-    REFERRAL_APPROVED,
-    REFERRAL_REJECTED,
-    GENERAL
-  }
+    INCOMPLETE_PROFILE("incomplete_profile"),
+    COMPANY_JOBS("company_jobs"),
+    APPLICATION_STATUS("application_status"),
+    POSTED_JOB_APPLICATIONS("posted_job_applications");
 
-  public enum RelatedEntityType {
-    JOB_APPLICATION,
-    JOB_REFERRAL,
-    JOB,
-    USER
-  }
+    private final String value;
 
-  public Notification(Long userId, String title, String message, NotificationType type) {
-    this.userId = userId;
-    this.title = title;
-    this.message = message;
-    this.type = type;
-    this.createdAt = LocalDateTime.now();
-    this.isRead = false;
-    this.isSent = false;
-  }
+    NotificationType(String value) {
+      this.value = value;
+    }
 
-  public Notification(Long userId, String title, String message, NotificationType type,
-      Long relatedEntityId, RelatedEntityType relatedEntityType) {
-    this(userId, title, message, type);
-    this.relatedEntityId = relatedEntityId;
-    this.relatedEntityType = relatedEntityType;
+    public String getValue() {
+      return value;
+    }
   }
-} 
+}

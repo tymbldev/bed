@@ -3,9 +3,11 @@ package com.tymbl.jobs.service;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.tymbl.common.entity.Country;
+import com.tymbl.common.entity.PendingContent;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
 import com.tymbl.common.repository.CountryRepository;
+import com.tymbl.common.repository.PendingContentRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
 import java.math.BigDecimal;
@@ -27,6 +29,7 @@ public class CountryTaggerService {
 
   private final CountryRepository countryRepository;
   private final SimilarContentRepository similarContentRepository;
+  private final PendingContentRepository pendingContentRepository;
   private final AIRestService aiRestService;
 
   /**
@@ -117,13 +120,17 @@ public class CountryTaggerService {
         return result;
       }
 
-      log.info(
-          "NO_MATCH for country: '{}' (sourceId: {}, portal: {}) - No match found after all tagging strategies",
-          countryName, sourceId, portalName);
+      // Log NO_MATCH case to PendingContent for future analysis
+      logPendingContent(countryName, sourceId, portalName, 
+          "No match found after all tagging strategies (exact, similar content, AI)");
 
     } catch (Exception e) {
       log.error("Error tagging country for external job {}: {}", sourceId, e.getMessage(), e);
       result.setError(e.getMessage());
+      
+      // Log error case to PendingContent for future analysis
+      logPendingContent(countryName, sourceId, portalName, 
+          "Error during tagging: " + e.getMessage());
     }
 
     return result;
@@ -372,6 +379,36 @@ public class CountryTaggerService {
 
     } catch (Exception e) {
       log.warn("Failed to store country mapping: {}", e.getMessage());
+    }
+  }
+
+  /**
+   * Log untagged country to PendingContent for future analysis
+   */
+  private void logPendingContent(String entityName, Long sourceId, String portalName, String notes) {
+    try {
+      // Check if this entity name is already in pending content to avoid duplicates (regardless of source)
+      if (pendingContentRepository.existsByEntityNameAndEntityType(
+          entityName, PendingContent.EntityType.COUNTRY)) {
+        log.debug("Pending content already exists for country: '{}' (entity name already logged)", entityName);
+        return;
+      }
+
+      PendingContent pendingContent = PendingContent.builder()
+          .entityName(entityName)
+          .entityType(PendingContent.EntityType.COUNTRY)
+          .sourceTable("external_jobs") // Assuming this comes from external jobs
+          .sourceId(sourceId)
+          .portalName(portalName)
+          .notes(notes)
+          .build();
+
+      pendingContentRepository.save(pendingContent);
+      log.info("Logged untagged country to PendingContent: '{}' (sourceId: {}, portal: {})", 
+          entityName, sourceId, portalName);
+
+    } catch (Exception e) {
+      log.warn("Failed to log pending content for country '{}': {}", entityName, e.getMessage());
     }
   }
 

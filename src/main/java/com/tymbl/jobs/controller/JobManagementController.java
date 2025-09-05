@@ -185,25 +185,25 @@ public class JobManagementController {
 
   @PostMapping("/register-referrer")
   @Operation(
-      summary = "Register as a JobReferrer for a job",
-      description = "Register yourself as a referrer for a job from your company. You can only register for jobs from the same company as yours."
+      summary = "Register as a JobReferrer for multiple jobs",
+      description = "Register yourself as a referrer for multiple jobs from your company. You can only register for jobs from the same company as yours. Returns detailed results for each job."
   )
   @ApiResponses(value = {
-      @ApiResponse(responseCode = "200", description = "Successfully registered as referrer"),
-      @ApiResponse(responseCode = "400", description = "Invalid input or already registered"),
+      @ApiResponse(responseCode = "200", description = "Registration completed with detailed results"),
+      @ApiResponse(responseCode = "400", description = "Invalid input"),
       @ApiResponse(responseCode = "401", description = "Unauthorized"),
-      @ApiResponse(responseCode = "403", description = "Forbidden - Different company"),
-      @ApiResponse(responseCode = "404", description = "Job not found"),
       @ApiResponse(responseCode = "500", description = "Server error")
   })
-  public ResponseEntity<Void> registerAsJobReferrer(
+  public ResponseEntity<com.tymbl.jobs.dto.MultipleJobReferrerRegistrationResponse> registerAsJobReferrer(
       @Valid @RequestBody JobReferrerRegistrationRequest request,
       @RequestHeader("Authorization") String token) {
     String email = jwtService.extractUsername(token.substring(7));
     User currentUser = registrationService.getUserByEmail(email);
-    jobService.registerAsJobReferrer(request.getJobId(), currentUser);
-    return ResponseEntity.ok().build();
+    com.tymbl.jobs.dto.MultipleJobReferrerRegistrationResponse response = 
+        jobService.registerAsJobReferrerForMultipleJobs(request.getJobIds(), currentUser);
+    return ResponseEntity.ok(response);
   }
+
 
   @PostMapping("/accept/{applicationId}")
   @Operation(

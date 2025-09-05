@@ -39,6 +39,46 @@ public class RegistrationService {
         .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
   }
 
+  public User getUserByEmail(String email) {
+    return userRepository.findByEmail(email)
+        .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+  }
+
+  /**
+   * Get missing profile fields for a user
+   */
+  public List<String> getMissingProfileFields(Long userId) {
+    User user = getUserById(userId);
+    List<String> missingFields = new ArrayList<>();
+
+    if (user.getFirstName() == null || user.getFirstName().trim().isEmpty()) {
+      missingFields.add("firstName");
+    }
+    if (user.getLastName() == null || user.getLastName().trim().isEmpty()) {
+      missingFields.add("lastName");
+    }
+    if (user.getPhoneNumber() == null || user.getPhoneNumber().trim().isEmpty()) {
+      missingFields.add("phoneNumber");
+    }
+    if (user.getCompanyId() == null && (user.getCompany() == null || user.getCompany().trim().isEmpty())) {
+      missingFields.add("company");
+    }
+    if (user.getDesignationId() == null && (user.getDesignation() == null || user.getDesignation().trim().isEmpty())) {
+      missingFields.add("designation");
+    }
+    if (user.getCityId() == null) {
+      missingFields.add("city");
+    }
+    if (user.getCountryId() == null) {
+      missingFields.add("country");
+    }
+    if (user.getResume() == null || user.getResume().trim().isEmpty()) {
+      missingFields.add("resume");
+    }
+
+    return missingFields;
+  }
+
   @Transactional
   public User registerUser(RegisterRequest request) {
     try {
@@ -286,11 +326,6 @@ public class RegistrationService {
         .build();
   }
 
-  @Transactional(readOnly = true)
-  public User getUserByEmail(String email) {
-    return userRepository.findByEmail(email)
-        .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
-  }
 
   private void saveUserSkills(Long userId, Set<Long> skillIds, Set<String> skillNames) {
     List<UserSkill> skills = new ArrayList<>();

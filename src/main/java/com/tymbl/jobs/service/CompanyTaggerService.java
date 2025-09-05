@@ -1,7 +1,9 @@
 package com.tymbl.jobs.service;
 
+import com.tymbl.common.entity.PendingContent;
 import com.tymbl.common.entity.SimilarContent;
 import com.tymbl.common.entity.SimilarContent.ContentType;
+import com.tymbl.common.repository.PendingContentRepository;
 import com.tymbl.common.repository.SimilarContentRepository;
 import com.tymbl.common.service.AIRestService;
 import com.tymbl.jobs.entity.Company;
@@ -24,6 +26,7 @@ public class CompanyTaggerService {
 
   private final CompanyRepository companyRepository;
   private final SimilarContentRepository similarContentRepository;
+  private final PendingContentRepository pendingContentRepository;
   private final AIRestService aiRestService;
 
   /**
@@ -105,11 +108,19 @@ public class CompanyTaggerService {
       }
 
       log.info("No company match found for: '{}'", companyName);
+      
+      // Log NO_MATCH case to PendingContent for future analysis
+      logPendingContent(companyName, sourceId, portalName, 
+          "No match found after all tagging strategies (exact, LIKE, similar content, AI)");
 
     } catch (Exception e) {
       log.error("Error tagging company '{}' for external job {}: {}", companyName, sourceId,
           e.getMessage(), e);
       result.setError(e.getMessage());
+      
+      // Log error case to PendingContent for future analysis
+      logPendingContent(companyName, sourceId, portalName, 
+          "Error during tagging: " + e.getMessage());
     }
 
     return result;
@@ -387,6 +398,36 @@ public class CompanyTaggerService {
     // High similarity score
     double similarity = calculateSimilarityScore(normalizedInput, normalizedMatched);
     return similarity > 0.8;
+  }
+
+  /**
+   * Log untagged company to PendingContent for future analysis
+   */
+  private void logPendingContent(String entityName, Long sourceId, String portalName, String notes) {
+    try {
+      // Check if this entity name is already in pending content to avoid duplicates (regardless of source)
+      if (pendingContentRepository.existsByEntityNameAndEntityType(
+          entityName, PendingContent.EntityType.COMPANY)) {
+        log.debug("Pending content already exists for company: '{}' (entity name already logged)", entityName);
+        return;
+      }
+
+      PendingContent pendingContent = PendingContent.builder()
+          .entityName(entityName)
+          .entityType(PendingContent.EntityType.COMPANY)
+          .sourceTable("external_jobs") // Assuming this comes from external jobs
+          .sourceId(sourceId)
+          .portalName(portalName)
+          .notes(notes)
+          .build();
+
+      pendingContentRepository.save(pendingContent);
+      log.info("Logged untagged company to PendingContent: '{}' (sourceId: {}, portal: {})", 
+          entityName, sourceId, portalName);
+
+    } catch (Exception e) {
+      log.warn("Failed to log pending content for company '{}': {}", entityName, e.getMessage());
+    }
   }
 
   /**

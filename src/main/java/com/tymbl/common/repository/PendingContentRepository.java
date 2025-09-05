@@ -51,4 +51,15 @@ public interface PendingContentRepository extends JpaRepository<PendingContent, 
    * Find pending content with high attempt count (potentially problematic)
    */
   java.util.List<PendingContent> findByAttemptCountGreaterThanEqual(int minAttempts);
+
+  /**
+   * Check if pending content exists for a specific entity
+   */
+  boolean existsByEntityNameAndEntityTypeAndSourceId(String entityName, 
+      PendingContent.EntityType entityType, Long sourceId);
+
+  /**
+   * Check if pending content exists for a specific entity name and type (regardless of source)
+   */
+  boolean existsByEntityNameAndEntityType(String entityName, PendingContent.EntityType entityType);
 }

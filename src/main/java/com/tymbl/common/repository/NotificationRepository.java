@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -13,40 +14,81 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-  // Find notifications for a specific user
-  List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
+  // Count queries
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.createdAt >= :since")
+  Long countByUserIdAndCreatedAtAfter(@Param("userId") Long userId, @Param("since") LocalDateTime since);
 
-  // Find notifications for a user in the last N days
-  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.createdAt >= :since ORDER BY n.createdAt DESC")
-  List<Notification> findByUserIdAndCreatedAtSince(@Param("userId") Long userId,
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.seen = false AND n.createdAt >= :since")
+  Long countUnseenByUserIdAndCreatedAtAfter(@Param("userId") Long userId, @Param("since") LocalDateTime since);
+
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.seen = true AND n.createdAt >= :since")
+  Long countSeenByUserIdAndCreatedAtAfter(@Param("userId") Long userId, @Param("since") LocalDateTime since);
+
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.clicked = true AND n.createdAt >= :since")
+  Long countClickedByUserIdAndCreatedAtAfter(@Param("userId") Long userId, @Param("since") LocalDateTime since);
+
+  // Count queries by type
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.createdAt >= :since")
+  Long countByUserIdAndTypeAndCreatedAtAfter(@Param("userId") Long userId, @Param("type") Notification.NotificationType type, @Param("since") LocalDateTime since);
+
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.seen = false AND n.createdAt >= :since")
+  Long countUnseenByUserIdAndTypeAndCreatedAtAfter(@Param("userId") Long userId, @Param("type") Notification.NotificationType type, @Param("since") LocalDateTime since);
+
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.seen = true AND n.createdAt >= :since")
+  Long countSeenByUserIdAndTypeAndCreatedAtAfter(@Param("userId") Long userId, @Param("type") Notification.NotificationType type, @Param("since") LocalDateTime since);
+
+  @Query("SELECT COUNT(n) FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.clicked = true AND n.createdAt >= :since")
+  Long countClickedByUserIdAndTypeAndCreatedAtAfter(@Param("userId") Long userId, @Param("type") Notification.NotificationType type, @Param("since") LocalDateTime since);
+
+  // List queries with pagination
+  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.createdAt >= :since ORDER BY n.clicked ASC, n.seen ASC, n.createdAt DESC")
+  Page<Notification> findByUserIdAndCreatedAtAfterOrderByCreatedAtDesc(
+      @Param("userId") Long userId, @Param("since") LocalDateTime since, Pageable pageable);
+
+  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.createdAt >= :since ORDER BY n.createdAt DESC")
+  Page<Notification> findByUserIdAndTypeAndCreatedAtAfterOrderByCreatedAtDesc(
+      @Param("userId") Long userId, @Param("type") Notification.NotificationType type, 
+      @Param("since") LocalDateTime since, Pageable pageable);
+
+  // Top N per type queries
+  @Query(value = "SELECT * FROM notifications n WHERE n.user_id = :userId AND n.type = :type AND n.created_at >= :since ORDER BY n.created_at DESC LIMIT :limit", nativeQuery = true)
+  List<Notification> findTopNByUserIdAndTypeAndCreatedAtAfter(
+      @Param("userId") Long userId, @Param("type") String type, 
+      @Param("since") LocalDateTime since, @Param("limit") int limit);
+
+  // Mark as seen/clicked
+  @Modifying
+  @Query("UPDATE Notification n SET n.seen = true, n.seenAt = :seenAt WHERE n.id = :notificationId AND n.userId = :userId")
+  int markAsSeen(@Param("notificationId") Long notificationId, @Param("userId") Long userId, @Param("seenAt") LocalDateTime seenAt);
+
+  @Modifying
+  @Query("UPDATE Notification n SET n.seen = true, n.seenAt = :seenAt WHERE n.userId = :userId AND n.seen = false")
+  int markAllAsSeen(@Param("userId") Long userId, @Param("seenAt") LocalDateTime seenAt);
+
+  @Modifying
+  @Query("UPDATE Notification n SET n.clicked = true, n.clickedAt = :clickedAt WHERE n.id = :notificationId AND n.userId = :userId")
+  int markAsClicked(@Param("notificationId") Long notificationId, @Param("userId") Long userId, @Param("clickedAt") LocalDateTime clickedAt);
+
+  // Check for existing notifications to avoid duplicates
+  @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.relatedEntityId = :relatedEntityId AND n.createdAt >= :since")
+  boolean existsByUserIdAndTypeAndRelatedEntityIdAndCreatedAtAfter(
+      @Param("userId") Long userId, @Param("type") Notification.NotificationType type, 
+      @Param("relatedEntityId") Long relatedEntityId, @Param("since") LocalDateTime since);
+
+  // Check for existing application status notifications by type+userId+companyId+designation
+  @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.companyId = :companyId AND n.designation = :designation AND n.createdAt >= :since")
+  boolean existsByUserIdAndTypeAndCompanyIdAndDesignationAndCreatedAtAfter(
+      @Param("userId") Long userId, @Param("type") Notification.NotificationType type, 
+      @Param("companyId") Long companyId, @Param("designation") String designation, 
       @Param("since") LocalDateTime since);
 
-  // Find unread notifications for a user
-  List<Notification> findByUserIdAndIsReadFalseOrderByCreatedAtDesc(Long userId);
+  // Cleanup old notifications
+  @Modifying
+  @Query("DELETE FROM Notification n WHERE n.createdAt < :cutoffDate")
+  int deleteByCreatedAtBefore(@Param("cutoffDate") LocalDateTime cutoffDate);
 
-  // Find unsent notifications
-  List<Notification> findByIsSentFalseOrderByCreatedAtAsc();
-
-  // Find notifications by type
-  List<Notification> findByUserIdAndTypeOrderByCreatedAtDesc(Long userId,
-      Notification.NotificationType type);
-
-  // Count unread notifications for a user
-  long countByUserIdAndIsReadFalse(Long userId);
-
-  // Find notifications with pagination
-  Page<Notification> findByUserIdOrderByCreatedAtDesc(Long userId, Pageable pageable);
-
-  // Find notifications for a user in the last 7 days
-  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.createdAt >= :sevenDaysAgo ORDER BY n.createdAt DESC")
-  List<Notification> findRecentNotificationsByUserId(@Param("userId") Long userId,
-      @Param("sevenDaysAgo") LocalDateTime sevenDaysAgo);
-
-  // Find notifications by related entity
-  List<Notification> findByRelatedEntityIdAndRelatedEntityTypeOrderByCreatedAtDesc(
-      Long relatedEntityId, Notification.RelatedEntityType relatedEntityType);
-
-  // Find notifications that need to be sent (unsent and older than 1 minute)
-  @Query("SELECT n FROM Notification n WHERE n.isSent = false AND n.createdAt <= :cutoffTime ORDER BY n.createdAt ASC")
-  List<Notification> findPendingNotifications(@Param("cutoffTime") LocalDateTime cutoffTime);
-} 
+  // Get notifications for specific entity types
+  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.relatedEntityType = :entityType AND n.createdAt >= :since ORDER BY n.createdAt DESC")
+  List<Notification> findByUserIdAndRelatedEntityTypeAndCreatedAtAfter(
+      @Param("userId") Long userId, @Param("entityType") String entityType, @Param("since") LocalDateTime since);
+}

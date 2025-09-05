@@ -1,8 +1,12 @@
 package com.tymbl.common.controller;
 
-import com.tymbl.common.dto.NotificationDTO;
+import com.tymbl.common.dto.NotificationCountResponse;
+import com.tymbl.common.dto.NotificationCountWithTypeResponse;
+import com.tymbl.common.dto.NotificationListResponse;
+import com.tymbl.common.dto.NotificationResponse;
 import com.tymbl.common.service.NotificationService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -12,13 +16,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -28,209 +32,215 @@ import org.springframework.web.bind.annotation.RestController;
 @CrossOrigin(origins = "*", allowedHeaders = "*")
 @RequestMapping("/api/v1/notifications")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Notifications", description = "APIs for managing user notifications")
 public class NotificationController {
 
   private final NotificationService notificationService;
 
   /**
-   * Get recent notifications (last 7 days) for a user
+   * Get notification count for a user
    */
-  @GetMapping("/recent/{userId}")
-  @Operation(summary = "Get recent notifications", description = "Returns notifications for a user in the last 7 days")
+  @GetMapping("/count/{userId}")
+  @Operation(
+      summary = "Get notification count with type breakdown",
+      description = "Returns total count, new count (unseen), and count breakdown by notification type for a user"
+  )
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
-          description = "Recent notifications retrieved successfully",
+          description = "Notification count retrieved successfully",
           content = @Content(
-              schema = @Schema(implementation = NotificationDTO.class),
-              examples = @ExampleObject(
-                  value = "[\n" +
-                      "  {\n" +
-                      "    \"id\": 1,\n" +
-                      "    \"userId\": 123,\n" +
-                      "    \"title\": \"New Referral Application\",\n" +
-                      "    \"message\": \"Someone applied for the referral you posted for Software Engineer position at Google\",\n"
-                      +
-                      "    \"type\": \"REFERRAL_APPLICATION\",\n" +
-                      "    \"isRead\": false,\n" +
-                      "    \"isSent\": true,\n" +
-                      "    \"createdAt\": \"2024-01-15T10:30:00\",\n" +
-                      "    \"timeAgo\": \"2 hours ago\",\n" +
-                      "    \"formattedDate\": \"Jan 15, 2024 at 10:30\"\n" +
-                      "  },\n" +
-                      "  {\n" +
-                      "    \"id\": 2,\n" +
-                      "    \"userId\": 123,\n" +
-                      "    \"title\": \"Application Shortlisted!\",\n" +
-                      "    \"message\": \"Congratulations! Your application for Senior Developer position at Microsoft has been shortlisted.\",\n"
-                      +
-                      "    \"type\": \"APPLICATION_SHORTLISTED\",\n" +
-                      "    \"isRead\": true,\n" +
-                      "    \"isSent\": true,\n" +
-                      "    \"createdAt\": \"2024-01-14T15:45:00\",\n" +
-                      "    \"timeAgo\": \"1 day ago\",\n" +
-                      "    \"formattedDate\": \"Jan 14, 2024 at 15:45\"\n" +
-                      "  }\n" +
-                      "]"
-              )
-          )
-      )
-  })
-  public ResponseEntity<List<NotificationDTO>> getRecentNotifications(@PathVariable Long userId) {
-    List<NotificationDTO> notifications = notificationService.getRecentNotifications(userId);
-    return ResponseEntity.ok(notifications);
-  }
-
-  /**
-   * Get all notifications for a user
-   */
-  @GetMapping("/all/{userId}")
-  @Operation(summary = "Get all notifications", description = "Returns all notifications for a user")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "All notifications retrieved successfully"
-      )
-  })
-  public ResponseEntity<List<NotificationDTO>> getAllNotifications(@PathVariable Long userId) {
-    List<NotificationDTO> notifications = notificationService.getAllNotifications(userId);
-    return ResponseEntity.ok(notifications);
-  }
-
-  /**
-   * Get unread notifications for a user
-   */
-  @GetMapping("/unread/{userId}")
-  @Operation(summary = "Get unread notifications", description = "Returns unread notifications for a user")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Unread notifications retrieved successfully"
-      )
-  })
-  public ResponseEntity<List<NotificationDTO>> getUnreadNotifications(@PathVariable Long userId) {
-    List<NotificationDTO> notifications = notificationService.getUnreadNotifications(userId);
-    return ResponseEntity.ok(notifications);
-  }
-
-  /**
-   * Get unread notification count for a user
-   */
-  @GetMapping("/unread-count/{userId}")
-  @Operation(summary = "Get unread notification count", description = "Returns the count of unread notifications for a user")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Unread count retrieved successfully",
-          content = @Content(
+              schema = @Schema(implementation = NotificationCountWithTypeResponse.class),
               examples = @ExampleObject(
                   value = "{\n" +
                       "  \"userId\": 123,\n" +
-                      "  \"unreadCount\": 5\n" +
+                      "  \"totalCount\": 15,\n" +
+                      "  \"newCount\": 5,\n" +
+                      "  \"seenCount\": 8,\n" +
+                      "  \"clickedCount\": 2,\n" +
+                      "  \"countsByType\": {\n" +
+                      "    \"company_jobs\": {\n" +
+                      "      \"totalCount\": 3,\n" +
+                      "      \"newCount\": 1,\n" +
+                      "      \"seenCount\": 2,\n" +
+                      "      \"clickedCount\": 0\n" +
+                      "    },\n" +
+                      "    \"application_status\": {\n" +
+                      "      \"totalCount\": 8,\n" +
+                      "      \"newCount\": 3,\n" +
+                      "      \"seenCount\": 4,\n" +
+                      "      \"clickedCount\": 1\n" +
+                      "    },\n" +
+                      "    \"posted_job_applications\": {\n" +
+                      "      \"totalCount\": 4,\n" +
+                      "      \"newCount\": 1,\n" +
+                      "      \"seenCount\": 2,\n" +
+                      "      \"clickedCount\": 1\n" +
+                      "    }\n" +
+                      "  }\n" +
                       "}"
               )
           )
       )
   })
-  public ResponseEntity<Map<String, Object>> getUnreadCount(@PathVariable Long userId) {
-    long unreadCount = notificationService.getUnreadCount(userId);
-    Map<String, Object> response = new HashMap<>();
-    response.put("userId", userId);
-    response.put("unreadCount", unreadCount);
+  public ResponseEntity<NotificationCountWithTypeResponse> getNotificationCount(
+      @Parameter(description = "User ID", required = true)
+      @PathVariable Long userId) {
+    
+    log.info("Getting notification count with type breakdown for user: {}", userId);
+    NotificationCountWithTypeResponse response = notificationService.getNotificationCountWithType(userId);
     return ResponseEntity.ok(response);
   }
 
   /**
-   * Mark a notification as read
+   * Get notifications list with pagination
    */
-  @PutMapping("/mark-read/{notificationId}")
-  @Operation(summary = "Mark notification as read", description = "Marks a specific notification as read")
+  @GetMapping("/list/{userId}")
+  @Operation(
+      summary = "Get notifications list",
+      description = "Returns paginated list of all notification types for a user with type mentioned in response"
+  )
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
-          description = "Notification marked as read successfully"
-      ),
-      @ApiResponse(responseCode = "404", description = "Notification not found")
-  })
-  public ResponseEntity<Map<String, String>> markAsRead(
-      @PathVariable Long notificationId,
-      @RequestParam Long userId) {
-
-    notificationService.markAsRead(notificationId, userId);
-    Map<String, String> response = new HashMap<>();
-    response.put("message", "Notification marked as read successfully");
-    return ResponseEntity.ok(response);
-  }
-
-  /**
-   * Mark all notifications as read for a user
-   */
-  @PutMapping("/mark-all-read/{userId}")
-  @Operation(summary = "Mark all notifications as read", description = "Marks all notifications as read for a user")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "All notifications marked as read successfully"
+          description = "Notifications list retrieved successfully",
+          content = @Content(
+              schema = @Schema(implementation = NotificationListResponse.class),
+              examples = @ExampleObject(
+                  value = "{\n" +
+                      "  \"notifications\": [\n" +
+                      "    {\n" +
+                      "      \"notificationId\": 1,\n" +
+                      "      \"type\": \"company_jobs\",\n" +
+                      "      \"message\": \"100+ jobs available in Microsoft, act as a referrer.\",\n" +
+                      "      \"seen\": false,\n" +
+                      "      \"clicked\": false,\n" +
+                      "      \"createdAt\": \"2024-01-15T10:30:00\"\n" +
+                      "    },\n" +
+                      "    {\n" +
+                      "      \"notificationId\": 2,\n" +
+                      "      \"type\": \"application_status\",\n" +
+                      "      \"message\": \"Your application status has been updated.\",\n" +
+                      "      \"seen\": true,\n" +
+                      "      \"clicked\": false,\n" +
+                      "      \"createdAt\": \"2024-01-15T09:15:00\"\n" +
+                      "    }\n" +
+                      "  ],\n" +
+                      "  \"totalCount\": 15,\n" +
+                      "  \"page\": 0,\n" +
+                      "  \"size\": 10,\n" +
+                      "  \"hasNext\": true,\n" +
+                      "  \"hasPrevious\": false\n" +
+                      "}"
+              )
+          )
       )
   })
-  public ResponseEntity<Map<String, String>> markAllAsRead(@PathVariable Long userId) {
-    notificationService.markAllAsRead(userId);
-    Map<String, String> response = new HashMap<>();
-    response.put("message", "All notifications marked as read successfully");
-    return ResponseEntity.ok(response);
-  }
-
-  /**
-   * Delete a notification
-   */
-  @DeleteMapping("/{notificationId}")
-  @Operation(summary = "Delete notification", description = "Deletes a specific notification")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Notification deleted successfully"
-      ),
-      @ApiResponse(responseCode = "404", description = "Notification not found")
-  })
-  public ResponseEntity<Map<String, String>> deleteNotification(
-      @PathVariable Long notificationId,
-      @RequestParam Long userId) {
-
-    notificationService.deleteNotification(notificationId, userId);
-    Map<String, String> response = new HashMap<>();
-    response.put("message", "Notification deleted successfully");
-    return ResponseEntity.ok(response);
-  }
-
-  /**
-   * Get notifications by type for a user
-   */
-  @GetMapping("/type/{userId}")
-  @Operation(summary = "Get notifications by type", description = "Returns notifications of a specific type for a user")
-  @ApiResponses(value = {
-      @ApiResponse(
-          responseCode = "200",
-          description = "Notifications retrieved successfully"
-      )
-  })
-  public ResponseEntity<List<NotificationDTO>> getNotificationsByType(
+  public ResponseEntity<NotificationListResponse> getNotifications(
+      @Parameter(description = "User ID", required = true)
       @PathVariable Long userId,
-      @RequestParam String type) {
-
-    // Convert string to enum
-    try {
-      com.tymbl.common.entity.Notification.NotificationType notificationType =
-          com.tymbl.common.entity.Notification.NotificationType.valueOf(type.toUpperCase());
-
-      List<NotificationDTO> notifications = notificationService.getUnreadNotifications(userId)
-          .stream()
-          .filter(n -> n.getType() == notificationType)
-          .collect(Collectors.toList());
-
-      return ResponseEntity.ok(notifications);
-    } catch (IllegalArgumentException e) {
-      return ResponseEntity.badRequest().build();
-    }
+      @Parameter(description = "Page number (0-based)", example = "0")
+      @RequestParam(defaultValue = "0") int page,
+      @Parameter(description = "Page size", example = "10")
+      @RequestParam(defaultValue = "10") int size) {
+    
+    log.info("Getting all notifications for user: {}, page: {}, size: {}", userId, page, size);
+    NotificationListResponse response = notificationService.getNotifications(userId, page, size);
+    return ResponseEntity.ok(response);
   }
-} 
+
+
+
+  /**
+   * Mark notifications as seen
+   */
+  @PutMapping("/mark-seen")
+  @Operation(
+      summary = "Mark notifications as seen",
+      description = "Marks multiple notifications as seen when user opens notification tray"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Notifications marked as seen successfully"
+      )
+  })
+  public ResponseEntity<Map<String, Object>> markAsSeen(
+      @Parameter(description = "List of notification IDs", required = true)
+      @RequestParam List<Long> notificationIds,
+      @Parameter(description = "User ID", required = true)
+      @RequestParam Long userId) {
+    
+    log.info("Marking {} notifications as seen for user: {}", notificationIds.size(), userId);
+    int updatedCount = notificationService.markAsSeen(notificationIds, userId);
+    
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", true);
+    response.put("updatedCount", updatedCount);
+    response.put("requestedCount", notificationIds.size());
+    response.put("message", String.format("Marked %d out of %d notifications as seen", updatedCount, notificationIds.size()));
+    
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Mark all notifications as seen
+   */
+  @PutMapping("/mark-all-seen/{userId}")
+  @Operation(
+      summary = "Mark all notifications as seen",
+      description = "Marks all unseen notifications as seen for a user"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "All notifications marked as seen successfully"
+      )
+  })
+  public ResponseEntity<Map<String, Object>> markAllAsSeen(
+      @Parameter(description = "User ID", required = true)
+      @PathVariable Long userId) {
+    
+    log.info("Marking all notifications as seen for user: {}", userId);
+    int updatedCount = notificationService.markAllAsSeen(userId);
+    
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", true);
+    response.put("updatedCount", updatedCount);
+    response.put("message", String.format("Marked %d notifications as seen", updatedCount));
+    
+    return ResponseEntity.ok(response);
+  }
+
+  /**
+   * Mark notifications as clicked
+   */
+  @PutMapping("/mark-clicked")
+  @Operation(
+      summary = "Mark notifications as clicked",
+      description = "Marks multiple notifications as clicked when user explicitly clicks them"
+  )
+  @ApiResponses(value = {
+      @ApiResponse(
+          responseCode = "200",
+          description = "Notifications marked as clicked successfully"
+      )
+  })
+  public ResponseEntity<Map<String, Object>> markAsClicked(
+      @Parameter(description = "List of notification IDs", required = true)
+      @RequestParam List<Long> notificationIds,
+      @Parameter(description = "User ID", required = true)
+      @RequestParam Long userId) {
+    
+    log.info("Marking {} notifications as clicked for user: {}", notificationIds.size(), userId);
+    int updatedCount = notificationService.markAsClicked(notificationIds, userId);
+    
+    Map<String, Object> response = new HashMap<>();
+    response.put("success", true);
+    response.put("updatedCount", updatedCount);
+    response.put("requestedCount", notificationIds.size());
+    response.put("message", String.format("Marked %d out of %d notifications as clicked", updatedCount, notificationIds.size()));
+    return ResponseEntity.ok(response);
+  }
+}
