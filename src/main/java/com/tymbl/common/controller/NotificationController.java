@@ -1,10 +1,11 @@
 package com.tymbl.common.controller;
 
-import com.tymbl.common.dto.NotificationCountResponse;
+import com.tymbl.auth.service.JwtService;
 import com.tymbl.common.dto.NotificationCountWithTypeResponse;
 import com.tymbl.common.dto.NotificationListResponse;
-import com.tymbl.common.dto.NotificationResponse;
+import com.tymbl.common.entity.User;
 import com.tymbl.common.service.NotificationService;
+import com.tymbl.registration.service.RegistrationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -21,9 +22,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -37,14 +37,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class NotificationController {
 
   private final NotificationService notificationService;
+  private final JwtService jwtService;
+  private final RegistrationService registrationService;
 
   /**
    * Get notification count for a user
    */
-  @GetMapping("/count/{userId}")
+  @GetMapping("/count")
   @Operation(
       summary = "Get notification count with type breakdown",
-      description = "Returns total count, new count (unseen), and count breakdown by notification type for a user"
+      description = "Returns total count, new count (unseen), and count breakdown by notification type for the authenticated user"
   )
   @ApiResponses(value = {
       @ApiResponse(
@@ -82,11 +84,15 @@ public class NotificationController {
                       "}"
               )
           )
-      )
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   public ResponseEntity<NotificationCountWithTypeResponse> getNotificationCount(
-      @Parameter(description = "User ID", required = true)
-      @PathVariable Long userId) {
+      @RequestHeader("Authorization") String token) {
+    
+    String email = jwtService.extractUsername(token.substring(7));
+    User currentUser = registrationService.getUserByEmail(email);
+    Long userId = currentUser.getId();
     
     log.info("Getting notification count with type breakdown for user: {}", userId);
     NotificationCountWithTypeResponse response = notificationService.getNotificationCountWithType(userId);
@@ -96,10 +102,10 @@ public class NotificationController {
   /**
    * Get notifications list with pagination
    */
-  @GetMapping("/list/{userId}")
+  @GetMapping("/list")
   @Operation(
       summary = "Get notifications list",
-      description = "Returns paginated list of all notification types for a user with type mentioned in response"
+      description = "Returns paginated list of all notification types for the authenticated user with type mentioned in response"
   )
   @ApiResponses(value = {
       @ApiResponse(
@@ -135,15 +141,19 @@ public class NotificationController {
                       "}"
               )
           )
-      )
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   public ResponseEntity<NotificationListResponse> getNotifications(
-      @Parameter(description = "User ID", required = true)
-      @PathVariable Long userId,
+      @RequestHeader("Authorization") String token,
       @Parameter(description = "Page number (0-based)", example = "0")
       @RequestParam(defaultValue = "0") int page,
       @Parameter(description = "Page size", example = "10")
       @RequestParam(defaultValue = "10") int size) {
+    
+    String email = jwtService.extractUsername(token.substring(7));
+    User currentUser = registrationService.getUserByEmail(email);
+    Long userId = currentUser.getId();
     
     log.info("Getting all notifications for user: {}, page: {}, size: {}", userId, page, size);
     NotificationListResponse response = notificationService.getNotifications(userId, page, size);
@@ -164,13 +174,17 @@ public class NotificationController {
       @ApiResponse(
           responseCode = "200",
           description = "Notifications marked as seen successfully"
-      )
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   public ResponseEntity<Map<String, Object>> markAsSeen(
+      @RequestHeader("Authorization") String token,
       @Parameter(description = "List of notification IDs", required = true)
-      @RequestParam List<Long> notificationIds,
-      @Parameter(description = "User ID", required = true)
-      @RequestParam Long userId) {
+      @RequestParam List<Long> notificationIds) {
+    
+    String email = jwtService.extractUsername(token.substring(7));
+    User currentUser = registrationService.getUserByEmail(email);
+    Long userId = currentUser.getId();
     
     log.info("Marking {} notifications as seen for user: {}", notificationIds.size(), userId);
     int updatedCount = notificationService.markAsSeen(notificationIds, userId);
@@ -187,20 +201,24 @@ public class NotificationController {
   /**
    * Mark all notifications as seen
    */
-  @PutMapping("/mark-all-seen/{userId}")
+  @PutMapping("/mark-all-seen")
   @Operation(
       summary = "Mark all notifications as seen",
-      description = "Marks all unseen notifications as seen for a user"
+      description = "Marks all unseen notifications as seen for the authenticated user"
   )
   @ApiResponses(value = {
       @ApiResponse(
           responseCode = "200",
           description = "All notifications marked as seen successfully"
-      )
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   public ResponseEntity<Map<String, Object>> markAllAsSeen(
-      @Parameter(description = "User ID", required = true)
-      @PathVariable Long userId) {
+      @RequestHeader("Authorization") String token) {
+    
+    String email = jwtService.extractUsername(token.substring(7));
+    User currentUser = registrationService.getUserByEmail(email);
+    Long userId = currentUser.getId();
     
     log.info("Marking all notifications as seen for user: {}", userId);
     int updatedCount = notificationService.markAllAsSeen(userId);
@@ -225,13 +243,17 @@ public class NotificationController {
       @ApiResponse(
           responseCode = "200",
           description = "Notifications marked as clicked successfully"
-      )
+      ),
+      @ApiResponse(responseCode = "401", description = "Unauthorized")
   })
   public ResponseEntity<Map<String, Object>> markAsClicked(
+      @RequestHeader("Authorization") String token,
       @Parameter(description = "List of notification IDs", required = true)
-      @RequestParam List<Long> notificationIds,
-      @Parameter(description = "User ID", required = true)
-      @RequestParam Long userId) {
+      @RequestParam List<Long> notificationIds) {
+    
+    String email = jwtService.extractUsername(token.substring(7));
+    User currentUser = registrationService.getUserByEmail(email);
+    Long userId = currentUser.getId();
     
     log.info("Marking {} notifications as clicked for user: {}", notificationIds.size(), userId);
     int updatedCount = notificationService.markAsClicked(notificationIds, userId);
