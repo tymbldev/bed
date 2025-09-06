@@ -242,12 +242,12 @@ public class IndividualDesignationDepartmentService {
   }
 
   /**
-   * Find all departments in a separate read transaction
+   * Find all departments in a separate read transaction, sorted by rank
    */
   @Transactional(readOnly = true)
   public List<Department> findAllDepartments() {
     try {
-      return departmentRepository.findAll();
+      return departmentRepository.findAllByOrderByRankAsc();
     } catch (Exception e) {
       log.error("Error finding all departments", e);
       return new ArrayList<>();

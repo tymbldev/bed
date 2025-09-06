@@ -30,7 +30,7 @@ public class DesignationDepartmentAssignmentService {
       log.info("🚀 Starting department assignment for all unassigned designations");
 
       List<Designation> unassignedDesignations = designationRepository.findByDepartmentAssignedFalse();
-      List<Department> availableDepartments = departmentRepository.findAll();
+      List<Department> availableDepartments = departmentRepository.findAllByOrderByRankAsc();
 
       if (unassignedDesignations.isEmpty()) {
         Map<String, Object> result = new HashMap<>();

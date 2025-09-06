@@ -130,3 +130,4 @@ class WebCrawlerServiceFallbackTest {
         assertEquals(80.0, statistics.getSuccessRate(), 0.1);
     }
 }
+

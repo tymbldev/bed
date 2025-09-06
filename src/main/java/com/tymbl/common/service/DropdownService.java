@@ -145,37 +145,25 @@ public class DropdownService {
     // Try to get from cache first
     if (!departmentEntityCache.isEmpty()) {
       List<Department> departments = new ArrayList<>(departmentEntityCache.values());
-      // Sort so that entries with "other" in the name come last
+      // Sort by rank (ascending), then by name for departments with same rank
       departments.sort((d1, d2) -> {
-        boolean d1HasOther = d1.getName().toLowerCase().contains("other");
-        boolean d2HasOther = d2.getName().toLowerCase().contains("other");
-        if (d1HasOther && !d2HasOther) {
-          return 1;
+        // First sort by rank (ascending)
+        int rankComparison = Integer.compare(
+            d1.getRank() != null ? d1.getRank() : 0,
+            d2.getRank() != null ? d2.getRank() : 0
+        );
+        if (rankComparison != 0) {
+          return rankComparison;
         }
-        if (!d1HasOther && d2HasOther) {
-          return -1;
-        }
+        // If ranks are equal, sort by name (ascending)
         return d1.getName().compareToIgnoreCase(d2.getName());
       });
       return departments;
     }
 
-    // Fallback to database if cache is empty
+    // Fallback to database if cache is empty - use repository method that sorts by rank
     log.warn("Department cache is empty, falling back to database");
-    List<Department> departments = departmentRepository.findAll();
-    // Sort so that entries with "other" in the name come last
-    departments.sort((d1, d2) -> {
-      boolean d1HasOther = d1.getName().toLowerCase().contains("other");
-      boolean d2HasOther = d2.getName().toLowerCase().contains("other");
-      if (d1HasOther && !d2HasOther) {
-        return 1;
-      }
-      if (!d1HasOther && d2HasOther) {
-        return -1;
-      }
-      return d1.getName().compareToIgnoreCase(d2.getName());
-    });
-    return departments;
+    return departmentRepository.findAllByOrderByRankAsc();
   }
 
   @Transactional
