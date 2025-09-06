@@ -31,6 +31,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -378,9 +379,12 @@ public class ElasticsearchJobQueryService {
     // Set default values for fields not in Elasticsearch
     response.setSuperAdminPosted(false);
     response.setApproved(JobApprovalStatus.APPROVED.getValue());
-    response.setReferrerCount(0);
     response.setUserRole("VIEWER");
     response.setActualPostedBy(response.getPostedBy());
+
+    // Initialize referrer data (will be populated by bulk method for multiple jobs)
+    response.setReferrerUserIds(new ArrayList<>());
+    response.setReferrerCount(0);
 
     // Enrich with dropdown values
     enrichJobResponseWithDropdownValues(response);
@@ -1187,5 +1191,6 @@ public class ElasticsearchJobQueryService {
       throw new RuntimeException("Failed to fetch companies by primary industry ID", e);
     }
   }
+
 
 }

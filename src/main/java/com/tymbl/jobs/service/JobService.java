@@ -30,6 +30,7 @@ import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -165,15 +166,33 @@ public class JobService {
 
   @Transactional(readOnly = true)
   public Page<JobResponse> getAllActiveJobs(Pageable pageable) {
-    return jobRepository.findByActiveTrueAndApproved(JobApprovalStatus.APPROVED.getValue(),
-            pageable)
-        .map(this::mapToResponse);
+    Page<Job> jobs = jobRepository.findByActiveTrueAndApproved(JobApprovalStatus.APPROVED.getValue(),
+            pageable);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return new PageImpl<>(jobResponses, pageable, jobs.getTotalElements());
   }
 
   @Transactional(readOnly = true)
   public Page<JobResponse> getJobsByUser(User user, Pageable pageable) {
-    return jobRepository.findByPostedByIdAndActiveTrue(user.getId(), pageable)
-        .map(this::mapToResponse);
+    Page<Job> jobs = jobRepository.findByPostedByIdAndActiveTrue(user.getId(), pageable);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return new PageImpl<>(jobResponses, pageable, jobs.getTotalElements());
   }
 
   @Transactional(readOnly = true)
@@ -219,6 +238,9 @@ public class JobService {
     List<JobResponse> jobResponses = paginatedJobs.stream()
         .map(job -> mapToResponseWithRole(job, user))
         .collect(Collectors.toList());
+
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
 
     // Create a new Page with the combined results
     return new PageImpl<>(jobResponses, pageable, allJobs.size());
@@ -267,8 +289,17 @@ public class JobService {
 
   @Transactional(readOnly = true)
   public Page<JobResponse> searchJobs(String keyword, Pageable pageable) {
-    return jobRepository.searchJobs(keyword, pageable)
-        .map(this::mapToResponse);
+    Page<Job> jobs = jobRepository.searchJobs(keyword, pageable);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return new PageImpl<>(jobResponses, pageable, jobs.getTotalElements());
   }
 
   /**
@@ -285,6 +316,11 @@ public class JobService {
 
     JobSearchResponse response = elasticsearchJobQueryService.searchJobs(mappedRequest,
         userDesignationId);
+
+    // Populate referrer user IDs for all jobs in a single query
+    if (response.getJobs() != null && !response.getJobs().isEmpty()) {
+      populateReferrerUserIdsForJobs(response.getJobs());
+    }
 
     // Populate companyMetaData
     if (response.getJobs() != null && !response.getJobs().isEmpty()) {
@@ -389,37 +425,78 @@ public class JobService {
       return Page.empty(pageable);
     }
 
-    return jobRepository.findBySkillsInAndApproved(skillIds, JobApprovalStatus.APPROVED.getValue(),
-            pageable)
-        .map(this::mapToResponse);
+    Page<Job> jobs = jobRepository.findBySkillsInAndApproved(skillIds, JobApprovalStatus.APPROVED.getValue(),
+            pageable);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return new PageImpl<>(jobResponses, pageable, jobs.getTotalElements());
   }
 
   public List<JobResponse> getJobsByCompany(Long companyId) {
-    return jobRepository.findByCompanyIdAndApproved(companyId,
-            JobApprovalStatus.APPROVED.getValue()).stream()
+    List<Job> jobs = jobRepository.findByCompanyIdAndApproved(companyId,
+            JobApprovalStatus.APPROVED.getValue());
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.stream()
         .map(this::mapToResponse)
         .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return jobResponses;
   }
 
   public List<JobResponse> getJobsByCompanyAndTitle(Long companyId, String title) {
-    return jobRepository.findActiveJobsByCompanyIdAndTitleAndApproved(companyId, title,
-            JobApprovalStatus.APPROVED.getValue()).stream()
+    List<Job> jobs = jobRepository.findActiveJobsByCompanyIdAndTitleAndApproved(companyId, title,
+            JobApprovalStatus.APPROVED.getValue());
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.stream()
         .map(this::mapToResponse)
         .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return jobResponses;
   }
 
   public List<JobResponse> getJobsByCompanyName(String companyName) {
-    return jobRepository.findByCompanyContainingIgnoreCaseAndApproved(companyName,
-            JobApprovalStatus.APPROVED.getValue()).stream()
+    List<Job> jobs = jobRepository.findByCompanyContainingIgnoreCaseAndApproved(companyName,
+            JobApprovalStatus.APPROVED.getValue());
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.stream()
         .map(this::mapToResponse)
         .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return jobResponses;
   }
 
   public List<JobResponse> getJobsByCompanyNameAndTitle(String companyName, String title) {
-    return jobRepository.findActiveJobsByCompanyAndTitleAndApproved(companyName, title,
-            JobApprovalStatus.APPROVED.getValue()).stream()
+    List<Job> jobs = jobRepository.findActiveJobsByCompanyAndTitleAndApproved(companyName, title,
+            JobApprovalStatus.APPROVED.getValue());
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.stream()
         .map(this::mapToResponse)
         .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return jobResponses;
   }
 
   @Transactional
@@ -521,8 +598,17 @@ public class JobService {
       return getAllActiveJobs(pageable);
     }
 
-    return jobRepository.findByTagsIn(tags, pageable)
-        .map(this::mapToResponse);
+    Page<Job> jobs = jobRepository.findByTagsIn(tags, pageable);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return new PageImpl<>(jobResponses, pageable, jobs.getTotalElements());
   }
 
   @Transactional(readOnly = true)
@@ -531,8 +617,17 @@ public class JobService {
       return getAllActiveJobs(pageable);
     }
 
-    return jobRepository.findByTagsContaining(tagKeyword, pageable)
-        .map(this::mapToResponse);
+    Page<Job> jobs = jobRepository.findByTagsContaining(tagKeyword, pageable);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return new PageImpl<>(jobResponses, pageable, jobs.getTotalElements());
   }
 
   @Transactional(readOnly = true)
@@ -542,10 +637,17 @@ public class JobService {
 
   public List<JobResponse> getJobsByCompanyPostedBySuperAdmin(Long companyId) {
     Long superAdminId = 0L; // Convention for super admin
-    return jobRepository.findByCompanyIdAndPostedByIdAndActiveTrue(companyId, superAdminId)
-        .stream()
+    List<Job> jobs = jobRepository.findByCompanyIdAndPostedByIdAndActiveTrue(companyId, superAdminId);
+    
+    // Convert to JobResponse list
+    List<JobResponse> jobResponses = jobs.stream()
         .map(this::mapToResponse)
         .collect(Collectors.toList());
+    
+    // Populate referrer user IDs for all jobs in a single query
+    populateReferrerUserIdsForJobs(jobResponses);
+    
+    return jobResponses;
   }
 
   public List<JobReferrerResponse> getReferrersForJob(Long jobId) {
@@ -834,14 +936,65 @@ public class JobService {
     response.setPlatform(job.getPlatform());
     response.setApproved(job.getApproved());
 
-    // Count referrers for this job
-    int referrerCount = jobReferrerRepository.countByJobId(job.getId());
-    response.setReferrerCount(referrerCount);
+    // Initialize referrer data (will be populated by bulk method for multiple jobs)
+    response.setReferrerUserIds(new ArrayList<>());
+    response.setReferrerCount(0);
 
     // Enrich with dropdown values
     enrichJobResponseWithDropdownValues(response);
 
     return response;
+  }
+
+
+  /**
+   * Populate referrer user IDs for multiple jobs in a single query
+   */
+  private void populateReferrerUserIdsForJobs(List<JobResponse> jobResponses) {
+    if (jobResponses == null || jobResponses.isEmpty()) {
+      return;
+    }
+
+    // Extract job IDs
+    List<Long> jobIds = jobResponses.stream()
+        .map(JobResponse::getId)
+        .filter(java.util.Objects::nonNull)
+        .collect(Collectors.toList());
+
+    if (jobIds.isEmpty()) {
+      return;
+    }
+
+    try {
+      // Fetch all referrer user IDs for these jobs in a single query
+      List<Map<String, Object>> referrerData = jobReferrerRepository.findReferrerUserIdsByJobIds(jobIds);
+      
+      // Group by job ID
+      Map<Long, List<Long>> referrersByJobId = referrerData.stream()
+          .collect(Collectors.groupingBy(
+              data -> (Long) data.get("jobId"),
+              Collectors.mapping(data -> (Long) data.get("userId"), Collectors.toList())
+          ));
+
+      // Populate referrer user IDs for each job
+      for (JobResponse jobResponse : jobResponses) {
+        if (jobResponse.getId() != null) {
+          List<Long> referrerUserIds = referrersByJobId.getOrDefault(jobResponse.getId(), new ArrayList<>());
+          jobResponse.setReferrerUserIds(referrerUserIds);
+          jobResponse.setReferrerCount(referrerUserIds.size());
+        } else {
+          jobResponse.setReferrerUserIds(new ArrayList<>());
+          jobResponse.setReferrerCount(0);
+        }
+      }
+    } catch (Exception e) {
+      logger.warn("Failed to fetch referrer user IDs for jobs: {}", e.getMessage());
+      // Set empty lists for all jobs on error
+      for (JobResponse jobResponse : jobResponses) {
+        jobResponse.setReferrerUserIds(new ArrayList<>());
+        jobResponse.setReferrerCount(0);
+      }
+    }
   }
 
   /**

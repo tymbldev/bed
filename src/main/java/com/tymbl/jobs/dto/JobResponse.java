@@ -4,7 +4,9 @@ import com.tymbl.common.entity.Job.JobType;
 import com.tymbl.common.entity.JobApprovalStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import lombok.Data;
 
@@ -49,6 +51,9 @@ public class JobResponse {
   private String currencyName;
   private String currencySymbol;
   private String companyName;
+
+  // Referrer user IDs
+  private List<Long> referrerUserIds = new ArrayList<>();
 
   // Helper method to get approval status string
   public String getApprovalStatus() {

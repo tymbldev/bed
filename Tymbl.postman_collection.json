@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "Tymbl API - Complete Collection",
-    "description": "Complete Tymbl API Collection with all endpoints including the new External Job Sync functionality with individual transaction processing",
+    "description": "Complete Tymbl API Collection with all endpoints including the new External Job Sync functionality with individual transaction processing\n\n🚀 NEW FEATURE: Bulk Referrer Population\nAll job listing endpoints now include referrerUserIds and referrerCount fields populated efficiently using a single database query instead of N+1 queries. This significantly improves performance when dealing with multiple jobs.\n\nNew fields in job responses:\n- referrerUserIds: Array of user IDs who are referrers for the job\n- referrerCount: Number of referrers for the job\n\nPerformance benefits:\n- Reduced database queries from N+1 to 1 query for all jobs\n- Better scalability as job count increases\n- Consistent referrer data across all job listing endpoints\n\nUpdated endpoints:\n- All job search endpoints\n- All job management endpoints  \n- All job listing endpoints\n- Company-specific job endpoints",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
@@ -216,7 +216,54 @@
                 }
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response with Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobmanagement/my-posts?page=0&size=10",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobmanagement",
+                    "my-posts"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"We are looking for a senior software engineer...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 80000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"jobType\": \"FULL_TIME\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-15T10:30:00\",\n  \"updatedAt\": \"2024-01-15T10:30:00\",\n  \"tags\": [\n    \"java\",\n    \"spring\",\n    \"microservices\"\n  ],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n  \"platform\": \"company_website\",\n  \"approved\": 1,\n  \"referrerCount\": 3,\n  \"userRole\": \"POSTER\",\n  \"actualPostedBy\": 1,\n  \"cityName\": \"San Francisco\",\n  \"countryName\": \"United States\",\n  \"designationName\": \"Software Engineer\",\n  \"currencyName\": \"US Dollar\",\n  \"currencySymbol\": \"$\",\n  \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n  \"referrerUserIds\": [\n    2,\n    3,\n    4\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Get Job Details with Referrers",
@@ -241,7 +288,45 @@
                 "details"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response with Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobmanagement/1/details",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobmanagement",
+                    "1",
+                    "details"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"We are looking for a senior software engineer...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 80000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"jobType\": \"FULL_TIME\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-15T10:30:00\",\n  \"updatedAt\": \"2024-01-15T10:30:00\",\n  \"tags\": [\n    \"java\",\n    \"spring\",\n    \"microservices\"\n  ],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n  \"platform\": \"company_website\",\n  \"approved\": 1,\n  \"referrerCount\": 3,\n  \"userRole\": \"POSTER\",\n  \"actualPostedBy\": 1,\n  \"cityName\": \"San Francisco\",\n  \"countryName\": \"United States\",\n  \"designationName\": \"Software Engineer\",\n  \"currencyName\": \"US Dollar\",\n  \"currencySymbol\": \"$\",\n  \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n  \"referrerUserIds\": [\n    2,\n    3,\n    4\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Register as Referrer (Multiple Jobs)",
@@ -376,7 +461,7 @@
                 }
               ],
               "cookie": [],
-              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Jobs crawled successfully\",\n  \"totalJobsFound\": 15,\n  \"rawResponseId\": 123,\n  \"processedJobsCount\": 15,\n  \"portalName\": \"foundit\",\n  \"keyword\": \"software engineer\",\n  \"processingTimeMs\": 2500,\n  \"jobDetails\": [\n    {\n      \"portalJobId\": \"34327838\",\n      \"jobTitle\": \"Sr. Software Engineer\",\n      \"companyName\": \"Tessolve Semiconductor Private Limited\",\n      \"companyId\": \"1056230\",\n      \"locations\": \"Bengaluru / Bangalore, Karnataka, India\",\n      \"minExperience\": 4,\n      \"maxExperience\": 10,\n      \"salaryRange\": \"400000-1000000 INR\",\n      \"jobDescription\": \"Position: Sr. Software Engineer Role : Sr. Firmware Development Engineer...\",\n\n      \"itSkills\": [\n        {\n          \"id\": \"805a39d3-d3e0-4418-8790-a061594a5e1b\",\n          \"text\": \"Node\"\n        },\n        {\n          \"id\": \"18cc5439-457e-11e9-a89e-70106fbef856\",\n          \"text\": \"Cassandra\"\n        },\n        {\n          \"id\": \"18a9dd99-457e-11e9-a89e-70106fbef856\",\n          \"text\": \"Spring Boot\"\n        }\n      ],\n      \"skills\": [\n        {\n          \"text\": \"Alerting\"\n        },\n        {\n          \"text\": \"Log aggregation\"\n        },\n        {\n          \"id\": \"1d3e1c4a-77e6-4fd6-abb8-5a76565e339f\",\n          \"text\": \"Monitoring\"\n        }\n      ],\n      \"postedDate\": \"2025-01-30T10:30:27\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
+              "body": "{\n  \"status\": \"SUCCESS\",\n  \"message\": \"Jobs crawled successfully\",\n  \"totalJobsFound\": 15,\n  \"rawResponseId\": 123,\n  \"processedJobsCount\": 15,\n  \"portalName\": \"foundit\",\n  \"keyword\": \"software engineer\",\n  \"processingTimeMs\": 2500,\n  \"jobDetails\": [\n    {\n      \"portalJobId\": \"34327838\",\n      \"jobTitle\": \"Sr. Software Engineer\",\n      \"companyName\": \"Tessolve Semiconductor Private Limited\",\n      \"companyId\": \"1056230\",\n      \"locations\": \"Bengaluru / Bangalore, Karnataka, India\",\n      \"minExperience\": 4,\n      \"maxExperience\": 10,\n      \"salaryRange\": \"400000-1000000 INR\",\n      \"jobDescription\": \"Position: Sr. Software Engineer Role : Sr. Firmware Development Engineer...\",\n      \"itSkills\": [\n        {\n          \"id\": \"805a39d3-d3e0-4418-8790-a061594a5e1b\",\n          \"text\": \"Node\"\n        },\n        {\n          \"id\": \"18cc5439-457e-11e9-a89e-70106fbef856\",\n          \"text\": \"Cassandra\"\n        },\n        {\n          \"id\": \"18a9dd99-457e-11e9-a89e-70106fbef856\",\n          \"text\": \"Spring Boot\"\n        }\n      ],\n      \"skills\": [\n        {\n          \"text\": \"Alerting\"\n        },\n        {\n          \"text\": \"Log aggregation\"\n        },\n        {\n          \"id\": \"1d3e1c4a-77e6-4fd6-abb8-5a76565e339f\",\n          \"text\": \"Monitoring\"\n        }\n      ],\n      \"postedDate\": \"2025-01-30T10:30:27\",\n      \"status\": \"ACTIVE\"\n    }\n  ]\n}"
             }
           ]
         },
@@ -1051,7 +1136,38 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response with Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsearch/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobsearch",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"jobs\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Software Engineer\",\n      \"description\": \"We are looking for a senior software engineer...\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designation\": \"Software Engineer\",\n      \"minSalary\": 80000,\n      \"maxSalary\": 120000,\n      \"minExperience\": 3,\n      \"maxExperience\": 7,\n      \"jobType\": \"FULL_TIME\",\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"company\": \"Tech Corp\",\n      \"postedBy\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-15T10:30:00\",\n      \"updatedAt\": \"2024-01-15T10:30:00\",\n      \"tags\": [\n        \"java\",\n        \"spring\",\n        \"microservices\"\n      ],\n      \"isSuperAdminPosted\": false,\n      \"openingCount\": 2,\n      \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n      \"platform\": \"company_website\",\n      \"approved\": 1,\n      \"referrerCount\": 3,\n      \"userRole\": \"POSTER\",\n      \"actualPostedBy\": 1,\n      \"cityName\": \"San Francisco\",\n      \"countryName\": \"United States\",\n      \"designationName\": \"Software Engineer\",\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"referrerUserIds\": [\n        2,\n        3,\n        4\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 0,\n  \"size\": 20,\n  \"companyMetaData\": {\n    \"1\": {\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"logoUrl\": \"https://example.com/logo.png\",\n      \"website\": \"https://techcorp.com\",\n      \"headquarters\": \"San Francisco, CA\",\n      \"activeJobCount\": 5,\n      \"secondaryIndustry\": \"Technology\",\n      \"companySize\": \"100-500\",\n      \"specialties\": \"Software Development\",\n      \"careerPageUrl\": \"https://techcorp.com/careers\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Search Jobs",
@@ -1083,7 +1199,52 @@
                 "search"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response with Referrer Data",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"keywords\": [\"software engineer\", \"java\"],\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"cityName\": \"Mountain View\",\n  \"countryName\": \"United States\",\n  \"companyId\": 1,\n  \"designationId\": 1,\n  \"minExperience\": 2,\n  \"maxExperience\": 5,\n  \"page\": 0,\n  \"size\": 20\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsearch/search",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobsearch",
+                    "search"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"jobs\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Software Engineer\",\n      \"description\": \"We are looking for a senior software engineer...\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designation\": \"Software Engineer\",\n      \"minSalary\": 80000,\n      \"maxSalary\": 120000,\n      \"minExperience\": 3,\n      \"maxExperience\": 7,\n      \"jobType\": \"FULL_TIME\",\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"company\": \"Tech Corp\",\n      \"postedBy\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-15T10:30:00\",\n      \"updatedAt\": \"2024-01-15T10:30:00\",\n      \"tags\": [\n        \"java\",\n        \"spring\",\n        \"microservices\"\n      ],\n      \"isSuperAdminPosted\": false,\n      \"openingCount\": 2,\n      \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n      \"platform\": \"company_website\",\n      \"approved\": 1,\n      \"referrerCount\": 3,\n      \"userRole\": \"POSTER\",\n      \"actualPostedBy\": 1,\n      \"cityName\": \"San Francisco\",\n      \"countryName\": \"United States\",\n      \"designationName\": \"Software Engineer\",\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"referrerUserIds\": [\n        2,\n        3,\n        4\n      ]\n    }\n  ],\n  \"total\": 1,\n  \"page\": 0,\n  \"size\": 20,\n  \"companyMetaData\": {\n    \"1\": {\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"logoUrl\": \"https://example.com/logo.png\",\n      \"website\": \"https://techcorp.com\",\n      \"headquarters\": \"San Francisco, CA\",\n      \"activeJobCount\": 5,\n      \"secondaryIndustry\": \"Technology\",\n      \"companySize\": \"100-500\",\n      \"specialties\": \"Software Development\",\n      \"careerPageUrl\": \"https://techcorp.com/careers\"\n    }\n  }\n}"
+            }
+          ]
         },
         {
           "name": "Get Referrers for Job",
@@ -1956,7 +2117,44 @@
                 "my-jobs"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response with Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/job-applications/my-jobs",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "job-applications",
+                    "my-jobs"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"We are looking for a senior software engineer...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 80000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"jobType\": \"FULL_TIME\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-15T10:30:00\",\n  \"updatedAt\": \"2024-01-15T10:30:00\",\n  \"tags\": [\n    \"java\",\n    \"spring\",\n    \"microservices\"\n  ],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n  \"platform\": \"company_website\",\n  \"approved\": 1,\n  \"referrerCount\": 3,\n  \"userRole\": \"POSTER\",\n  \"actualPostedBy\": 1,\n  \"cityName\": \"San Francisco\",\n  \"countryName\": \"United States\",\n  \"designationName\": \"Software Engineer\",\n  \"currencyName\": \"US Dollar\",\n  \"currencySymbol\": \"$\",\n  \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n  \"referrerUserIds\": [\n    2,\n    3,\n    4\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Get Applications for Job",
@@ -1981,7 +2179,45 @@
                 "1"
               ]
             }
-          }
+          },
+          "response": [
+            {
+              "name": "Success Response with Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/job-applications/job/1",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "job-applications",
+                    "job",
+                    "1"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"id\": 1,\n  \"title\": \"Senior Software Engineer\",\n  \"description\": \"We are looking for a senior software engineer...\",\n  \"cityId\": 1,\n  \"countryId\": 1,\n  \"designationId\": 1,\n  \"designation\": \"Software Engineer\",\n  \"minSalary\": 80000,\n  \"maxSalary\": 120000,\n  \"minExperience\": 3,\n  \"maxExperience\": 7,\n  \"jobType\": \"FULL_TIME\",\n  \"currencyId\": 1,\n  \"companyId\": 1,\n  \"company\": \"Tech Corp\",\n  \"postedBy\": 1,\n  \"active\": true,\n  \"createdAt\": \"2024-01-15T10:30:00\",\n  \"updatedAt\": \"2024-01-15T10:30:00\",\n  \"tags\": [\n    \"java\",\n    \"spring\",\n    \"microservices\"\n  ],\n  \"isSuperAdminPosted\": false,\n  \"openingCount\": 2,\n  \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n  \"platform\": \"company_website\",\n  \"approved\": 1,\n  \"referrerCount\": 3,\n  \"userRole\": \"POSTER\",\n  \"actualPostedBy\": 1,\n  \"cityName\": \"San Francisco\",\n  \"countryName\": \"United States\",\n  \"designationName\": \"Software Engineer\",\n  \"currencyName\": \"US Dollar\",\n  \"currencySymbol\": \"$\",\n  \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n  \"referrerUserIds\": [\n    2,\n    3,\n    4\n  ]\n}"
+            }
+          ]
         },
         {
           "name": "Get Application Details",
@@ -5674,6 +5910,259 @@
               ],
               "cookie": [],
               "body": "{\n  \"company-pages\": {\n    \"lastGenerated\": \"2025-01-01T12:00:00\",\n    \"totalPages\": 5,\n    \"isActive\": true\n  },\n  \"location-wise-jobs\": {\n    \"lastGenerated\": \"2025-01-01T12:00:00\",\n    \"totalPages\": 1,\n    \"isActive\": true\n  },\n  \"designation-wise-jobs\": {\n    \"lastGenerated\": \"2025-01-01T12:00:00\",\n    \"totalPages\": 1,\n    \"isActive\": true\n  },\n  \"skill-wise-jobs\": {\n    \"lastGenerated\": \"2025-01-01T12:00:00\",\n    \"totalPages\": 1,\n    \"isActive\": true\n  },\n  \"job-description\": {\n    \"lastGenerated\": \"2025-01-01T12:00:00\",\n    \"totalPages\": 10,\n    \"isActive\": true\n  }\n}"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Bulk Referrer Population Testing",
+      "description": "Test endpoints to verify bulk referrer population functionality. All job listing endpoints now include referrerUserIds and referrerCount fields populated efficiently using a single database query.",
+      "item": [
+        {
+          "name": "Test Job Search with Referrer Data",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"keywords\": [\"software engineer\"],\n  \"page\": 0,\n  \"size\": 10\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/search",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "search"
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response with Bulk Referrer Data",
+              "originalRequest": {
+                "method": "POST",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  },
+                  {
+                    "key": "Content-Type",
+                    "value": "application/json"
+                  }
+                ],
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"keywords\": [\"software engineer\"],\n  \"page\": 0,\n  \"size\": 10\n}"
+                },
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsearch/search",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobsearch",
+                    "search"
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"jobs\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Software Engineer\",\n      \"description\": \"We are looking for a senior software engineer...\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designation\": \"Software Engineer\",\n      \"minSalary\": 80000,\n      \"maxSalary\": 120000,\n      \"minExperience\": 3,\n      \"maxExperience\": 7,\n      \"jobType\": \"FULL_TIME\",\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"company\": \"Tech Corp\",\n      \"postedBy\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-15T10:30:00\",\n      \"updatedAt\": \"2024-01-15T10:30:00\",\n      \"tags\": [\n        \"java\",\n        \"spring\",\n        \"microservices\"\n      ],\n      \"isSuperAdminPosted\": false,\n      \"openingCount\": 2,\n      \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n      \"platform\": \"company_website\",\n      \"approved\": 1,\n      \"referrerCount\": 3,\n      \"userRole\": \"VIEWER\",\n      \"actualPostedBy\": 1,\n      \"cityName\": \"San Francisco\",\n      \"countryName\": \"United States\",\n      \"designationName\": \"Software Engineer\",\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"referrerUserIds\": [\n        2,\n        3,\n        4\n      ]\n    },\n    {\n      \"id\": 2,\n      \"title\": \"Full Stack Developer\",\n      \"description\": \"Join our team as a full stack developer...\",\n      \"cityId\": 2,\n      \"countryId\": 1,\n      \"designationId\": 2,\n      \"designation\": \"Full Stack Developer\",\n      \"minSalary\": 70000,\n      \"maxSalary\": 100000,\n      \"minExperience\": 2,\n      \"maxExperience\": 5,\n      \"jobType\": \"FULL_TIME\",\n      \"currencyId\": 1,\n      \"companyId\": 2,\n      \"company\": \"Startup Inc\",\n      \"postedBy\": 2,\n      \"active\": true,\n      \"createdAt\": \"2024-01-16T09:15:00\",\n      \"updatedAt\": \"2024-01-16T09:15:00\",\n      \"tags\": [\n        \"react\",\n        \"nodejs\",\n        \"typescript\"\n      ],\n      \"isSuperAdminPosted\": false,\n      \"openingCount\": 1,\n      \"uniqueUrl\": \"https://startup.com/careers/full-stack-dev\",\n      \"platform\": \"company_website\",\n      \"approved\": 1,\n      \"referrerCount\": 3,\n      \"userRole\": \"VIEWER\",\n      \"actualPostedBy\": 2,\n      \"cityName\": \"New York\",\n      \"countryName\": \"United States\",\n      \"designationName\": \"Full Stack Developer\",\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"companyName\": \"Startup Inc\",\n      \"referrerUserIds\": [\n        2,\n        3,\n        4\n      ]\n    }\n  ],\n  \"total\": 2,\n  \"page\": 0,\n  \"size\": 10,\n  \"companyMetaData\": {\n    \"1\": {\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"logoUrl\": \"https://example.com/techcorp-logo.png\",\n      \"website\": \"https://techcorp.com\",\n      \"headquarters\": \"San Francisco, CA\",\n      \"activeJobCount\": 5,\n      \"secondaryIndustry\": \"Technology\",\n      \"companySize\": \"100-500\",\n      \"specialties\": \"Software Development\",\n      \"careerPageUrl\": \"https://techcorp.com/careers\"\n    },\n    \"2\": {\n      \"companyName\": \"Startup Inc\",\n      \"logoUrl\": \"https://example.com/startup-logo.png\",\n      \"website\": \"https://startup.com\",\n      \"headquarters\": \"New York, NY\",\n      \"activeJobCount\": 3,\n      \"secondaryIndustry\": \"Technology\",\n      \"companySize\": \"10-50\",\n      \"specialties\": \"Web Development\",\n      \"careerPageUrl\": \"https://startup.com/careers\"\n    }\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Test Get My Jobs with Referrer Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobmanagement/my-posts?page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobmanagement",
+                "my-posts"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response with Bulk Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobmanagement/my-posts?page=0&size=10",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobmanagement",
+                    "my-posts"
+                  ],
+                  "query": [
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Software Engineer\",\n      \"description\": \"We are looking for a senior software engineer...\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designation\": \"Software Engineer\",\n      \"minSalary\": 80000,\n      \"maxSalary\": 120000,\n      \"minExperience\": 3,\n      \"maxExperience\": 7,\n      \"jobType\": \"FULL_TIME\",\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"company\": \"Tech Corp\",\n      \"postedBy\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-15T10:30:00\",\n      \"updatedAt\": \"2024-01-15T10:30:00\",\n      \"tags\": [\n        \"java\",\n        \"spring\",\n        \"microservices\"\n      ],\n      \"isSuperAdminPosted\": false,\n      \"openingCount\": 2,\n      \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n      \"platform\": \"company_website\",\n      \"approved\": 1,\n      \"referrerCount\": 3,\n      \"userRole\": \"POSTER\",\n      \"actualPostedBy\": 1,\n      \"cityName\": \"San Francisco\",\n      \"countryName\": \"United States\",\n      \"designationName\": \"Software Engineer\",\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"referrerUserIds\": [\n        2,\n        3,\n        4\n      ]\n    }\n  ],\n  \"pageable\": {\n    \"sort\": {\n      \"sorted\": false,\n      \"unsorted\": true\n    },\n    \"pageNumber\": 0,\n    \"pageSize\": 10,\n    \"offset\": 0,\n    \"paged\": true,\n    \"unpaged\": false\n  },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"first\": true,\n  \"numberOfElements\": 1,\n  \"size\": 10,\n  \"number\": 0,\n  \"sort\": {\n    \"sorted\": false,\n    \"unsorted\": true\n  }\n}"
+            }
+          ]
+        },
+        {
+          "name": "Test Job Search by Skills with Referrer Data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/jobsearch/skills?skills=java,spring&page=0&size=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "api",
+                "v1",
+                "jobsearch",
+                "skills"
+              ],
+              "query": [
+                {
+                  "key": "skills",
+                  "value": "java,spring"
+                },
+                {
+                  "key": "page",
+                  "value": "0"
+                },
+                {
+                  "key": "size",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": [
+            {
+              "name": "Success Response with Bulk Referrer Data",
+              "originalRequest": {
+                "method": "GET",
+                "header": [
+                  {
+                    "key": "Authorization",
+                    "value": "Bearer {{token}}"
+                  }
+                ],
+                "url": {
+                  "raw": "{{base_url}}/api/v1/jobsearch/skills?skills=java,spring&page=0&size=10",
+                  "host": [
+                    "{{base_url}}"
+                  ],
+                  "path": [
+                    "api",
+                    "v1",
+                    "jobsearch",
+                    "skills"
+                  ],
+                  "query": [
+                    {
+                      "key": "skills",
+                      "value": "java,spring"
+                    },
+                    {
+                      "key": "page",
+                      "value": "0"
+                    },
+                    {
+                      "key": "size",
+                      "value": "10"
+                    }
+                  ]
+                }
+              },
+              "status": "OK",
+              "code": 200,
+              "_postman_previewlanguage": "json",
+              "header": [
+                {
+                  "key": "Content-Type",
+                  "value": "application/json"
+                }
+              ],
+              "cookie": [],
+              "body": "{\n  \"content\": [\n    {\n      \"id\": 1,\n      \"title\": \"Senior Software Engineer\",\n      \"description\": \"We are looking for a senior software engineer...\",\n      \"cityId\": 1,\n      \"countryId\": 1,\n      \"designationId\": 1,\n      \"designation\": \"Software Engineer\",\n      \"minSalary\": 80000,\n      \"maxSalary\": 120000,\n      \"minExperience\": 3,\n      \"maxExperience\": 7,\n      \"jobType\": \"FULL_TIME\",\n      \"currencyId\": 1,\n      \"companyId\": 1,\n      \"company\": \"Tech Corp\",\n      \"postedBy\": 1,\n      \"active\": true,\n      \"createdAt\": \"2024-01-15T10:30:00\",\n      \"updatedAt\": \"2024-01-15T10:30:00\",\n      \"tags\": [\n        \"java\",\n        \"spring\",\n        \"microservices\"\n      ],\n      \"isSuperAdminPosted\": false,\n      \"openingCount\": 2,\n      \"uniqueUrl\": \"https://company.com/jobs/senior-software-engineer\",\n      \"platform\": \"company_website\",\n      \"approved\": 1,\n      \"referrerCount\": 3,\n      \"userRole\": \"VIEWER\",\n      \"actualPostedBy\": 1,\n      \"cityName\": \"San Francisco\",\n      \"countryName\": \"United States\",\n      \"designationName\": \"Software Engineer\",\n      \"currencyName\": \"US Dollar\",\n      \"currencySymbol\": \"$\",\n      \"companyName\": \"Tech Corp\",\n    \"referrerUserIds\": [2, 3, 4],\n    \"referrerCount\": 3,\n      \"referrerUserIds\": [\n        2,\n        3,\n        4\n      ]\n    }\n  ],\n  \"pageable\": {\n    \"sort\": {\n      \"sorted\": false,\n      \"unsorted\": true\n    },\n    \"pageNumber\": 0,\n    \"pageSize\": 10,\n    \"offset\": 0,\n    \"paged\": true,\n    \"unpaged\": false\n  },\n  \"totalElements\": 1,\n  \"totalPages\": 1,\n  \"last\": true,\n  \"first\": true,\n  \"numberOfElements\": 1,\n  \"size\": 10,\n  \"number\": 0,\n  \"sort\": {\n    \"sorted\": false,\n    \"unsorted\": true\n  }\n}"
             }
           ]
         }
