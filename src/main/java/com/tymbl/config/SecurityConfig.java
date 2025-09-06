@@ -45,7 +45,6 @@ public class SecurityConfig {
                 // Public endpoints (no JWT required)
                 .antMatchers("/api/v1/auth/**", "/tymbl-service/api/v1/auth/**").permitAll()
                 .antMatchers("/api/v1/registration", "/tymbl-service/api/v1/registration").permitAll()
-                .antMatchers("/api/v1/notifications", "/tymbl-service/api/v1/notifications").permitAll()
                 .antMatchers("/api/v1/registration/**", "/tymbl-service/api/v1/registration/**").permitAll()
                 .antMatchers("/api/v1/locations/**", "/tymbl-service/api/v1/locations/**").permitAll()
                 .antMatchers("/api/v1/ai/**", "/tymbl-service/api/v1/ai/**").permitAll()
@@ -54,6 +53,7 @@ public class SecurityConfig {
                 .antMatchers("/api/admin/company-data/**", "/tymbl-service/api/admin/company-data/**")
                 .permitAll()
                 .antMatchers("/api/v1/dropdowns/**", "/tymbl-service/api/v1/dropdowns/**").permitAll()
+                .antMatchers("/api/v1/ai-notifications/**", "/tymbl-service/api/v1/ai-notifications/**").permitAll()
                 .antMatchers("/api/v1/sitemap/**", "/tymbl-service/api/v1/sitemap/**").permitAll()
                 .antMatchers("/api/v1/seo/**", "/tymbl-service/api/v1/seo/**").permitAll()
                 .antMatchers("/api/v1/skills/**", "/tymbl-service/api/v1/skills/**").permitAll()
@@ -68,6 +68,7 @@ public class SecurityConfig {
 
                 // Protected endpoints (JWT required)
                 .antMatchers("/api/v1/jobmanagement/**").authenticated()
+                .antMatchers("api/v1/notifications/**").authenticated()
                 .antMatchers("/api/v1/users/**").authenticated()
                 .antMatchers("/api/v1/resumes/**").authenticated()
                 .antMatchers("/api/v1/job-applications/**").authenticated()

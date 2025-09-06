@@ -7,6 +7,7 @@ import com.tymbl.common.repository.UserRepository;
 import com.tymbl.jobs.entity.JobApplication;
 import com.tymbl.jobs.repository.JobApplicationRepository;
 import com.tymbl.jobs.repository.JobRepository;
+import com.tymbl.common.service.DropdownService;
 import com.tymbl.jobs.service.ElasticsearchJobQueryService;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ public class NotificationEngine {
   private final JobApplicationRepository jobApplicationRepository;
   private final JobRepository jobRepository;
   private final NotificationJobApplicationCountRepository notificationJobApplicationCountRepository;
+  private final DropdownService dropdownService;
   
   // Configuration for job count notification
   private static final int DEFAULT_JOB_COUNT_DAYS = 30;
@@ -71,8 +73,22 @@ public class NotificationEngine {
         
         // Only create notification if there are jobs available
         if (jobCount > 0) {
-          String companyName = user.getCompany() != null ? user.getCompany() : "your company";
-          notificationService.createCompanyJobsNotification(user.getId(), companyName, (int) jobCount);
+          // Get actual company name from DropdownService
+          String companyName = "your company"; // Default fallback
+          try {
+            String fetchedCompanyName = dropdownService.getCompanyNameById(user.getCompanyId());
+            if (fetchedCompanyName != null && !fetchedCompanyName.trim().isEmpty()) {
+              companyName = fetchedCompanyName;
+            }
+          } catch (Exception e) {
+            log.warn("Could not fetch company name for company ID {}: {}", user.getCompanyId(), e.getMessage());
+          }
+          
+          // Get user's designation for context
+          String designation = user.getDesignation() != null ? user.getDesignation() : null;
+          
+          notificationService.createCompanyJobsNotification(
+              user.getId(), companyName, (int) jobCount, user.getCompanyId(), designation);
           notificationsCreated++;
           
           log.info("Created company jobs notification for user {}: {} jobs in {} (last {} days)", 
@@ -272,4 +288,71 @@ public class NotificationEngine {
       log.error("Error cleaning up old notifications", e);
     }
   }
+
+  /**
+   * Generate notifications for a specific user after registration
+   * This includes company jobs notifications if the user has a company
+   */
+  @Transactional
+  public void generateNotificationsForUser(Long userId) {
+    log.info("Generating notifications for user: {}", userId);
+    
+    try {
+      // Get user details
+      User user = userRepository.findById(userId).orElse(null);
+      if (user == null) {
+        log.warn("User not found with ID: {}", userId);
+        return;
+      }
+      
+      int notificationsCreated = 0;
+      
+      // Generate company jobs notification if user has a company
+      if (user.getCompanyId() != null) {
+        try {
+          // Fetch job count for the company in the last 30 days using Elasticsearch
+          long jobCount = elasticsearchJobQueryService.searchJobsByCompanyAndDateRange(
+              user.getCompanyId(), DEFAULT_JOB_COUNT_DAYS);
+          
+          // Only create notification if there are jobs available
+          if (jobCount > 0) {
+            // Get actual company name from DropdownService
+            String companyName = "your company"; // Default fallback
+            try {
+              String fetchedCompanyName = dropdownService.getCompanyNameById(user.getCompanyId());
+              if (fetchedCompanyName != null && !fetchedCompanyName.trim().isEmpty()) {
+                companyName = fetchedCompanyName;
+              }
+            } catch (Exception e) {
+              log.warn("Could not fetch company name for company ID {}: {}", user.getCompanyId(), e.getMessage());
+            }
+            
+            // Get user's designation for context
+            String designation = user.getDesignation() != null ? user.getDesignation() : null;
+            
+            notificationService.createCompanyJobsNotification(
+                user.getId(), companyName, (int) jobCount, user.getCompanyId(), designation);
+            notificationsCreated++;
+            
+            log.info("Created company jobs notification for user {}: {} jobs in {} (last {} days)", 
+                user.getId(), jobCount, companyName, DEFAULT_JOB_COUNT_DAYS);
+          } else {
+            log.info("No jobs found for user {} in company {} (last {} days), skipping notification", 
+                user.getId(), user.getCompanyId(), DEFAULT_JOB_COUNT_DAYS);
+          }
+        } catch (Exception e) {
+          log.error("Error generating company jobs notification for user {}: {}", userId, e.getMessage(), e);
+        }
+      } else {
+        log.info("User {} has no company associated, skipping company jobs notification", userId);
+      }
+      
+      log.info("Completed notification generation for user {}. Notifications created: {}", userId, notificationsCreated);
+      
+    } catch (Exception e) {
+      log.error("Error generating notifications for user {}: {}", userId, e.getMessage(), e);
+      throw e;
+    }
+  }
+
 }

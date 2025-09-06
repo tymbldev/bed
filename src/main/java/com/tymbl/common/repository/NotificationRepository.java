@@ -70,13 +70,16 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   int markAsClicked(@Param("notificationId") Long notificationId, @Param("userId") Long userId, @Param("clickedAt") LocalDateTime clickedAt);
 
   // Check for existing notifications to avoid duplicates
-  @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.relatedEntityId = :relatedEntityId AND n.createdAt >= :since")
+  @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE n.userId = :userId AND n.type = :type AND " +
+         "(:relatedEntityId IS NULL AND n.relatedEntityId IS NULL OR n.relatedEntityId = :relatedEntityId) AND n.createdAt >= :since")
   boolean existsByUserIdAndTypeAndRelatedEntityIdAndCreatedAtAfter(
       @Param("userId") Long userId, @Param("type") Notification.NotificationType type, 
       @Param("relatedEntityId") Long relatedEntityId, @Param("since") LocalDateTime since);
 
   // Check for existing application status notifications by type+userId+companyId+designation
-  @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE n.userId = :userId AND n.type = :type AND n.companyId = :companyId AND n.designation = :designation AND n.createdAt >= :since")
+  @Query("SELECT COUNT(n) > 0 FROM Notification n WHERE n.userId = :userId AND n.type = :type AND " +
+         "(:companyId IS NULL AND n.companyId IS NULL OR n.companyId = :companyId) AND " +
+         "(:designation IS NULL AND n.designation IS NULL OR n.designation = :designation) AND n.createdAt >= :since")
   boolean existsByUserIdAndTypeAndCompanyIdAndDesignationAndCreatedAtAfter(
       @Param("userId") Long userId, @Param("type") Notification.NotificationType type, 
       @Param("companyId") Long companyId, @Param("designation") String designation, 
@@ -88,7 +91,8 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
   int deleteByCreatedAtBefore(@Param("cutoffDate") LocalDateTime cutoffDate);
 
   // Get notifications for specific entity types
-  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND n.relatedEntityType = :entityType AND n.createdAt >= :since ORDER BY n.createdAt DESC")
+  @Query("SELECT n FROM Notification n WHERE n.userId = :userId AND " +
+         "(:entityType IS NULL AND n.relatedEntityType IS NULL OR n.relatedEntityType = :entityType) AND n.createdAt >= :since ORDER BY n.createdAt DESC")
   List<Notification> findByUserIdAndRelatedEntityTypeAndCreatedAtAfter(
       @Param("userId") Long userId, @Param("entityType") String entityType, @Param("since") LocalDateTime since);
 }

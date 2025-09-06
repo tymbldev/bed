@@ -9,6 +9,7 @@ import com.tymbl.common.repository.UserRepository;
 import com.tymbl.common.repository.UserSkillRepository;
 import com.tymbl.common.service.EmailService;
 import com.tymbl.common.service.LinkedInService;
+import com.tymbl.common.service.NotificationEngine;
 import com.tymbl.exception.EmailAlreadyExistsException;
 import com.tymbl.registration.dto.LinkedInProfile;
 import com.tymbl.registration.dto.LinkedInRegisterRequest;
@@ -19,12 +20,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class RegistrationService {
 
   private final UserRepository userRepository;
@@ -33,6 +36,7 @@ public class RegistrationService {
   private final LinkedInService linkedInService;
   private final JwtService jwtService;
   private final EmailService emailService;
+  private final NotificationEngine notificationEngine;
 
   public User getUserById(Long userId) {
     return userRepository.findById(userId)
@@ -128,6 +132,17 @@ public class RegistrationService {
 
     // Generate JWT token
     String token = jwtService.generateToken(user);
+
+    // Trigger notifications for the new user (asynchronously to avoid blocking registration)
+    try {
+      // Generate company jobs notification if user has a company
+      if (user.getCompanyId() != null) {
+        notificationEngine.generateNotificationsForUser(user.getId());
+      }
+    } catch (Exception e) {
+      // Log error but don't fail registration
+      log.error("Failed to generate notifications for user {}: {}", user.getId(), e.getMessage(), e);
+    }
 
     // Return auth response
     return AuthResponse.builder()
@@ -314,6 +329,17 @@ public class RegistrationService {
 
     // Generate JWT token
     String token = jwtService.generateToken(user);
+
+    // Trigger notifications for the new user (asynchronously to avoid blocking registration)
+    try {
+      // Generate company jobs notification if user has a company
+      if (user.getCompanyId() != null) {
+        notificationEngine.generateNotificationsForUser(user.getId());
+      }
+    } catch (Exception e) {
+      // Log error but don't fail registration
+      log.error("Failed to generate notifications for user {}: {}", user.getId(), e.getMessage(), e);
+    }
 
     // Return auth response
     return AuthResponse.builder()

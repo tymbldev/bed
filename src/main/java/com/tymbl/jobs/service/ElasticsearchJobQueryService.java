@@ -1031,7 +1031,16 @@ public class ElasticsearchJobQueryService {
    */
   public long searchJobsByCompanyAndDateRange(Long companyId, int daysBack) {
     try {
+      if (companyId == null || companyId <= 0) {
+        log.warn("Invalid company ID provided: {}", companyId);
+        return 0L;
+      }
+      
       LocalDateTime since = LocalDateTime.now().minusDays(daysBack);
+      // Convert LocalDateTime to Timestamp for Elasticsearch compatibility
+      java.sql.Timestamp sinceTimestamp = java.sql.Timestamp.valueOf(since);
+      
+      log.debug("Searching jobs for company {} since {} ({} days back)", companyId, sinceTimestamp, daysBack);
       
       SearchRequest searchRequest = SearchRequest.of(s -> s
           .index(ElasticsearchConstants.JOBS_INDEX)
@@ -1042,17 +1051,20 @@ public class ElasticsearchJobQueryService {
                   .must(m -> m.term(t -> t.field(ElasticsearchConstants.FIELD_ACTIVE).value(true)))
                   .must(m -> m.range(r -> r
                       .field(ElasticsearchConstants.FIELD_CREATED_AT)
-                      .gte(JsonData.of(since))
+                      .gte(JsonData.of(sinceTimestamp))
                   ))
               )
           )
       );
 
       SearchResponse<Map> response = elasticsearchClient.search(searchRequest, Map.class);
-      return response.hits().total() != null ? response.hits().total().value() : 0L;
+      long count = response.hits().total() != null ? response.hits().total().value() : 0L;
+      log.debug("Found {} jobs for company {} in the last {} days", count, companyId, daysBack);
+      return count;
       
     } catch (Exception e) {
-      log.error("Error searching jobs by company and date range for company {}: {}", companyId, e.getMessage(), e);
+      log.error("Error searching jobs by company and date range for company {} (days back: {}): {}", 
+                companyId, daysBack, e.getMessage(), e);
       return 0L;
     }
   }
